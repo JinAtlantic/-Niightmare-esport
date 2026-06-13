@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "home": { "en": "HOME", "lo": "ໜ້າຫຼັກ" },
+    "roster": { "en": "ROSTER", "lo": "ນັກກີລາ" },
+    "matches": { "en": "MATCHES", "lo": "ການແຂ່ງຂັນ" },
+    "sponsors": { "en": "SPONSORS", "lo": "ສະປອນເຊີ" },
+    "contact": { "en": "CONTACT", "lo": "ຕິດຕໍ່" },
+    "join_community": { "en": "JOIN COMMUNITY", "lo": "ເຂົ້າຮ່ວມຊຸມຊົນ" }
+  },
+  "hero": {
+    "tagline": {
+      "en": "FROM LAO PDR — WE HAUNT THE META",
+      "lo": "ຈາກ ສປປລາວ — ພວກເຮົາຄອງເກມ"
+    },
+    "subtitle": {
+      "en": "Competing in Mobile Legends: Bang Bang & eFootball",
+      "lo": "ແຂ່ງຂັນໃນ Mobile Legends: Bang Bang ແລະ eFootball"
+    },
+    "btn_roster": { "en": "VIEW ROSTER", "lo": "ເບິ່ງນັກກີລາ" },
+    "btn_follow": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" }
+  },
+  "sections": {
+    "latest_news": { "en": "LATEST NEWS", "lo": "ຂ່າວຫຼ້າສຸດ" },
+    "our_roster": { "en": "OUR ROSTER", "lo": "ທີມງານຂອງເຮົາ" },
+    "match_results": { "en": "MATCH RESULTS", "lo": "ຜົນການແຂ່ງ" },
+    "our_partners": { "en": "OUR PARTNERS", "lo": "ຄູ່ຮ່ວມງານ" },
+    "contact_us": { "en": "CONTACT US", "lo": "ຕິດຕໍ່ຫາເຮົາ" },
+    "upcoming_match": { "en": "UPCOMING MATCH", "lo": "ການແຂ່ງຂັນຕໍ່ໄປ" },
+    "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" }
+  },
+  "common": {
+    "read_more": { "en": "READ MORE", "lo": "ອ່ານເພີ່ມ" },
+    "contact_us": { "en": "CONTACT US", "lo": "ຕິດຕໍ່ຫາເຮົາ" },
+    "vs": { "en": "VS", "lo": "ປະທະ" },
+    "watch_vod": { "en": "WATCH VOD", "lo": "ເບິ່ງ VOD" },
+    "loading": { "en": "ENTERING THE VOID", "lo": "ກຳລັງເຂົ້າສູ່ຄວາມມືດ" }
+  },
+  "roster": {
+    "tab_mlbb": { "en": "MOBILE LEGENDS", "lo": "MOBILE LEGENDS" },
+    "tab_efootball": { "en": "eFOOTBALL", "lo": "eFOOTBALL" },
+    "staff_label": { "en": "STAFF & MANAGEMENT", "lo": "ທີມງານ ແລະ ການຄຸ້ມຄອງ" },
+    "intro": {
+      "en": "Meet the players who carry the reaper's banner.",
+      "lo": "ພົບກັບນັກກີລາຜູ້ຖືທຸງຂອງທີມພວກເຮົາ."
+    }
+  },
+  "matches": {
+    "filter_all": { "en": "ALL", "lo": "ທັງໝົດ" },
+    "filter_mlbb": { "en": "MLBB", "lo": "MLBB" },
+    "filter_efootball": { "en": "eFOOTBALL", "lo": "eFOOTBALL" },
+    "filter_wins": { "en": "WINS", "lo": "ຊະນະ" },
+    "filter_losses": { "en": "LOSSES", "lo": "ແພ້" },
+    "result_win": { "en": "WIN", "lo": "ຊະນະ" },
+    "result_loss": { "en": "LOSS", "lo": "ແພ້" },
+    "result_draw": { "en": "DRAW", "lo": "ສະເໝີ" },
+    "col_date": { "en": "DATE", "lo": "ວັນທີ" },
+    "col_tournament": { "en": "TOURNAMENT", "lo": "ການແຂ່ງຂັນ" },
+    "col_opponent": { "en": "OPPONENT", "lo": "ຄູ່ແຂ່ງ" },
+    "col_score": { "en": "SCORE", "lo": "ຄະແນນ" },
+    "col_result": { "en": "RESULT", "lo": "ຜົນ" },
+    "placement": { "en": "Placement", "lo": "ອັນດັບ" },
+    "prize": { "en": "Prize", "lo": "ລາງວັນ" },
+    "season": { "en": "Season", "lo": "ລະດູການ" },
+    "no_results": { "en": "No matches found for this filter.", "lo": "ບໍ່ພົບການແຂ່ງຂັນສຳລັບການກັ່ນຕອງນີ້." }
+  },
+  "sponsors": {
+    "hero_title": { "en": "PARTNER WITH NIIGHTMARE", "lo": "ຮ່ວມເປັນຄູ່ຮ່ວມງານກັບ NIIGHTMARE" },
+    "hero_sub": {
+      "en": "Join us as we dominate the Lao esports scene",
+      "lo": "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ"
+    },
+    "partners_label": { "en": "OUR PARTNERS", "lo": "ຄູ່ຮ່ວມງານ" },
+    "tiers_label": { "en": "SPONSORSHIP TIERS", "lo": "ລະດັບການສະໜັບສະໜູນ" },
+    "tiers_intro": {
+      "en": "Three ways to put your brand in front of a passionate Lao gaming audience.",
+      "lo": "ສາມວິທີໃນການນຳສະເໜີແບຣນຂອງທ່ານໃຫ້ກັບຜູ້ຊົມເກມລາວທີ່ມີຄວາມກະຕືລືລົ້ນ."
+    }
+  },
+  "contact": {
+    "intro": {
+      "en": "Reach out for sponsorships, media, tryouts, or anything else.",
+      "lo": "ຕິດຕໍ່ສຳລັບການສະໜັບສະໜູນ, ສື່, ການທົດສອບ, ຫຼື ເລື່ອງອື່ນໆ."
+    },
+    "info_label": { "en": "GET IN TOUCH", "lo": "ຊ່ອງທາງຕິດຕໍ່" },
+    "form_label": { "en": "SEND A MESSAGE", "lo": "ສົ່ງຂໍ້ຄວາມ" },
+    "field_name": { "en": "Name", "lo": "ຊື່" },
+    "field_email": { "en": "Email", "lo": "ອີເມວ" },
+    "field_company": { "en": "Company / Organization", "lo": "ບໍລິສັດ / ອົງກອນ" },
+    "field_message": { "en": "Message", "lo": "ຂໍ້ຄວາມ" },
+    "field_type": { "en": "Type", "lo": "ປະເພດ" },
+    "type_sponsorship": { "en": "Sponsorship", "lo": "ການສະໜັບສະໜູນ" },
+    "type_media": { "en": "Media", "lo": "ສື່" },
+    "type_general": { "en": "General", "lo": "ທົ່ວໄປ" },
+    "type_tryout": { "en": "Tryout", "lo": "ການທົດສອບ" },
+    "submit": { "en": "SEND MESSAGE", "lo": "ສົ່ງຂໍ້ຄວາມ" },
+    "mediakit_label": { "en": "MEDIA KIT", "lo": "ຊຸດສື່" },
+    "mediakit_btn": { "en": "DOWNLOAD MEDIA KIT (PDF)", "lo": "ດາວໂຫຼດຊຸດສື່ (PDF)" },
+    "mediakit_desc": {
+      "en": "Logos, brand guidelines, player profiles, audience stats.",
+      "lo": "ໂລໂກ້, ຄຳແນະນຳແບຣນ, ໂປຣໄຟລ໌ນັກກີລາ, ສະຖິຕິຜູ້ຊົມ."
+    }
+  },
+  "footer": {
+    "tagline": { "en": "WE HAUNT THE META", "lo": "ພວກເຮົາຄອງເກມ" },
+    "quick_links": { "en": "QUICK LINKS", "lo": "ລິ້ງດ່ວນ" },
+    "follow_us": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" },
+    "copyright": {
+      "en": "© 2025 NIIGHTMARE ESPORTS — LAO PDR",
+      "lo": "© 2025 NIIGHTMARE ESPORTS — ສປປ ລາວ"
+    }
+  }
+}

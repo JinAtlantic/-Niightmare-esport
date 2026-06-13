@@ -1,0 +1,106 @@
+{
+  "articles": [
+    {
+      "id": 1,
+      "date": "2025-06-10",
+      "tag": {
+        "en": "MATCH RESULT",
+        "lo": "ຜົນການແຂ່ງຂັນ"
+      },
+      "title": {
+        "en": "NIIGHTMARE defeats Dragon Force 3-1 in Lao Open Cup",
+        "lo": "NIIGHTMARE ເອົາຊະນະ Dragon Force 3-1 ໃນ Lao Open Cup"
+      },
+      "excerpt": {
+        "en": "An outstanding performance in the Lao Open Cup quarter-finals saw our MLBB squad dismantle Dragon Force with a dominant late-game macro display.",
+        "lo": "ການສະແດງທີ່ໂດດເດັ່ນໃນຮອບ 8 ທີມສຸດທ້າຍ ເຮັດໃຫ້ທີມ MLBB ຂອງເຮົາເອົາຊະນະ Dragon Force ດ້ວຍການຄຸ້ມເກມໃນຊ່ວງທ້າຍ."
+      },
+      "link": "#"
+    },
+    {
+      "id": 2,
+      "date": "2025-06-04",
+      "tag": {
+        "en": "ANNOUNCEMENT",
+        "lo": "ປະກາດ"
+      },
+      "title": {
+        "en": "NIIGHTMARE signs new eFootball forward 'PhantomLAO'",
+        "lo": "NIIGHTMARE ເຊັນສັນຍານັກກີລາ eFootball ກອງໜ້າຄົນໃໝ່ 'PhantomLAO'"
+      },
+      "excerpt": {
+        "en": "We are proud to welcome rising star PhantomLAO to our eFootball division ahead of the regional qualifiers this August.",
+        "lo": "ພວກເຮົາພູມໃຈທີ່ໄດ້ຕ້ອນຮັບດາວຮຸ່ງ PhantomLAO ເຂົ້າສູ່ທີມ eFootball ກ່ອນຮອບຄັດເລືອກລະດັບພາກພື້ນໃນເດືອນສິງຫາ."
+      },
+      "link": "#"
+    },
+    {
+      "id": 3,
+      "date": "2025-05-28",
+      "tag": {
+        "en": "HIGHLIGHTS",
+        "lo": "ໄຮໄລ້"
+      },
+      "title": {
+        "en": "Top 5 plays from our Mekong Showdown run",
+        "lo": "5 ຈັງຫວະເດັ່ນຈາກການແຂ່ງ Mekong Showdown ຂອງເຮົາ"
+      },
+      "excerpt": {
+        "en": "From clutch Roamer rotations to a buzzer-beating Lord steal — relive the moments that defined our Mekong Showdown campaign.",
+        "lo": "ຈາກການໝູນຂອງ Roamer ທີ່ເດັດຂາດ ໄປຮອດການແຍ່ງ Lord ໃນວິນາທີສຸດທ້າຍ — ມາເບິ່ງຈັງຫວະທີ່ສຳຄັນຈາກແຄມເປນ Mekong Showdown ຂອງເຮົາ."
+      },
+      "link": "#"
+    },
+    {
+      "id": 4,
+      "date": "2025-05-15",
+      "tag": {
+        "en": "ANNOUNCEMENT",
+        "lo": "ປະກາດ"
+      },
+      "title": {
+        "en": "Tryouts open for MLBB substitute roster",
+        "lo": "ເປີດຮັບສະໝັກທົດສອບຝີມືສຳລັບນັກກີລາສຳຮອງ MLBB"
+      },
+      "excerpt": {
+        "en": "Think you can carry the reaper's banner? Applications are now open for our MLBB substitute and academy positions.",
+        "lo": "ຄິດວ່າຕົນເອງແບກທຸງຂອງທີມໄຫວບໍ? ດຽວນີ້ເປີດຮັບສະໝັກຕຳແໜ່ງນັກກີລາສຳຮອງ ແລະ ອາຄາເດມີ MLBB ແລ້ວ."
+      },
+      "link": "#"
+    },
+    {
+      "id": 5,
+      "date": "2025-05-02",
+      "tag": {
+        "en": "MATCH RESULT",
+        "lo": "ຜົນການແຂ່ງຂັນ"
+      },
+      "title": {
+        "en": "Hard-fought 2-3 loss to Vientiane Vipers in grand final",
+        "lo": "ພ່າຍແພ້ຢ່າງສູສີ 2-3 ໃຫ້ກັບ Vientiane Vipers ໃນຮອບຊິງຊະນະເລີດ"
+      },
+      "excerpt": {
+        "en": "A heartbreaking game-five finish, but our squad showed championship-level heart against the defending champions.",
+        "lo": "ຈົບເກມທີ່ຫ້າຢ່າງໜ້າເສຍດາຍ ແຕ່ທີມຂອງເຮົາໄດ້ສະແດງໃຫ້ເຫັນຫົວໃຈລະດັບແຊມ ເມື່ອພົບກັບແຊມເກົ່າ."
+      },
+      "link": "#"
+    },
+    {
+      "id": 6,
+      "date": "2025-04-20",
+      "tag": {
+        "en": "HIGHLIGHTS",
+        "lo": "ໄຮໄລ້"
+      },
+      "title": {
+        "en": "Behind the scenes: bootcamp week in Vientiane",
+        "lo": "ເບື້ອງຫຼັງ: ອາທິດເກັບໂຕທີ່ນະຄອນຫຼວງວຽງຈັນ"
+      },
+      "excerpt": {
+        "en": "A full week of scrims, strategy reviews, and team bonding as we prepare for the second half of the season.",
+        "lo": "ໜຶ່ງອາທິດເຕັມຂອງການຊ້ອມ ການວິເຄາະກົນລະຍຸດ ແລະ ການສ້າງຄວາມສາມັກຄີ ເພື່ອກຽມພ້ອມສຳລັບເຄິ່ງຫຼັງຂອງລະດູການ."
+      },
+      "link": "#"
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --font-barlow: "Barlow", sans-serif;
+  --font-noto-lao: "Noto Sans Lao", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0a14;
+  color: #f0f0f0;
+  font-family: var(--font-barlow);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+  font-family: var(--font-rajdhani);
+  letter-spacing: 0.02em;
+}
+
+/* ----------------------------------------------------------------
+   BILINGUAL: when Lao is active, use Noto Sans Lao for everything
+   and bump the base size slightly so Lao script stays readable.
+   .keep-latin opts an element back into the Latin display font
+   (used for the brand wordmark / in-game names).
+------------------------------------------------------------------ */
+html.lang-lo {
+  font-size: 17px; /* ~1px bump from the 16px default */
+}
+
+html.lang-lo body,
+html.lang-lo h1,
+html.lang-lo h2,
+html.lang-lo h3,
+html.lang-lo h4,
+html.lang-lo h5,
+html.lang-lo h6,
+html.lang-lo .font-display,
+html.lang-lo .font-rajdhani,
+html.lang-lo .font-barlow {
+  font-family: var(--font-noto-lao) !important;
+  letter-spacing: 0;
+  line-height: 1.65;
+}
+
+html.lang-lo .keep-latin {
+  font-family: var(--font-rajdhani) !important;
+}
+
+/* ----------------------------------------------------------------
+   Thin purple scrollbar
+------------------------------------------------------------------ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8b2fc9 #0a0a14;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a14;
+}
+::-webkit-scrollbar-thumb {
+  background: #8b2fc9;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c244c4;
+}
+
+::selection {
+  background: rgba(194, 68, 196, 0.4);
+  color: #ffffff;
+}
+
+/* ----------------------------------------------------------------
+   Textures & brand motifs
+------------------------------------------------------------------ */
+
+/* Subtle film noise overlay */
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Scanline texture */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.025) 0px,
+    rgba(255, 255, 255, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Diagonal split background used by the hero */
+.diagonal-split {
+  background: linear-gradient(
+    115deg,
+    #1a0a2e 0%,
+    #1a0a2e 42%,
+    #0a0a14 58%,
+    #0a0a14 100%
+  );
+}
+
+/* Scythe-slash divider line */
+.scythe-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b2fc9 30%, #c244c4 60%, transparent);
+  transform: skewX(-24deg);
+}
+
+/* Section label small tick */
+.label-tick {
+  width: 38px;
+  height: 3px;
+  background: linear-gradient(90deg, #8b2fc9, #c244c4);
+  transform: skewX(-24deg);
+}
+
+/* Glow on hover helpers */
+.hover-glow {
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 18px rgba(139, 47, 201, 0.55);
+  border-color: #8b2fc9;
+}
+
+/* Clip-path diagonal corner used on cards/banners */
+.clip-diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+}
+
+/* Animated diagonal floating slash in the hero */
+.hero-slash {
+  position: absolute;
+  width: 140%;
+  height: 2px;
+  left: -20%;
+  background: linear-gradient(90deg, transparent, rgba(194, 68, 196, 0.85), transparent);
+  transform: rotate(-12deg);
+  box-shadow: 0 0 24px rgba(194, 68, 196, 0.55);
+}
+
+/* Reduce motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

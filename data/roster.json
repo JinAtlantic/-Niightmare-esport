@@ -1,0 +1,170 @@
+{
+  "mlbb": {
+    "players": [
+      {
+        "id": "mlbb-1",
+        "jersey": "07",
+        "ign": "ReaperX",
+        "name": "Somchai Vongsa",
+        "role": { "en": "Jungler", "lo": "ຈັງເກີ" },
+        "description": {
+          "en": "Aggressive early-game jungler with a deadly objective sense.",
+          "lo": "ຈັງເກີສາຍບຸກ ທີ່ຍຶດເປົ້າໝາຍໄດ້ດີ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "mlbb-2",
+        "jersey": "01",
+        "ign": "SoulKeeper",
+        "name": "Khamla Insixiengmay",
+        "role": { "en": "Roamer", "lo": "ໂຣມເມີ" },
+        "description": {
+          "en": "Shot-calling roamer who sets up every team fight.",
+          "lo": "ໂຣມເມີຜູ້ສັ່ງການ ຈັດວາງທຸກການປະທະ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "mlbb-3",
+        "jersey": "10",
+        "ign": "GoldGhost",
+        "name": "Bounmy Soukan",
+        "role": { "en": "Gold Laner", "lo": "ໂກລເລນ" },
+        "description": {
+          "en": "Hyper-carry marksman with insane late-game scaling.",
+          "lo": "ນັກຍິງສາຍແຄຣີ ທີ່ແຮງຂຶ້ນເລື້ອຍໆໃນເກມຍາວ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "mlbb-4",
+        "jersey": "22",
+        "ign": "Mystveil",
+        "name": "Phetsamone Lao",
+        "role": { "en": "Mid Laner", "lo": "ມິດເລນ" },
+        "description": {
+          "en": "Burst mage specialist with pinpoint rotations.",
+          "lo": "ຜູ້ຊ່ຽວຊານເມຈ ດາເມຈສູງ ພ້ອມການໝູນທີ່ແມ່ນຍຳ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "mlbb-5",
+        "jersey": "05",
+        "ign": "IronTomb",
+        "name": "Vilaysack Phomma",
+        "role": { "en": "Exp Laner", "lo": "ເອັກສ໌ເລນ" },
+        "description": {
+          "en": "Unbreakable side-lane tank and split-push threat.",
+          "lo": "ແທງເລນຂ້າງທີ່ແຂງແກ່ນ ແລະ ເປັນໄພຈາກການ split push."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "mlbb-6",
+        "jersey": "13",
+        "ign": "Wraith",
+        "name": "Anousone Keo",
+        "role": { "en": "Substitute", "lo": "ນັກກີລາສຳຮອງ" },
+        "description": {
+          "en": "Flex substitute comfortable across multiple roles.",
+          "lo": "ນັກກີລາສຳຮອງທີ່ຫຼິ້ນໄດ້ຫຼາຍຕຳແໜ່ງ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      }
+    ]
+  },
+  "efootball": {
+    "players": [
+      {
+        "id": "efb-1",
+        "jersey": "09",
+        "ign": "PhantomLAO",
+        "name": "Thongdy Sisavath",
+        "role": { "en": "Forward", "lo": "ກອງໜ້າ" },
+        "description": {
+          "en": "Clinical finisher with lightning-fast counter-attacks.",
+          "lo": "ກອງໜ້າຈົບສະກໍແມ່ນຍຳ ພ້ອມການສວນກັບໄວ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "efb-2",
+        "jersey": "11",
+        "ign": "NightStriker",
+        "name": "Souksavanh Dao",
+        "role": { "en": "Forward", "lo": "ກອງໜ້າ" },
+        "description": {
+          "en": "Pacey winger who stretches every defensive line.",
+          "lo": "ປີກຄວາມໄວສູງ ທີ່ດຶງແນວຮັບໃຫ້ຖ່າງອອກ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "efb-3",
+        "jersey": "08",
+        "ign": "Maestro",
+        "name": "Kaysone Vong",
+        "role": { "en": "Midfielder", "lo": "ກອງກາງ" },
+        "description": {
+          "en": "Creative playmaker controlling the tempo of every match.",
+          "lo": "ກອງກາງສ້າງສັນເກມ ຄຸມຈັງຫວະທຸກນັດ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "efb-4",
+        "jersey": "06",
+        "ign": "Anchor",
+        "name": "Sengdao Phila",
+        "role": { "en": "Midfielder", "lo": "ກອງກາງ" },
+        "description": {
+          "en": "Defensive midfielder who breaks up every attack.",
+          "lo": "ກອງກາງຕົວຮັບ ທີ່ສະກັດທຸກການບຸກ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "efb-5",
+        "jersey": "04",
+        "ign": "GraveWall",
+        "name": "Outhai Sengphet",
+        "role": { "en": "Defender", "lo": "ກອງຫຼັງ" },
+        "description": {
+          "en": "Commanding center-back who reads the game two steps ahead.",
+          "lo": "ກອງຫຼັງຕົວກາງຜູ້ນຳ ອ່ານເກມລ່ວງໜ້າສອງກ້າວ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      },
+      {
+        "id": "efb-6",
+        "jersey": "02",
+        "ign": "Sentinel",
+        "name": "Bounthavy Sai",
+        "role": { "en": "Defender", "lo": "ກອງຫຼັງ" },
+        "description": {
+          "en": "Overlapping full-back with relentless stamina.",
+          "lo": "ກອງຫຼັງຂ້າງ ທີ່ເຕີມເກມຮຸກ ພ້ອມພະລັງບໍ່ໝົດ."
+        },
+        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      }
+    ]
+  },
+  "staff": [
+    {
+      "id": "staff-1",
+      "ign": "Coach Vong",
+      "name": "Khampha Vongphachanh",
+      "role": { "en": "Head Coach", "lo": "ຫົວໜ້າຄູຝຶກ" },
+      "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+    },
+    {
+      "id": "staff-2",
+      "ign": "Manager Noy",
+      "name": "Manivanh Chanthavong",
+      "role": { "en": "Team Manager", "lo": "ຜູ້ຈັດການທີມ" },
+      "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+    }
+  ]
+}

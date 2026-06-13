@@ -1,0 +1,26 @@
+{
+  "team": {
+    "name": "NIIGHTMARE",
+    "fullName": "NIIGHTMARE ESPORTS",
+    "region": { "en": "Lao PDR", "lo": "ສປປ ລາວ" }
+  },
+  "contact": {
+    "email": "contact@niightmare.gg",
+    "facebook": "https://facebook.com/niightmareesports",
+    "youtube": "https://youtube.com/@niightmareesports",
+    "tiktok": "https://tiktok.com/@niightmareesports",
+    "discord": "https://discord.gg/niightmare"
+  },
+  "communityUrl": "https://discord.gg/niightmare",
+  "formspreeEndpoint": "https://formspree.io/f/your-form-id",
+  "mediaKitUrl": "/media-kit.pdf",
+  "upcomingMatch": {
+    "date": "2025-06-20T19:00:00+07:00",
+    "game": "mlbb",
+    "tournament": {
+      "en": "Lao Open Cup 2025 — Semi Final",
+      "lo": "Lao Open Cup 2025 — ຮອບຮອງຊະນະເລີດ"
+    },
+    "opponent": "Vientiane Vipers"
+  }
+}

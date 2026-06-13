@@ -1,0 +1,43 @@
+{
+  "sponsors": [
+    { "id": "s1", "name": "Mekong Mobile", "url": "#" },
+    { "id": "s2", "name": "Lao Net", "url": "#" },
+    { "id": "s3", "name": "ThunderGear", "url": "#" },
+    { "id": "s4", "name": "Vientiane Bank", "url": "#" },
+    { "id": "s5", "name": "Riverside Energy", "url": "#" },
+    { "id": "s6", "name": "Nightfall Apparel", "url": "#" }
+  ],
+  "tiers": [
+    {
+      "id": "tier-title",
+      "name": { "en": "TITLE SPONSOR", "lo": "ສະປອນເຊີຫຼັກ" },
+      "color": "#C244C4",
+      "benefits": [
+        { "en": "Logo on jersey front", "lo": "ໂລໂກ້ດ້ານໜ້າເສື້ອແຂ່ງ" },
+        { "en": "Branding across all platforms", "lo": "ໂລໂກ້ໃນທຸກຊ່ອງທາງ" },
+        { "en": "Named title sponsor of the team", "lo": "ເປັນສະປອນເຊີຫຼັກຂອງທີມ" },
+        { "en": "Priority at all events and content", "lo": "ໄດ້ສິດທິກ່ອນໃນທຸກກິດຈະກຳ ແລະ ຄອນເທນ" }
+      ]
+    },
+    {
+      "id": "tier-gold",
+      "name": { "en": "GOLD SPONSOR", "lo": "ສະປອນເຊີຄຳ" },
+      "color": "#C9A227",
+      "benefits": [
+        { "en": "Logo on website and stream overlays", "lo": "ໂລໂກ້ໃນເວັບໄຊ ແລະ ໜ້າຈໍຖ່າຍທອດ" },
+        { "en": "Regular social media mentions", "lo": "ກ່າວເຖິງໃນສື່ສັງຄົມເປັນປະຈຳ" },
+        { "en": "Logo on jersey sleeve", "lo": "ໂລໂກ້ດ້ານແຂນເສື້ອ" }
+      ]
+    },
+    {
+      "id": "tier-community",
+      "name": { "en": "COMMUNITY PARTNER", "lo": "ຄູ່ຮ່ວມງານຊຸມຊົນ" },
+      "color": "#8B2FC9",
+      "benefits": [
+        { "en": "Social media shoutouts", "lo": "ກ່າວເຖິງໃນສື່ສັງຄົມ" },
+        { "en": "Logo in partner section", "lo": "ໂລໂກ້ໃນພາກຄູ່ຮ່ວມງານ" },
+        { "en": "Community event collaborations", "lo": "ຮ່ວມຈັດກິດຈະກຳຊຸມຊົນ" }
+      ]
+    }
+  ]
+}
