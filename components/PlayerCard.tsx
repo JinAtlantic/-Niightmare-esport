@@ -18,12 +18,16 @@ export default function PlayerCard({ player }: { player: Player }) {
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent opacity-40 transition-opacity duration-300 group-hover:opacity-100"
       />
 
-      {/* substitute badge */}
-      {player.sub && (
-        <span className="absolute left-4 top-4 z-[1] border border-edge-bright bg-void/60 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-ash">
-          Sub
-        </span>
-      )}
+      {/* status badge — Main (starter) or Sub (substitute) */}
+      <span
+        className={`absolute left-4 top-4 z-[1] border px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] ${
+          player.sub
+            ? "border-edge-bright bg-void/60 text-ash"
+            : "border-amethyst/50 bg-amethyst/10 text-spectre"
+        }`}
+      >
+        {player.sub ? "Sub" : "Main"}
+      </span>
 
       {/* monogram as a faint watermark */}
       <span
