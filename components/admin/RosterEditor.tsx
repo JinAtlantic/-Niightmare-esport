@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   TextField,
+  SelectField,
   BilingualField,
   ImageField,
   Label,
@@ -93,17 +94,15 @@ function PlayerList({
               <div className="md:col-span-2">
                 <BilingualField label="ตำแหน่ง" value={p.role} onChange={(v) => onPatch(i, { role: v })} />
               </div>
-              <div className="flex items-end">
-                <label className="flex items-center gap-2 font-mono text-xs text-ash">
-                  <input
-                    type="checkbox"
-                    checked={!!p.sub}
-                    onChange={(e) => onPatch(i, { sub: e.target.checked || undefined })}
-                    className="h-4 w-4 accent-amethyst"
-                  />
-                  ตัวสำรอง (Sub)
-                </label>
-              </div>
+              <SelectField
+                label="สถานะ"
+                value={p.sub ? "sub" : "main"}
+                onChange={(v) => onPatch(i, { sub: v === "sub" ? true : undefined })}
+                options={[
+                  { value: "main", label: "ตัวจริง (Main)" },
+                  { value: "sub", label: "ตัวสำรอง (Sub)" },
+                ]}
+              />
               <div className="md:col-span-2">
                 <ImageField
                   label="รูปนักแข่ง"
