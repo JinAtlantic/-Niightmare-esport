@@ -51,6 +51,9 @@ export interface Match {
   game: GameId;
   tournament: Bilingual;
   opponent: string;
+  /** Optional path/URL to the opponent's logo (e.g. "/teams/dragon-force.png").
+   *  When absent the row falls back to an initials monogram. */
+  opponentLogo?: string;
   score: string;
   result: MatchResult;
   vod: string | null;

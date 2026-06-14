@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import PageHeader from "@/components/PageHeader";
 import SectionLabel from "@/components/SectionLabel";
 import TournamentAccordion from "@/components/TournamentAccordion";
+import OpponentLogo from "@/components/OpponentLogo";
 import Reveal from "@/components/Reveal";
 import { EfootballIcon, MlbbIcon, PlayIcon } from "@/components/Icons";
 import { formatDate } from "@/lib/format";
@@ -124,10 +125,13 @@ function MatchCard({ match }: { match: Match }) {
         <p className="truncate font-display text-sm font-semibold uppercase tracking-[0.06em] text-soul">
           {pick(match.tournament)}
         </p>
-        <p className="truncate font-mono text-xs text-ash">
-          <span className="text-ash-dim">vs</span>{" "}
-          <span className="keep-latin text-spectre">{match.opponent}</span>
-        </p>
+        <div className="mt-1 flex items-center gap-2">
+          <OpponentLogo src={match.opponentLogo} name={match.opponent} />
+          <p className="min-w-0 truncate font-mono text-xs text-ash">
+            <span className="text-ash-dim">vs</span>{" "}
+            <span className="keep-latin text-spectre">{match.opponent}</span>
+          </p>
+        </div>
       </div>
 
       {/* score */}
