@@ -9,6 +9,12 @@ export default function PlayerCard({ player }: { player: Player }) {
   const { pick } = useLanguage();
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const isSub = !!player.sub;
+  const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
+  const photoStyle = {
+    objectPosition: `${crop.x}% ${crop.y}%`,
+    transformOrigin: `${crop.x}% ${crop.y}%`,
+    "--zoom": crop.zoom,
+  } as React.CSSProperties;
 
   return (
     // Outer wrapper carries the neon-violet aura on hover (kept off the clipped
@@ -21,7 +27,8 @@ export default function PlayerCard({ player }: { player: Player }) {
           <img
             src={player.photo}
             alt={player.ign}
-            className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
+            style={photoStyle}
+            className="crop-img absolute inset-0 h-full w-full object-cover"
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-amethyst-deep/40 via-crypt to-void transition-transform duration-500 ease-out group-hover:scale-110">

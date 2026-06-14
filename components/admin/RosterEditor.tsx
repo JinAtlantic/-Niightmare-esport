@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useData } from "@/components/admin/useData";
+import PhotoCropEditor from "@/components/admin/PhotoCropEditor";
 import {
   Button,
   Card,
@@ -108,9 +109,19 @@ function PlayerList({
                   label="รูปนักแข่ง"
                   value={p.photo}
                   folder="players"
-                  onChange={(path) => onPatch(i, { photo: path || undefined })}
+                  onChange={(path) => onPatch(i, { photo: path || undefined, photoCrop: undefined })}
                 />
               </div>
+              {p.photo && (
+                <div className="md:col-span-2">
+                  <PhotoCropEditor
+                    key={p.photo}
+                    src={p.photo}
+                    crop={p.photoCrop}
+                    onChange={(crop) => onPatch(i, { photoCrop: crop })}
+                  />
+                </div>
+              )}
               <div className="md:col-span-2">
                 <Label>โซเชียล — วางลิงก์เฉพาะที่นักแข่งคนนี้ใช้ (เว้นว่าง = ไม่โชว์ไอคอน)</Label>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

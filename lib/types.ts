@@ -34,6 +34,9 @@ export interface Player {
   sub?: boolean;
   /** Optional player photo (e.g. "/players/phantom.png"). Falls back to a monogram. */
   photo?: string;
+  /** Admin-controlled crop for the photo: zoom (scale, 1 = fit) and focal
+   *  point x/y as percentages (0–100). */
+  photoCrop?: { zoom: number; x: number; y: number };
   socials: Socials;
 }
 
