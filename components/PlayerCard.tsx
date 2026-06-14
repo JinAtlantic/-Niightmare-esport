@@ -48,9 +48,9 @@ export default function PlayerCard({ player }: { player: Player }) {
             {player.ign}
           </h3>
           {player.name && (
-            <p className="mt-1 truncate font-mono text-[11px] text-ash">{player.name}</p>
+            <p className="mt-1 truncate font-mono text-xs text-spectre md:text-sm">{player.name}</p>
           )}
-          <span className="mt-2 inline-flex items-center border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
+          <span className="mt-2 inline-flex items-center border-l-2 border-amethyst pl-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-glow md:text-sm">
             {pick(player.role)}
           </span>
           <SocialLinks socials={player.socials} size={14} compact className="mt-3" />
