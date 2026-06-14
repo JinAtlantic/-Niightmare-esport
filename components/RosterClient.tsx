@@ -5,6 +5,8 @@ import { useLanguage } from "@/components/LanguageContext";
 import PageHeader from "@/components/PageHeader";
 import PlayerCard from "@/components/PlayerCard";
 import StaffCard from "@/components/StaffCard";
+import SectionLabel from "@/components/SectionLabel";
+import Reveal from "@/components/Reveal";
 import { EfootballIcon, MlbbIcon } from "@/components/Icons";
 import rosterData from "@/data/roster.json";
 import type { GameId, Player, StaffMember } from "@/lib/types";
@@ -19,21 +21,30 @@ export default function RosterClient() {
   const { t } = useLanguage();
   const [division, setDivision] = useState<GameId>("mlbb");
 
-  const tabs: { id: GameId; labelKey: string; Icon: typeof MlbbIcon }[] = [
-    { id: "mlbb", labelKey: "roster.tab_mlbb", Icon: MlbbIcon },
-    { id: "efootball", labelKey: "roster.tab_efootball", Icon: EfootballIcon },
+  const tabs: {
+    id: GameId;
+    labelKey: string;
+    Icon: typeof MlbbIcon;
+    count: number;
+  }[] = [
+    { id: "mlbb", labelKey: "roster.tab_mlbb", Icon: MlbbIcon, count: roster.mlbb.players.length },
+    { id: "efootball", labelKey: "roster.tab_efootball", Icon: EfootballIcon, count: roster.efootball.players.length },
   ];
 
   const players = roster[division].players;
 
   return (
     <>
-      <PageHeader title={t("sections.our_roster")} subtitle={t("roster.intro")} />
+      <PageHeader
+        kicker={t("roster.kicker")}
+        title={t("sections.our_roster")}
+        subtitle={t("roster.intro")}
+      />
 
-      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
         {/* Division tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 border-b border-edge">
-          {tabs.map(({ id, labelKey, Icon }) => {
+        <div className="flex flex-wrap items-center justify-center gap-1 border-b border-edge">
+          {tabs.map(({ id, labelKey, Icon, count }) => {
             const active = division === id;
             return (
               <button
@@ -41,43 +52,48 @@ export default function RosterClient() {
                 type="button"
                 onClick={() => setDivision(id)}
                 aria-pressed={active}
-                className={`relative -mb-px flex items-center gap-2 px-6 py-3 font-display text-sm font-semibold uppercase tracking-[0.14em] transition-colors ${
-                  active
-                    ? "text-text-primary [text-shadow:0_0_12px_rgba(194,68,196,0.7)]"
-                    : "text-text-muted hover:text-text-primary"
+                className={`group relative -mb-px flex items-center gap-2.5 px-6 py-4 font-display text-sm font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                  active ? "text-soul" : "text-ash hover:text-soul"
                 }`}
               >
-                <Icon size={18} className={active ? "text-accent" : ""} />
+                <Icon
+                  size={18}
+                  className={`transition-colors ${active ? "text-amethyst" : "text-ash group-hover:text-spectre"}`}
+                />
                 <span className="keep-latin">{t(labelKey)}</span>
+                <span className={`font-mono text-[11px] ${active ? "text-spectre" : "text-ash-dim"}`}>
+                  {count}
+                </span>
                 <span
-                  className={`absolute inset-x-0 bottom-0 h-[3px] bg-primary transition-all duration-300 ${
-                    active ? "opacity-100 shadow-glow" : "opacity-0"
-                  }`}
                   aria-hidden
+                  className={`absolute inset-x-0 bottom-0 h-[2px] -skew-x-[24deg] bg-gradient-to-r from-amethyst to-glow transition-opacity duration-300 ${
+                    active ? "opacity-100 shadow-[0_0_14px_rgba(168,85,247,0.7)]" : "opacity-0"
+                  }`}
                 />
               </button>
             );
           })}
         </div>
 
-        {/* Player grid */}
-        <div
-          key={division}
-          className="mt-10 grid gap-6 animate-fadeIn sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {players.map((player) => (
-            <PlayerCard key={player.id} player={player} />
+        {/* Player grid — re-keyed per division so cards re-enter on switch */}
+        <div key={division} className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {players.map((player, i) => (
+            <Reveal key={player.id} delay={i * 70} className="h-full">
+              <PlayerCard player={player} />
+            </Reveal>
           ))}
         </div>
 
-        {/* Staff row */}
-        <div className="mt-16">
-          <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-text-primary">
+        {/* Staff & management */}
+        <div className="mt-20">
+          <SectionLabel kicker={t("roster.staff_kicker")}>
             {t("roster.staff_label")}
-          </h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {roster.staff.map((member) => (
-              <StaffCard key={member.id} member={member} />
+          </SectionLabel>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {roster.staff.map((member, i) => (
+              <Reveal key={member.id} delay={i * 90} className="h-full">
+                <StaffCard member={member} />
+              </Reveal>
             ))}
           </div>
         </div>

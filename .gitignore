@@ -26,5 +26,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local screenshots / design references (not part of the app)
+/preview
+
 # NOTE: the /data folder is content and MUST be committed.
 # It is intentionally NOT ignored here.
+
+.vercel

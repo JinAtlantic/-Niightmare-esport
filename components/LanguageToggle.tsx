@@ -26,7 +26,7 @@ export default function LanguageToggle({ className = "" }: { className?: string 
             type="button"
             onClick={() => setLang(opt.value)}
             aria-pressed={active}
-            className={`px-3 py-1.5 text-sm font-semibold uppercase tracking-wide transition-colors ${
+            className={`grid min-h-[44px] place-items-center px-3.5 text-sm font-semibold uppercase tracking-wide transition-colors ${
               opt.value === "lo" ? "" : "keep-latin font-rajdhani"
             } ${
               active

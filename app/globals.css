@@ -3,18 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --font-rajdhani: "Rajdhani", sans-serif;
+  /* The display face is now Chakra Petch — the var name is kept as
+     --font-rajdhani for backward compatibility with existing classes. */
+  --font-rajdhani: "Chakra Petch", sans-serif;
   --font-barlow: "Barlow", sans-serif;
-  --font-noto-lao: "Noto Sans Lao", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  /* Lao script face — Phetsarath OT (the standard Lao font). Var name kept
+     as --font-noto-lao for backward compatibility with existing rules. */
+  --font-noto-lao: "Phetsarath", "Noto Sans Lao", sans-serif;
+
+  --void: #0b0710;
+  --amethyst: #a855f7;
+  --glow: #c77dff;
 }
 
 html {
   scroll-behavior: smooth;
+  /* clip horizontal overflow at the root too — body-only overflow-x:hidden
+     does not constrain fixed elements (e.g. the off-canvas mobile drawer),
+     which otherwise widen the document and cause sideways scroll on mobile. */
+  overflow-x: hidden;
 }
 
 body {
-  background-color: #0a0a14;
-  color: #f0f0f0;
+  background-color: #0b0710;
+  color: #ece7f2;
   font-family: var(--font-barlow);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -38,7 +51,7 @@ h6,
    (used for the brand wordmark / in-game names).
 ------------------------------------------------------------------ */
 html.lang-lo {
-  font-size: 17px; /* ~1px bump from the 16px default */
+  font-size: 17px;
 }
 
 html.lang-lo body,
@@ -50,6 +63,7 @@ html.lang-lo h5,
 html.lang-lo h6,
 html.lang-lo .font-display,
 html.lang-lo .font-rajdhani,
+html.lang-lo .font-mono,
 html.lang-lo .font-barlow {
   font-family: var(--font-noto-lao) !important;
   letter-spacing: 0;
@@ -61,37 +75,36 @@ html.lang-lo .keep-latin {
 }
 
 /* ----------------------------------------------------------------
-   Thin purple scrollbar
+   Thin amethyst scrollbar
 ------------------------------------------------------------------ */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #8b2fc9 #0a0a14;
+  scrollbar-color: #a855f7 #0b0710;
 }
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a14;
+  background: #0b0710;
 }
 ::-webkit-scrollbar-thumb {
-  background: #8b2fc9;
+  background: #a855f7;
   border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c244c4;
+  background: #c77dff;
 }
 
 ::selection {
-  background: rgba(194, 68, 196, 0.4);
+  background: rgba(199, 125, 255, 0.4);
   color: #ffffff;
 }
 
 /* ----------------------------------------------------------------
-   Textures & brand motifs
+   Textures & brand motifs (kept for the not-yet-redesigned pages)
 ------------------------------------------------------------------ */
 
-/* Subtle film noise overlay */
 .noise-overlay::before {
   content: "";
   position: absolute;
@@ -101,7 +114,6 @@ html.lang-lo .keep-latin {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Scanline texture */
 .scanlines::after {
   content: "";
   position: absolute;
@@ -116,58 +128,475 @@ html.lang-lo .keep-latin {
   );
 }
 
-/* Diagonal split background used by the hero */
 .diagonal-split {
   background: linear-gradient(
     115deg,
-    #1a0a2e 0%,
-    #1a0a2e 42%,
-    #0a0a14 58%,
-    #0a0a14 100%
+    #1c1428 0%,
+    #1c1428 42%,
+    #0b0710 58%,
+    #0b0710 100%
   );
 }
 
-/* Scythe-slash divider line */
 .scythe-line {
   height: 2px;
-  background: linear-gradient(90deg, transparent, #8b2fc9 30%, #c244c4 60%, transparent);
+  background: linear-gradient(90deg, transparent, #a855f7 30%, #c77dff 60%, transparent);
   transform: skewX(-24deg);
 }
 
-/* Section label small tick */
 .label-tick {
-  width: 38px;
+  width: 22px;
   height: 3px;
-  background: linear-gradient(90deg, #8b2fc9, #c244c4);
+  background: linear-gradient(90deg, #a855f7, #c77dff);
   transform: skewX(-24deg);
 }
+@media (min-width: 768px) {
+  .label-tick {
+    width: 38px;
+  }
+}
 
-/* Glow on hover helpers */
 .hover-glow {
   transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 }
 .hover-glow:hover {
-  box-shadow: 0 0 18px rgba(139, 47, 201, 0.55);
-  border-color: #8b2fc9;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.55);
+  border-color: #a855f7;
 }
 
-/* Clip-path diagonal corner used on cards/banners */
 .clip-diagonal {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
 }
 
-/* Animated diagonal floating slash in the hero */
 .hero-slash {
   position: absolute;
   width: 140%;
   height: 2px;
   left: -20%;
-  background: linear-gradient(90deg, transparent, rgba(194, 68, 196, 0.85), transparent);
+  background: linear-gradient(90deg, transparent, rgba(199, 125, 255, 0.85), transparent);
   transform: rotate(-12deg);
-  box-shadow: 0 0 24px rgba(194, 68, 196, 0.55);
+  box-shadow: 0 0 24px rgba(199, 125, 255, 0.55);
 }
 
-/* Reduce motion preferences */
+/* ----------------------------------------------------------------
+   HERO — redesigned flagship
+------------------------------------------------------------------ */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background: var(--void);
+}
+/* one disciplined light source rising from below */
+.hero-section::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -18%;
+  transform: translateX(-50%);
+  width: 120vw;
+  height: 80vh;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(124, 47, 214, 0.28) 0%,
+    rgba(124, 47, 214, 0.1) 38%,
+    transparent 68%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+/* top deepening + vignette */
+.hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(180deg, #0e0916 0%, transparent 22%),
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+/* subtle film grain (tasteful, not scanlines) */
+.hero-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- atmospheric layer (fills the empty void behind the hero) ---- */
+.hero-atmos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* dim background scene — visible enough to read as a misty mountain vista,
+   but veiled so it never competes with the reaper or the text */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 62%;
+  opacity: 0.74;
+}
+.hero-bg-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      180deg,
+      rgba(14, 9, 22, 0.3) 0%,
+      rgba(14, 9, 22, 0.08) 32%,
+      rgba(14, 9, 22, 0.4) 74%,
+      rgba(14, 9, 22, 0.85) 100%
+    ),
+    radial-gradient(ellipse 78% 66% at 50% 42%, transparent 48%, rgba(14, 9, 22, 0.36) 100%);
+}
+/* drifting fog */
+.hero-fog {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+}
+.hero-fog--1 {
+  width: 64vw;
+  height: 42vh;
+  left: -12vw;
+  top: 16%;
+  background: radial-gradient(ellipse at center, rgba(124, 47, 214, 0.16), transparent 70%);
+  animation: fog-drift-1 28s ease-in-out infinite;
+}
+.hero-fog--2 {
+  width: 58vw;
+  height: 40vh;
+  right: -14vw;
+  bottom: 10%;
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.13), transparent 70%);
+  animation: fog-drift-2 34s ease-in-out infinite;
+}
+/* floating embers */
+.hero-ember {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #c77dff;
+  box-shadow: 0 0 8px 1px rgba(199, 125, 255, 0.8);
+  opacity: 0;
+  animation: ember-rise 11s linear infinite;
+}
+.hero-ember--1 { left: 14%; animation-delay: 0s; }
+.hero-ember--2 { left: 28%; animation-delay: 2.6s; width: 2px; height: 2px; }
+.hero-ember--3 { left: 42%; animation-delay: 5.1s; }
+.hero-ember--4 { left: 57%; animation-delay: 1.4s; width: 2px; height: 2px; }
+.hero-ember--5 { left: 70%; animation-delay: 6.8s; }
+.hero-ember--6 { left: 83%; animation-delay: 3.9s; width: 4px; height: 4px; }
+.hero-ember--7 { left: 92%; animation-delay: 8.3s; width: 2px; height: 2px; }
+
+@keyframes fog-drift-1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(7%, -5%); }
+}
+@keyframes fog-drift-2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-8%, 4%); }
+}
+@keyframes ember-rise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  12% { opacity: 0.9; }
+  85% { opacity: 0.7; }
+  100% { transform: translateY(-78vh) translateX(18px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-fog,
+  .hero-ember {
+    animation: none;
+  }
+  .hero-ember { display: none; }
+}
+
+.logo-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 6px auto 18px;
+}
+.logo-aura {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 152%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(168, 85, 247, 0.32) 0%,
+    rgba(124, 47, 214, 0.15) 42%,
+    transparent 70%
+  );
+}
+.logo-main {
+  position: relative;
+  z-index: 2;
+  width: clamp(240px, 37vw, 470px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 20px 44px rgba(0, 0, 0, 0.6));
+  opacity: 0;
+  animation: fx-rise 1s cubic-bezier(0.2, 0.7, 0.2, 1) forwards 0.18s;
+}
+/* ghost afterimage — the "haunt" */
+.logo-ghost {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: clamp(240px, 37vw, 470px);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  filter: blur(28px) saturate(1.6);
+  opacity: 0.55;
+  animation: fx-hauntLogo 9s ease-in-out infinite;
+}
+
+/* reaper portrait variant — the square character art has no frame; its edges
+   are feathered with a radial mask so the dark square background dissolves into
+   the hero and the reaper appears to emerge from the dark ("haunt"). */
+.logo-stage--repper {
+  margin: 4px auto 14px;
+}
+/* the hero is the focal point — larger, brighter aura, lifted off the void */
+.logo-stage--repper .logo-aura {
+  width: 152%;
+  height: 168%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(168, 85, 247, 0.46) 0%,
+    rgba(124, 47, 214, 0.22) 40%,
+    transparent 70%
+  );
+}
+.logo-stage--repper .logo-main {
+  width: clamp(244px, 37vw, 452px);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(ellipse 60% 64% at 50% 48%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 64% at 50% 48%, #000 60%, transparent 100%);
+  filter: drop-shadow(0 20px 46px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 0 54px rgba(168, 85, 247, 0.42)) saturate(1.08) contrast(1.05);
+}
+/* pedestal glow so the reaper feels planted, not floating in emptiness */
+.logo-stage--repper::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6%;
+  transform: translateX(-50%);
+  width: 62%;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.5), transparent 72%);
+  filter: blur(10px);
+  z-index: 0;
+  pointer-events: none;
+}
+.logo-stage--repper .logo-ghost {
+  width: clamp(220px, 33vw, 410px);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(ellipse 60% 64% at 50% 48%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 64% at 50% 48%, #000 60%, transparent 100%);
+  filter: blur(34px) saturate(1.7);
+  opacity: 0.5;
+}
+
+/* brand wordmark under the reaper — gradient fill + outlined second word, with
+   a subtle haunt flicker on the glow. */
+.repper-wordmark {
+  margin: 0 auto 2px;
+  font-weight: 800;
+  /* the club name is the hero's focal text — as large as fits on one line
+     (tighter tracking buys the extra size) down to a 320px phone */
+  font-size: clamp(1.45rem, 6.7vw, 4.5rem);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #ffffff 0%, #ead7ff 40%, #a855f7 80%, #7c2fd6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 4px 26px rgba(168, 85, 247, 0.5));
+  animation: fx-rise 0.8s ease forwards, repper-flicker 6s ease-in-out infinite 1.4s;
+}
+.repper-wordmark .repper-esport {
+  margin-left: 0.18em;
+  background: none;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  -webkit-text-stroke: 1.4px rgba(214, 170, 255, 0.9);
+  filter: drop-shadow(0 0 14px rgba(199, 125, 255, 0.5));
+}
+@keyframes repper-flicker {
+  0%, 100% {
+    filter: drop-shadow(0 4px 26px rgba(168, 85, 247, 0.5));
+    opacity: 1;
+  }
+  47% {
+    filter: drop-shadow(0 4px 32px rgba(199, 125, 255, 0.78));
+  }
+  49% {
+    filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.28));
+    opacity: 0.9;
+  }
+  51% {
+    filter: drop-shadow(0 4px 34px rgba(199, 125, 255, 0.85));
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .repper-wordmark {
+    animation: fx-rise 0.8s ease forwards;
+  }
+}
+
+.fx-rise {
+  opacity: 0;
+  animation: fx-rise 0.8s ease forwards;
+}
+.fx-ping {
+  animation: fx-ping 2.2s ease-out infinite;
+}
+
+.next-line::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a855f7 35%, #c77dff 60%, transparent);
+}
+
+@keyframes fx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fx-hauntLogo {
+  0%,
+  100% {
+    transform: translate(calc(-50% - 9px), calc(-50% + 6px)) scale(1.02);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(calc(-50% + 11px), calc(-50% - 7px)) scale(1.06);
+    opacity: 0.3;
+  }
+}
+@keyframes fx-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(168, 85, 247, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+  }
+}
+
+/* ----------------------------------------------------------------
+   PAGE HEADER — inner-page band; a shorter echo of the hero's single
+   light source rising from below, with a top deepening + vignette.
+------------------------------------------------------------------ */
+.page-header {
+  position: relative;
+  background: var(--void);
+}
+.page-header::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -40%;
+  transform: translateX(-50%);
+  width: 120vw;
+  height: 120%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(124, 47, 214, 0.22) 0%,
+    rgba(124, 47, 214, 0.08) 40%,
+    transparent 70%
+  );
+}
+.page-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(180deg, #0e0916 0%, transparent 28%),
+    radial-gradient(120% 100% at 50% 30%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+/* ----------------------------------------------------------------
+   Scroll-reveal — below-the-fold content rises in as it enters view
+   (paired with <Reveal>). animation-delay drives the stagger.
+------------------------------------------------------------------ */
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  animation: fx-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ----------------------------------------------------------------
+   NEWS — latest dispatches: a faint amethyst halo bleeds down from
+   the top to tie the section back to the hero's light source.
+------------------------------------------------------------------ */
+.news-section {
+  position: relative;
+}
+.news-section::before {
+  content: "";
+  position: absolute;
+  top: -6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  max-width: 1100px;
+  height: 55%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse at center top,
+    rgba(168, 85, 247, 0.07),
+    transparent 70%
+  );
+}
+
+/* ----------------------------------------------------------------
+   Reduce motion preferences
+------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

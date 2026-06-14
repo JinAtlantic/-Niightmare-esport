@@ -53,12 +53,12 @@ export default function Footer() {
           <p className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-text-primary">
             {t("footer.quick_links")}
           </p>
-          <ul className="mt-4 grid grid-cols-2 gap-2">
+          <ul className="mt-2 grid grid-cols-2 gap-x-2">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="text-sm text-text-muted transition-colors hover:text-accent"
+                  className="flex min-h-[44px] items-center text-sm text-text-muted transition-colors hover:text-accent"
                 >
                   {t(item.key)}
                 </Link>
@@ -80,7 +80,7 @@ export default function Footer() {
                 target={href.startsWith("mailto:") ? undefined : "_blank"}
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="hover-glow grid h-10 w-10 place-items-center border border-edge bg-void/60 text-text-muted hover:text-accent"
+                className="hover-glow grid h-11 w-11 place-items-center border border-edge bg-void/60 text-text-muted hover:text-accent"
               >
                 <Icon size={20} />
               </a>

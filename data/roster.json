@@ -3,75 +3,40 @@
     "players": [
       {
         "id": "mlbb-1",
-        "jersey": "07",
-        "ign": "ReaperX",
-        "name": "Somchai Vongsa",
-        "role": { "en": "Jungler", "lo": "ຈັງເກີ" },
-        "description": {
-          "en": "Aggressive early-game jungler with a deadly objective sense.",
-          "lo": "ຈັງເກີສາຍບຸກ ທີ່ຍຶດເປົ້າໝາຍໄດ້ດີ."
-        },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "ign": "2EZ4LEXXY",
+        "role": { "en": "Jungle", "lo": "ຈັງເກີ" },
+        "socials": { "facebook": "#", "instagram": "#" }
       },
       {
         "id": "mlbb-2",
-        "jersey": "01",
-        "ign": "SoulKeeper",
-        "name": "Khamla Insixiengmay",
-        "role": { "en": "Roamer", "lo": "ໂຣມເມີ" },
-        "description": {
-          "en": "Shot-calling roamer who sets up every team fight.",
-          "lo": "ໂຣມເມີຜູ້ສັ່ງການ ຈັດວາງທຸກການປະທະ."
-        },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "ign": "J4ZBIN",
+        "role": { "en": "Roam", "lo": "ໂຣມ" },
+        "socials": { "facebook": "#", "instagram": "#" }
       },
       {
         "id": "mlbb-3",
-        "jersey": "10",
-        "ign": "GoldGhost",
-        "name": "Bounmy Soukan",
-        "role": { "en": "Gold Laner", "lo": "ໂກລເລນ" },
-        "description": {
-          "en": "Hyper-carry marksman with insane late-game scaling.",
-          "lo": "ນັກຍິງສາຍແຄຣີ ທີ່ແຮງຂຶ້ນເລື້ອຍໆໃນເກມຍາວ."
-        },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "ign": "I DID",
+        "role": { "en": "Mid Lane", "lo": "ມິດເລນ" },
+        "socials": { "facebook": "#", "instagram": "#" }
       },
       {
         "id": "mlbb-4",
-        "jersey": "22",
-        "ign": "Mystveil",
-        "name": "Phetsamone Lao",
-        "role": { "en": "Mid Laner", "lo": "ມິດເລນ" },
-        "description": {
-          "en": "Burst mage specialist with pinpoint rotations.",
-          "lo": "ຜູ້ຊ່ຽວຊານເມຈ ດາເມຈສູງ ພ້ອມການໝູນທີ່ແມ່ນຍຳ."
-        },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "ign": "JUVIANA",
+        "role": { "en": "Exp Lane", "lo": "ເອັກສ໌ເລນ" },
+        "socials": { "facebook": "#", "instagram": "#" }
       },
       {
         "id": "mlbb-5",
-        "jersey": "05",
-        "ign": "IronTomb",
-        "name": "Vilaysack Phomma",
-        "role": { "en": "Exp Laner", "lo": "ເອັກສ໌ເລນ" },
-        "description": {
-          "en": "Unbreakable side-lane tank and split-push threat.",
-          "lo": "ແທງເລນຂ້າງທີ່ແຂງແກ່ນ ແລະ ເປັນໄພຈາກການ split push."
-        },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "ign": "NOMED",
+        "role": { "en": "Gold Lane", "lo": "ໂກລເລນ" },
+        "socials": { "facebook": "#", "instagram": "#" }
       },
       {
         "id": "mlbb-6",
-        "jersey": "13",
-        "ign": "Wraith",
-        "name": "Anousone Keo",
-        "role": { "en": "Substitute", "lo": "ນັກກີລາສຳຮອງ" },
-        "description": {
-          "en": "Flex substitute comfortable across multiple roles.",
-          "lo": "ນັກກີລາສຳຮອງທີ່ຫຼິ້ນໄດ້ຫຼາຍຕຳແໜ່ງ."
-        },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "ign": "KHAMMY",
+        "role": { "en": "Gold Lane", "lo": "ໂກລເລນ" },
+        "sub": true,
+        "socials": { "facebook": "#", "instagram": "#" }
       }
     ]
   },

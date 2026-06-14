@@ -8,19 +8,29 @@
     "join_community": { "en": "JOIN COMMUNITY", "lo": "ເຂົ້າຮ່ວມຊຸມຊົນ" }
   },
   "hero": {
+    "kicker": {
+      "en": "LAO PDR · MLBB / eFOOTBALL",
+      "lo": "ສປປ ລາວ · MLBB / eFOOTBALL"
+    },
     "tagline": {
-      "en": "FROM LAO PDR — WE HAUNT THE META",
-      "lo": "ຈາກ ສປປລາວ — ພວກເຮົາຄອງເກມ"
+      "en": "WE HAUNT THE",
+      "lo": "ພວກເຮົາ"
+    },
+    "tagline_accent": {
+      "en": "META",
+      "lo": "ຄອງເກມ"
     },
     "subtitle": {
       "en": "Competing in Mobile Legends: Bang Bang & eFootball",
       "lo": "ແຂ່ງຂັນໃນ Mobile Legends: Bang Bang ແລະ eFootball"
     },
     "btn_roster": { "en": "VIEW ROSTER", "lo": "ເບິ່ງນັກກີລາ" },
-    "btn_follow": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" }
+    "btn_follow": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" },
+    "until_kickoff": { "en": "Until kickoff", "lo": "ກ່ອນເລີ່ມ" }
   },
   "sections": {
     "latest_news": { "en": "LATEST NEWS", "lo": "ຂ່າວຫຼ້າສຸດ" },
+    "news_kicker": { "en": "TEAM DISPATCHES", "lo": "ຂ່າວສານຈາກທີມ" },
     "our_roster": { "en": "OUR ROSTER", "lo": "ທີມງານຂອງເຮົາ" },
     "match_results": { "en": "MATCH RESULTS", "lo": "ຜົນການແຂ່ງ" },
     "our_partners": { "en": "OUR PARTNERS", "lo": "ຄູ່ຮ່ວມງານ" },
@@ -42,7 +52,9 @@
     "intro": {
       "en": "Meet the players who carry the reaper's banner.",
       "lo": "ພົບກັບນັກກີລາຜູ້ຖືທຸງຂອງທີມພວກເຮົາ."
-    }
+    },
+    "kicker": { "en": "THE LINEUP", "lo": "ລາຍຊື່ນັກກີລາ" },
+    "staff_kicker": { "en": "BEHIND THE TEAM", "lo": "ເບື້ອງຫຼັງທີມ" }
   },
   "matches": {
     "filter_all": { "en": "ALL", "lo": "ທັງໝົດ" },
@@ -61,7 +73,13 @@
     "placement": { "en": "Placement", "lo": "ອັນດັບ" },
     "prize": { "en": "Prize", "lo": "ລາງວັນ" },
     "season": { "en": "Season", "lo": "ລະດູການ" },
-    "no_results": { "en": "No matches found for this filter.", "lo": "ບໍ່ພົບການແຂ່ງຂັນສຳລັບການກັ່ນຕອງນີ້." }
+    "no_results": { "en": "No matches found for this filter.", "lo": "ບໍ່ພົບການແຂ່ງຂັນສຳລັບການກັ່ນຕອງນີ້." },
+    "kicker": { "en": "THE RECORD", "lo": "ສະຖິຕິການແຂ່ງ" },
+    "intro": { "en": "Every battle the reapers have fought.", "lo": "ທຸກສະໜາມທີ່ທີມໄດ້ລົງແຂ່ງ." },
+    "draws": { "en": "DRAWS", "lo": "ສະເໝີ" },
+    "winrate": { "en": "WIN RATE", "lo": "ອັດຕາຊະນະ" },
+    "history_kicker": { "en": "TROPHY ROOM", "lo": "ຫ້ອງລາງວັນ" },
+    "vod_soon": { "en": "VOD SOON", "lo": "ໄວໆນີ້" }
   },
   "sponsors": {
     "hero_title": { "en": "PARTNER WITH NIIGHTMARE", "lo": "ຮ່ວມເປັນຄູ່ຮ່ວມງານກັບ NIIGHTMARE" },

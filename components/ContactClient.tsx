@@ -14,8 +14,10 @@ import site from "@/data/site.json";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
+// text-base (16px) keeps iOS from auto-zooming on focus; min-h-[44px] meets the
+// mobile touch-target minimum.
 const inputClass =
-  "w-full border border-edge bg-void/60 px-4 py-3 text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-primary focus:shadow-glow-soft";
+  "w-full border border-edge bg-void/60 px-4 py-3 text-base min-h-[44px] text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-primary focus:shadow-glow-soft";
 
 export default function ContactClient() {
   const { t } = useLanguage();
@@ -107,7 +109,7 @@ export default function ContactClient() {
                 href={site.mediaKitUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover-glow mt-4 inline-flex items-center gap-2 border border-primary px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-text-primary hover:bg-primary/15"
+                className="hover-glow mt-4 inline-flex min-h-[44px] items-center gap-2 border border-primary px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-text-primary hover:bg-primary/15"
               >
                 {t("contact.mediakit_btn")}
                 <ArrowRightIcon size={16} />

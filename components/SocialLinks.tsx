@@ -1,5 +1,5 @@
 import React from "react";
-import { FacebookIcon, TiktokIcon, YoutubeIcon } from "@/components/Icons";
+import { FacebookIcon, InstagramIcon, TiktokIcon, YoutubeIcon } from "@/components/Icons";
 import type { Socials } from "@/lib/types";
 
 interface SocialLinksProps {
@@ -12,6 +12,7 @@ export default function SocialLinks({ socials, size = 18, className = "" }: Soci
   const items: { key: keyof Socials; label: string; Icon: typeof YoutubeIcon }[] = [
     { key: "youtube", label: "YouTube", Icon: YoutubeIcon },
     { key: "facebook", label: "Facebook", Icon: FacebookIcon },
+    { key: "instagram", label: "Instagram", Icon: InstagramIcon },
     { key: "tiktok", label: "TikTok", Icon: TiktokIcon },
   ];
 
@@ -25,7 +26,7 @@ export default function SocialLinks({ socials, size = 18, className = "" }: Soci
             target="_blank"
             rel="noopener noreferrer"
             aria-label={label}
-            className="hover-glow grid h-8 w-8 place-items-center border border-edge bg-void/60 text-text-muted hover:text-accent"
+            className="hover-glow grid h-11 w-11 place-items-center border border-edge bg-crypt text-ash transition-colors hover:text-glow"
           >
             <Icon size={size} />
           </a>

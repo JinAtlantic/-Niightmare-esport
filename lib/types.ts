@@ -8,6 +8,7 @@ export interface Bilingual {
 export interface Socials {
   youtube?: string;
   facebook?: string;
+  instagram?: string;
   tiktok?: string;
 }
 
@@ -22,11 +23,14 @@ export interface NewsArticle {
 
 export interface Player {
   id: string;
-  jersey: string;
+  /** Optional jersey number. When absent the card falls back to an IGN monogram. */
+  jersey?: string;
   ign: string;
   name?: string;
   role: Bilingual;
   description?: Bilingual;
+  /** Marks a substitute player (shows a SUB badge). */
+  sub?: boolean;
   socials: Socials;
 }
 
