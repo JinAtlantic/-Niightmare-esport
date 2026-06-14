@@ -161,6 +161,16 @@ export default function RosterEditor() {
     patchPlayer(game, i, { socials });
   };
 
+  const patchStaff = (i: number, patch: Partial<StaffMember>) =>
+    setData({ ...data, staff: data.staff.map((x, idx) => (idx === i ? { ...x, ...patch } : x)) });
+  const setStaffSocial = (i: number, key: keyof StaffMember["socials"], val: string) => {
+    const socials = { ...data.staff[i].socials };
+    const v = val.trim();
+    if (!v || v === "#") delete socials[key];
+    else socials[key] = v;
+    patchStaff(i, { socials });
+  };
+
   const sectionProps = (game: GameId) => ({
     players: data[game].players,
     onAdd: () => setPlayers(game, [...data[game].players, emptyPlayer(game)]),
@@ -198,7 +208,7 @@ export default function RosterEditor() {
             onClick={() =>
               setData({
                 ...data,
-                staff: [...data.staff, { id: uid("staff"), ign: "", role: { en: "", lo: "" }, socials: {} }],
+                staff: [...data.staff, { id: uid("staff"), name: "", role: { en: "", lo: "" }, socials: {} }],
               })
             }
           >
@@ -209,32 +219,55 @@ export default function RosterEditor() {
           {data.staff.map((s, i) => (
             <Card key={s.id}>
               <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="font-mono text-xs text-spectre">{s.ign || "—"}</span>
+                <span className="font-mono text-xs text-spectre">{s.name || "—"}</span>
                 <Button variant="danger" onClick={() => setData({ ...data, staff: data.staff.filter((_, idx) => idx !== i) })}>
                   ลบ
                 </Button>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <TextField
-                  label="ชื่อ/ตำแหน่งเล่น"
-                  value={s.ign}
-                  onChange={(v) => setData({ ...data, staff: data.staff.map((x, idx) => (idx === i ? { ...x, ign: v } : x)) })}
-                />
-                <TextField
-                  label="ชื่อจริง (ไม่บังคับ)"
+                  label="ชื่อจริง"
                   value={s.name ?? ""}
-                  onChange={(v) =>
-                    setData({ ...data, staff: data.staff.map((x, idx) => (idx === i ? { ...x, name: v || undefined } : x)) })
-                  }
+                  onChange={(v) => patchStaff(i, { name: v })}
                 />
                 <div className="md:col-span-2">
                   <BilingualField
-                    label="บทบาท"
+                    label="ตำแหน่ง"
                     value={s.role}
-                    onChange={(v) =>
-                      setData({ ...data, staff: data.staff.map((x, idx) => (idx === i ? { ...x, role: v } : x)) })
-                    }
+                    onChange={(v) => patchStaff(i, { role: v })}
                   />
+                </div>
+                <div className="md:col-span-2">
+                  <ImageField
+                    label="รูปทีมงาน"
+                    value={s.photo}
+                    folder="staff"
+                    onChange={(path) => patchStaff(i, { photo: path || undefined })}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label>ช่องทางติดต่อ (วางลิงก์เฉพาะที่มี — เว้นว่าง = ไม่โชว์)</Label>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {([
+                      ["whatsapp", "WhatsApp"],
+                      ["facebook", "Facebook"],
+                      ["instagram", "Instagram"],
+                      ["tiktok", "TikTok"],
+                      ["youtube", "YouTube"],
+                    ] as const).map(([k, label]) => (
+                      <label key={k} className="flex items-center gap-2">
+                        <span className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
+                          {label}
+                        </span>
+                        <input
+                          className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
+                          placeholder="https://…"
+                          value={socialValue(s.socials[k])}
+                          onChange={(e) => setStaffSocial(i, k, e.target.value)}
+                        />
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             </Card>

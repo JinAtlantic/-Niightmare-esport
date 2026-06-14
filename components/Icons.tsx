@@ -62,6 +62,19 @@ export function DiscordIcon(props: IconProps) {
   );
 }
 
+export function WhatsappIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 20l1.4-4A7.6 7.6 0 1 1 8.2 18.8L4 20z" />
+      <path
+        d="M9.2 8.6c-.2 0-.5 0-.7.3-.3.3-.9.8-.9 2s.9 2.3 1 2.5c.2.2 1.7 2.7 4.3 3.7 2.1.8 2.5.6 3 .6.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-1.7-.8c-.2-.1-.4-.1-.6.1l-.6.7c-.1.2-.3.2-.5.1-.7-.3-1.5-.8-2.2-1.7-.2-.3 0-.5.1-.6l.4-.5c.1-.2.1-.3 0-.5l-.7-1.7c-.1-.4-.3-.4-.5-.4z"
+        fill="currentColor"
+        stroke="none"
+      />
+    </svg>
+  );
+}
+
 export function MailIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

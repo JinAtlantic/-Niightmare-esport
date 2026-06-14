@@ -6,6 +6,7 @@ export interface Bilingual {
 }
 
 export interface Socials {
+  whatsapp?: string;
   youtube?: string;
   facebook?: string;
   instagram?: string;
@@ -38,9 +39,12 @@ export interface Player {
 
 export interface StaffMember {
   id: string;
-  ign: string;
+  /** Optional handle/nickname. The card shows the real name when present. */
+  ign?: string;
   name?: string;
   role: Bilingual;
+  /** Optional staff photo (e.g. "/staff/coach.png"). Falls back to a monogram. */
+  photo?: string;
   socials: Socials;
 }
 

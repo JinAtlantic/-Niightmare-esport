@@ -186,8 +186,8 @@ export function ImageField({
 }: {
   label: string;
   value?: string;
-  /** Upload target subfolder under /public (e.g. "teams" or "players"). */
-  folder: "teams" | "players";
+  /** Upload target subfolder under /public (e.g. "teams", "players", "staff"). */
+  folder: "teams" | "players" | "staff";
   onChange: (path: string) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);

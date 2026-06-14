@@ -1,5 +1,5 @@
 import React from "react";
-import { FacebookIcon, InstagramIcon, TiktokIcon, YoutubeIcon } from "@/components/Icons";
+import { FacebookIcon, InstagramIcon, TiktokIcon, WhatsappIcon, YoutubeIcon } from "@/components/Icons";
 import type { Socials } from "@/lib/types";
 
 interface SocialLinksProps {
@@ -13,10 +13,11 @@ interface SocialLinksProps {
 export default function SocialLinks({ socials, size = 18, className = "", compact = false }: SocialLinksProps) {
   const box = compact ? "h-8 w-8" : "h-11 w-11";
   const items: { key: keyof Socials; label: string; Icon: typeof YoutubeIcon }[] = [
-    { key: "youtube", label: "YouTube", Icon: YoutubeIcon },
+    { key: "whatsapp", label: "WhatsApp", Icon: WhatsappIcon },
     { key: "facebook", label: "Facebook", Icon: FacebookIcon },
     { key: "instagram", label: "Instagram", Icon: InstagramIcon },
     { key: "tiktok", label: "TikTok", Icon: TiktokIcon },
+    { key: "youtube", label: "YouTube", Icon: YoutubeIcon },
   ];
 
   // Only render an icon when there is a real link. Empty values and the "#"

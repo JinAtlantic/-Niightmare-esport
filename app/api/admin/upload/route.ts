@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Upload targets → subfolder under /public. */
-const FOLDERS = new Set(["teams", "players"]);
+const FOLDERS = new Set(["teams", "players", "staff"]);
 const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 const EXT: Record<string, string> = {
   "image/png": "png",
