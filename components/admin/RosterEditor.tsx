@@ -37,6 +37,100 @@ function emptyPlayer(game: GameId): Player {
   };
 }
 
+/**
+ * A roster section for one game. Defined at module top-level (NOT inside
+ * RosterEditor) so its component identity stays stable across re-renders —
+ * otherwise React remounts the inputs on every keystroke, losing focus and
+ * jumping the scroll position.
+ */
+function PlayerList({
+  title,
+  players,
+  onAdd,
+  onMove,
+  onDelete,
+  onPatch,
+  onSocial,
+}: {
+  title: string;
+  players: Player[];
+  onAdd: () => void;
+  onMove: (i: number, dir: -1 | 1) => void;
+  onDelete: (i: number) => void;
+  onPatch: (i: number, patch: Partial<Player>) => void;
+  onSocial: (i: number, key: keyof Player["socials"], val: string) => void;
+}) {
+  return (
+    <section>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{title}</h2>
+        <Button onClick={onAdd}>+ เพิ่มนักแข่ง</Button>
+      </div>
+      <div className="space-y-4">
+        {players.map((p, i) => (
+          <Card key={p.id}>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-spectre">{p.ign || "—"}</span>
+              <div className="flex items-center gap-1.5">
+                <Button onClick={() => onMove(i, -1)}>↑</Button>
+                <Button onClick={() => onMove(i, 1)}>↓</Button>
+                <Button variant="danger" onClick={() => onDelete(i)}>
+                  ลบ
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <TextField label="IGN (ชื่อในเกม)" value={p.ign} onChange={(v) => onPatch(i, { ign: v })} />
+              <TextField
+                label="ชื่อจริง (ไม่บังคับ)"
+                value={p.name ?? ""}
+                onChange={(v) => onPatch(i, { name: v || undefined })}
+              />
+              <div className="md:col-span-2">
+                <BilingualField label="ตำแหน่ง" value={p.role} onChange={(v) => onPatch(i, { role: v })} />
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 font-mono text-xs text-ash">
+                  <input
+                    type="checkbox"
+                    checked={!!p.sub}
+                    onChange={(e) => onPatch(i, { sub: e.target.checked || undefined })}
+                    className="h-4 w-4 accent-amethyst"
+                  />
+                  ตัวสำรอง (Sub)
+                </label>
+              </div>
+              <div className="md:col-span-2">
+                <ImageField
+                  label="รูปนักแข่ง"
+                  value={p.photo}
+                  folder="players"
+                  onChange={(path) => onPatch(i, { photo: path || undefined })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label>โซเชียล (ลิงก์ — เว้นว่างได้)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["facebook", "instagram", "youtube", "tiktok"] as const).map((k) => (
+                    <input
+                      key={k}
+                      className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
+                      placeholder={k}
+                      value={p.socials[k] ?? ""}
+                      onChange={(e) => onSocial(i, k, e.target.value)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function RosterEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<RosterFile>("roster");
 
@@ -47,92 +141,19 @@ export default function RosterEditor() {
     setData({ ...data, [game]: { players: next } } as RosterFile);
   const patchPlayer = (game: GameId, i: number, patch: Partial<Player>) =>
     setPlayers(game, data[game].players.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
-
   const setSocial = (game: GameId, i: number, key: keyof Player["socials"], val: string) => {
     const p = data[game].players[i];
     patchPlayer(game, i, { socials: { ...p.socials, [key]: val } });
   };
 
-  function PlayerList({ game, title }: { game: GameId; title: string }) {
-    const players = data![game].players;
-    return (
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{title}</h2>
-          <Button onClick={() => setPlayers(game, [...players, emptyPlayer(game)])}>+ เพิ่มนักแข่ง</Button>
-        </div>
-        <div className="space-y-4">
-          {players.map((p, i) => (
-            <Card key={p.id}>
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="font-mono text-xs text-spectre">{p.ign || "—"}</span>
-                <div className="flex items-center gap-1.5">
-                  <Button onClick={() => setPlayers(game, move(players, i, -1))}>↑</Button>
-                  <Button onClick={() => setPlayers(game, move(players, i, 1))}>↓</Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => setPlayers(game, players.filter((_, idx) => idx !== i))}
-                  >
-                    ลบ
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-2">
-                <TextField label="IGN (ชื่อในเกม)" value={p.ign} onChange={(v) => patchPlayer(game, i, { ign: v })} />
-                <TextField
-                  label="ชื่อจริง (ไม่บังคับ)"
-                  value={p.name ?? ""}
-                  onChange={(v) => patchPlayer(game, i, { name: v || undefined })}
-                />
-                <div className="md:col-span-2">
-                  <BilingualField label="ตำแหน่ง" value={p.role} onChange={(v) => patchPlayer(game, i, { role: v })} />
-                </div>
-                <TextField
-                  label="เบอร์เสื้อ (ไม่บังคับ)"
-                  value={p.jersey ?? ""}
-                  onChange={(v) => patchPlayer(game, i, { jersey: v || undefined })}
-                />
-                <div className="flex items-end">
-                  <label className="flex items-center gap-2 font-mono text-xs text-ash">
-                    <input
-                      type="checkbox"
-                      checked={!!p.sub}
-                      onChange={(e) => patchPlayer(game, i, { sub: e.target.checked || undefined })}
-                      className="h-4 w-4 accent-amethyst"
-                    />
-                    ตัวสำรอง (Sub)
-                  </label>
-                </div>
-                <div className="md:col-span-2">
-                  <ImageField
-                    label="รูปนักแข่ง"
-                    value={p.photo}
-                    folder="players"
-                    onChange={(path) => patchPlayer(game, i, { photo: path || undefined })}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label>โซเชียล (ลิงก์ — เว้นว่างได้)</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["facebook", "instagram", "youtube", "tiktok"] as const).map((k) => (
-                      <input
-                        key={k}
-                        className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
-                        placeholder={k}
-                        value={p.socials[k] ?? ""}
-                        onChange={(e) => setSocial(game, i, k, e.target.value)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </section>
-    );
-  }
+  const sectionProps = (game: GameId) => ({
+    players: data[game].players,
+    onAdd: () => setPlayers(game, [...data[game].players, emptyPlayer(game)]),
+    onMove: (i: number, dir: -1 | 1) => setPlayers(game, move(data[game].players, i, dir)),
+    onDelete: (i: number) => setPlayers(game, data[game].players.filter((_, idx) => idx !== i)),
+    onPatch: (i: number, patch: Partial<Player>) => patchPlayer(game, i, patch),
+    onSocial: (i: number, key: keyof Player["socials"], val: string) => setSocial(game, i, key, val),
+  });
 
   return (
     <div className="space-y-10">
@@ -151,8 +172,8 @@ export default function RosterEditor() {
         </div>
       </div>
 
-      <PlayerList game="mlbb" title="ทีม MLBB" />
-      <PlayerList game="efootball" title="ทีม eFootball" />
+      <PlayerList title="ทีม MLBB" {...sectionProps("mlbb")} />
+      <PlayerList title="ทีม eFootball" {...sectionProps("efootball")} />
 
       {/* staff */}
       <section>
