@@ -42,8 +42,10 @@ export default function RosterClient() {
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+        <SectionLabel>{t("roster.lineup_label")}</SectionLabel>
+
         {/* Division tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-1 border-b border-edge">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-1 border-b border-edge">
           {tabs.map(({ id, labelKey, Icon, count }) => {
             const active = division === id;
             return (
