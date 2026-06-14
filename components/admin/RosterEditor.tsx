@@ -33,9 +33,12 @@ function emptyPlayer(game: GameId): Player {
     id: uid(game === "mlbb" ? "mlbb" : "efb"),
     ign: "",
     role: { en: "", lo: "" },
-    socials: { facebook: "#" },
+    socials: {},
   };
 }
+
+/** A stored value counts as "set" only if it is non-empty and not the "#" placeholder. */
+const socialValue = (v?: string) => (v && v.trim() && v.trim() !== "#" ? v : "");
 
 /**
  * A roster section for one game. Defined at module top-level (NOT inside
@@ -110,16 +113,25 @@ function PlayerList({
                 />
               </div>
               <div className="md:col-span-2">
-                <Label>โซเชียล (ลิงก์ — เว้นว่างได้)</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["facebook", "instagram", "youtube", "tiktok"] as const).map((k) => (
-                    <input
-                      key={k}
-                      className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
-                      placeholder={k}
-                      value={p.socials[k] ?? ""}
-                      onChange={(e) => onSocial(i, k, e.target.value)}
-                    />
+                <Label>โซเชียล — วางลิงก์เฉพาะที่นักแข่งคนนี้ใช้ (เว้นว่าง = ไม่โชว์ไอคอน)</Label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {([
+                    ["facebook", "Facebook"],
+                    ["instagram", "Instagram"],
+                    ["tiktok", "TikTok"],
+                    ["youtube", "YouTube"],
+                  ] as const).map(([k, label]) => (
+                    <label key={k} className="flex items-center gap-2">
+                      <span className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
+                        {label}
+                      </span>
+                      <input
+                        className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
+                        placeholder="https://…"
+                        value={socialValue(p.socials[k])}
+                        onChange={(e) => onSocial(i, k, e.target.value)}
+                      />
+                    </label>
                   ))}
                 </div>
               </div>
@@ -143,7 +155,11 @@ export default function RosterEditor() {
     setPlayers(game, data[game].players.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
   const setSocial = (game: GameId, i: number, key: keyof Player["socials"], val: string) => {
     const p = data[game].players[i];
-    patchPlayer(game, i, { socials: { ...p.socials, [key]: val } });
+    const socials = { ...p.socials };
+    const v = val.trim();
+    if (!v || v === "#") delete socials[key];
+    else socials[key] = v;
+    patchPlayer(game, i, { socials });
   };
 
   const sectionProps = (game: GameId) => ({

@@ -16,22 +16,29 @@ export default function SocialLinks({ socials, size = 18, className = "" }: Soci
     { key: "tiktok", label: "TikTok", Icon: TiktokIcon },
   ];
 
+  // Only render an icon when there is a real link. Empty values and the "#"
+  // placeholder are treated as "not set" and hidden.
+  const visible = items.filter(({ key }) => {
+    const link = socials[key]?.trim();
+    return link && link !== "#";
+  });
+
+  if (visible.length === 0) return null;
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {items.map(({ key, label, Icon }) =>
-        socials[key] ? (
-          <a
-            key={key}
-            href={socials[key]}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={label}
-            className="hover-glow grid h-11 w-11 place-items-center border border-edge bg-crypt text-ash transition-colors hover:text-glow"
-          >
-            <Icon size={size} />
-          </a>
-        ) : null
-      )}
+      {visible.map(({ key, label, Icon }) => (
+        <a
+          key={key}
+          href={socials[key]}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={label}
+          className="hover-glow grid h-11 w-11 place-items-center border border-edge bg-crypt text-ash transition-colors hover:text-glow"
+        >
+          <Icon size={size} />
+        </a>
+      ))}
     </div>
   );
 }

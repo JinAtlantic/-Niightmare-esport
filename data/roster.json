@@ -4,39 +4,57 @@
       {
         "id": "mlbb-1",
         "ign": "2EZ4LEXXY",
-        "role": { "en": "Jungle", "lo": "ຈັງເກີ" },
-        "socials": { "facebook": "#", "instagram": "#" }
+        "role": {
+          "en": "Jungle",
+          "lo": "ຈັງເກີ"
+        },
+        "socials": {}
       },
       {
         "id": "mlbb-2",
         "ign": "J4ZBIN",
-        "role": { "en": "Roam", "lo": "ໂຣມ" },
-        "socials": { "facebook": "#", "instagram": "#" }
+        "role": {
+          "en": "Roam",
+          "lo": "ໂຣມ"
+        },
+        "socials": {}
       },
       {
         "id": "mlbb-3",
         "ign": "I DID",
-        "role": { "en": "Mid Lane", "lo": "ມິດເລນ" },
-        "socials": { "facebook": "#", "instagram": "#" }
+        "role": {
+          "en": "Mid Lane",
+          "lo": "ມິດເລນ"
+        },
+        "socials": {}
       },
       {
         "id": "mlbb-4",
         "ign": "JUVIANA",
-        "role": { "en": "Exp Lane", "lo": "ເອັກສ໌ເລນ" },
-        "socials": { "facebook": "#", "instagram": "#" }
+        "role": {
+          "en": "Exp Lane",
+          "lo": "ເອັກສ໌ເລນ"
+        },
+        "socials": {}
       },
       {
         "id": "mlbb-5",
         "ign": "NOMED",
-        "role": { "en": "Gold Lane", "lo": "ໂກລເລນ" },
-        "socials": { "facebook": "#", "instagram": "#" }
+        "role": {
+          "en": "Gold Lane",
+          "lo": "ໂກລເລນ"
+        },
+        "socials": {}
       },
       {
         "id": "mlbb-6",
         "ign": "KHAMMY",
-        "role": { "en": "Gold Lane", "lo": "ໂກລເລນ" },
+        "role": {
+          "en": "Gold Lane",
+          "lo": "ໂກລເລນ"
+        },
         "sub": true,
-        "socials": { "facebook": "#", "instagram": "#" }
+        "socials": {}
       }
     ]
   },
@@ -46,67 +64,85 @@
         "id": "efb-1",
         "ign": "PhantomLAO",
         "name": "Thongdy Sisavath",
-        "role": { "en": "Forward", "lo": "ກອງໜ້າ" },
+        "role": {
+          "en": "Forward",
+          "lo": "ກອງໜ້າ"
+        },
         "description": {
           "en": "Clinical finisher with lightning-fast counter-attacks.",
           "lo": "ກອງໜ້າຈົບສະກໍແມ່ນຍຳ ພ້ອມການສວນກັບໄວ."
         },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "socials": {}
       },
       {
         "id": "efb-2",
         "ign": "NightStriker",
         "name": "Souksavanh Dao",
-        "role": { "en": "Forward", "lo": "ກອງໜ້າ" },
+        "role": {
+          "en": "Forward",
+          "lo": "ກອງໜ້າ"
+        },
         "description": {
           "en": "Pacey winger who stretches every defensive line.",
           "lo": "ປີກຄວາມໄວສູງ ທີ່ດຶງແນວຮັບໃຫ້ຖ່າງອອກ."
         },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "socials": {}
       },
       {
         "id": "efb-3",
         "ign": "Maestro",
         "name": "Kaysone Vong",
-        "role": { "en": "Midfielder", "lo": "ກອງກາງ" },
+        "role": {
+          "en": "Midfielder",
+          "lo": "ກອງກາງ"
+        },
         "description": {
           "en": "Creative playmaker controlling the tempo of every match.",
           "lo": "ກອງກາງສ້າງສັນເກມ ຄຸມຈັງຫວະທຸກນັດ."
         },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "socials": {}
       },
       {
         "id": "efb-4",
         "ign": "Anchor",
         "name": "Sengdao Phila",
-        "role": { "en": "Midfielder", "lo": "ກອງກາງ" },
+        "role": {
+          "en": "Midfielder",
+          "lo": "ກອງກາງ"
+        },
         "description": {
           "en": "Defensive midfielder who breaks up every attack.",
           "lo": "ກອງກາງຕົວຮັບ ທີ່ສະກັດທຸກການບຸກ."
         },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "socials": {}
       },
       {
         "id": "efb-5",
         "ign": "GraveWall",
         "name": "Outhai Sengphet",
-        "role": { "en": "Defender", "lo": "ກອງຫຼັງ" },
+        "role": {
+          "en": "Defender",
+          "lo": "ກອງຫຼັງ"
+        },
         "description": {
           "en": "Commanding center-back who reads the game two steps ahead.",
           "lo": "ກອງຫຼັງຕົວກາງຜູ້ນຳ ອ່ານເກມລ່ວງໜ້າສອງກ້າວ."
         },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "socials": {}
       },
       {
         "id": "efb-6",
         "ign": "Sentinel",
         "name": "Bounthavy Sai",
-        "role": { "en": "Defender", "lo": "ກອງຫຼັງ" },
+        "role": {
+          "en": "Defender",
+          "lo": "ກອງຫຼັງ"
+        },
         "description": {
           "en": "Overlapping full-back with relentless stamina.",
           "lo": "ກອງຫຼັງຂ້າງ ທີ່ເຕີມເກມຮຸກ ພ້ອມພະລັງບໍ່ໝົດ."
         },
-        "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+        "socials": {}
       }
     ]
   },
@@ -115,15 +151,21 @@
       "id": "staff-1",
       "ign": "Coach Vong",
       "name": "Khampha Vongphachanh",
-      "role": { "en": "Head Coach", "lo": "ຫົວໜ້າຄູຝຶກ" },
-      "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      "role": {
+        "en": "Head Coach",
+        "lo": "ຫົວໜ້າຄູຝຶກ"
+      },
+      "socials": {}
     },
     {
       "id": "staff-2",
       "ign": "Manager Noy",
       "name": "Manivanh Chanthavong",
-      "role": { "en": "Team Manager", "lo": "ຜູ້ຈັດການທີມ" },
-      "socials": { "youtube": "#", "facebook": "#", "tiktok": "#" }
+      "role": {
+        "en": "Team Manager",
+        "lo": "ຜູ້ຈັດການທີມ"
+      },
+      "socials": {}
     }
   ]
 }
