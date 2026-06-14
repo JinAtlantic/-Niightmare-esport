@@ -6,6 +6,14 @@ export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "niightmare2025";
 const SECRET = process.env.ADMIN_SECRET || "niightmare-dev-secret-change-me";
 
 export const COOKIE_NAME = "nm_admin";
+
+/**
+ * The admin is local-first: it writes to the repo's files, which only works on
+ * the local dev server. On Vercel (read-only FS) it can't save, so we disable
+ * it entirely there to avoid exposing a non-functional login. `VERCEL` is set
+ * automatically in Vercel's build/runtime environment.
+ */
+export const adminDisabled = (): boolean => Boolean(process.env.VERCEL);
 /** Session lifetime — 30 days. */
 export const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
 

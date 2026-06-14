@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { ADMIN_PASSWORD, COOKIE_NAME, SESSION_MAX_AGE, makeToken } from "@/lib/adminAuth";
+import { ADMIN_PASSWORD, COOKIE_NAME, SESSION_MAX_AGE, adminDisabled, makeToken } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  if (adminDisabled()) return NextResponse.json({ error: "Not found" }, { status: 404 });
   let password = "";
   try {
     const body = await request.json();

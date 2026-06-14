@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { promises as fs } from "fs";
 import path from "path";
-import { COOKIE_NAME, verifyToken } from "@/lib/adminAuth";
+import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ function slug(name: string): string {
 }
 
 export async function POST(request: Request) {
-  if (!verifyToken(cookies().get(COOKIE_NAME)?.value)) {
+  if (adminDisabled() || !verifyToken(cookies().get(COOKIE_NAME)?.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
