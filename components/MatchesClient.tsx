@@ -7,10 +7,10 @@ import SectionLabel from "@/components/SectionLabel";
 import TournamentAccordion from "@/components/TournamentAccordion";
 import OpponentLogo from "@/components/OpponentLogo";
 import Reveal from "@/components/Reveal";
-import { EfootballIcon, MlbbIcon, PlayIcon } from "@/components/Icons";
+import { PlayIcon } from "@/components/Icons";
 import { formatDate } from "@/lib/format";
 import matchesData from "@/data/matches.json";
-import type { Match, MatchResult, Tournament } from "@/lib/types";
+import type { GameId, Match, MatchResult, Tournament } from "@/lib/types";
 
 const data = matchesData as { matches: Match[]; tournaments: Tournament[] };
 
@@ -30,10 +30,18 @@ const RESULT_KEY: Record<MatchResult, string> = {
   draw: "matches.result_draw",
 };
 
-const RESULT_ACCENT: Record<MatchResult, { blade: string; score: string; badge: string }> = {
-  win: { blade: "bg-win", score: "text-win", badge: "border-win/50 bg-win/10 text-win" },
-  loss: { blade: "bg-loss", score: "text-loss", badge: "border-loss/50 bg-loss/10 text-loss" },
-  draw: { blade: "bg-draw", score: "text-ash", badge: "border-edge bg-crypt2 text-ash" },
+const RESULT_ACCENT: Record<MatchResult, { score: string; badge: string }> = {
+  win: { score: "text-win", badge: "border-win/50 bg-win/10 text-win" },
+  loss: { score: "text-loss", badge: "border-loss/50 bg-loss/10 text-loss" },
+  draw: { score: "text-ash", badge: "border-edge bg-crypt2 text-ash" },
+};
+
+// Left accent blade colored by game type — neon violet for MLBB (MOBA),
+// neon cyan for eFootball (sporty contrast). The result is still conveyed by
+// the score color and the result badge.
+const GAME_BLADE: Record<GameId, string> = {
+  mlbb: "bg-amethyst shadow-[0_0_10px_rgba(168,85,247,0.85)]",
+  efootball: "bg-[#22D3EE] shadow-[0_0_10px_rgba(34,211,238,0.85)]",
 };
 
 function StatsStrip({
@@ -102,23 +110,19 @@ function VodButton({ href }: { href: string | null }) {
 
 function MatchCard({ match }: { match: Match }) {
   const { t, pick, lang } = useLanguage();
-  const GameIcon = match.game === "mlbb" ? MlbbIcon : EfootballIcon;
   const accent = RESULT_ACCENT[match.result];
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
 
   return (
     <article className="hover-glow group relative overflow-hidden border border-edge bg-crypt p-5 pl-6 md:p-6 md:pl-7">
-      {/* result blade */}
-      <span aria-hidden className={`absolute left-0 top-0 h-full w-[3px] ${accent.blade}`} />
+      {/* left accent blade — colored by game type (MLBB = violet, eFootball = cyan) */}
+      <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${GAME_BLADE[match.game]}`} />
 
-      {/* header: game + date | round */}
+      {/* header: date | round */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <GameIcon size={18} className="shrink-0 text-amethyst" />
-          <time className="whitespace-nowrap font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
-            {formatDate(match.date, lang)}
-          </time>
-        </div>
+        <time className="whitespace-nowrap font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
+          {formatDate(match.date, lang)}
+        </time>
         {round && (
           <span className="shrink-0 border border-edge-bright bg-void/40 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre">
             {round}
