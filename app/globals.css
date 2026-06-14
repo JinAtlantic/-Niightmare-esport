@@ -168,6 +168,11 @@ html.lang-lo .keep-latin {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
 }
 
+/* Cyberpunk "sensor" bevel — clips the top-left and bottom-right corners. */
+.clip-esports {
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+}
+
 .hero-slash {
   position: absolute;
   width: 140%;

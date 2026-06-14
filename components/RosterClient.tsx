@@ -76,7 +76,7 @@ export default function RosterClient() {
         </div>
 
         {/* Player grid — re-keyed per division so cards re-enter on switch */}
-        <div key={division} className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div key={division} className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {players.map((player, i) => (
             <Reveal key={player.id} delay={i * 70} className="h-full">
               <PlayerCard player={player} />
