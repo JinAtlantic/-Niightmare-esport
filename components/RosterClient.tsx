@@ -36,9 +36,9 @@ export default function RosterClient() {
   return (
     <>
       <PageHeader
-        kicker={t("roster.kicker")}
         title={t("sections.our_roster")}
         subtitle={t("roster.intro")}
+        subtitleClassName="text-lg font-medium text-spectre md:text-2xl"
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">

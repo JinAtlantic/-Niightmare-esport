@@ -7,6 +7,8 @@ interface PageHeaderProps {
   subtitle?: string;
   /** Optional mono eyebrow shown above the title, with a glowing node. */
   kicker?: string;
+  /** Overrides the subtitle's size/color (layout classes are kept). */
+  subtitleClassName?: string;
 }
 
 /**
@@ -14,7 +16,7 @@ interface PageHeaderProps {
  * disciplined light source rising from below, film grain, an optional mono
  * kicker, the display title with a violet glow, and the scythe-blade divider.
  */
-export default function PageHeader({ title, subtitle, kicker }: PageHeaderProps) {
+export default function PageHeader({ title, subtitle, kicker, subtitleClassName }: PageHeaderProps) {
   return (
     <section className="page-header relative overflow-hidden border-b border-edge">
       <div className="hero-grain" aria-hidden />
@@ -36,7 +38,9 @@ export default function PageHeader({ title, subtitle, kicker }: PageHeaderProps)
 
         {subtitle && (
           <p
-            className="fx-rise mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-ash md:text-base"
+            className={`fx-rise mx-auto mt-5 max-w-2xl leading-relaxed ${
+              subtitleClassName ?? "text-[15px] text-ash md:text-base"
+            }`}
             style={{ animationDelay: "0.16s" }}
           >
             {subtitle}
