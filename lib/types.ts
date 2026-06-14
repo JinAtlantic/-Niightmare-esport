@@ -52,6 +52,8 @@ export interface Match {
   date: string;
   game: GameId;
   tournament: Bilingual;
+  /** Optional stage/round within the tournament (e.g. Group Stage, Grand Final). */
+  round?: Bilingual;
   opponent: string;
   /** Optional path/URL to the opponent's logo (e.g. "/teams/dragon-force.png").
    *  When absent the row falls back to an initials monogram. */

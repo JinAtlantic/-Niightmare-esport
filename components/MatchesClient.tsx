@@ -104,52 +104,68 @@ function MatchCard({ match }: { match: Match }) {
   const { t, pick, lang } = useLanguage();
   const GameIcon = match.game === "mlbb" ? MlbbIcon : EfootballIcon;
   const accent = RESULT_ACCENT[match.result];
+  const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
 
-  // Fixed-width score / badge / VOD columns keep every row in vertical
-  // alignment; the tournament column flexes to absorb the slack.
   return (
-    <article className="hover-glow group relative flex flex-wrap items-center gap-x-3 gap-y-3 overflow-hidden border border-edge bg-crypt p-4 pl-6 md:flex-nowrap md:gap-6">
+    <article className="hover-glow group relative overflow-hidden border border-edge bg-crypt p-5 pl-6 md:p-6 md:pl-7">
       {/* result blade */}
       <span aria-hidden className={`absolute left-0 top-0 h-full w-[3px] ${accent.blade}`} />
 
-      {/* game + date */}
-      <div className="order-1 flex items-center gap-3 md:w-[150px] md:shrink-0">
-        <GameIcon size={20} className="shrink-0 text-amethyst" />
-        <time className="whitespace-nowrap font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
-          {formatDate(match.date, lang)}
-        </time>
+      {/* header: game + date | round */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <GameIcon size={18} className="shrink-0 text-amethyst" />
+          <time className="whitespace-nowrap font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
+            {formatDate(match.date, lang)}
+          </time>
+        </div>
+        {round && (
+          <span className="shrink-0 border border-edge-bright bg-void/40 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre">
+            {round}
+          </span>
+        )}
       </div>
 
-      {/* tournament + opponent */}
-      <div className="order-4 min-w-0 basis-full md:order-none md:basis-auto md:flex-1">
-        <p className="truncate font-display text-sm font-semibold uppercase tracking-[0.06em] text-soul">
-          {pick(match.tournament)}
-        </p>
-        <div className="mt-1 flex items-center gap-2">
-          <OpponentLogo src={match.opponentLogo} name={match.opponent} />
-          <p className="min-w-0 truncate font-mono text-xs text-ash">
-            <span className="text-ash-dim">vs</span>{" "}
-            <span className="keep-latin text-spectre">{match.opponent}</span>
-          </p>
+      {/* tournament name — enlarged */}
+      <p className="mt-3 text-center font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-xl">
+        {pick(match.tournament)}
+      </p>
+
+      {/* head-to-head: (NM logo) NIIGHTMARE · score · opponent (opponent logo)
+          Stacks vertically on mobile (full names) and lays out horizontally
+          with logos on the outer edges from md up. */}
+      <div className="mt-4 flex flex-col gap-3 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
+        {/* NIIGHTMARE side */}
+        <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-start md:gap-3">
+          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={44} />
+          <span className="keep-latin truncate font-display text-base font-bold uppercase leading-tight text-soul md:text-2xl">
+            NIIGHTMARE
+          </span>
+        </div>
+
+        {/* score + result */}
+        <div className="flex flex-col items-center">
+          <span className={`keep-latin font-display text-3xl font-bold tracking-[0.1em] md:text-4xl ${accent.score}`}>
+            {match.score}
+          </span>
+          <span
+            className={`mt-1 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:text-[10px] ${accent.badge}`}
+          >
+            {t(RESULT_KEY[match.result])}
+          </span>
+        </div>
+
+        {/* opponent side */}
+        <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-end md:gap-3">
+          <span className="keep-latin truncate text-center font-display text-base font-bold uppercase leading-tight text-soul md:text-right md:text-2xl">
+            {match.opponent}
+          </span>
+          <OpponentLogo src={match.opponentLogo} name={match.opponent} size={44} />
         </div>
       </div>
 
-      {/* score */}
-      <div
-        className={`keep-latin order-2 ml-auto shrink-0 text-right font-display text-2xl font-bold tracking-[0.12em] md:order-none md:ml-0 md:w-[60px] md:text-center ${accent.score}`}
-      >
-        {match.score}
-      </div>
-
-      {/* result badge */}
-      <span
-        className={`order-3 shrink-0 border px-2.5 py-1 text-center font-mono text-[10px] font-bold uppercase tracking-[0.14em] md:order-none md:w-[92px] ${accent.badge}`}
-      >
-        {t(RESULT_KEY[match.result])}
-      </span>
-
       {/* VOD — always present */}
-      <div className="order-5 basis-full md:order-none md:w-[140px] md:shrink-0 md:basis-auto">
+      <div className="mx-auto mt-4 max-w-xs">
         <VodButton href={match.vod} />
       </div>
     </article>

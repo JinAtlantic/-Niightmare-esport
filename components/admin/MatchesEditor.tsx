@@ -61,6 +61,7 @@ export default function MatchesEditor() {
         date: new Date().toISOString().slice(0, 10),
         game: "mlbb",
         tournament: { en: "", lo: "" },
+        round: { en: "", lo: "" },
         opponent: "",
         score: "0-0",
         result: "win",
@@ -142,6 +143,13 @@ export default function MatchesEditor() {
                     label="ทัวร์นาเมนต์"
                     value={m.tournament}
                     onChange={(v) => patchMatch(i, { tournament: v })}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <BilingualField
+                    label="รอบการแข่งขัน (เช่น รอบแบ่งกลุ่ม / รอบชิง — เว้นว่างได้)"
+                    value={m.round ?? { en: "", lo: "" }}
+                    onChange={(v) => patchMatch(i, { round: v })}
                   />
                 </div>
                 <TextField
