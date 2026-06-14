@@ -34,11 +34,6 @@ export default function StaffCard({ member }: { member: StaffMember }) {
           </div>
         )}
 
-        {/* role badge — top-left with a faint neon-violet glow */}
-        <span className="absolute left-3 top-3 z-10 border border-amethyst/60 bg-amethyst/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-spectre shadow-[0_0_12px_rgba(168,85,247,0.55)] backdrop-blur-sm">
-          Staff
-        </span>
-
         {/* bottom text overlay — dark→violet gradient keeps the name legible */}
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#1A0A2E]/85 to-transparent px-4 pb-4 pt-14">
           <h3 className="keep-latin font-display text-lg font-bold uppercase leading-tight tracking-wide text-soul transition-colors duration-300 group-hover:text-glow md:text-xl">
