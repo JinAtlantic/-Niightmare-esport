@@ -86,9 +86,7 @@ export default function RosterClient() {
 
         {/* Staff & management */}
         <div className="mt-20">
-          <SectionLabel kicker={t("roster.staff_kicker")}>
-            {t("roster.staff_label")}
-          </SectionLabel>
+          <SectionLabel>{t("roster.staff_label")}</SectionLabel>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {roster.staff.map((member, i) => (
               <Reveal key={member.id} delay={i * 90} className="h-full">
