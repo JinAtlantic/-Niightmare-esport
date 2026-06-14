@@ -39,10 +39,15 @@ export default function PlayerCard({ player }: { player: Player }) {
           aria-hidden
           className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.35),transparent_70%)] opacity-70 blur-md transition-opacity duration-300 group-hover:opacity-100"
         />
-        <div className="relative grid h-28 w-28 place-items-center rounded-full border border-amethyst/50 bg-gradient-to-br from-amethyst-deep/60 to-void shadow-[inset_0_0_22px_rgba(168,85,247,0.25)]">
-          <span className="keep-latin font-display text-[1.9rem] font-bold tracking-tight text-soul [text-shadow:0_0_18px_rgba(199,125,255,0.6)]">
-            {monogram}
-          </span>
+        <div className="relative grid h-28 w-28 place-items-center overflow-hidden rounded-full border border-amethyst/50 bg-gradient-to-br from-amethyst-deep/60 to-void shadow-[inset_0_0_22px_rgba(168,85,247,0.25)]">
+          {player.photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={player.photo} alt={player.ign} className="h-full w-full object-cover" />
+          ) : (
+            <span className="keep-latin font-display text-[1.9rem] font-bold tracking-tight text-soul [text-shadow:0_0_18px_rgba(199,125,255,0.6)]">
+              {monogram}
+            </span>
+          )}
         </div>
       </div>
 

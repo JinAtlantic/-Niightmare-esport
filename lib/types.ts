@@ -31,6 +31,8 @@ export interface Player {
   description?: Bilingual;
   /** Marks a substitute player (shows a SUB badge). */
   sub?: boolean;
+  /** Optional player photo (e.g. "/players/phantom.png"). Falls back to a monogram. */
+  photo?: string;
   socials: Socials;
 }
 

@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import Preloader from "@/components/Preloader";
+import Chrome from "@/components/Chrome";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://niightmare.gg"),
@@ -67,10 +65,7 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
-          <Preloader />
-          <Navbar />
-          <main className="min-h-screen pt-16">{children}</main>
-          <Footer />
+          <Chrome>{children}</Chrome>
         </LanguageProvider>
       </body>
     </html>
