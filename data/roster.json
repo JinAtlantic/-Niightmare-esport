@@ -6,9 +6,14 @@
         "ign": "2EZ4LEXXY",
         "role": {
           "en": "Jungle",
-          "lo": "ຈັງເກີ"
+          "lo": "ປ່າ"
         },
-        "socials": {}
+        "socials": {
+          "facebook": "https://www.facebook.com/share/1DyeNbhC6Z/",
+          "instagram": "https://www.instagram.com/lexxyyboiiz?igsh=MTk4Ym5hMWJqZWF1NQ=="
+        },
+        "name": "Mr.kuykuykuy",
+        "photo": "/players/ple-2961-mqdy0g36.jpg"
       },
       {
         "id": "mlbb-2",
@@ -17,14 +22,16 @@
           "en": "Roam",
           "lo": "ໂຣມ"
         },
-        "socials": {}
+        "socials": {
+          "facebook": "https://www.facebook.com/share/1CekQzwg2o/"
+        }
       },
       {
         "id": "mlbb-3",
         "ign": "I DID",
         "role": {
           "en": "Mid Lane",
-          "lo": "ມິດເລນ"
+          "lo": "ເລນກາງ"
         },
         "socials": {}
       },
@@ -33,7 +40,7 @@
         "ign": "JUVIANA",
         "role": {
           "en": "Exp Lane",
-          "lo": "ເອັກສ໌ເລນ"
+          "lo": "ອອຟເລນ"
         },
         "socials": {}
       },
@@ -42,7 +49,7 @@
         "ign": "NOMED",
         "role": {
           "en": "Gold Lane",
-          "lo": "ໂກລເລນ"
+          "lo": "ເລນທອງ"
         },
         "socials": {}
       },
@@ -51,10 +58,24 @@
         "ign": "KHAMMY",
         "role": {
           "en": "Gold Lane",
-          "lo": "ໂກລເລນ"
+          "lo": "ເລນທອງ"
         },
         "sub": true,
-        "socials": {}
+        "socials": {
+          "facebook": "https://www.facebook.com/share/18n8KbuQ1c/"
+        }
+      },
+      {
+        "id": "mlbb-mqdu0zbu910",
+        "ign": "SOSOUL",
+        "role": {
+          "en": "Mid Lane",
+          "lo": "ເລນກາງ"
+        },
+        "socials": {
+          "facebook": "https://www.facebook.com/share/14aLZJ1tgTS/"
+        },
+        "sub": true
       }
     ]
   },
@@ -73,99 +94,34 @@
           "lo": "ກອງໜ້າຈົບສະກໍແມ່ນຍຳ ພ້ອມການສວນກັບໄວ."
         },
         "socials": {}
-      },
-      {
-        "id": "efb-2",
-        "ign": "NightStriker",
-        "name": "Souksavanh Dao",
-        "role": {
-          "en": "Forward",
-          "lo": "ກອງໜ້າ"
-        },
-        "description": {
-          "en": "Pacey winger who stretches every defensive line.",
-          "lo": "ປີກຄວາມໄວສູງ ທີ່ດຶງແນວຮັບໃຫ້ຖ່າງອອກ."
-        },
-        "socials": {}
-      },
-      {
-        "id": "efb-3",
-        "ign": "Maestro",
-        "name": "Kaysone Vong",
-        "role": {
-          "en": "Midfielder",
-          "lo": "ກອງກາງ"
-        },
-        "description": {
-          "en": "Creative playmaker controlling the tempo of every match.",
-          "lo": "ກອງກາງສ້າງສັນເກມ ຄຸມຈັງຫວະທຸກນັດ."
-        },
-        "socials": {}
-      },
-      {
-        "id": "efb-4",
-        "ign": "Anchor",
-        "name": "Sengdao Phila",
-        "role": {
-          "en": "Midfielder",
-          "lo": "ກອງກາງ"
-        },
-        "description": {
-          "en": "Defensive midfielder who breaks up every attack.",
-          "lo": "ກອງກາງຕົວຮັບ ທີ່ສະກັດທຸກການບຸກ."
-        },
-        "socials": {}
-      },
-      {
-        "id": "efb-5",
-        "ign": "GraveWall",
-        "name": "Outhai Sengphet",
-        "role": {
-          "en": "Defender",
-          "lo": "ກອງຫຼັງ"
-        },
-        "description": {
-          "en": "Commanding center-back who reads the game two steps ahead.",
-          "lo": "ກອງຫຼັງຕົວກາງຜູ້ນຳ ອ່ານເກມລ່ວງໜ້າສອງກ້າວ."
-        },
-        "socials": {}
-      },
-      {
-        "id": "efb-6",
-        "ign": "Sentinel",
-        "name": "Bounthavy Sai",
-        "role": {
-          "en": "Defender",
-          "lo": "ກອງຫຼັງ"
-        },
-        "description": {
-          "en": "Overlapping full-back with relentless stamina.",
-          "lo": "ກອງຫຼັງຂ້າງ ທີ່ເຕີມເກມຮຸກ ພ້ອມພະລັງບໍ່ໝົດ."
-        },
-        "socials": {}
       }
     ]
   },
   "staff": [
     {
       "id": "staff-1",
-      "ign": "Coach Vong",
-      "name": "Khampha Vongphachanh",
+      "ign": "Coach V",
+      "name": "V",
       "role": {
-        "en": "Head Coach",
+        "en": "Head Coach MLBB",
         "lo": "ຫົວໜ້າຄູຝຶກ"
       },
       "socials": {}
     },
     {
       "id": "staff-2",
-      "ign": "Manager Noy",
-      "name": "Manivanh Chanthavong",
+      "ign": "Jin",
+      "name": "Mr.Sitthidet Xaysana",
       "role": {
-        "en": "Team Manager",
-        "lo": "ຜູ້ຈັດການທີມ"
+        "en": "Website Developer",
+        "lo": "ນັກພັດທະນາເວັບໄຊ້ທ໌"
       },
-      "socials": {}
+      "socials": {
+        "facebook": "https://www.facebook.com/share/1ENWWNpzQ2/",
+        "instagram": "https://www.instagram.com/just_jinnnn?igsh=MWpzdWFsZW1mbmRvNw==",
+        "whatsapp": "https://wa.me/8562056779011](https://wa.me/8562056779011)"
+      },
+      "photo": "/staff/ple-2961-mqdx6ag7.jpg"
     }
   ]
 }
