@@ -48,8 +48,8 @@
   "roster": {
     "tab_mlbb": { "en": "MOBILE LEGENDS", "lo": "MOBILE LEGENDS" },
     "tab_efootball": { "en": "eFOOTBALL", "lo": "eFOOTBALL" },
-    "lineup_label": { "en": "LINEUP", "lo": "LINEUP" },
-    "staff_label": { "en": "Operations & Management", "lo": "Operations & Management" },
+    "lineup_label": { "en": "LINEUP", "lo": "ນັກກິລາ" },
+    "staff_label": { "en": "Operations & Management", "lo": "ທີມປະຕິບັດງານ ແລະ ບໍລິຫານ" },
     "intro": {
       "en": "Meet the players who carry the reaper's banner",
       "lo": "ພົບກັບເຫຼົ່ານັກຮົບຜູ້ແບກຮັບສັກສີແຫ່ງຍົມມທູດ"
