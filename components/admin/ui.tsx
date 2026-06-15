@@ -10,7 +10,9 @@ import React, { useRef, useState } from "react";
 async function downscaleImage(file: File, maxEdge = 1200, quality = 0.82): Promise<Blob> {
   if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) return file;
   try {
-    const bmp = await createImageBitmap(file);
+    // imageOrientation:'from-image' bakes EXIF rotation in so phone photos
+    // don't end up sideways once the orientation tag is dropped.
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
     const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
     const w = Math.round(bmp.width * scale);
     const h = Math.round(bmp.height * scale);
