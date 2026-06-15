@@ -9,11 +9,13 @@ export const COOKIE_NAME = "nm_admin";
 
 /**
  * The admin is local-first: it writes to the repo's files, which only works on
- * the local dev server. On Vercel (read-only FS) it can't save, so we disable
- * it entirely there to avoid exposing a non-functional login. `VERCEL` is set
- * automatically in Vercel's build/runtime environment.
+ * the local dev server. It is therefore enabled ONLY under `next dev`
+ * (NODE_ENV === "development"); any production build — including Vercel, where
+ * the filesystem is read-only — disables it (the /admin page 404s and the API
+ * routes refuse). Gating on NODE_ENV avoids false-disables from a stray
+ * `VERCEL` env var leaking into a local dev process.
  */
-export const adminDisabled = (): boolean => Boolean(process.env.VERCEL);
+export const adminDisabled = (): boolean => process.env.NODE_ENV !== "development";
 /** Session lifetime — 30 days. */
 export const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
 
