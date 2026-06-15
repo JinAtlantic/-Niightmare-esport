@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { promises as fs } from "fs";
-import path from "path";
+import { put } from "@vercel/blob";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Upload targets → subfolder under /public. */
+/** Upload targets → folder prefix inside the blob store. */
 const FOLDERS = new Set(["teams", "players", "staff"]);
 const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 const EXT: Record<string, string> = {
@@ -18,7 +17,7 @@ const EXT: Record<string, string> = {
   "image/svg+xml": "svg",
 };
 
-/** Slugify a filename base so it is safe and predictable on disk. */
+/** Slugify a filename base so it is safe and predictable. */
 function slug(name: string): string {
   return (
     name
@@ -26,13 +25,21 @@ function slug(name: string): string {
       .replace(/\.[^.]+$/, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
-      .slice(0, 48) || "logo"
+      .slice(0, 48) || "image"
   );
 }
 
 export async function POST(request: Request) {
   if (adminDisabled() || !verifyToken(cookies().get(COOKIE_NAME)?.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) {
+    return NextResponse.json(
+      { error: "Storage not configured (BLOB_READ_WRITE_TOKEN missing)" },
+      { status: 500 }
+    );
   }
 
   let form: FormData;
@@ -60,14 +67,19 @@ export async function POST(request: Request) {
   }
 
   const base = slug((file as File).name);
-  const filename = `${base}-${Date.now().toString(36)}.${ext}`;
-  const dir = path.join(process.cwd(), "public", folder);
+  const pathname = `${folder}/${base}-${Date.now().toString(36)}.${ext}`;
   try {
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, filename), Buffer.from(await file.arrayBuffer()));
+    const blob = await put(pathname, file, {
+      access: "public",
+      contentType: file.type,
+      token,
+      addRandomSuffix: false,
+      cacheControlMaxAge: 31536000, // images are immutable; cache hard
+    });
+    // The stored path is the full public blob URL (works the same as the old
+    // /teams/... local paths in <img src>).
+    return NextResponse.json({ ok: true, path: blob.url });
   } catch {
-    return NextResponse.json({ error: "Could not save file" }, { status: 500 });
+    return NextResponse.json({ error: "Could not upload image" }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, path: `/${folder}/${filename}` });
 }

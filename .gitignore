@@ -33,3 +33,5 @@ next-env.d.ts
 # It is intentionally NOT ignored here.
 
 .vercel
+
+.env*

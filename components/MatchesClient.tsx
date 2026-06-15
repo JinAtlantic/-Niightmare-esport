@@ -9,10 +9,8 @@ import OpponentLogo from "@/components/OpponentLogo";
 import Reveal from "@/components/Reveal";
 import { PlayIcon } from "@/components/Icons";
 import { formatDate } from "@/lib/format";
-import matchesData from "@/data/matches.json";
+import { useContent } from "@/components/ContentContext";
 import type { GameId, Match, MatchResult, Tournament } from "@/lib/types";
-
-const data = matchesData as { matches: Match[]; tournaments: Tournament[] };
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 
@@ -178,6 +176,10 @@ function MatchCard({ match }: { match: Match }) {
 
 export default function MatchesClient() {
   const { t } = useLanguage();
+  const data = useContent().matches as {
+    matches: Match[];
+    tournaments: Tournament[];
+  };
   const [filter, setFilter] = useState<Filter>("all");
 
   const stats = useMemo(() => {
@@ -187,7 +189,7 @@ export default function MatchesClient() {
     const draws = count("draw");
     const total = data.matches.length || 1;
     return { wins, losses, draws, winrate: Math.round((wins / total) * 100) };
-  }, []);
+  }, [data]);
 
   const filtered = useMemo(() => {
     return data.matches.filter((m) => {
@@ -204,7 +206,7 @@ export default function MatchesClient() {
           return true;
       }
     });
-  }, [filter]);
+  }, [filter, data]);
 
   return (
     <>

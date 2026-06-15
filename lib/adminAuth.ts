@@ -1,21 +1,33 @@
 import crypto from "crypto";
 
+// These defaults ship in the public repo, so they must never guard a live
+// admin. Production stays disabled until BOTH are overridden via env vars.
+const DEFAULT_PASSWORD = "niightmare2025";
+const DEFAULT_SECRET = "niightmare-dev-secret-change-me";
+
 /** Admin password — read from env, with a dev fallback so it works out of the box. */
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "niightmare2025";
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || DEFAULT_PASSWORD;
 /** Secret used to sign the session cookie. */
-const SECRET = process.env.ADMIN_SECRET || "niightmare-dev-secret-change-me";
+const SECRET = process.env.ADMIN_SECRET || DEFAULT_SECRET;
 
 export const COOKIE_NAME = "nm_admin";
 
 /**
- * The admin is local-first: it writes to the repo's files, which only works on
- * the local dev server. It is therefore enabled ONLY under `next dev`
- * (NODE_ENV === "development"); any production build — including Vercel, where
- * the filesystem is read-only — disables it (the /admin page 404s and the API
- * routes refuse). Gating on NODE_ENV avoids false-disables from a stray
- * `VERCEL` env var leaking into a local dev process.
+ * The admin now stores content in Vercel Blob, so it can run on the live site.
+ * Gating:
+ *  - Local dev (`next dev`): always enabled for convenience.
+ *  - Production: enabled ONLY when ADMIN_PASSWORD and ADMIN_SECRET are both set
+ *    to non-default values. This guarantees a deploy can never expose the admin
+ *    with the credentials that are public in the repo.
  */
-export const adminDisabled = (): boolean => process.env.NODE_ENV !== "development";
+export const adminDisabled = (): boolean => {
+  if (process.env.NODE_ENV === "development") return false;
+  const securePw =
+    !!process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD !== DEFAULT_PASSWORD;
+  const secureSecret =
+    !!process.env.ADMIN_SECRET && process.env.ADMIN_SECRET !== DEFAULT_SECRET;
+  return !(securePw && secureSecret);
+};
 /** Session lifetime — 30 days. */
 export const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
 

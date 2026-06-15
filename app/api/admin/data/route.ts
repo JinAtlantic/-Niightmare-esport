@@ -1,40 +1,38 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { promises as fs } from "fs";
-import path from "path";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
+import { readSection, writeSection, type ContentKey } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Only these content files may be read/written through the admin API. */
-const ALLOWED = new Set(["matches", "roster", "sponsors", "news", "site"]);
+/** Only these content sections may be read/written through the admin API. */
+const ALLOWED = new Set<ContentKey>(["matches", "roster", "sponsors", "news", "site"]);
 
 function authed(): boolean {
   return !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
 }
 
-function resolveFile(name: string | null): string | null {
-  if (!name || !ALLOWED.has(name)) return null;
-  return path.join(process.cwd(), "data", `${name}.json`);
+function asKey(name: string | null): ContentKey | null {
+  return name && ALLOWED.has(name as ContentKey) ? (name as ContentKey) : null;
 }
 
 export async function GET(request: Request) {
   if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const file = resolveFile(new URL(request.url).searchParams.get("file"));
-  if (!file) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
+  const key = asKey(new URL(request.url).searchParams.get("file"));
+  if (!key) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
   try {
-    const raw = await fs.readFile(file, "utf8");
-    return NextResponse.json(JSON.parse(raw));
+    const data = await readSection(key);
+    return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
   } catch {
-    return NextResponse.json({ error: "Could not read file" }, { status: 500 });
+    return NextResponse.json({ error: "Could not read content" }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const file = resolveFile(new URL(request.url).searchParams.get("file"));
-  if (!file) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
+  const key = asKey(new URL(request.url).searchParams.get("file"));
+  if (!key) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
 
   let data: unknown;
   try {
@@ -47,9 +45,10 @@ export async function PUT(request: Request) {
   }
 
   try {
-    await fs.writeFile(file, JSON.stringify(data, null, 2) + "\n", "utf8");
+    await writeSection(key, data);
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "Could not write file" }, { status: 500 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Could not save content";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

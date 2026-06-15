@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageContext";
 import SectionLabel from "@/components/SectionLabel";
 import NewsCard from "@/components/NewsCard";
 import Reveal from "@/components/Reveal";
 import { ArrowRightIcon } from "@/components/Icons";
 import { formatDate } from "@/lib/format";
-import newsData from "@/data/news.json";
+import { useContent } from "@/components/ContentContext";
 import type { NewsArticle } from "@/lib/types";
 
 // One soft easing curve shared by every transition so the whole interaction
@@ -15,8 +15,8 @@ import type { NewsArticle } from "@/lib/types";
 const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 /** One clickable digest box — title only, expands to full content when open.
- *  The outer grid (1fr→0fr) collapses siblings smoothly, which floats the
- *  opened item up to the top without any jumpy reorder. */
+ *  Lives inside a fixed-height scroll rail, so expanding scrolls the rail
+ *  instead of resizing the page. */
 function DigestItem({
   article,
   open,
@@ -29,7 +29,8 @@ function DigestItem({
   onToggle: () => void;
 }) {
   const { t, pick, lang } = useLanguage();
-  const hasLink = article.link && article.link !== "#";
+  const hasLink = Boolean(article.link && article.link !== "#");
+  const external = hasLink && /^https?:\/\//.test(article.link);
 
   return (
     <div
@@ -107,21 +108,21 @@ function DigestItem({
                 <p className="text-sm leading-relaxed text-ash">
                   {pick(article.excerpt)}
                 </p>
-                <div className="mt-4 flex items-center gap-4">
-                  {hasLink && (
+                {hasLink && (
+                  <div className="mt-4">
                     <a
                       href={article.link}
                       onClick={(e) => e.stopPropagation()}
+                      {...(external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
                       className="inline-flex items-center gap-2 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-amethyst transition-colors hover:text-glow"
                     >
                       {t("common.read_more")}
                       <ArrowRightIcon size={15} />
                     </a>
-                  )}
-                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ash-dim">
-                    ▲ {lang === "lo" ? "ປິດ" : "Close"}
-                  </span>
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -133,9 +134,26 @@ function DigestItem({
 
 export default function NewsSection() {
   const { t } = useLanguage();
-  // Featured on the left; every remaining article fills the scrollable digest.
+  const { news: newsData } = useContent();
+  // The first article is the latest — it stays pinned in the featured slot on
+  // the left; everything else fills the scrollable rail on the right.
   const [featured, ...digest] = newsData.articles as NewsArticle[];
   const [openId, setOpenId] = useState<number | null>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+
+  const toggle = (id: number) =>
+    setOpenId((cur) => {
+      const next = cur === id ? null : id;
+      // On open, snap the rail to the top so the expanded article (which floats
+      // up as siblings collapse) is in view. The rail is fixed-height with
+      // internal scroll, so the page itself never grows or shrinks.
+      if (next !== null) {
+        requestAnimationFrame(() =>
+          railRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+        );
+      }
+      return next;
+    });
 
   return (
     <section id="news" className="news-section mx-auto max-w-7xl px-4 py-24 md:px-6">
@@ -145,24 +163,25 @@ export default function NewsSection() {
         </Reveal>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-12">
-          {/* Featured — the latest dispatch */}
+          {/* Featured — always the latest article, pinned on the left */}
           <Reveal className="lg:col-span-7">
             <NewsCard article={featured} variant="featured" index={1} />
           </Reveal>
 
-          {/* Digest — clickable purple boxes in a scrollable rail (matches the
-              featured card's height on desktop; scroll the mouse to see more) */}
+          {/* Digest — fixed-height scroll rail; expanding an item scrolls inside
+              it rather than resizing the page */}
           <Reveal className="lg:col-span-5" delay={120}>
-            <div className="news-scroll flex flex-col lg:h-full lg:max-h-[600px] lg:overflow-y-auto lg:pr-2.5">
+            <div
+              ref={railRef}
+              className="news-scroll flex h-[460px] flex-col overflow-y-auto pr-2.5 lg:h-[560px]"
+            >
               {digest.map((article) => (
                 <DigestItem
                   key={article.id}
                   article={article}
                   open={openId === article.id}
                   collapsed={openId !== null && openId !== article.id}
-                  onToggle={() =>
-                    setOpenId((cur) => (cur === article.id ? null : article.id))
-                  }
+                  onToggle={() => toggle(article.id)}
                 />
               ))}
             </div>

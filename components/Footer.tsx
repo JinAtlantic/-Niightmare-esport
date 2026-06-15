@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageContext";
 import { DiscordIcon, FacebookIcon, MailIcon, TiktokIcon, YoutubeIcon } from "@/components/Icons";
-import site from "@/data/site.json";
+import { useContent } from "@/components/ContentContext";
 
 const NAV_ITEMS = [
   { href: "/", key: "nav.home" },
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
 
 export default function Footer() {
   const { t } = useLanguage();
+  const { site } = useContent();
 
   const socials = [
     { href: `mailto:${site.contact.email}`, label: "Email", Icon: MailIcon },

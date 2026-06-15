@@ -1,11 +1,46 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { ADMIN_PASSWORD, COOKIE_NAME, SESSION_MAX_AGE, adminDisabled, makeToken } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Best-effort in-memory rate limit. Serverless instances are ephemeral, so this
+// is not bulletproof, but it meaningfully slows password guessing per instance.
+const WINDOW_MS = 10 * 60 * 1000; // 10 min
+const MAX_ATTEMPTS = 8;
+const attempts = new Map<string, { count: number; resetAt: number }>();
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const rec = attempts.get(ip);
+  if (!rec || now > rec.resetAt) {
+    attempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+  rec.count += 1;
+  return rec.count > MAX_ATTEMPTS;
+}
+
+/** Constant-time string compare (hash to a fixed length first). */
+function safeEqual(a: string, b: string): boolean {
+  const ha = crypto.createHash("sha256").update(a).digest();
+  const hb = crypto.createHash("sha256").update(b).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
 export async function POST(request: Request) {
   if (adminDisabled()) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  if (rateLimited(ip)) {
+    return NextResponse.json(
+      { ok: false, error: "ลองมากเกินไป กรุณารอสักครู่แล้วลองใหม่" },
+      { status: 429 }
+    );
+  }
+
   let password = "";
   try {
     const body = await request.json();
@@ -14,13 +49,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Bad request" }, { status: 400 });
   }
 
-  if (password !== ADMIN_PASSWORD) {
+  if (!safeEqual(password, ADMIN_PASSWORD)) {
     return NextResponse.json({ ok: false, error: "รหัสผ่านไม่ถูกต้อง" }, { status: 401 });
   }
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set(COOKIE_NAME, makeToken(), {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE,

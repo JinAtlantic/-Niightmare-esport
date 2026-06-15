@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
+import { ContentProvider } from "@/components/ContentContext";
 import Chrome from "@/components/Chrome";
 
 export const metadata: Metadata = {
@@ -65,7 +66,9 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
-          <Chrome>{children}</Chrome>
+          <ContentProvider>
+            <Chrome>{children}</Chrome>
+          </ContentProvider>
         </LanguageProvider>
       </body>
     </html>

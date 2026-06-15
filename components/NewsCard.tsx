@@ -61,14 +61,17 @@ export default function NewsCard({
   }
 
   const featured = variant === "featured";
+  const hasLink = Boolean(article.link && article.link !== "#");
+  const external = hasLink && /^https?:\/\//.test(article.link);
 
   // ── Featured + default cards — panel with corner cut and top accent ──────
   return (
     <a
-      href={article.link}
+      href={hasLink ? article.link : undefined}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={`hover-glow clip-diagonal group relative flex h-full flex-col overflow-hidden border border-edge bg-crypt ${
         featured ? "p-7 md:p-9" : "p-6"
-      }`}
+      } ${hasLink ? "" : "cursor-default"}`}
     >
       <span
         aria-hidden
@@ -107,17 +110,19 @@ export default function NewsCard({
         {pick(article.excerpt)}
       </p>
 
-      <span
-        className={`relative inline-flex items-center gap-2 self-start font-mono font-semibold uppercase tracking-[0.16em] text-amethyst transition-colors duration-300 group-hover:text-glow ${
-          featured ? "mt-8 text-[13px]" : "mt-5 text-[12px]"
-        }`}
-      >
-        {t("common.read_more")}
-        <ArrowRightIcon
-          size={16}
-          className="transition-transform duration-300 group-hover:translate-x-1.5"
-        />
-      </span>
+      {hasLink && (
+        <span
+          className={`relative inline-flex items-center gap-2 self-start font-mono font-semibold uppercase tracking-[0.16em] text-amethyst transition-colors duration-300 group-hover:text-glow ${
+            featured ? "mt-8 text-[13px]" : "mt-5 text-[12px]"
+          }`}
+        >
+          {t("common.read_more")}
+          <ArrowRightIcon
+            size={16}
+            className="transition-transform duration-300 group-hover:translate-x-1.5"
+          />
+        </span>
+      )}
     </a>
   );
 }

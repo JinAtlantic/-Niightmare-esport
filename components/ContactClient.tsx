@@ -10,7 +10,7 @@ import {
   YoutubeIcon,
   ArrowRightIcon,
 } from "@/components/Icons";
-import site from "@/data/site.json";
+import { useContent } from "@/components/ContentContext";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -21,6 +21,7 @@ const inputClass =
 
 export default function ContactClient() {
   const { t } = useLanguage();
+  const { site } = useContent();
   const [status, setStatus] = useState<Status>("idle");
 
   const contactRows = [

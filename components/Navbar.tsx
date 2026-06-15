@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import { CloseIcon, MenuIcon } from "@/components/Icons";
-import site from "@/data/site.json";
+import { useContent } from "@/components/ContentContext";
 
 const NAV_ITEMS = [
   { href: "/", key: "nav.home" },
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const { t } = useLanguage();
+  const { site } = useContent();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

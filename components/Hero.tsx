@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageContext";
 import { formatDateTime } from "@/lib/format";
-import site from "@/data/site.json";
+import { useContent } from "@/components/ContentContext";
 import type { MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
 const STATUS_KEY: Record<MatchStatus, string> = {
@@ -35,6 +35,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Hero() {
   const { t, pick, lang } = useLanguage();
+  const { site } = useContent();
   const match = site.upcomingMatch as UpcomingMatchData;
   const status: MatchStatus = match.status ?? "next";
   const hasOpponent = Boolean(match.opponent && match.opponent.trim());

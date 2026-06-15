@@ -8,17 +8,16 @@ import StaffCard from "@/components/StaffCard";
 import SectionLabel from "@/components/SectionLabel";
 import Reveal from "@/components/Reveal";
 import { EfootballIcon, MlbbIcon } from "@/components/Icons";
-import rosterData from "@/data/roster.json";
+import { useContent } from "@/components/ContentContext";
 import type { GameId, Player, StaffMember } from "@/lib/types";
-
-const roster = rosterData as {
-  mlbb: { players: Player[] };
-  efootball: { players: Player[] };
-  staff: StaffMember[];
-};
 
 export default function RosterClient() {
   const { t } = useLanguage();
+  const roster = useContent().roster as {
+    mlbb: { players: Player[] };
+    efootball: { players: Player[] };
+    staff: StaffMember[];
+  };
   const [division, setDivision] = useState<GameId>("mlbb");
 
   const tabs: {

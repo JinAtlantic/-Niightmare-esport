@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageContext";
 import { EfootballIcon, MlbbIcon } from "@/components/Icons";
 import { formatDateTime } from "@/lib/format";
-import site from "@/data/site.json";
+import { useContent } from "@/components/ContentContext";
 import type { MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
 type Countdown = { d: number; h: number; m: number; s: number; done: boolean };
@@ -134,6 +134,7 @@ function CountdownBlock({ cd }: { cd: Countdown }) {
 
 export default function UpcomingMatch() {
   const { t, pick, lang } = useLanguage();
+  const { site } = useContent();
   const match = site.upcomingMatch as UpcomingMatchData;
   const status: MatchStatus = match.status ?? "next";
   const s = STATUS[status] ?? STATUS.next;

@@ -5,10 +5,8 @@ import Link from "next/link";
 import { useLanguage } from "@/components/LanguageContext";
 import PageHeader from "@/components/PageHeader";
 import SectionLabel from "@/components/SectionLabel";
-import sponsorsData from "@/data/sponsors.json";
+import { useContent } from "@/components/ContentContext";
 import type { Sponsor, SponsorTier } from "@/lib/types";
-
-const data = sponsorsData as { sponsors: Sponsor[]; tiers: SponsorTier[] };
 
 function SponsorBox({ sponsor }: { sponsor: Sponsor }) {
   return (
@@ -66,6 +64,10 @@ function TierCard({ tier }: { tier: SponsorTier }) {
 
 export default function SponsorsClient() {
   const { t } = useLanguage();
+  const data = useContent().sponsors as {
+    sponsors: Sponsor[];
+    tiers: SponsorTier[];
+  };
 
   return (
     <>
