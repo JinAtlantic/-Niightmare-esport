@@ -3,6 +3,7 @@
 import React from "react";
 import { useLanguage } from "@/components/LanguageContext";
 import SocialLinks from "@/components/SocialLinks";
+import FitText from "@/components/FitText";
 import type { StaffMember } from "@/lib/types";
 
 export default function StaffCard({ member }: { member: StaffMember }) {
@@ -38,8 +39,14 @@ export default function StaffCard({ member }: { member: StaffMember }) {
 
         {/* bottom text overlay — dark→violet gradient keeps the name legible */}
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#1A0A2E]/85 to-transparent px-4 pb-4 pt-14">
-          <h3 className="keep-latin line-clamp-2 break-words font-display text-xs font-bold uppercase leading-[1.18] tracking-tight text-soul transition-colors duration-300 group-hover:text-glow md:text-base md:tracking-wide">
-            {title}
+          <h3 className="leading-[1.1]">
+            <FitText
+              max={20}
+              min={9}
+              className="keep-latin font-display font-bold uppercase tracking-tight text-soul transition-colors duration-300 group-hover:text-glow"
+            >
+              {title}
+            </FitText>
           </h3>
           <span className="mt-2 flex max-w-full items-center gap-1.5 border-l-2 border-amethyst pl-2 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-spectre md:text-[10px]">
             <span className="truncate">{pick(member.role)}</span>
