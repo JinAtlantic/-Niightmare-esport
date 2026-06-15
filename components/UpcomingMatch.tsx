@@ -30,30 +30,24 @@ function initials(name: string): string {
   return (w[0][0] + w[w.length - 1][0]).toUpperCase();
 }
 
-const STATUS: Record<
-  MatchStatus,
-  { key: string; dot: string; text: string; ring: string; glow: string }
-> = {
+const STATUS: Record<MatchStatus, { key: string; text: string; ring: string; glow: string }> = {
   next: {
     key: "sections.upcoming_status_next",
-    dot: "bg-amethyst",
-    text: "text-amethyst",
-    ring: "border-amethyst/50",
-    glow: "shadow-[0_0_20px_rgba(168,85,247,0.45)]",
+    text: "text-glow",
+    ring: "border-amethyst/60",
+    glow: "shadow-[0_0_26px_rgba(168,85,247,0.5)]",
   },
   live: {
     key: "sections.upcoming_status_live",
-    dot: "bg-loss",
     text: "text-loss",
-    ring: "border-loss/50",
-    glow: "shadow-[0_0_20px_rgba(251,113,133,0.5)]",
+    ring: "border-loss/60",
+    glow: "shadow-[0_0_26px_rgba(251,113,133,0.55)]",
   },
   practice: {
     key: "sections.upcoming_status_practice",
-    dot: "bg-spectre",
     text: "text-spectre",
-    ring: "border-spectre/40",
-    glow: "shadow-[0_0_16px_rgba(201,180,246,0.4)]",
+    ring: "border-spectre/50",
+    glow: "shadow-[0_0_20px_rgba(201,180,246,0.45)]",
   },
 };
 
@@ -68,21 +62,17 @@ function TeamSide({
   home?: boolean;
 }) {
   return (
-    <div className="flex w-[34vw] max-w-[180px] flex-col items-center gap-3.5">
+    <div className="flex w-[32vw] max-w-[190px] flex-col items-center gap-3.5">
       <div
-        className={`relative grid h-[88px] w-[88px] place-items-center overflow-hidden rounded-full border-2 bg-gradient-to-br from-[#1A0A2E] to-[#08060F] transition-transform duration-300 hover:scale-[1.04] md:h-[120px] md:w-[120px] ${
+        className={`relative grid h-[94px] w-[94px] place-items-center overflow-hidden rounded-full border-2 bg-gradient-to-br from-[#1A0A2E] to-[#08060F] transition-transform duration-300 hover:scale-[1.05] md:h-[128px] md:w-[128px] ${
           home
-            ? "border-amethyst/70 shadow-[0_0_34px_rgba(168,85,247,0.4)]"
+            ? "border-amethyst/70 shadow-[0_0_40px_rgba(168,85,247,0.45)]"
             : "border-edge-bright shadow-[0_0_18px_rgba(0,0,0,0.5)]"
         }`}
       >
         {logo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={logo}
-            alt={name}
-            className="h-full w-full object-contain p-1.5"
-          />
+          <img src={logo} alt={name} className="h-full w-full object-contain p-1.5" />
         ) : (
           <span
             className="keep-latin font-display text-2xl font-bold text-ash md:text-4xl"
@@ -103,24 +93,29 @@ function TeamSide({
   );
 }
 
+/** Segmented, glowing countdown — the section's signature flair. */
 function CountdownBlock({ cd }: { cd: Countdown }) {
   const cell = (v: string, label: string) => (
-    <div className="flex flex-col items-center">
-      <span className="font-mono text-[clamp(20px,5vw,30px)] font-bold tabular-nums leading-none text-soul [text-shadow:0_0_22px_rgba(168,85,247,0.35)]">
-        {v}
-      </span>
-      <span className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.22em] text-ash-dim">
-        {label}
-      </span>
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative grid h-[60px] w-[54px] place-items-center overflow-hidden rounded-md border border-amethyst/30 bg-gradient-to-b from-crypt2/80 to-void/85 shadow-[0_0_20px_rgba(168,85,247,0.16)] md:h-[80px] md:w-[72px]">
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent"
+        />
+        <span className="font-mono text-[clamp(24px,6vw,42px)] font-bold tabular-nums leading-none text-soul [text-shadow:0_0_18px_rgba(199,125,255,0.5)]">
+          {v}
+        </span>
+      </div>
+      <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-ash-dim">{label}</span>
     </div>
   );
   const sep = (
-    <span className="self-start pt-1 font-mono text-[clamp(18px,4vw,26px)] font-bold text-amethyst/60">
+    <span className="flex h-[60px] items-center font-mono text-2xl font-bold text-amethyst/50 md:h-[80px] md:text-3xl">
       :
     </span>
   );
   return (
-    <div className="flex items-center gap-3 md:gap-4">
+    <div className="flex items-start gap-2 md:gap-3">
       {cell(String(cd.d), "Days")}
       {sep}
       {cell(pad(cd.h), "Hrs")}
@@ -141,8 +136,7 @@ export default function UpcomingMatch() {
   const GameIcon = match.game === "efootball" ? EfootballIcon : MlbbIcon;
 
   const hasOpponent = Boolean(match.opponent && match.opponent.trim());
-  const round =
-    match.round && (match.round.en || match.round.lo) ? match.round : null;
+  const round = match.round && (match.round.en || match.round.lo) ? match.round : null;
 
   // Countdown renders client-side only to avoid time-zone hydration mismatch.
   const [cd, setCd] = useState<Countdown | null>(null);
@@ -158,60 +152,60 @@ export default function UpcomingMatch() {
   const showCountdown = status === "next" && cd != null && !cd.done;
 
   return (
-    <section className="relative overflow-hidden border-y border-edge bg-[#0c0915]">
+    <section className="relative overflow-hidden border-y border-edge bg-[#0b0813]">
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
+      {/* ambient glow + center spotlight on the matchup */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(70% 130% at 50% 0%, rgba(168,85,247,0.16), transparent 65%)",
+            "radial-gradient(80% 120% at 50% 0%, rgba(168,85,247,0.20), transparent 60%), radial-gradient(40% 60% at 50% 52%, rgba(199,125,255,0.10), transparent 70%)",
         }}
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-4xl px-4 py-16 md:px-6 md:py-20">
-        {/* status badge */}
+      <div className="relative mx-auto max-w-4xl px-4 py-20 md:px-6 md:py-28">
+        {/* status badge — clean (no dot/icon), with a slow light sweep */}
         <div className="flex justify-center">
           <span
-            className={`inline-flex items-center gap-2.5 rounded-full border bg-void/70 px-4 py-1.5 backdrop-blur ${s.ring} ${s.glow}`}
+            className={`relative inline-flex items-center overflow-hidden rounded-full border bg-void/70 px-7 py-2.5 backdrop-blur ${s.ring} ${s.glow}`}
           >
-            <span className="relative flex h-2 w-2">
-              {status === "live" && (
-                <span
-                  className={`absolute inline-flex h-full w-full rounded-full opacity-70 motion-safe:animate-ping ${s.dot}`}
-                />
-              )}
+            {status === "next" && (
               <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${s.dot}`}
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/15 to-transparent motion-safe:animate-slashSlide"
               />
-            </span>
+            )}
             <span
-              className={`font-mono text-[11px] font-bold uppercase tracking-[0.3em] ${s.text}`}
+              className={`relative font-display text-sm font-bold uppercase tracking-[0.42em] ${s.text}`}
             >
               {t(s.key)}
             </span>
-            <span aria-hidden className="h-3 w-px bg-edge-bright" />
-            <GameIcon size={14} className={s.text} />
           </span>
         </div>
 
         {/* head-to-head */}
-        <div className="mt-12 flex items-center justify-center gap-3 sm:gap-8 md:gap-14">
+        <div className="mt-14 flex items-center justify-center gap-3 sm:gap-10 md:gap-16">
           <TeamSide logo="/logo.png" name="NIIGHTMARE" home />
 
           {hasOpponent ? (
             <>
-              <div className="flex flex-col items-center">
-                <span className="font-display text-3xl font-bold uppercase italic tracking-[0.1em] text-glow [text-shadow:0_0_28px_rgba(199,125,255,0.55)] md:text-5xl">
+              <div className="relative flex flex-col items-center">
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -z-10 blur-2xl"
+                  style={{ background: "radial-gradient(circle, rgba(199,125,255,0.35), transparent 70%)" }}
+                />
+                <span className="font-display text-4xl font-bold uppercase italic tracking-[0.08em] text-glow [text-shadow:0_0_34px_rgba(199,125,255,0.65)] md:text-6xl">
                   {t("common.vs")}
                 </span>
               </div>
               <TeamSide logo={match.opponentLogo} name={match.opponent} />
             </>
           ) : (
-            <div className="flex w-[34vw] max-w-[180px] flex-col items-center gap-3.5">
-              <div className="grid h-[88px] w-[88px] place-items-center rounded-full border-2 border-dashed border-edge-bright bg-void/40 md:h-[120px] md:w-[120px]">
-                <GameIcon size={40} className="text-ash" />
+            <div className="flex w-[32vw] max-w-[190px] flex-col items-center gap-3.5">
+              <div className="grid h-[94px] w-[94px] place-items-center rounded-full border-2 border-dashed border-edge-bright bg-void/40 md:h-[128px] md:w-[128px]">
+                <GameIcon size={44} className="text-ash" />
               </div>
               <span className="font-display text-sm font-bold uppercase tracking-[0.1em] text-spectre md:text-lg">
                 {t("sections.upcoming_practice_label")}
@@ -221,30 +215,30 @@ export default function UpcomingMatch() {
         </div>
 
         {/* tournament + round */}
-        <div className="mt-12 flex flex-col items-center gap-3 text-center">
-          <p className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul md:text-2xl">
+        <div className="mt-14 flex flex-col items-center gap-3 text-center">
+          <p className="font-display text-xl font-bold uppercase tracking-[0.06em] text-soul md:text-3xl">
             {pick(match.tournament)}
           </p>
           {round && (
-            <span className="inline-flex items-center border border-amethyst/40 bg-amethyst/[0.08] px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-spectre">
+            <span className="inline-flex items-center border border-amethyst/40 bg-amethyst/[0.08] px-3.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-spectre">
               {pick(round)}
             </span>
           )}
         </div>
 
         {/* time + countdown */}
-        <div className="mt-8 flex flex-col items-center gap-6">
-          <p className="font-mono text-sm tracking-[0.06em] text-ash">
+        <div className="mt-10 flex flex-col items-center gap-7">
+          <p className="font-mono text-sm tracking-[0.08em] text-ash">
             {cd ? formatDateTime(match.date, lang) : "—"}
           </p>
 
           {showCountdown && cd && <CountdownBlock cd={cd} />}
 
           {status === "live" && (
-            <span className="inline-flex items-center gap-2 font-display text-base font-bold uppercase tracking-[0.16em] text-loss">
-              <span className="relative flex h-2.5 w-2.5">
+            <span className="inline-flex items-center gap-2.5 font-display text-lg font-bold uppercase tracking-[0.18em] text-loss">
+              <span className="relative flex h-3 w-3">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-loss" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-loss" />
               </span>
               {t("sections.upcoming_status_live")}
             </span>
