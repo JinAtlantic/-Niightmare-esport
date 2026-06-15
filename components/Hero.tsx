@@ -67,12 +67,13 @@ export default function Hero() {
         <h1 className="logo-stage logo-stage--repper">
           <span className="logo-aura" aria-hidden />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="logo-ghost" src="/repper.png" aria-hidden alt="" />
+          <img className="logo-ghost" src="/repper.webp" aria-hidden alt="" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="logo-main"
-            src="/repper.png"
+            src="/repper.webp"
             alt="NIIGHTMARE Esports — Lao PDR"
+            fetchPriority="high"
           />
         </h1>
 

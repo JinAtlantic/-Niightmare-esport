@@ -2,6 +2,32 @@
 
 import React, { useRef, useState } from "react";
 
+/**
+ * Shrinks a photo in the browser before upload so large phone images don't
+ * bloat the site (the main mobile-speed killer). Resizes to a max edge and
+ * re-encodes as JPEG; leaves SVG/GIF and already-small files untouched.
+ */
+async function downscaleImage(file: File, maxEdge = 1200, quality = 0.82): Promise<Blob> {
+  if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
+    const w = Math.round(bmp.width * scale);
+    const h = Math.round(bmp.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bmp, 0, 0, w, h);
+    bmp.close?.();
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", quality));
+    return blob && blob.size < file.size ? blob : file;
+  } catch {
+    return file;
+  }
+}
+
 /* ── primitive styles ─────────────────────────────────────────────── */
 
 const inputClass =
@@ -198,9 +224,12 @@ export function ImageField({
     setBusy(true);
     setErr("");
     try {
+      const blob = await downscaleImage(file);
+      const isJpeg = blob !== file && blob.type === "image/jpeg";
+      const name = isJpeg ? file.name.replace(/\.[^.]+$/, "") + ".jpg" : file.name;
       const fd = new FormData();
       fd.append("folder", folder);
-      fd.append("file", file);
+      fd.append("file", blob, name);
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "อัปโหลดไม่สำเร็จ");

@@ -28,6 +28,8 @@ export default function PlayerCard({ player }: { player: Player }) {
             src={player.photo}
             alt={player.ign}
             style={photoStyle}
+            loading="lazy"
+            decoding="async"
             className="crop-img absolute inset-0 h-full w-full object-cover"
           />
         ) : (
