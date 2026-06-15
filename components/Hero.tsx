@@ -4,7 +4,18 @@ import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageContext";
 import { formatDateTime } from "@/lib/format";
 import site from "@/data/site.json";
-import type { Bilingual, GameId } from "@/lib/types";
+import type { MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
+
+const STATUS_KEY: Record<MatchStatus, string> = {
+  next: "sections.upcoming_status_next",
+  live: "sections.upcoming_status_live",
+  practice: "sections.upcoming_status_practice",
+};
+const STATUS_DOT: Record<MatchStatus, string> = {
+  next: "bg-amethyst",
+  live: "bg-loss",
+  practice: "bg-spectre",
+};
 
 type Countdown = { d: number; h: number; m: number; s: number; done: boolean };
 
@@ -24,12 +35,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Hero() {
   const { t, pick, lang } = useLanguage();
-  const match = site.upcomingMatch as {
-    date: string;
-    game: GameId;
-    tournament: Bilingual;
-    opponent: string;
-  };
+  const match = site.upcomingMatch as UpcomingMatchData;
+  const status: MatchStatus = match.status ?? "next";
+  const hasOpponent = Boolean(match.opponent && match.opponent.trim());
 
   // Countdown + formatted date render client-side only, so server and client
   // markup always agree (no time-zone hydration mismatch).
@@ -111,38 +119,56 @@ export default function Hero() {
       >
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-8 gap-y-2 px-5 py-4 md:px-14">
           <span className="flex items-center gap-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-ash">
-            <span className="fx-ping h-[7px] w-[7px] rounded-full bg-amethyst" />
-            {t("sections.upcoming_match")}
+            <span className={`fx-ping h-[7px] w-[7px] rounded-full ${STATUS_DOT[status]}`} />
+            {t(STATUS_KEY[status])}
           </span>
           <span className="whitespace-nowrap font-mono text-[13px] tracking-[0.06em] text-spectre">
             {cd ? formatDateTime(match.date, lang) : "—"}
           </span>
-          <span className="whitespace-nowrap font-display text-[clamp(15px,1.7vw,20px)] font-semibold tracking-[0.04em] text-soul">
-            <span className="keep-latin">NIIGHTMARE</span>
-            <span className="mx-2.5 text-[0.8em] text-ash-dim">{t("common.vs")}</span>
-            <span className="keep-latin text-spectre">{match.opponent}</span>
-          </span>
+          {hasOpponent ? (
+            <span className="whitespace-nowrap font-display text-[clamp(15px,1.7vw,20px)] font-semibold tracking-[0.04em] text-soul">
+              <span className="keep-latin">NIIGHTMARE</span>
+              <span className="mx-2.5 text-[0.8em] text-ash-dim">{t("common.vs")}</span>
+              <span className="keep-latin text-spectre">{match.opponent}</span>
+            </span>
+          ) : (
+            <span className="whitespace-nowrap font-display text-[clamp(15px,1.7vw,20px)] font-semibold tracking-[0.04em] text-soul">
+              {t("sections.upcoming_practice_label")}
+            </span>
+          )}
           <span className="text-[13px] text-ash">{pick(match.tournament)}</span>
 
           <span className="ml-auto flex items-center gap-2.5">
-            <span className="font-mono text-[clamp(16px,2vw,22px)] font-bold tabular-nums tracking-[0.06em] text-soul">
-              {cd && !cd.done ? (
-                <>
-                  {cd.d}
-                  <span className="mx-0.5 text-[0.58em] font-medium text-ash-dim">D</span>{" "}
-                  {pad(cd.h)}
-                  <span className="text-[0.58em] text-ash-dim">:</span>
-                  {pad(cd.m)}
-                  <span className="text-[0.58em] text-ash-dim">:</span>
-                  {pad(cd.s)}
-                </>
-              ) : (
-                "—"
-              )}
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash-dim">
-              {t("hero.until_kickoff")}
-            </span>
+            {status === "next" ? (
+              <>
+                <span className="font-mono text-[clamp(16px,2vw,22px)] font-bold tabular-nums tracking-[0.06em] text-soul">
+                  {cd && !cd.done ? (
+                    <>
+                      {cd.d}
+                      <span className="mx-0.5 text-[0.58em] font-medium text-ash-dim">D</span>{" "}
+                      {pad(cd.h)}
+                      <span className="text-[0.58em] text-ash-dim">:</span>
+                      {pad(cd.m)}
+                      <span className="text-[0.58em] text-ash-dim">:</span>
+                      {pad(cd.s)}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash-dim">
+                  {t("hero.until_kickoff")}
+                </span>
+              </>
+            ) : (
+              <span
+                className={`font-display text-[clamp(13px,1.6vw,17px)] font-bold uppercase tracking-[0.16em] ${
+                  status === "live" ? "text-loss" : "text-spectre"
+                }`}
+              >
+                {t(STATUS_KEY[status])}
+              </span>
+            )}
           </span>
         </div>
       </div>

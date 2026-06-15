@@ -144,6 +144,62 @@ html.lang-lo .keep-latin {
   transform: skewX(-24deg);
 }
 
+/* Thin violet scrollbar for the scrollable news digest rail */
+.news-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+.news-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.news-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.news-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    rgba(168, 85, 247, 0.6),
+    rgba(199, 125, 255, 0.6)
+  );
+  border-radius: 9999px;
+}
+.news-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(199, 125, 255, 0.85);
+}
+
+/* Footer wordmark — pale soul text with a slow violet glint sweeping through */
+.wordmark-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    #ece7f2 0%,
+    #ece7f2 38%,
+    #c77dff 48%,
+    #a855f7 54%,
+    #ece7f2 64%,
+    #ece7f2 100%
+  );
+  background-size: 220% 100%;
+  background-position: 120% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wordmark-shimmer {
+    animation: wordmarkShimmer 6.5s ease-in-out infinite;
+  }
+}
+@keyframes wordmarkShimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  55%,
+  100% {
+    background-position: -20% 0;
+  }
+}
+
 .label-tick {
   width: 22px;
   height: 3px;

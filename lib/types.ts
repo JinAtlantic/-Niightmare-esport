@@ -54,6 +54,24 @@ export interface StaffMember {
 export type GameId = "mlbb" | "efootball";
 export type MatchResult = "win" | "loss" | "draw";
 
+/** State of the headline fixture shown on the home page. */
+export type MatchStatus = "next" | "live" | "practice";
+
+export interface UpcomingMatch {
+  /** Drives the badge + styling: upcoming, currently live, or scrim/practice block. */
+  status: MatchStatus;
+  /** ISO datetime with offset, e.g. "2025-06-20T19:00:00+07:00". */
+  date: string;
+  game: GameId;
+  /** Tournament / event name. */
+  tournament: Bilingual;
+  /** Optional stage/round (e.g. Semi Final). */
+  round?: Bilingual;
+  opponent: string;
+  /** Optional opponent logo (e.g. "/teams/vipers.png"); falls back to a monogram. */
+  opponentLogo?: string;
+}
+
 export interface Match {
   id: string;
   date: string;

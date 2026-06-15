@@ -2,18 +2,22 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/admin/ui";
+import HomeEditor from "@/components/admin/HomeEditor";
 import MatchesEditor from "@/components/admin/MatchesEditor";
+import NewsEditor from "@/components/admin/NewsEditor";
 import RosterEditor from "@/components/admin/RosterEditor";
 
-type Tab = "matches" | "roster";
+type Tab = "home" | "news" | "matches" | "roster";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "home", label: "หน้า Home (นัดต่อไป)" },
+  { id: "news", label: "ข่าวสาร" },
   { id: "matches", label: "แมตช์ & ทัวร์นาเมนต์" },
   { id: "roster", label: "นักแข่ง (Roster)" },
 ];
 
 export default function AdminApp() {
-  const [tab, setTab] = useState<Tab>("matches");
+  const [tab, setTab] = useState<Tab>("home");
   const [deploying, setDeploying] = useState(false);
   const [deployMsg, setDeployMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -106,7 +110,10 @@ export default function AdminApp() {
 
       {/* content */}
       <main className="mx-auto max-w-5xl px-4 py-8 md:px-6">
-        {tab === "matches" ? <MatchesEditor /> : <RosterEditor />}
+        {tab === "home" && <HomeEditor />}
+        {tab === "news" && <NewsEditor />}
+        {tab === "matches" && <MatchesEditor />}
+        {tab === "roster" && <RosterEditor />}
       </main>
     </div>
   );

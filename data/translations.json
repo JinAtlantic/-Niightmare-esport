@@ -36,6 +36,10 @@
     "our_partners": { "en": "OUR PARTNERS", "lo": "ຄູ່ຮ່ວມງານ" },
     "contact_us": { "en": "CONTACT US", "lo": "ຕິດຕໍ່ຫາເຮົາ" },
     "upcoming_match": { "en": "UPCOMING MATCH", "lo": "ການແຂ່ງຂັນຕໍ່ໄປ" },
+    "upcoming_status_next": { "en": "UP NEXT", "lo": "ການແຂ່ງຕໍ່ໄປ" },
+    "upcoming_status_live": { "en": "LIVE NOW", "lo": "ກຳລັງແຂ່ງ" },
+    "upcoming_status_practice": { "en": "IN SCRIMS", "lo": "ຊ່ວງຊ້ອມທີມ" },
+    "upcoming_practice_label": { "en": "TEAM PRACTICE", "lo": "ການຊ້ອມຂອງທີມ" },
     "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" }
   },
   "common": {

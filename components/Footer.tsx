@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageContext";
-import TeamLogo from "@/components/TeamLogo";
 import { DiscordIcon, FacebookIcon, MailIcon, TiktokIcon, YoutubeIcon } from "@/components/Icons";
 import site from "@/data/site.json";
 
@@ -30,22 +29,33 @@ export default function Footer() {
     <footer className="relative mt-20 border-t border-edge bg-card">
       <div className="scythe-line absolute inset-x-0 -top-px h-[2px] opacity-60" aria-hidden />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-3 md:px-6">
-        {/* Brand */}
+        {/* Brand — typographic wordmark with a slow violet shimmer */}
         <div>
-          <div className="flex items-center gap-3">
-            <TeamLogo size={48} />
-            <div>
-              <p className="keep-latin font-rajdhani text-lg font-bold uppercase tracking-[0.18em] text-text-primary">
+          <div className="group inline-flex flex-col">
+            <div className="flex items-baseline gap-2.5">
+              <h2 className="wordmark-shimmer keep-latin font-display text-3xl font-bold uppercase leading-none tracking-[0.12em] transition-transform duration-300 ease-out [text-shadow:0_2px_30px_rgba(168,85,247,0.45)] group-hover:-translate-y-0.5 sm:text-[2.1rem]">
                 NIIGHTMARE
-              </p>
-              <p className="font-display text-xs uppercase tracking-[0.2em] text-accent">
-                {t("footer.tagline")}
-              </p>
+              </h2>
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.42em] text-amethyst/85">
+                Esport
+              </span>
             </div>
+
+            {/* scythe rule — grows on hover */}
+            <span
+              aria-hidden
+              className="scythe-line mt-3.5 block h-[2px] w-20 opacity-60 transition-all duration-500 ease-out group-hover:w-full"
+            />
+
+            {/* tagline with a live pulse node */}
+            <p className="mt-3.5 flex items-center gap-2.5 font-display text-xs uppercase tracking-[0.3em] text-glow">
+              <span className="relative flex h-[6px] w-[6px]">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-amethyst opacity-60 motion-safe:animate-ping" />
+                <span className="relative inline-flex h-[6px] w-[6px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
+              </span>
+              {t("footer.tagline")}
+            </p>
           </div>
-          <p className="mt-4 max-w-xs text-sm text-text-muted">
-            {t("hero.subtitle")}
-          </p>
         </div>
 
         {/* Quick links */}
