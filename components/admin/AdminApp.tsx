@@ -14,10 +14,29 @@ const TABS: { id: Tab; label: string }[] = [
 
 export default function AdminApp() {
   const [tab, setTab] = useState<Tab>("matches");
+  const [deploying, setDeploying] = useState(false);
+  const [deployMsg, setDeployMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     window.location.reload();
+  }
+
+  async function deploy() {
+    if (deploying) return;
+    if (!window.confirm("เผยแพร่เวอร์ชันล่าสุดขึ้นเว็บออนไลน์เลยไหม? (ใช้เวลา ~1–2 นาที)")) return;
+    setDeploying(true);
+    setDeployMsg(null);
+    try {
+      const res = await fetch("/api/admin/deploy", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Deploy ไม่สำเร็จ");
+      setDeployMsg({ ok: true, text: `เผยแพร่ขึ้นเว็บแล้ว ✓ — ${json.url}` });
+    } catch (e) {
+      setDeployMsg({ ok: false, text: e instanceof Error ? e.message : "Deploy ไม่สำเร็จ" });
+    } finally {
+      setDeploying(false);
+    }
   }
 
   return (
@@ -37,6 +56,9 @@ export default function AdminApp() {
             <a href="/" target="_blank" rel="noopener noreferrer">
               <Button>เปิดดูเว็บ ↗</Button>
             </a>
+            <Button variant="primary" onClick={deploy} disabled={deploying}>
+              {deploying ? "กำลัง Deploy…" : "🚀 Deploy ขึ้นเว็บ"}
+            </Button>
             <Button variant="danger" onClick={logout}>
               ออกจากระบบ
             </Button>
@@ -44,11 +66,18 @@ export default function AdminApp() {
         </div>
       </header>
 
-      {/* publish reminder */}
+      {/* publish reminder / deploy status */}
       <div className="border-b border-edge bg-amethyst/[0.06]">
         <p className="mx-auto max-w-5xl px-4 py-2.5 font-mono text-[11px] leading-relaxed text-spectre md:px-6">
-          💾 การแก้ไขจะบันทึกลงไฟล์ในเครื่องทันที และเห็นผลในเว็บที่รันในเครื่องเลย ·
-          ต้องการให้คนอื่นเห็นบนลิงก์ออนไลน์ ให้ <b>Deploy ขึ้น Vercel</b> อีกครั้งหลังบันทึก
+          {deploying ? (
+            <span className="text-glow">🚀 กำลังเผยแพร่ขึ้นเว็บออนไลน์… อย่าปิดหน้านี้ (~1–2 นาที)</span>
+          ) : deployMsg ? (
+            <span className={deployMsg.ok ? "text-win" : "text-loss"}>{deployMsg.text}</span>
+          ) : (
+            <>
+              💾 บันทึกแล้วเห็นผลในเครื่องทันที · กด <b>🚀 Deploy ขึ้นเว็บ</b> เพื่อเผยแพร่ให้คนอื่นเห็นบนลิงก์ออนไลน์
+            </>
+          )}
         </p>
       </div>
 
