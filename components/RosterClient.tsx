@@ -42,7 +42,7 @@ export default function RosterClient() {
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-        <SectionLabel>{t("roster.lineup_label")}</SectionLabel>
+        <SectionLabel centered>{t("roster.lineup_label")}</SectionLabel>
 
         {/* Division tabs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-1 border-b border-edge">
@@ -88,7 +88,7 @@ export default function RosterClient() {
 
         {/* Staff & management */}
         <div className="mt-20">
-          <SectionLabel>{t("roster.staff_label")}</SectionLabel>
+          <SectionLabel centered>{t("roster.staff_label")}</SectionLabel>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {roster.staff.map((member, i) => (
               <Reveal key={member.id} delay={i * 90} className="h-full">
