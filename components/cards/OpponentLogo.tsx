@@ -10,7 +10,7 @@ interface OpponentLogoProps {
   src?: string | null;
   /** Opponent team name — used for the monogram fallback and the alt text. */
   name: string;
-  /** Box diameter in pixels. The fixed size keeps every row's logo the same
+  /** Box size in pixels. The fixed size keeps every row's logo the same
    *  height; object-contain lets any aspect ratio sit inside it cleanly. */
   size?: number;
   className?: string;
@@ -29,7 +29,7 @@ export default function OpponentLogo({ src, name, size = 28, className = "" }: O
 
   return (
     <span
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-full border border-edge bg-gradient-to-br from-crypt2/80 to-void/80 shadow-[inset_0_0_14px_rgba(168,85,247,0.10)] ${className}`}
+      className={`grid shrink-0 place-items-center ${className}`}
       style={dimension}
       role="img"
       aria-label={`${name} logo`}
@@ -38,7 +38,7 @@ export default function OpponentLogo({ src, name, size = 28, className = "" }: O
         <Image
           src={src}
           alt=""
-          className="h-full w-full object-contain p-[15%]"
+          className="h-full w-full object-contain drop-shadow-[0_0_12px_rgba(0,0,0,0.65)]"
           width={size}
           height={size}
         />

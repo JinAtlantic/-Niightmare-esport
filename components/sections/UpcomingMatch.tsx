@@ -53,7 +53,7 @@ const STATUS: Record<MatchStatus, { key: string; text: string; ring: string; glo
 };
 
 /**
- * One contender's zone in the split arena: a side label, framed crest and name
+ * One contender's zone in the split arena: a side label, full crest and name
  * over a directional color wash — violet for the home side, rose-steel for the
  * challenger — so the two halves read as opposing camps, not a mirrored pair.
  */
@@ -78,11 +78,7 @@ function TeamSide({
         }`}
       />
       <div
-        className={`relative grid h-[88px] w-[88px] shrink-0 place-items-center overflow-hidden rounded-full border-2 bg-gradient-to-br from-[#1A0A2E] to-[#08060F] transition-transform duration-300 group-hover:scale-[1.06] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px] ${
-          home
-            ? "border-amethyst/70 shadow-[0_0_36px_rgba(168,85,247,0.45)]"
-            : "border-edge-bright shadow-[0_0_16px_rgba(0,0,0,0.5)]"
-        }`}
+        className="relative grid h-[88px] w-[88px] shrink-0 place-items-center transition-transform duration-300 group-hover:scale-[1.06] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
       >
         {logo ? (
           <Image
@@ -90,7 +86,11 @@ function TeamSide({
             alt={name}
             fill
             sizes="(min-width: 1024px) 184px, (min-width: 768px) 156px, 88px"
-            className="object-contain p-[15%]"
+            className={`object-contain ${
+              home
+                ? "drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
+                : "drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
+            }`}
           />
         ) : (
           <span
