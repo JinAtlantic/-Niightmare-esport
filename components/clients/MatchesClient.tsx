@@ -43,6 +43,8 @@ const GAME_BLADE: Record<GameId, string> = {
   efootball: "bg-[#22D3EE] shadow-[0_0_10px_rgba(34,211,238,0.85)]",
 };
 
+const MATCH_LOGO_SIZE = 64;
+
 function StatsStrip({
   wins,
   draws,
@@ -144,7 +146,7 @@ function MatchCard({ match }: { match: Match }) {
       <div className="mt-4 flex flex-col gap-3 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
         {/* NIIGHTMARE side */}
         <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-start md:gap-3">
-          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={44} />
+          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={MATCH_LOGO_SIZE} />
           <span className="keep-latin truncate font-display text-base font-bold uppercase leading-tight text-soul md:text-2xl">
             NIIGHTMARE
           </span>
@@ -167,7 +169,7 @@ function MatchCard({ match }: { match: Match }) {
           <span className="keep-latin truncate text-center font-display text-base font-bold uppercase leading-tight text-soul md:text-right md:text-2xl">
             {match.opponent}
           </span>
-          <OpponentLogo src={match.opponentLogo} name={match.opponent} size={44} />
+          <OpponentLogo src={match.opponentLogo} name={match.opponent} size={MATCH_LOGO_SIZE} />
         </div>
       </div>
 
