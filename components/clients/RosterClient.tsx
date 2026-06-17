@@ -10,7 +10,45 @@ import Reveal from "@/components/ui/Reveal";
 import { EfootballIcon, MlbbIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
 import { groupStaffByTier, type StaffTier } from "@/lib/staff";
-import type { GameId, Player, StaffMember } from "@/lib/types";
+import rosterSeed from "@/data/roster.json";
+import type { Bilingual, GameId, Player, StaffMember } from "@/lib/types";
+
+type RosterStatId = "active" | "mlbb" | "efootball" | "staff";
+
+interface RosterPageStat {
+  id: RosterStatId | string;
+  label: Bilingual;
+  detail: Bilingual;
+}
+
+interface RosterPageCopy {
+  kicker?: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  overviewLabel: Bilingual;
+  overviewIntro: Bilingual;
+  lineupLabel: Bilingual;
+  staffLabel: Bilingual;
+  divisionLabels: Record<GameId, Bilingual>;
+  tierLabels: {
+    executive: Bilingual;
+    operations: Bilingual;
+    technical: Bilingual;
+  };
+  stats: RosterPageStat[];
+}
+
+const pageSeed = rosterSeed.page as RosterPageCopy;
+
+function mergePageCopy(page?: Partial<RosterPageCopy>): RosterPageCopy {
+  return {
+    ...pageSeed,
+    ...page,
+    divisionLabels: { ...pageSeed.divisionLabels, ...(page?.divisionLabels ?? {}) },
+    tierLabels: { ...pageSeed.tierLabels, ...(page?.tierLabels ?? {}) },
+    stats: page?.stats?.length ? page.stats : pageSeed.stats,
+  };
+}
 
 /**
  * One hierarchy row under the BEHIND THE TEAM heading. Cards line up centred so
@@ -46,22 +84,31 @@ function TierRow({ label, members }: { label: string; members: StaffMember[] }) 
 }
 
 export default function RosterClient() {
-  const { t } = useLanguage();
+  const { pick } = useLanguage();
   const roster = useContent().roster as {
+    page?: Partial<RosterPageCopy>;
     mlbb: { players: Player[] };
     efootball: { players: Player[] };
     staff: StaffMember[];
   };
   const [division, setDivision] = useState<GameId>("mlbb");
+  const page = mergePageCopy(roster.page);
+
+  const counts: Record<RosterStatId, number> = {
+    active: roster.mlbb.players.length + roster.efootball.players.length + roster.staff.length,
+    mlbb: roster.mlbb.players.length,
+    efootball: roster.efootball.players.length,
+    staff: roster.staff.length,
+  };
 
   const tabs: {
     id: GameId;
-    labelKey: string;
+    label: Bilingual;
     Icon: typeof MlbbIcon;
     count: number;
   }[] = [
-    { id: "mlbb", labelKey: "roster.tab_mlbb", Icon: MlbbIcon, count: roster.mlbb.players.length },
-    { id: "efootball", labelKey: "roster.tab_efootball", Icon: EfootballIcon, count: roster.efootball.players.length },
+    { id: "mlbb", label: page.divisionLabels.mlbb, Icon: MlbbIcon, count: roster.mlbb.players.length },
+    { id: "efootball", label: page.divisionLabels.efootball, Icon: EfootballIcon, count: roster.efootball.players.length },
   ];
 
   const players = roster[division].players;
@@ -69,17 +116,57 @@ export default function RosterClient() {
   return (
     <>
       <PageHeader
-        title={t("sections.our_roster")}
-        subtitle={t("roster.intro")}
+        kicker={page.kicker ? pick(page.kicker) : undefined}
+        title={pick(page.title)}
+        subtitle={pick(page.intro)}
         subtitleClassName="text-lg font-medium text-spectre md:text-2xl"
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-        <SectionLabel centered>{t("roster.lineup_label")}</SectionLabel>
+      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
+        <div className="mb-16 border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
+          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.4fr] lg:items-stretch">
+            <div className="flex min-h-[180px] flex-col justify-between border border-edge bg-void/45 p-5">
+              <div>
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
+                  {pick(page.overviewLabel)}
+                </p>
+                <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
+                  {pick(page.overviewIntro)}
+                </p>
+              </div>
+              <div
+                aria-hidden
+                className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {page.stats.map((stat) => {
+                const value = counts[stat.id as RosterStatId] ?? 0;
+                return (
+                  <div key={stat.id} className="relative min-h-[180px] overflow-hidden border border-edge bg-void/55 p-4">
+                    <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
+                    <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5" />
+                    <p className="font-mono text-4xl font-bold leading-none text-soul md:text-5xl">
+                      {value}
+                    </p>
+                    <p className="mt-5 font-display text-sm font-bold uppercase tracking-[0.12em] text-spectre">
+                      {pick(stat.label)}
+                    </p>
+                    <p className="mt-3 text-xs leading-relaxed text-ash md:text-sm">
+                      {pick(stat.detail)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <SectionLabel centered>{pick(page.lineupLabel)}</SectionLabel>
 
         {/* Division tabs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-1 border-b border-edge">
-          {tabs.map(({ id, labelKey, Icon, count }) => {
+          {tabs.map(({ id, label, Icon, count }) => {
             const active = division === id;
             return (
               <button
@@ -95,7 +182,7 @@ export default function RosterClient() {
                   size={18}
                   className={`transition-colors ${active ? "text-amethyst" : "text-ash group-hover:text-spectre"}`}
                 />
-                <span className="keep-latin">{t(labelKey)}</span>
+                <span className="keep-latin">{pick(label)}</span>
                 <span className={`font-mono text-[11px] ${active ? "text-spectre" : "text-ash-dim"}`}>
                   {count}
                 </span>
@@ -121,16 +208,16 @@ export default function RosterClient() {
 
         {/* Behind the team — ordered by hierarchy tier */}
         <div className="mt-20">
-          <SectionLabel centered>{t("roster.staff_label")}</SectionLabel>
+          <SectionLabel centered>{pick(page.staffLabel)}</SectionLabel>
           {(() => {
             const tiers = groupStaffByTier(roster.staff);
-            const rows: { tier: StaffTier; labelKey: string }[] = [
-              { tier: 1, labelKey: "roster.tier_executive" },
-              { tier: 2, labelKey: "roster.tier_operations" },
-              { tier: 3, labelKey: "roster.tier_technical" },
+            const rows: { tier: StaffTier; label: string }[] = [
+              { tier: 1, label: pick(page.tierLabels.executive) },
+              { tier: 2, label: pick(page.tierLabels.operations) },
+              { tier: 3, label: pick(page.tierLabels.technical) },
             ];
-            return rows.map(({ tier, labelKey }) => (
-              <TierRow key={tier} label={t(labelKey)} members={tiers[tier]} />
+            return rows.map(({ tier, label }) => (
+              <TierRow key={tier} label={label} members={tiers[tier]} />
             ));
           })()}
         </div>

@@ -1,4 +1,104 @@
 {
+  "page": {
+    "kicker": {
+      "en": "Competitive Roster",
+      "lo": "ລາຍຊື່ນັກກິລາແຂ່ງຂັນ"
+    },
+    "title": {
+      "en": "Our Roster",
+      "lo": "ນັກກິລາຂອງເຮົາ"
+    },
+    "intro": {
+      "en": "Meet the players and staff carrying the NIIGHTMARE banner across MLBB and eFootball.",
+      "lo": "ຮູ້ຈັກນັກກິລາ ແລະ ທີມງານທີ່ພາຊື່ NIIGHTMARE ລົງແຂ່ງຂັນໃນ MLBB ແລະ eFootball."
+    },
+    "overviewLabel": {
+      "en": "Roster Intelligence",
+      "lo": "ຂໍ້ມູນລວມຂອງທີມ"
+    },
+    "overviewIntro": {
+      "en": "A quick operational view for fans, media, and partners.",
+      "lo": "ຂໍ້ມູນສັ້ນໆ ສໍາລັບແຟນ, ສື່ ແລະ ພາກສ່ວນພັນທະມິດ."
+    },
+    "lineupLabel": {
+      "en": "Lineup",
+      "lo": "ລາຍຊື່ຜູ້ແຂ່ງຂັນ"
+    },
+    "staffLabel": {
+      "en": "Behind the Team",
+      "lo": "ເບື້ອງຫຼັງທີມ"
+    },
+    "divisionLabels": {
+      "mlbb": {
+        "en": "Mobile Legends",
+        "lo": "Mobile Legends"
+      },
+      "efootball": {
+        "en": "eFootball",
+        "lo": "eFootball"
+      }
+    },
+    "tierLabels": {
+      "executive": {
+        "en": "Executive",
+        "lo": "ຜູ້ບໍລິຫານ"
+      },
+      "operations": {
+        "en": "Operations & Coaching",
+        "lo": "ຝ່າຍປະຕິບັດການ ແລະ ໂຄ້ຊ"
+      },
+      "technical": {
+        "en": "Technical & Support",
+        "lo": "ຝ່າຍເຕັກນິກ ແລະ ສະໜັບສະໜູນ"
+      }
+    },
+    "stats": [
+      {
+        "id": "active",
+        "label": {
+          "en": "Active Members",
+          "lo": "ສະມາຊິກທີ່ກໍາລັງໃຊ້ງານ"
+        },
+        "detail": {
+          "en": "Players and staff currently listed in admin.",
+          "lo": "ນັກກິລາ ແລະ ທີມງານທີ່ຢູ່ໃນລະບົບ admin."
+        }
+      },
+      {
+        "id": "mlbb",
+        "label": {
+          "en": "MLBB Players",
+          "lo": "ນັກກິລາ MLBB"
+        },
+        "detail": {
+          "en": "Main and substitute lineup.",
+          "lo": "ລາຍຊື່ຕົວຈິງ ແລະ ຕົວສໍາຮອງ."
+        }
+      },
+      {
+        "id": "efootball",
+        "label": {
+          "en": "eFootball Players",
+          "lo": "ນັກກິລາ eFootball"
+        },
+        "detail": {
+          "en": "Football division lineup.",
+          "lo": "ລາຍຊື່ຜູ້ແຂ່ງຂັນສາຍຟຸດບອນ."
+        }
+      },
+      {
+        "id": "staff",
+        "label": {
+          "en": "Staff",
+          "lo": "ທີມງານ"
+        },
+        "detail": {
+          "en": "Management, coaching, and support.",
+          "lo": "ຝ່າຍບໍລິຫານ, ໂຄ້ຊ ແລະ ສະໜັບສະໜູນ."
+        }
+      }
+    ]
+  },
   "mlbb": {
     "players": [
       {

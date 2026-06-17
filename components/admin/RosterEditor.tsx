@@ -12,7 +12,8 @@ import {
   ImageField,
   Label,
 } from "@/components/admin/ui";
-import type { Player, StaffMember, GameId } from "@/lib/types";
+import rosterSeed from "@/data/roster.json";
+import type { Bilingual, Player, StaffMember, GameId } from "@/lib/types";
 import { STAFF_ROLES, STAFF_ROLE_TIER, staffRoleKey } from "@/lib/staff";
 
 const TIER_LABEL: Record<1 | 2 | 3, string> = {
@@ -26,10 +27,47 @@ const STAFF_ROLE_OPTIONS = STAFF_ROLES.map((r) => ({
   label: `${r.label.en} — ${TIER_LABEL[STAFF_ROLE_TIER[r.value]]}`,
 }));
 
+type RosterStatId = "active" | "mlbb" | "efootball" | "staff";
+type RosterTierKey = "executive" | "operations" | "technical";
+
+interface RosterPageStat {
+  id: RosterStatId;
+  label: Bilingual;
+  detail: Bilingual;
+}
+
+interface RosterPageCopy {
+  kicker?: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  overviewLabel: Bilingual;
+  overviewIntro: Bilingual;
+  lineupLabel: Bilingual;
+  staffLabel: Bilingual;
+  divisionLabels: Record<GameId, Bilingual>;
+  tierLabels: Record<RosterTierKey, Bilingual>;
+  stats: RosterPageStat[];
+}
+
 interface RosterFile {
+  page?: RosterPageCopy;
   mlbb: { players: Player[] };
   efootball: { players: Player[] };
   staff: StaffMember[];
+}
+
+const pageSeed = rosterSeed.page as RosterPageCopy;
+const statIds: RosterStatId[] = ["active", "mlbb", "efootball", "staff"];
+
+function pageCopy(page?: Partial<RosterPageCopy>): RosterPageCopy {
+  const incomingStats = page?.stats ?? [];
+  return {
+    ...pageSeed,
+    ...page,
+    divisionLabels: { ...pageSeed.divisionLabels, ...(page?.divisionLabels ?? {}) },
+    tierLabels: { ...pageSeed.tierLabels, ...(page?.tierLabels ?? {}) },
+    stats: statIds.map((id) => incomingStats.find((stat) => stat.id === id) ?? pageSeed.stats.find((stat) => stat.id === id)!),
+  };
 }
 
 const uid = (p: string) => `${p}-${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
@@ -204,10 +242,19 @@ function PlayerList({
 
 export default function RosterEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<RosterFile>("roster");
-  const [view, setView] = useState<"players" | "staff">("players");
+  const [view, setView] = useState<"page" | "players" | "staff">("players");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data) return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
+
+  const page = pageCopy(data.page);
+  const setPage = (next: RosterPageCopy) => setData({ ...data, page: next });
+  const patchPage = (patch: Partial<RosterPageCopy>) => setPage({ ...page, ...patch });
+  const patchStat = (id: RosterStatId, patch: Partial<RosterPageStat>) =>
+    setPage({
+      ...page,
+      stats: page.stats.map((stat) => (stat.id === id ? { ...stat, ...patch } : stat)),
+    });
 
   const setPlayers = (game: GameId, next: Player[]) =>
     setData({ ...data, [game]: { players: next } } as RosterFile);
@@ -263,6 +310,7 @@ export default function RosterEditor() {
       {/* sub-tabs — edit players or staff separately for a shorter, focused form */}
       <div className="flex flex-wrap gap-2">
         {([
+          { id: "page", label: "หน้า Roster (Page)", count: page.stats.length },
           { id: "players", label: "นักกีฬา (Players)", count: data.mlbb.players.length + data.efootball.players.length },
           { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: data.staff.length },
         ] as const).map(({ id, label, count }) => {
@@ -285,6 +333,98 @@ export default function RosterEditor() {
           );
         })}
       </div>
+
+      {view === "page" && (
+        <section className="space-y-4">
+          <Card>
+            <div className="mb-4">
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Roster page copy</h2>
+              <p className="mt-1 font-mono text-xs text-ash">
+                ข้อความทุกช่องนี้จะแสดงบนหน้า /roster และแก้ได้โดยไม่ต้อง deploy
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <BilingualField
+                label="Hero kicker"
+                value={page.kicker ?? { en: "", lo: "" }}
+                onChange={(v) => patchPage({ kicker: v.en || v.lo ? v : undefined })}
+              />
+              <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
+              <BilingualField label="Hero intro" value={page.intro} onChange={(v) => patchPage({ intro: v })} />
+              <BilingualField
+                label="Overview label"
+                value={page.overviewLabel}
+                onChange={(v) => patchPage({ overviewLabel: v })}
+              />
+              <BilingualField
+                label="Overview intro"
+                value={page.overviewIntro}
+                onChange={(v) => patchPage({ overviewIntro: v })}
+              />
+              <BilingualField label="Lineup heading" value={page.lineupLabel} onChange={(v) => patchPage({ lineupLabel: v })} />
+              <BilingualField label="Staff heading" value={page.staffLabel} onChange={(v) => patchPage({ staffLabel: v })} />
+            </div>
+          </Card>
+
+          <Card>
+            <div className="mb-4">
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Navigation labels</h2>
+              <p className="mt-1 font-mono text-xs text-ash">
+                Labels ของ tab เกมและ tier ทีมงานบนหน้า roster
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <BilingualField
+                label="MLBB tab"
+                value={page.divisionLabels.mlbb}
+                onChange={(v) => patchPage({ divisionLabels: { ...page.divisionLabels, mlbb: v } })}
+              />
+              <BilingualField
+                label="eFootball tab"
+                value={page.divisionLabels.efootball}
+                onChange={(v) => patchPage({ divisionLabels: { ...page.divisionLabels, efootball: v } })}
+              />
+              <BilingualField
+                label="Executive tier"
+                value={page.tierLabels.executive}
+                onChange={(v) => patchPage({ tierLabels: { ...page.tierLabels, executive: v } })}
+              />
+              <BilingualField
+                label="Operations tier"
+                value={page.tierLabels.operations}
+                onChange={(v) => patchPage({ tierLabels: { ...page.tierLabels, operations: v } })}
+              />
+              <BilingualField
+                label="Technical tier"
+                value={page.tierLabels.technical}
+                onChange={(v) => patchPage({ tierLabels: { ...page.tierLabels, technical: v } })}
+              />
+            </div>
+          </Card>
+
+          <Card>
+            <div className="mb-4">
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Overview stats</h2>
+              <p className="mt-1 font-mono text-xs text-ash">
+                ตัวเลขคำนวณจากจำนวน player/staff ใน admin; แก้ label และคำอธิบายได้ที่นี่
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {page.stats.map((stat) => (
+                <div key={stat.id} className="border border-edge bg-void/40 p-4">
+                  <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">
+                    {stat.id}
+                  </p>
+                  <div className="grid gap-3">
+                    <BilingualField label="Label" value={stat.label} onChange={(v) => patchStat(stat.id, { label: v })} />
+                    <BilingualField label="Detail" value={stat.detail} onChange={(v) => patchStat(stat.id, { detail: v })} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+      )}
 
       {view === "players" && (
         <>
