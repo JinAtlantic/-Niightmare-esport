@@ -7,7 +7,57 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import Reveal from "@/components/ui/Reveal";
 import SectionLabel from "@/components/ui/SectionLabel";
 import { ArrowRightIcon, EfootballIcon, MlbbIcon, TrophyIcon } from "@/components/ui/Icons";
-import type { Player, SponsorTier, Tournament } from "@/lib/types";
+import type { Bilingual } from "@/lib/types";
+
+interface SnapshotStat {
+  id: string;
+  value: string;
+  label: Bilingual;
+  detail: Bilingual;
+}
+
+interface SnapshotPillar {
+  id: string;
+  title: Bilingual;
+  body: Bilingual;
+}
+
+interface SnapshotCta {
+  label: Bilingual;
+  href: string;
+}
+
+interface HomeSnapshot {
+  kicker: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  stats: SnapshotStat[];
+  pillars: SnapshotPillar[];
+  primaryCta: SnapshotCta;
+  secondaryCta: SnapshotCta;
+}
+
+const FALLBACK_SNAPSHOT: HomeSnapshot = {
+  kicker: { en: "PARTNER-READY CLUB PROFILE", lo: "ໂປຣໄຟລ໌ທີມສໍາລັບພາກສ່ວນ" },
+  title: { en: "TEAM SNAPSHOT", lo: "ພາບລວມຂອງທີມ" },
+  intro: {
+    en: "A fast read for fans, media, and brands: the competitions we play, the roster behind the tag, and the sponsor paths built into the club.",
+    lo: "ພາບລວມສໍາລັບແຟນ, ສື່ ແລະ ແບຣນ: ລາຍການທີ່ເຮົາແຂ່ງ, ນັກກິລາໃນທີມ ແລະ ເສັ້ນທາງສໍາລັບພາກສ່ວນທີ່ຢາກຮ່ວມງານ.",
+  },
+  stats: [
+    { id: "divisions", value: "2", label: { en: "DIVISIONS", lo: "ປະເພດເກມ" }, detail: { en: "MLBB / eFootball", lo: "MLBB / eFootball" } },
+    { id: "roster", value: "8", label: { en: "ROSTER", lo: "ນັກກິລາ" }, detail: { en: "Active players across the current lineup.", lo: "ນັກກິລາທີ່ຢູ່ໃນລາຍຊື່ປັດຈຸບັນ." } },
+    { id: "honours", value: "1", label: { en: "HONOURS", lo: "ລາງວັນ" }, detail: { en: "Tournament placements already in the cabinet.", lo: "ຜົນງານການແຂ່ງຂັນທີ່ຢູ່ໃນຕູ້ລາງວັນ." } },
+    { id: "partners", value: "3+", label: { en: "PARTNER TIERS", lo: "ລະດັບພາກສ່ວນ" }, detail: { en: "Structured options for brands and community partners.", lo: "ທາງເລືອກສໍາລັບແບຣນ ແລະ ພາກສ່ວນຊຸມຊົນ." } },
+  ],
+  pillars: [
+    { id: "matchday", title: { en: "MATCHDAY PRESENCE", lo: "ພ້ອມສໍາລັບວັນແຂ່ງ" }, body: { en: "The headline fixture gives visitors the next battle, opponent, tournament, and kickoff without digging through pages.", lo: "ຜູ້ເຂົ້າຊົມເຫັນນັດຕໍ່ໄປ, ຄູ່ແຂ່ງ, ລາຍການ ແລະ ເວລາເລີ່ມໄດ້ທັນທີ." } },
+    { id: "proof", title: { en: "PROOF OF LEVEL", lo: "ຫຼັກຖານຂອງລະດັບ" }, body: { en: "Honours, match history, and news make the team look active instead of like a static logo page.", lo: "ລາງວັນ, ປະຫວັດການແຂ່ງ ແລະ ຂ່າວ ຊ່ວຍໃຫ້ທີມເບິ່ງມີການເຄື່ອນໄຫວ." } },
+    { id: "partners", title: { en: "BUSINESS FLOW", lo: "ເສັ້ນທາງທຸລະກິດ" }, body: { en: "Sponsor and contact routes are visible from the home page, which helps with price discussions and partner trust.", lo: "ລິ້ງສໍາລັບສະປອນເຊີ ແລະ ການຕິດຕໍ່ຢູ່ໃນໜ້າຫຼັກ ຊ່ວຍໃນການຕໍ່ລອງ ແລະ ສ້າງຄວາມເຊື່ອໃຈ." } },
+  ],
+  primaryCta: { label: { en: "VIEW SPONSOR PATHS", lo: "ເບິ່ງທາງເລືອກສະປອນເຊີ" }, href: "/sponsors" },
+  secondaryCta: { label: { en: "START A DEAL", lo: "ເລີ່ມຕິດຕໍ່ທຸລະກິດ" }, href: "/contact" },
+};
 
 function StatTile({
   value,
@@ -58,14 +108,12 @@ function Pillar({
 }
 
 export default function TeamSnapshot() {
-  const { t } = useLanguage();
-  const { roster, matches, sponsors } = useContent();
-
-  const mlbbPlayers = ((roster.mlbb?.players ?? []) as Player[]).length;
-  const efootballPlayers = ((roster.efootball?.players ?? []) as Player[]).length;
-  const rosterCount = mlbbPlayers + efootballPlayers;
-  const honoursCount = ((matches.tournaments ?? []) as Tournament[]).length;
-  const partnerTierCount = ((sponsors.tiers ?? []) as SponsorTier[]).length;
+  const { pick } = useLanguage();
+  const { site } = useContent();
+  const snapshot = ((site as { homeSnapshot?: HomeSnapshot }).homeSnapshot ?? FALLBACK_SNAPSHOT);
+  const stats = snapshot.stats.length ? snapshot.stats : FALLBACK_SNAPSHOT.stats;
+  const pillars = snapshot.pillars.length ? snapshot.pillars : FALLBACK_SNAPSHOT.pillars;
+  const icons = [<MlbbIcon key="mlbb" size={22} />, <TrophyIcon key="trophy" size={22} />, <EfootballIcon key="efb" size={22} />];
 
   return (
     <section className="relative overflow-hidden border-y border-edge bg-gradient-to-b from-void via-crypt/35 to-void">
@@ -83,84 +131,45 @@ export default function TeamSnapshot() {
       <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
         <Reveal>
           <div className="mx-auto max-w-3xl text-center">
-            <SectionLabel centered kicker={t("sections.home_snapshot_kicker")}>
-              {t("sections.home_snapshot_title")}
+            <SectionLabel centered kicker={pick(snapshot.kicker)}>
+              {pick(snapshot.title)}
             </SectionLabel>
             <p className="mt-5 text-base leading-relaxed text-ash md:text-lg">
-              {t("sections.home_snapshot_intro")}
+              {pick(snapshot.intro)}
             </p>
           </div>
         </Reveal>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Reveal>
-            <StatTile
-              value="2"
-              label={t("sections.home_snapshot_stat_divisions")}
-              detail="MLBB / eFootball"
-            />
-          </Reveal>
-          <Reveal delay={80}>
-            <StatTile
-              value={String(rosterCount)}
-              label={t("sections.home_snapshot_stat_roster")}
-              detail={t("sections.home_snapshot_stat_roster_detail")}
-            />
-          </Reveal>
-          <Reveal delay={160}>
-            <StatTile
-              value={String(honoursCount)}
-              label={t("sections.home_snapshot_stat_honours")}
-              detail={t("sections.home_snapshot_stat_honours_detail")}
-            />
-          </Reveal>
-          <Reveal delay={240}>
-            <StatTile
-              value={`${partnerTierCount}+`}
-              label={t("sections.home_snapshot_stat_partners")}
-              detail={t("sections.home_snapshot_stat_partners_detail")}
-            />
-          </Reveal>
+          {stats.slice(0, 4).map((stat, i) => (
+            <Reveal key={stat.id} delay={i * 80}>
+              <StatTile value={stat.value} label={pick(stat.label)} detail={pick(stat.detail)} />
+            </Reveal>
+          ))}
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <Reveal>
-            <Pillar
-              icon={<MlbbIcon size={22} />}
-              title={t("sections.home_snapshot_pillar_matchday")}
-              body={t("sections.home_snapshot_pillar_matchday_body")}
-            />
-          </Reveal>
-          <Reveal delay={80}>
-            <Pillar
-              icon={<TrophyIcon size={22} />}
-              title={t("sections.home_snapshot_pillar_proof")}
-              body={t("sections.home_snapshot_pillar_proof_body")}
-            />
-          </Reveal>
-          <Reveal delay={160}>
-            <Pillar
-              icon={<EfootballIcon size={22} />}
-              title={t("sections.home_snapshot_pillar_partners")}
-              body={t("sections.home_snapshot_pillar_partners_body")}
-            />
-          </Reveal>
+          {pillars.slice(0, 3).map((pillar, i) => (
+            <Reveal key={pillar.id} delay={i * 80}>
+              <Pillar icon={icons[i] ?? icons[0]} title={pick(pillar.title)} body={pick(pillar.body)} />
+            </Reveal>
+          ))}
         </div>
 
         <Reveal delay={220}>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/sponsors"
+              href={snapshot.primaryCta.href}
               className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.24)] transition-colors hover:bg-amethyst/25"
             >
-              {t("sections.home_snapshot_cta_sponsors")}
+              {pick(snapshot.primaryCta.label)}
               <ArrowRightIcon size={16} />
             </Link>
             <Link
-              href="/contact"
+              href={snapshot.secondaryCta.href}
               className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/40 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
             >
-              {t("sections.home_snapshot_cta_contact")}
+              {pick(snapshot.secondaryCta.label)}
               <ArrowRightIcon size={16} />
             </Link>
           </div>
