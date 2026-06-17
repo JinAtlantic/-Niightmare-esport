@@ -29,7 +29,7 @@ export default function OpponentLogo({ src, name, size = 28, className = "" }: O
 
   return (
     <span
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-full border border-edge bg-void/60 ${className}`}
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-full border border-edge bg-gradient-to-br from-crypt2/80 to-void/80 shadow-[inset_0_0_14px_rgba(168,85,247,0.10)] ${className}`}
       style={dimension}
       role="img"
       aria-label={`${name} logo`}
@@ -38,7 +38,7 @@ export default function OpponentLogo({ src, name, size = 28, className = "" }: O
         <Image
           src={src}
           alt=""
-          className="h-full w-full object-contain"
+          className="h-full w-full object-contain p-[15%]"
           width={size}
           height={size}
         />
