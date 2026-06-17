@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
 import {
   Button,
@@ -11,11 +11,51 @@ import {
   ImageField,
 } from "@/components/admin/ui";
 import OpponentLogo from "@/components/cards/OpponentLogo";
-import type { Match, Tournament } from "@/lib/types";
+import matchesSeed from "@/data/matches.json";
+import type { Bilingual, Match, MatchResult, Tournament } from "@/lib/types";
+
+type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
+
+interface MatchesPageCopy {
+  kicker: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  recordLabel: Bilingual;
+  recordIntro: Bilingual;
+  historyKicker: Bilingual;
+  historyTitle: Bilingual;
+  noResults: Bilingual;
+  unknownOpponent: Bilingual;
+  unknownTournament: Bilingual;
+  vodSoon: Bilingual;
+  watchVod: Bilingual;
+  filters: Record<Filter, Bilingual>;
+  stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
+  results: Record<MatchResult, Bilingual>;
+  tournamentLabels: Record<"placement" | "prize" | "season", Bilingual>;
+}
 
 interface MatchesFile {
+  page?: MatchesPageCopy;
   matches: Match[];
   tournaments: Tournament[];
+}
+
+const pageSeed = matchesSeed.page as MatchesPageCopy;
+const filterIds: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
+const statIds = ["wins", "draws", "losses", "winrate"] as const;
+const resultIds: MatchResult[] = ["win", "draw", "loss"];
+const tournamentLabelIds = ["placement", "prize", "season"] as const;
+
+function pageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
+  return {
+    ...pageSeed,
+    ...page,
+    filters: { ...pageSeed.filters, ...(page?.filters ?? {}) },
+    stats: { ...pageSeed.stats, ...(page?.stats ?? {}) },
+    results: { ...pageSeed.results, ...(page?.results ?? {}) },
+    tournamentLabels: { ...pageSeed.tournamentLabels, ...(page?.tournamentLabels ?? {}) },
+  };
 }
 
 const GAME_OPTS = [
@@ -40,11 +80,15 @@ function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
 
 export default function MatchesEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<MatchesFile>("matches");
+  const [view, setView] = useState<"page" | "matches" | "tournaments">("matches");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data) return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
 
   const { matches, tournaments } = data;
+  const page = pageCopy(data.page);
+  const setPage = (next: MatchesPageCopy) => setData({ ...data, page: next });
+  const patchPage = (patch: Partial<MatchesPageCopy>) => setPage({ ...page, ...patch });
 
   const setMatches = (next: Match[]) => setData({ ...data, matches: next });
   const setTournaments = (next: Tournament[]) => setData({ ...data, tournaments: next });
@@ -102,6 +146,123 @@ export default function MatchesEditor() {
       </div>
 
       {/* ── matches ─────────────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-2">
+        {([
+          { id: "page", label: "หน้า Matches (Page)", count: 4 },
+          { id: "matches", label: "ผลการแข่งขัน (Matches)", count: matches.length },
+          { id: "tournaments", label: "ทัวร์นาเมนต์", count: tournaments.length },
+        ] as const).map(({ id, label, count }) => {
+          const active = view === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setView(id)}
+              aria-pressed={active}
+              className={`inline-flex min-h-[40px] items-center gap-2 border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                active
+                  ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.3)]"
+                  : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+              }`}
+            >
+              {label}
+              <span className={`font-mono text-[10px] ${active ? "text-spectre" : "text-ash-dim"}`}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {view === "page" && (
+        <section className="space-y-4">
+          <Card>
+            <div className="mb-4">
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Matches page copy</h2>
+              <p className="mt-1 font-mono text-xs text-ash">
+                ข้อความทุกช่องนี้จะแสดงบนหน้า /matches และแก้ได้โดยไม่ต้อง deploy
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <BilingualField label="Hero kicker" value={page.kicker} onChange={(v) => patchPage({ kicker: v })} />
+              <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
+              <BilingualField label="Hero intro" value={page.intro} onChange={(v) => patchPage({ intro: v })} />
+              <BilingualField label="Record panel label" value={page.recordLabel} onChange={(v) => patchPage({ recordLabel: v })} />
+              <BilingualField label="Record panel intro" value={page.recordIntro} onChange={(v) => patchPage({ recordIntro: v })} />
+              <BilingualField label="History kicker" value={page.historyKicker} onChange={(v) => patchPage({ historyKicker: v })} />
+              <BilingualField label="History title" value={page.historyTitle} onChange={(v) => patchPage({ historyTitle: v })} />
+              <BilingualField label="No results message" value={page.noResults} onChange={(v) => patchPage({ noResults: v })} />
+              <BilingualField label="Unknown opponent fallback" value={page.unknownOpponent} onChange={(v) => patchPage({ unknownOpponent: v })} />
+              <BilingualField label="Unknown tournament fallback" value={page.unknownTournament} onChange={(v) => patchPage({ unknownTournament: v })} />
+              <BilingualField label="VOD soon label" value={page.vodSoon} onChange={(v) => patchPage({ vodSoon: v })} />
+              <BilingualField label="Watch VOD label" value={page.watchVod} onChange={(v) => patchPage({ watchVod: v })} />
+            </div>
+          </Card>
+
+          <Card>
+            <div className="mb-4">
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Filters, stats, results</h2>
+              <p className="mt-1 font-mono text-xs text-ash">
+                Labels ของ filter, stat cards, result badges และ tournament accordion
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="border border-edge bg-void/40 p-4">
+                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Filters</p>
+                <div className="grid gap-3">
+                  {filterIds.map((id) => (
+                    <BilingualField
+                      key={id}
+                      label={id}
+                      value={page.filters[id]}
+                      onChange={(v) => patchPage({ filters: { ...page.filters, [id]: v } })}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="border border-edge bg-void/40 p-4">
+                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Stats</p>
+                <div className="grid gap-3">
+                  {statIds.map((id) => (
+                    <BilingualField
+                      key={id}
+                      label={id}
+                      value={page.stats[id]}
+                      onChange={(v) => patchPage({ stats: { ...page.stats, [id]: v } })}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="border border-edge bg-void/40 p-4">
+                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Results</p>
+                <div className="grid gap-3">
+                  {resultIds.map((id) => (
+                    <BilingualField
+                      key={id}
+                      label={id}
+                      value={page.results[id]}
+                      onChange={(v) => patchPage({ results: { ...page.results, [id]: v } })}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="border border-edge bg-void/40 p-4">
+                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Tournament labels</p>
+                <div className="grid gap-3">
+                  {tournamentLabelIds.map((id) => (
+                    <BilingualField
+                      key={id}
+                      label={id}
+                      value={page.tournamentLabels[id]}
+                      onChange={(v) => patchPage({ tournamentLabels: { ...page.tournamentLabels, [id]: v } })}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </section>
+      )}
+
+      {view === "matches" && (
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
@@ -189,6 +350,7 @@ export default function MatchesEditor() {
           ))}
         </div>
       </section>
+      )}
 
       {/* ── tournaments ─────────────────────────────────────────── */}
       <section>

@@ -4,9 +4,15 @@ import React, { useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import Reveal from "@/components/ui/Reveal";
 import { EfootballIcon, MlbbIcon } from "@/components/ui/Icons";
-import type { Tournament } from "@/lib/types";
+import type { Bilingual, Tournament } from "@/lib/types";
 
-function AccordionItem({ tournament }: { tournament: Tournament }) {
+interface TournamentLabels {
+  placement: Bilingual;
+  prize: Bilingual;
+  season: Bilingual;
+}
+
+function AccordionItem({ tournament, labels }: { tournament: Tournament; labels?: TournamentLabels }) {
   const { t, pick } = useLanguage();
   const [open, setOpen] = useState(false);
   const GameIcon = tournament.game === "mlbb" ? MlbbIcon : EfootballIcon;
@@ -49,7 +55,7 @@ function AccordionItem({ tournament }: { tournament: Tournament }) {
           <div className="grid gap-4 border-t border-edge px-5 py-5 sm:grid-cols-3">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
-                {t("matches.placement")}
+                {labels ? pick(labels.placement) : t("matches.placement")}
               </p>
               <p className="mt-1.5 font-display text-lg font-bold text-glow">
                 {pick(tournament.placement)}
@@ -57,7 +63,7 @@ function AccordionItem({ tournament }: { tournament: Tournament }) {
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
-                {t("matches.prize")}
+                {labels ? pick(labels.prize) : t("matches.prize")}
               </p>
               <p className="keep-latin mt-1.5 font-display text-lg font-bold text-soul">
                 {tournament.prize}
@@ -65,7 +71,7 @@ function AccordionItem({ tournament }: { tournament: Tournament }) {
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
-                {t("matches.season")}
+                {labels ? pick(labels.season) : t("matches.season")}
               </p>
               <p className="keep-latin mt-1.5 font-display text-lg font-bold text-soul">
                 {tournament.season}
@@ -78,12 +84,12 @@ function AccordionItem({ tournament }: { tournament: Tournament }) {
   );
 }
 
-export default function TournamentAccordion({ tournaments }: { tournaments: Tournament[] }) {
+export default function TournamentAccordion({ tournaments, labels }: { tournaments: Tournament[]; labels?: TournamentLabels }) {
   return (
     <div className="flex flex-col gap-3">
       {tournaments.map((tournament, i) => (
         <Reveal key={tournament.id} delay={i * 70}>
-          <AccordionItem tournament={tournament} />
+          <AccordionItem tournament={tournament} labels={labels} />
         </Reveal>
       ))}
     </div>

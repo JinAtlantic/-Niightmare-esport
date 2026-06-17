@@ -11,23 +11,44 @@ import CountUp from "@/components/ui/CountUp";
 import { PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
-import type { GameId, Match, MatchResult, Tournament } from "@/lib/types";
+import matchesSeed from "@/data/matches.json";
+import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 
-const FILTERS: { id: Filter; labelKey: string }[] = [
-  { id: "all", labelKey: "matches.filter_all" },
-  { id: "mlbb", labelKey: "matches.filter_mlbb" },
-  { id: "efootball", labelKey: "matches.filter_efootball" },
-  { id: "wins", labelKey: "matches.filter_wins" },
-  { id: "losses", labelKey: "matches.filter_losses" },
-];
+const FILTERS: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
 
-const RESULT_KEY: Record<MatchResult, string> = {
-  win: "matches.result_win",
-  loss: "matches.result_loss",
-  draw: "matches.result_draw",
-};
+interface MatchesPageCopy {
+  kicker: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  recordLabel: Bilingual;
+  recordIntro: Bilingual;
+  historyKicker: Bilingual;
+  historyTitle: Bilingual;
+  noResults: Bilingual;
+  unknownOpponent: Bilingual;
+  unknownTournament: Bilingual;
+  vodSoon: Bilingual;
+  watchVod: Bilingual;
+  filters: Record<Filter, Bilingual>;
+  stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
+  results: Record<MatchResult, Bilingual>;
+  tournamentLabels: Record<"placement" | "prize" | "season", Bilingual>;
+}
+
+const pageSeed = matchesSeed.page as MatchesPageCopy;
+
+function mergePageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
+  return {
+    ...pageSeed,
+    ...page,
+    filters: { ...pageSeed.filters, ...(page?.filters ?? {}) },
+    stats: { ...pageSeed.stats, ...(page?.stats ?? {}) },
+    results: { ...pageSeed.results, ...(page?.results ?? {}) },
+    tournamentLabels: { ...pageSeed.tournamentLabels, ...(page?.tournamentLabels ?? {}) },
+  };
+}
 
 const RESULT_ACCENT: Record<MatchResult, { score: string; badge: string }> = {
   win: { score: "text-win", badge: "border-win/50 bg-win/10 text-win" },
@@ -51,18 +72,20 @@ function StatsStrip({
   draws,
   losses,
   winrate,
+  page,
 }: {
   wins: number;
   draws: number;
   losses: number;
   winrate: number;
+  page: MatchesPageCopy;
 }) {
-  const { t } = useLanguage();
+  const { pick } = useLanguage();
   const tiles = [
-    { value: wins, suffix: "", label: t("matches.filter_wins"), tone: "text-win" },
-    { value: draws, suffix: "", label: t("matches.draws"), tone: "text-ash" },
-    { value: losses, suffix: "", label: t("matches.filter_losses"), tone: "text-loss" },
-    { value: winrate, suffix: "%", label: t("matches.winrate"), tone: "text-glow" },
+    { value: wins, suffix: "", label: pick(page.stats.wins), tone: "text-win" },
+    { value: draws, suffix: "", label: pick(page.stats.draws), tone: "text-ash" },
+    { value: losses, suffix: "", label: pick(page.stats.losses), tone: "text-loss" },
+    { value: winrate, suffix: "%", label: pick(page.stats.winrate), tone: "text-glow" },
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -85,8 +108,8 @@ function StatsStrip({
 /** VOD control rendered on every row. Active link when a VOD exists,
  *  otherwise a disabled "VOD SOON" placeholder of the same footprint so
  *  the score/badge/VOD columns stay aligned across all rows. */
-function VodButton({ href }: { href: string | null }) {
-  const { t } = useLanguage();
+function VodButton({ href, page }: { href: string | null; page: MatchesPageCopy }) {
+  const { pick } = useLanguage();
   const base =
     "inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 border px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors";
 
@@ -99,7 +122,7 @@ function VodButton({ href }: { href: string | null }) {
         className={`${base} border-edge bg-void/40 text-ash hover:border-amethyst hover:text-glow`}
       >
         <PlayIcon size={13} />
-        {t("common.watch_vod")}
+        {pick(page.watchVod)}
       </a>
     );
   }
@@ -109,15 +132,17 @@ function VodButton({ href }: { href: string | null }) {
       aria-disabled="true"
       className={`${base} cursor-not-allowed border-edge/60 bg-void/20 text-ash-dim`}
     >
-      {t("matches.vod_soon")}
+      {pick(page.vodSoon)}
     </span>
   );
 }
 
-function MatchCard({ match }: { match: Match }) {
-  const { t, pick, lang } = useLanguage();
+function MatchCard({ match, page }: { match: Match; page: MatchesPageCopy }) {
+  const { pick, lang } = useLanguage();
   const accent = RESULT_ACCENT[match.result];
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
+  const tournamentName = pick(match.tournament).trim() || pick(page.unknownTournament);
+  const opponentName = match.opponent.trim() || pick(page.unknownOpponent);
 
   return (
     <article className="hover-glow group relative overflow-hidden border border-edge bg-crypt p-5 pl-6 md:p-6 md:pl-7">
@@ -138,7 +163,7 @@ function MatchCard({ match }: { match: Match }) {
 
       {/* tournament name — enlarged */}
       <p className="mt-3 text-center font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-xl">
-        {pick(match.tournament)}
+        {tournamentName}
       </p>
 
       <div className="relative mt-5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/25 py-4 md:hidden">
@@ -160,14 +185,14 @@ function MatchCard({ match }: { match: Match }) {
           <span
             className={`mt-2 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] ${accent.badge}`}
           >
-            {t(RESULT_KEY[match.result])}
+            {pick(page.results[match.result])}
           </span>
         </div>
 
         <div className="flex min-w-0 flex-col items-center gap-2 text-center">
-          <OpponentLogo src={match.opponentLogo} name={match.opponent} size={MOBILE_MATCH_LOGO_SIZE} />
+          <OpponentLogo src={match.opponentLogo} name={opponentName} size={MOBILE_MATCH_LOGO_SIZE} />
           <span className="keep-latin max-w-[104px] break-words font-display text-xs font-bold uppercase leading-tight text-soul">
-            {match.opponent}
+            {opponentName}
           </span>
         </div>
       </div>
@@ -190,34 +215,36 @@ function MatchCard({ match }: { match: Match }) {
           <span
             className={`mt-1 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:text-[10px] ${accent.badge}`}
           >
-            {t(RESULT_KEY[match.result])}
+            {pick(page.results[match.result])}
           </span>
         </div>
 
         {/* opponent side */}
         <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-end md:gap-3">
           <span className="keep-latin truncate text-center font-display text-base font-bold uppercase leading-tight text-soul md:text-right md:text-2xl">
-            {match.opponent}
+            {opponentName}
           </span>
-          <OpponentLogo src={match.opponentLogo} name={match.opponent} size={MATCH_LOGO_SIZE} />
+          <OpponentLogo src={match.opponentLogo} name={opponentName} size={MATCH_LOGO_SIZE} />
         </div>
       </div>
 
       {/* VOD — always present */}
       <div className="mx-auto mt-4 max-w-xs">
-        <VodButton href={match.vod} />
+        <VodButton href={match.vod} page={page} />
       </div>
     </article>
   );
 }
 
 export default function MatchesClient() {
-  const { t } = useLanguage();
+  const { pick } = useLanguage();
   const data = useContent().matches as {
+    page?: Partial<MatchesPageCopy>;
     matches: Match[];
     tournaments: Tournament[];
   };
   const [filter, setFilter] = useState<Filter>("all");
+  const page = mergePageCopy(data.page);
 
   const stats = useMemo(() => {
     const count = (r: MatchResult) => data.matches.filter((m) => m.result === r).length;
@@ -248,38 +275,51 @@ export default function MatchesClient() {
   return (
     <>
       <PageHeader
-        kicker={t("matches.kicker")}
-        title={t("sections.match_results")}
-        subtitle={t("matches.intro")}
+        kicker={pick(page.kicker)}
+        title={pick(page.title)}
+        subtitle={pick(page.intro)}
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-        {/* Record summary */}
+      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
         <Reveal>
-          <StatsStrip {...stats} />
-        </Reveal>
-
-        {/* Filter bar */}
-        <Reveal className="mt-10" delay={80}>
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map(({ id, labelKey }) => {
-              const active = filter === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setFilter(id)}
-                  aria-pressed={active}
-                  className={`inline-flex min-h-[44px] items-center border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
-                    active
-                      ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
-                      : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                  }`}
-                >
-                  {t(labelKey)}
-                </button>
-              );
-            })}
+          <div className="border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
+            <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
+              <div className="flex min-h-[170px] flex-col justify-between border border-edge bg-void/45 p-5">
+                <div>
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
+                    {pick(page.recordLabel)}
+                  </p>
+                  <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
+                    {pick(page.recordIntro)}
+                  </p>
+                </div>
+                <div
+                  aria-hidden
+                  className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
+                />
+              </div>
+              <StatsStrip {...stats} page={page} />
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {FILTERS.map((id) => {
+                const active = filter === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setFilter(id)}
+                    aria-pressed={active}
+                    className={`inline-flex min-h-[44px] items-center border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
+                      active
+                        ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+                        : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
+                    }`}
+                  >
+                    {pick(page.filters[id])}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </Reveal>
 
@@ -288,23 +328,23 @@ export default function MatchesClient() {
           {filtered.length > 0 ? (
             filtered.map((match, i) => (
               <Reveal key={match.id} delay={i * 55}>
-                <MatchCard match={match} />
+                <MatchCard match={match} page={page} />
               </Reveal>
             ))
           ) : (
             <p className="border border-edge bg-crypt p-8 text-center font-mono text-sm text-ash">
-              {t("matches.no_results")}
+              {pick(page.noResults)}
             </p>
           )}
         </div>
 
         {/* Tournament history */}
         <div className="mt-20">
-          <SectionLabel kicker={t("matches.history_kicker")}>
-            {t("sections.tournament_history")}
+          <SectionLabel kicker={pick(page.historyKicker)}>
+            {pick(page.historyTitle)}
           </SectionLabel>
           <div className="mt-8">
-            <TournamentAccordion tournaments={data.tournaments} />
+            <TournamentAccordion tournaments={data.tournaments} labels={page.tournamentLabels} />
           </div>
         </div>
       </section>

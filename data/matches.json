@@ -1,4 +1,122 @@
 {
+  "page": {
+    "kicker": {
+      "en": "The Record",
+      "lo": "ບັນທຶກການແຂ່ງ"
+    },
+    "title": {
+      "en": "Match Results",
+      "lo": "ຜົນການແຂ່ງຂັນ"
+    },
+    "intro": {
+      "en": "Track NIIGHTMARE match results, VODs, and tournament history across both divisions.",
+      "lo": "ຕິດຕາມຜົນການແຂ່ງ, VOD ແລະ ປະຫວັດທົວນາເມັນຂອງ NIIGHTMARE ທັງສອງສາຍ."
+    },
+    "recordLabel": {
+      "en": "Match Command",
+      "lo": "ສູນຂໍ້ມູນການແຂ່ງ"
+    },
+    "recordIntro": {
+      "en": "A media-ready view of the club record, filters, and latest match logs.",
+      "lo": "ມຸມມອງທີ່ພ້ອມສໍາລັບສື່: ສະຖິຕິ, ຕົວກອງ ແລະ ບັນທຶກແມຕຊ໌ຫຼ້າສຸດ."
+    },
+    "historyKicker": {
+      "en": "Honours",
+      "lo": "ກຽດສັກສີ"
+    },
+    "historyTitle": {
+      "en": "Tournament History",
+      "lo": "ປະຫວັດທົວນາເມັນ"
+    },
+    "noResults": {
+      "en": "No matches found for this filter.",
+      "lo": "ບໍ່ພົບການແຂ່ງຂັນສໍາລັບຕົວກອງນີ້."
+    },
+    "unknownOpponent": {
+      "en": "Opponent TBA",
+      "lo": "ລໍຖ້າຢືນຢັນຄູ່ແຂ່ງ"
+    },
+    "unknownTournament": {
+      "en": "Match Record",
+      "lo": "ບັນທຶກແມຕຊ໌"
+    },
+    "vodSoon": {
+      "en": "VOD Soon",
+      "lo": "VOD ຈະຕາມມາ"
+    },
+    "watchVod": {
+      "en": "Watch VOD",
+      "lo": "ເບິ່ງ VOD"
+    },
+    "filters": {
+      "all": {
+        "en": "All",
+        "lo": "ທັງໝົດ"
+      },
+      "mlbb": {
+        "en": "MLBB",
+        "lo": "MLBB"
+      },
+      "efootball": {
+        "en": "eFootball",
+        "lo": "eFootball"
+      },
+      "wins": {
+        "en": "Wins",
+        "lo": "ຊະນະ"
+      },
+      "losses": {
+        "en": "Losses",
+        "lo": "ແພ້"
+      }
+    },
+    "stats": {
+      "wins": {
+        "en": "Wins",
+        "lo": "ຊະນະ"
+      },
+      "draws": {
+        "en": "Draws",
+        "lo": "ສະເໝີ"
+      },
+      "losses": {
+        "en": "Losses",
+        "lo": "ແພ້"
+      },
+      "winrate": {
+        "en": "Win Rate",
+        "lo": "ອັດຕາຊະນະ"
+      }
+    },
+    "results": {
+      "win": {
+        "en": "Win",
+        "lo": "ຊະນະ"
+      },
+      "loss": {
+        "en": "Loss",
+        "lo": "ແພ້"
+      },
+      "draw": {
+        "en": "Draw",
+        "lo": "ສະເໝີ"
+      }
+    },
+    "tournamentLabels": {
+      "placement": {
+        "en": "Placement",
+        "lo": "ອັນດັບ"
+      },
+      "prize": {
+        "en": "Prize",
+        "lo": "ເງິນລາງວັນ"
+      },
+      "season": {
+        "en": "Season",
+        "lo": "ລະດູການ"
+      }
+    }
+  },
   "matches": [
     {
       "id": "mmqdvgagm924",
