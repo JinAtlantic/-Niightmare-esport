@@ -6,14 +6,16 @@ import HomeEditor from "@/components/admin/HomeEditor";
 import MatchesEditor from "@/components/admin/MatchesEditor";
 import NewsEditor from "@/components/admin/NewsEditor";
 import RosterEditor from "@/components/admin/RosterEditor";
+import SponsorsEditor from "@/components/admin/SponsorsEditor";
 
-type Tab = "home" | "news" | "matches" | "roster";
+type Tab = "home" | "news" | "matches" | "roster" | "sponsors";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "หน้า Home (นัดต่อไป)" },
   { id: "news", label: "ข่าวสาร" },
   { id: "matches", label: "แมตช์ & ทัวร์นาเมนต์" },
   { id: "roster", label: "นักแข่ง (Roster)" },
+  { id: "sponsors", label: "Sponsors" },
 ];
 
 export default function AdminApp() {
@@ -84,6 +86,7 @@ export default function AdminApp() {
         {tab === "news" && <NewsEditor />}
         {tab === "matches" && <MatchesEditor />}
         {tab === "roster" && <RosterEditor />}
+        {tab === "sponsors" && <SponsorsEditor />}
       </main>
     </div>
   );
