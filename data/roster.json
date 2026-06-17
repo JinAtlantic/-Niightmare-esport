@@ -101,6 +101,7 @@
       "id": "staff-1",
       "ign": "Coach V",
       "name": "V",
+      "officialRole": "head_coach",
       "role": {
         "en": "Head Coach MLBB",
         "lo": "ຫົວໜ້າຄູຝຶກ"
@@ -111,6 +112,7 @@
       "id": "staff-2",
       "ign": "Jin",
       "name": "Mr.Sitthidet Xaysana",
+      "officialRole": "developer",
       "role": {
         "en": "Website Developer",
         "lo": "ນັກພັດທະນາເວັບໄຊ້ທ໌"

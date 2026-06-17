@@ -1,5 +1,5 @@
 import React from "react";
-import TeamLogo from "@/components/TeamLogo";
+import TeamLogo from "@/components/cards/TeamLogo";
 
 /** Route-level loading fallback: the team logo pulses on the void. */
 export default function Loading() {

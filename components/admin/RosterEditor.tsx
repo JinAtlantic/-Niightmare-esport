@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
 import PhotoCropEditor from "@/components/admin/PhotoCropEditor";
 import {
@@ -13,6 +13,18 @@ import {
   Label,
 } from "@/components/admin/ui";
 import type { Player, StaffMember, GameId } from "@/lib/types";
+import { STAFF_ROLES, STAFF_ROLE_TIER, staffRoleKey } from "@/lib/staff";
+
+const TIER_LABEL: Record<1 | 2 | 3, string> = {
+  1: "แถว 1 · บริหาร",
+  2: "แถว 2 · ปฏิบัติงาน",
+  3: "แถว 3 · เทคนิค/สนับสนุน",
+};
+
+const STAFF_ROLE_OPTIONS = STAFF_ROLES.map((r) => ({
+  value: r.value,
+  label: `${r.label.en} — ${TIER_LABEL[STAFF_ROLE_TIER[r.value]]}`,
+}));
 
 interface RosterFile {
   mlbb: { players: Player[] };
@@ -72,7 +84,19 @@ function PlayerList({
         <Button onClick={onAdd}>+ เพิ่มนักแข่ง</Button>
       </div>
       <div className="space-y-4">
-        {players.map((p, i) => (
+        {players.map((p, i) => {
+          const setHero = (k: number, v: string) => {
+            const arr = [...(p.heroes ?? [])];
+            while (arr.length < 3) arr.push("");
+            arr[k] = v;
+            const cleaned = arr.map((x) => x.trim());
+            onPatch(i, { heroes: cleaned.some(Boolean) ? cleaned : undefined });
+          };
+          const setGear = (key: "device" | "audio", v: string) => {
+            const gear = { ...p.gear, [key]: v.trim() || undefined };
+            onPatch(i, { gear: gear.device || gear.audio ? gear : undefined });
+          };
+          return (
           <Card key={p.id}>
             <div className="mb-3 flex items-center justify-between gap-2">
               <span className="font-mono text-xs text-spectre">{p.ign || "—"}</span>
@@ -122,6 +146,30 @@ function PlayerList({
                   />
                 </div>
               )}
+              {/* Profile extras shown in the player modal */}
+              <div className="md:col-span-2 grid gap-3 sm:grid-cols-3">
+                <TextField label="Signature Hero 1" value={p.heroes?.[0] ?? ""} onChange={(v) => setHero(0, v)} />
+                <TextField label="Signature Hero 2" value={p.heroes?.[1] ?? ""} onChange={(v) => setHero(1, v)} />
+                <TextField label="Signature Hero 3" value={p.heroes?.[2] ?? ""} onChange={(v) => setHero(2, v)} />
+              </div>
+              <TextField
+                label="Win Rate (เช่น 68%)"
+                value={p.winRate ?? ""}
+                onChange={(v) => onPatch(i, { winRate: v || undefined })}
+              />
+              <div className="hidden md:block" />
+              <TextField label="GEAR — มือถือ/เครื่อง" value={p.gear?.device ?? ""} onChange={(v) => setGear("device", v)} />
+              <TextField label="GEAR — หูฟัง" value={p.gear?.audio ?? ""} onChange={(v) => setGear("audio", v)} />
+
+              <div className="md:col-span-2">
+                <TextField
+                  label="อีเมล (ไม่บังคับ — ใส่แล้วจะมีปุ่มก๊อปปี้อีเมลในโปรไฟล์)"
+                  value={p.email ?? ""}
+                  onChange={(v) => onPatch(i, { email: v.trim() || undefined })}
+                  placeholder="name@niightmare.gg"
+                />
+              </div>
+
               <div className="md:col-span-2">
                 <Label>โซเชียล — วางลิงก์เฉพาะที่นักแข่งคนนี้ใช้ (เว้นว่าง = ไม่โชว์ไอคอน)</Label>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -147,7 +195,8 @@ function PlayerList({
               </div>
             </div>
           </Card>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
@@ -155,6 +204,7 @@ function PlayerList({
 
 export default function RosterEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<RosterFile>("roster");
+  const [view, setView] = useState<"players" | "staff">("players");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data) return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
@@ -174,6 +224,8 @@ export default function RosterEditor() {
 
   const patchStaff = (i: number, patch: Partial<StaffMember>) =>
     setData({ ...data, staff: data.staff.map((x, idx) => (idx === i ? { ...x, ...patch } : x)) });
+  const moveStaff = (i: number, dir: -1 | 1) =>
+    setData({ ...data, staff: move(data.staff, i, dir) });
   const setStaffSocial = (i: number, key: keyof StaffMember["socials"], val: string) => {
     const socials = { ...data.staff[i].socials };
     const v = val.trim();
@@ -208,10 +260,41 @@ export default function RosterEditor() {
         </div>
       </div>
 
-      <PlayerList title="ทีม MLBB" {...sectionProps("mlbb")} />
-      <PlayerList title="ทีม eFootball" {...sectionProps("efootball")} />
+      {/* sub-tabs — edit players or staff separately for a shorter, focused form */}
+      <div className="flex flex-wrap gap-2">
+        {([
+          { id: "players", label: "นักกีฬา (Players)", count: data.mlbb.players.length + data.efootball.players.length },
+          { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: data.staff.length },
+        ] as const).map(({ id, label, count }) => {
+          const active = view === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setView(id)}
+              aria-pressed={active}
+              className={`inline-flex min-h-[40px] items-center gap-2 border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                active
+                  ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.3)]"
+                  : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+              }`}
+            >
+              {label}
+              <span className={`font-mono text-[10px] ${active ? "text-spectre" : "text-ash-dim"}`}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {view === "players" && (
+        <>
+          <PlayerList title="ทีม MLBB" {...sectionProps("mlbb")} />
+          <PlayerList title="ทีม eFootball" {...sectionProps("efootball")} />
+        </>
+      )}
 
       {/* staff */}
+      {view === "staff" && (
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">ทีมงาน (Staff)</h2>
@@ -231,9 +314,13 @@ export default function RosterEditor() {
             <Card key={s.id}>
               <div className="mb-3 flex items-center justify-between gap-2">
                 <span className="font-mono text-xs text-spectre">{s.name || "—"}</span>
-                <Button variant="danger" onClick={() => setData({ ...data, staff: data.staff.filter((_, idx) => idx !== i) })}>
-                  ลบ
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button onClick={() => moveStaff(i, -1)}>↑</Button>
+                  <Button onClick={() => moveStaff(i, 1)}>↓</Button>
+                  <Button variant="danger" onClick={() => setData({ ...data, staff: data.staff.filter((_, idx) => idx !== i) })}>
+                    ลบ
+                  </Button>
+                </div>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <TextField
@@ -241,11 +328,39 @@ export default function RosterEditor() {
                   value={s.name ?? ""}
                   onChange={(v) => patchStaff(i, { name: v })}
                 />
+                <TextField
+                  label="ชื่อเล่น / Nickname (ไม่บังคับ)"
+                  value={s.ign ?? ""}
+                  onChange={(v) => patchStaff(i, { ign: v || undefined })}
+                />
+                <div className="md:col-span-2">
+                  <SelectField
+                    label="ตำแหน่งทางการ (จัดลำดับแถวอัตโนมัติ)"
+                    value={staffRoleKey(s)}
+                    onChange={(v) => patchStaff(i, { officialRole: v as StaffMember["officialRole"] })}
+                    options={STAFF_ROLE_OPTIONS}
+                  />
+                </div>
                 <div className="md:col-span-2">
                   <BilingualField
-                    label="ตำแหน่ง"
+                    label="ตำแหน่งที่แสดงบนการ์ด (Display)"
                     value={s.role}
                     onChange={(v) => patchStaff(i, { role: v })}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <BilingualField
+                    label="หน้าที่รับผิดชอบ (Responsibility / Bio)"
+                    value={s.bio ?? { en: "", lo: "" }}
+                    onChange={(v) => patchStaff(i, { bio: v.en || v.lo ? v : undefined })}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <TextField
+                    label="อีเมลธุรกิจ (ไม่บังคับ — เว้นว่าง = ใช้อีเมลกลางของสโมสร)"
+                    value={s.email ?? ""}
+                    onChange={(v) => patchStaff(i, { email: v.trim() || undefined })}
+                    placeholder="name@niightmare.gg"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -285,6 +400,7 @@ export default function RosterEditor() {
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }

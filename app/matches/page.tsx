@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import MatchesClient from "@/components/MatchesClient";
+import MatchesClient from "@/components/clients/MatchesClient";
+import JsonLd from "@/components/seo/JsonLd";
+import { matchesSchema, breadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Matches & Tournaments",
@@ -8,5 +10,18 @@ export const metadata: Metadata = {
 };
 
 export default function MatchesPage() {
-  return <MatchesClient />;
+  return (
+    <>
+      <JsonLd
+        data={[
+          matchesSchema(),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Matches", path: "/matches" },
+          ]),
+        ]}
+      />
+      <MatchesClient />
+    </>
+  );
 }

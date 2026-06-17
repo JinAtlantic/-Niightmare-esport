@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import ContactClient from "@/components/ContactClient";
+import ContactClient from "@/components/clients/ContactClient";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Contact & Media Kit",
@@ -8,5 +10,15 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return <ContactClient />;
+  return (
+    <>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ])}
+      />
+      <ContactClient />
+    </>
+  );
 }

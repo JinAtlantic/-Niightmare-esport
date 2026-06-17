@@ -40,6 +40,7 @@
     "upcoming_status_live": { "en": "LIVE NOW", "lo": "ກຳລັງແຂ່ງ" },
     "upcoming_status_practice": { "en": "IN SCRIMS", "lo": "ຊ່ວງຊ້ອມທີມ" },
     "upcoming_practice_label": { "en": "TEAM PRACTICE", "lo": "ການຊ້ອມຂອງທີມ" },
+    "watch_live": { "en": "WATCH LIVE", "lo": "ເບິ່ງຖ່າຍທອດສົດ" },
     "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" }
   },
   "common": {
@@ -47,19 +48,46 @@
     "contact_us": { "en": "CONTACT US", "lo": "ຕິດຕໍ່ຫາເຮົາ" },
     "vs": { "en": "VS", "lo": "ປະທະ" },
     "watch_vod": { "en": "WATCH VOD", "lo": "ເບິ່ງ VOD" },
-    "loading": { "en": "ENTERING THE VOID", "lo": "ກຳລັງເຂົ້າສູ່ຄວາມມືດ" }
+    "loading": { "en": "ENTERING THE VOID", "lo": "ກຳລັງເຂົ້າສູ່ຄວາມມືດ" },
+    "close": { "en": "Close", "lo": "ປິດ" }
   },
   "roster": {
     "tab_mlbb": { "en": "MOBILE LEGENDS", "lo": "MOBILE LEGENDS" },
     "tab_efootball": { "en": "eFOOTBALL", "lo": "eFOOTBALL" },
     "lineup_label": { "en": "LINEUP", "lo": "ນັກກິລາ" },
-    "staff_label": { "en": "Operations & Management", "lo": "ທີມປະຕິບັດງານ ແລະ ບໍລິຫານ" },
+    "staff_label": { "en": "Behind the Team", "lo": "ເບື້ອງຫຼັງທີມ" },
     "intro": {
       "en": "Meet the players who carry the reaper's banner",
-      "lo": "ພົບກັບເຫຼົ່ານັກຮົບຜູ້ແບກຮັບສັກສີແຫ່ງຍົມມທູດ"
+      "lo": "ພົບກັບ ເຫຼົ່ານັກຮົບ ຜູ້ແບກຮັບ ສັກສີ ແຫ່ງຍົມມະທູດ"
     },
     "kicker": { "en": "THE LINEUP", "lo": "ລາຍຊື່ນັກກີລາ" },
-    "staff_kicker": { "en": "BEHIND THE TEAM", "lo": "ເບື້ອງຫຼັງທີມ" }
+    "staff_kicker": { "en": "BEHIND THE TEAM", "lo": "ເບື້ອງຫຼັງທີມ" },
+    "badge_main": { "en": "Main", "lo": "ຫຼັກ" },
+    "badge_sub": { "en": "Sub", "lo": "ສຳຮອງ" },
+    "profile_kicker": { "en": "PLAYER PROFILE", "lo": "ໂປຣໄຟລ໌ນັກກີລາ" },
+    "role_label": { "en": "ROLE", "lo": "ຕຳແໜ່ງ" },
+    "view_profile": { "en": "View profile", "lo": "ເບິ່ງໂປຣໄຟລ໌" },
+    "gear_label": { "en": "GEAR", "lo": "ອຸປະກອນ" },
+    "stats_label": { "en": "STATS", "lo": "ສະຖິຕິ" },
+    "gear_device": { "en": "Device", "lo": "ເຄື່ອງ" },
+    "gear_audio": { "en": "Audio", "lo": "ຫູຟັງ" },
+    "stat_division": { "en": "Division", "lo": "ສາຍແຂ່ງ" },
+    "stat_status": { "en": "Status", "lo": "ສະຖານະ" },
+    "tba": { "en": "TBA", "lo": "ລໍຖ້າປະກາດ" },
+    "signature_heroes": { "en": "SIGNATURE HEROES", "lo": "ຮີໂຣ່ຖະໜັດ" },
+    "win_rate": { "en": "WIN RATE", "lo": "ອັດຕາຊະນະ" },
+    "responsibility": { "en": "RESPONSIBILITY", "lo": "ໜ້າທີ່ຮັບຜິດຊອບ" },
+    "official_role": { "en": "OFFICIAL ROLE", "lo": "ຕຳແໜ່ງທາງການ" },
+    "responsibility_fallback": {
+      "en": "Part of the crew that keeps NIIGHTMARE running behind the scenes.",
+      "lo": "ໜຶ່ງໃນທີມງານທີ່ຄອຍຂັບເຄື່ອນ NIIGHTMARE ຢູ່ເບື້ອງຫຼັງ."
+    },
+    "business_email": { "en": "Business email", "lo": "ອີເມວທຸລະກິດ" },
+    "copy_email": { "en": "Copy email", "lo": "ສຳເນົາອີເມວ" },
+    "email_copied": { "en": "Email copied to clipboard!", "lo": "ສຳເນົາອີເມວແລ້ວ!" },
+    "tier_executive": { "en": "Executive", "lo": "ບໍລິຫານ" },
+    "tier_operations": { "en": "Operations & Coaching", "lo": "ປະຕິບັດງານ ແລະ ຄູຝຶກ" },
+    "tier_technical": { "en": "Technical & Support", "lo": "ເຕັກນິກ ແລະ ສະໜັບສະໜູນ" }
   },
   "matches": {
     "filter_all": { "en": "ALL", "lo": "ທັງໝົດ" },
@@ -84,7 +112,10 @@
     "draws": { "en": "DRAWS", "lo": "ສະເໝີ" },
     "winrate": { "en": "WIN RATE", "lo": "ອັດຕາຊະນະ" },
     "history_kicker": { "en": "TROPHY ROOM", "lo": "ຫ້ອງລາງວັນ" },
-    "vod_soon": { "en": "VOD SOON", "lo": "ໄວໆນີ້" }
+    "vod_soon": { "en": "VOD SOON", "lo": "ໄວໆນີ້" },
+    "trophy_cabinet": { "en": "TROPHY CABINET", "lo": "ຕູ້ລາງວັນ" },
+    "honours_kicker": { "en": "HONOURS", "lo": "ກຽດຕິຍົດ" },
+    "honours_empty": { "en": "Silverware incoming — the reapers are just getting started.", "lo": "ລາງວັນກຳລັງມາ — ທີມຫາກໍ່ເລີ່ມຕົ້ນ." }
   },
   "sponsors": {
     "hero_title": { "en": "PARTNER WITH NIIGHTMARE", "lo": "ຮ່ວມເປັນຄູ່ຮ່ວມງານກັບ NIIGHTMARE" },
@@ -128,8 +159,31 @@
     "quick_links": { "en": "QUICK LINKS", "lo": "ລິ້ງດ່ວນ" },
     "follow_us": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" },
     "copyright": {
-      "en": "© 2025 NIIGHTMARE ESPORTS — LAO PDR",
-      "lo": "© 2025 NIIGHTMARE ESPORTS — ສປປ ລາວ"
+      "en": "© 2026 NIIGHTMARE ESPORTS — LAO PDR",
+      "lo": "© 2026 NIIGHTMARE ESPORTS — ສປປ ລາວ"
+    },
+    "privacy": { "en": "Privacy Policy", "lo": "ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ" },
+    "terms": { "en": "Terms of Service", "lo": "ຂໍ້ກຳນົດການນຳໃຊ້" }
+  },
+  "legal": {
+    "kicker": { "en": "LEGAL", "lo": "ກົດໝາຍ" },
+    "last_updated": { "en": "Last updated", "lo": "ອັບເດດລ່າສຸດ" },
+    "governing_note": {
+      "en": "This document is provided in English, the governing language. Any translation is offered for convenience only; if there is a conflict, the English version prevails.",
+      "lo": "ເອກະສານນີ້ສະໜອງເປັນພາສາອັງກິດ ເຊິ່ງເປັນພາສາຫຼັກ. ການແປແມ່ນເພື່ອຄວາມສະດວກເທົ່ານັ້ນ; ຫາກມີຂໍ້ຂັດແຍ້ງ ໃຫ້ຖືພາສາອັງກິດເປັນຫຼັກ."
+    },
+    "questions": { "en": "Questions about this document?", "lo": "ມີຄຳຖາມກ່ຽວກັບເອກະສານນີ້ບໍ?" },
+    "contact_cta": { "en": "Contact us", "lo": "ຕິດຕໍ່ຫາເຮົາ" },
+    "back_home": { "en": "Back to home", "lo": "ກັບໄປໜ້າຫຼັກ" },
+    "privacy_title": { "en": "Privacy Policy", "lo": "ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ" },
+    "privacy_intro": {
+      "en": "How NIIGHTMARE Esports collects, uses, and protects your information — including the data you share when applying for a tryout.",
+      "lo": "NIIGHTMARE Esports ເກັບກຳ, ນຳໃຊ້ ແລະ ປົກປ້ອງຂໍ້ມູນຂອງທ່ານແນວໃດ — ລວມທັງຂໍ້ມູນທີ່ທ່ານສົ່ງມາເມື່ອສະໝັກທົດສອບຝີມື."
+    },
+    "terms_title": { "en": "Terms of Service", "lo": "ຂໍ້ກຳນົດການນຳໃຊ້" },
+    "terms_intro": {
+      "en": "The terms that govern your use of the NIIGHTMARE Esports website, our intellectual property, and any submissions you make.",
+      "lo": "ຂໍ້ກຳນົດທີ່ຄວບຄຸມການນຳໃຊ້ເວັບໄຊ້ NIIGHTMARE Esports, ຊັບສິນທາງປັນຍາຂອງພວກເຮົາ ແລະ ການສົ່ງຂໍ້ມູນຕ່າງໆ."
     }
   }
 }

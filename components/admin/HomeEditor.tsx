@@ -9,15 +9,47 @@ import {
   SelectField,
   BilingualField,
   ImageField,
+  Label,
 } from "@/components/admin/ui";
-import OpponentLogo from "@/components/OpponentLogo";
+import OpponentLogo from "@/components/cards/OpponentLogo";
+import {
+  MailIcon,
+  FacebookIcon,
+  InstagramIcon,
+  YoutubeIcon,
+  DiscordIcon,
+} from "@/components/ui/Icons";
 import type { UpcomingMatch } from "@/lib/types";
 
-/** site.json — we only edit `upcomingMatch`; everything else is preserved. */
+interface Contact {
+  email?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  discord?: string;
+  [key: string]: string | undefined;
+}
+
+/** site.json — we edit `upcomingMatch` and `contact`; everything else is preserved. */
 interface SiteFile {
   upcomingMatch: UpcomingMatch;
+  contact?: Contact;
   [key: string]: unknown;
 }
+
+/** The footer/contact channels, in footer order, each with its icon + hint. */
+const CONTACT_FIELDS: {
+  key: keyof Contact;
+  label: string;
+  Icon: typeof MailIcon;
+  placeholder: string;
+}[] = [
+  { key: "email", label: "Email", Icon: MailIcon, placeholder: "contact@niightmare.gg" },
+  { key: "facebook", label: "Facebook", Icon: FacebookIcon, placeholder: "https://facebook.com/…" },
+  { key: "instagram", label: "Instagram", Icon: InstagramIcon, placeholder: "https://instagram.com/…" },
+  { key: "youtube", label: "YouTube", Icon: YoutubeIcon, placeholder: "https://youtube.com/@…" },
+  { key: "discord", label: "Discord", Icon: DiscordIcon, placeholder: "https://discord.gg/…" },
+];
 
 const STATUS_OPTS = [
   { value: "next", label: "นัดต่อไป (Next)" },
@@ -49,6 +81,12 @@ export default function HomeEditor() {
   const m = data.upcomingMatch;
   const patch = (p: Partial<UpcomingMatch>) =>
     setData({ ...data, upcomingMatch: { ...m, ...p } });
+
+  const contact: Contact = data.contact ?? {};
+  const patchContact = (key: keyof Contact, value: string) => {
+    const next = { ...contact, [key]: value.trim() || undefined };
+    setData({ ...data, contact: next });
+  };
 
   const isPractice = m.status === "practice";
 
@@ -140,6 +178,14 @@ export default function HomeEditor() {
                 onChange={(p) => patch({ opponentLogo: p || undefined })}
               />
             </div>
+            <div className="md:col-span-2">
+              <TextField
+                label="ลิงก์ไลฟ์สด (YouTube/Facebook) — โชว์ปุ่ม WATCH LIVE เมื่อสถานะ = กำลังแข่ง"
+                value={m.streamUrl ?? ""}
+                onChange={(v) => patch({ streamUrl: v || undefined })}
+                placeholder="https://youtube.com/live/…"
+              />
+            </div>
           </div>
 
           {isPractice && (
@@ -148,6 +194,42 @@ export default function HomeEditor() {
               PRACTICE” แทนการ vs ทีมอื่น
             </p>
           )}
+        </Card>
+      </section>
+
+      {/* Footer / contact links */}
+      <section>
+        <div className="mb-4">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
+            ลิงก์ติดต่อ & Footer
+          </h2>
+          <p className="mt-1 font-mono text-[11px] text-ash">
+            ไอคอนท้ายเว็บ (Footer) — เว้นว่างช่องไหน ไอคอนนั้นจะถูกซ่อนอัตโนมัติ
+          </p>
+        </div>
+
+        <Card>
+          <div className="space-y-3">
+            {CONTACT_FIELDS.map(({ key, label, Icon, placeholder }) => (
+              <div key={key}>
+                <Label>{label}</Label>
+                <div className="flex items-center gap-2.5">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/60 text-amethyst">
+                    <Icon size={18} />
+                  </span>
+                  <input
+                    className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst"
+                    placeholder={placeholder}
+                    value={contact[key] ?? ""}
+                    onChange={(e) => patchContact(key, e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 font-mono text-[11px] leading-relaxed text-ash">
+            Email ใส่เป็นที่อยู่อีเมลธรรมดา (เช่น contact@niightmare.gg) — ระบบจะทำลิงก์ mailto ให้เอง
+          </p>
         </Card>
       </section>
     </div>

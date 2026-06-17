@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import SponsorsClient from "@/components/SponsorsClient";
+import SponsorsClient from "@/components/clients/SponsorsClient";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Sponsors & Partners",
@@ -8,5 +10,15 @@ export const metadata: Metadata = {
 };
 
 export default function SponsorsPage() {
-  return <SponsorsClient />;
+  return (
+    <>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Sponsors", path: "/sponsors" },
+        ])}
+      />
+      <SponsorsClient />
+    </>
+  );
 }

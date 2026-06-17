@@ -10,7 +10,7 @@ import {
   BilingualField,
   ImageField,
 } from "@/components/admin/ui";
-import OpponentLogo from "@/components/OpponentLogo";
+import OpponentLogo from "@/components/cards/OpponentLogo";
 import type { Match, Tournament } from "@/lib/types";
 
 interface MatchesFile {

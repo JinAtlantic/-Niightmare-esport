@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import RosterClient from "@/components/RosterClient";
+import RosterClient from "@/components/clients/RosterClient";
+import JsonLd from "@/components/seo/JsonLd";
+import { sportsTeamSchema, breadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Roster",
@@ -8,5 +10,18 @@ export const metadata: Metadata = {
 };
 
 export default function RosterPage() {
-  return <RosterClient />;
+  return (
+    <>
+      <JsonLd
+        data={[
+          sportsTeamSchema(),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Roster", path: "/roster" },
+          ]),
+        ]}
+      />
+      <RosterClient />
+    </>
+  );
 }

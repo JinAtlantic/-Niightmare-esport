@@ -37,8 +37,38 @@ export interface Player {
   /** Admin-controlled crop for the photo: zoom (scale, 1 = fit) and focal
    *  point x/y as percentages (0–100). */
   photoCrop?: { zoom: number; x: number; y: number };
+  /** Optional setup shown in the profile modal's GEAR section. Empty fields
+   *  fall back to a "TBA" placeholder — never fabricated. */
+  gear?: { device?: string; audio?: string };
+  /** Optional signature heroes (names) shown as boxes in the profile modal. */
+  heroes?: string[];
+  /** Optional win-rate string (e.g. "68%"). Shown as "—" when absent. */
+  winRate?: string;
+  /** Optional contact email; when set, the profile modal shows a copy button. */
+  email?: string;
   socials: Socials;
 }
+
+/**
+ * Official position key. Drives the Operations & Management hierarchy rows
+ * (executive → operations → technical/support) independently of the free-text
+ * display `role`. Legacy entries without it fall back to keyword inference.
+ */
+export type StaffRole =
+  // Tier 1 — executive
+  | "owner"
+  | "founder"
+  | "ceo"
+  // Tier 2 — operations / leadership
+  | "manager"
+  | "head_coach"
+  | "coach"
+  | "analyst"
+  // Tier 3 — technical / support
+  | "developer"
+  | "designer"
+  | "content"
+  | "other";
 
 export interface StaffMember {
   id: string;
@@ -46,6 +76,12 @@ export interface StaffMember {
   ign?: string;
   name?: string;
   role: Bilingual;
+  /** Official position used to place the member in the management hierarchy. */
+  officialRole?: StaffRole;
+  /** Optional direct business email. Falls back to the club's contact email. */
+  email?: string;
+  /** Optional short responsibility / bio shown in the staff modal. */
+  bio?: Bilingual;
   /** Optional staff photo (e.g. "/staff/coach.png"). Falls back to a monogram. */
   photo?: string;
   socials: Socials;
@@ -70,6 +106,9 @@ export interface UpcomingMatch {
   opponent: string;
   /** Optional opponent logo (e.g. "/teams/vipers.png"); falls back to a monogram. */
   opponentLogo?: string;
+  /** Optional live-stream URL (YouTube/Facebook). When set + status "live",
+   *  the home hero shows a WATCH LIVE button. */
+  streamUrl?: string;
 }
 
 export interface Match {

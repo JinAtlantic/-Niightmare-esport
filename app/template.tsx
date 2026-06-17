@@ -7,5 +7,5 @@ import React from "react";
  * fade-in animation gives a smooth page transition between routes.
  */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="animate-fadeIn">{children}</div>;
+  return <div className="page-enter">{children}</div>;
 }
