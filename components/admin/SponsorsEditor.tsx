@@ -2,13 +2,36 @@
 
 import React from "react";
 import { useData } from "@/components/admin/useData";
-import { BilingualField, Button, Card, TextField } from "@/components/admin/ui";
-import type { Sponsor, SponsorTier } from "@/lib/types";
+import { BilingualField, Button, Card, Label, TextArea, TextField } from "@/components/admin/ui";
+import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
+
+interface SponsorsPageCopy {
+  heroTitle: Bilingual;
+  heroSubtitle: Bilingual;
+  partnersLabel: Bilingual;
+  tiersLabel: Bilingual;
+  tiersIntro: Bilingual;
+}
 
 interface SponsorsFile {
+  page?: SponsorsPageCopy;
   sponsors: Sponsor[];
   tiers: SponsorTier[];
 }
+
+const DEFAULT_PAGE: SponsorsPageCopy = {
+  heroTitle: { en: "PARTNER WITH NIIGHTMARE", lo: "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE" },
+  heroSubtitle: {
+    en: "Join us as we dominate the Lao esports scene",
+    lo: "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ",
+  },
+  partnersLabel: { en: "OUR PARTNERS", lo: "ພາກສ່ວນຂອງພວກເຮົາ" },
+  tiersLabel: { en: "SPONSORSHIP TIERS", lo: "ລະດັບການສະໜັບສະໜູນ" },
+  tiersIntro: {
+    en: "Three ways to put your brand in front of a passionate Lao gaming audience.",
+    lo: "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ.",
+  },
+};
 
 const uid = (prefix: string) =>
   `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
@@ -21,6 +44,38 @@ function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
   return next;
 }
 
+function BilingualTextArea({
+  label,
+  value,
+  onChange,
+  rows = 3,
+}: {
+  label: string;
+  value: Bilingual;
+  onChange: (v: Bilingual) => void;
+  rows?: number;
+}) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="grid gap-2 md:grid-cols-2">
+        <TextArea
+          label="EN"
+          value={value.en}
+          rows={rows}
+          onChange={(en) => onChange({ ...value, en })}
+        />
+        <TextArea
+          label="ລາວ"
+          value={value.lo}
+          rows={rows}
+          onChange={(lo) => onChange({ ...value, lo })}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function SponsorsEditor() {
   const { data, setData, loading, saving, error, savedAt, save } =
     useData<SponsorsFile>("sponsors");
@@ -30,6 +85,9 @@ export default function SponsorsEditor() {
     return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
 
   const { sponsors, tiers } = data;
+  const page = { ...DEFAULT_PAGE, ...(data.page ?? {}) };
+  const patchPage = (patch: Partial<SponsorsPageCopy>) =>
+    setData({ ...data, page: { ...page, ...patch } });
   const setSponsors = (next: Sponsor[]) => setData({ ...data, sponsors: next });
   const setTiers = (next: SponsorTier[]) => setData({ ...data, tiers: next });
 
@@ -79,6 +137,47 @@ export default function SponsorsEditor() {
           </Button>
         </div>
       </div>
+
+      <section>
+        <div className="mb-4">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
+            Sponsors Page Copy
+          </h2>
+          <p className="mt-1 font-mono text-[11px] text-ash">
+            ข้อความบนหน้า Sponsors ทั้งหมดควรแก้จากตรงนี้ ไม่ต้องแก้โค้ด
+          </p>
+        </div>
+
+        <Card className="space-y-4">
+          <BilingualField
+            label="Hero title"
+            value={page.heroTitle}
+            onChange={(heroTitle) => patchPage({ heroTitle })}
+          />
+          <BilingualTextArea
+            label="Hero subtitle"
+            value={page.heroSubtitle}
+            onChange={(heroSubtitle) => patchPage({ heroSubtitle })}
+          />
+          <div className="grid gap-3 md:grid-cols-2">
+            <BilingualField
+              label="Partners section label"
+              value={page.partnersLabel}
+              onChange={(partnersLabel) => patchPage({ partnersLabel })}
+            />
+            <BilingualField
+              label="Tiers section label"
+              value={page.tiersLabel}
+              onChange={(tiersLabel) => patchPage({ tiersLabel })}
+            />
+          </div>
+          <BilingualTextArea
+            label="Tiers intro"
+            value={page.tiersIntro}
+            onChange={(tiersIntro) => patchPage({ tiersIntro })}
+          />
+        </Card>
+      </section>
 
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">

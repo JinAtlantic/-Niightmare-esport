@@ -6,7 +6,29 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import { useContent } from "@/components/context/ContentContext";
-import type { Sponsor, SponsorTier } from "@/lib/types";
+import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
+
+interface SponsorsPageCopy {
+  heroTitle: Bilingual;
+  heroSubtitle: Bilingual;
+  partnersLabel: Bilingual;
+  tiersLabel: Bilingual;
+  tiersIntro: Bilingual;
+}
+
+const FALLBACK_PAGE: SponsorsPageCopy = {
+  heroTitle: { en: "PARTNER WITH NIIGHTMARE", lo: "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE" },
+  heroSubtitle: {
+    en: "Join us as we dominate the Lao esports scene",
+    lo: "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ",
+  },
+  partnersLabel: { en: "OUR PARTNERS", lo: "ພາກສ່ວນຂອງພວກເຮົາ" },
+  tiersLabel: { en: "SPONSORSHIP TIERS", lo: "ລະດັບການສະໜັບສະໜູນ" },
+  tiersIntro: {
+    en: "Three ways to put your brand in front of a passionate Lao gaming audience.",
+    lo: "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ.",
+  },
+};
 
 function SponsorBox({ sponsor }: { sponsor: Sponsor }) {
   return (
@@ -63,19 +85,21 @@ function TierCard({ tier }: { tier: SponsorTier }) {
 }
 
 export default function SponsorsClient() {
-  const { t } = useLanguage();
+  const { pick } = useLanguage();
   const data = useContent().sponsors as {
+    page?: SponsorsPageCopy;
     sponsors: Sponsor[];
     tiers: SponsorTier[];
   };
+  const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
 
   return (
     <>
-      <PageHeader title={t("sponsors.hero_title")} subtitle={t("sponsors.hero_sub")} />
+      <PageHeader title={pick(page.heroTitle)} subtitle={pick(page.heroSubtitle)} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
         {/* Active partners */}
-        <SectionLabel>{t("sponsors.partners_label")}</SectionLabel>
+        <SectionLabel>{pick(page.partnersLabel)}</SectionLabel>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {data.sponsors.map((sponsor) => (
             <SponsorBox key={sponsor.id} sponsor={sponsor} />
@@ -84,9 +108,9 @@ export default function SponsorsClient() {
 
         {/* Sponsorship tiers */}
         <div className="mt-20">
-          <SectionLabel>{t("sponsors.tiers_label")}</SectionLabel>
+          <SectionLabel>{pick(page.tiersLabel)}</SectionLabel>
           <p className="mx-auto mt-4 max-w-2xl text-center text-text-muted">
-            {t("sponsors.tiers_intro")}
+            {pick(page.tiersIntro)}
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {data.tiers.map((tier) => (

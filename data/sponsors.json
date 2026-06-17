@@ -1,4 +1,26 @@
 {
+  "page": {
+    "heroTitle": {
+      "en": "PARTNER WITH NIIGHTMARE",
+      "lo": "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE"
+    },
+    "heroSubtitle": {
+      "en": "Join us as we dominate the Lao esports scene",
+      "lo": "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ"
+    },
+    "partnersLabel": {
+      "en": "OUR PARTNERS",
+      "lo": "ພາກສ່ວນຂອງພວກເຮົາ"
+    },
+    "tiersLabel": {
+      "en": "SPONSORSHIP TIERS",
+      "lo": "ລະດັບການສະໜັບສະໜູນ"
+    },
+    "tiersIntro": {
+      "en": "Three ways to put your brand in front of a passionate Lao gaming audience.",
+      "lo": "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ."
+    }
+  },
   "sponsors": [
     { "id": "s1", "name": "Mekong Mobile", "url": "#" },
     { "id": "s2", "name": "Lao Net", "url": "#" },
