@@ -272,7 +272,7 @@ export default function UpcomingMatch() {
                   aria-hidden
                   className="absolute h-[46px] w-[46px] rotate-45 rounded-sm border border-amethyst/25 md:h-[74px] md:w-[74px] lg:h-[88px] lg:w-[88px]"
                 />
-                <span className="relative inline-grid h-[58px] w-[58px] place-items-center font-display text-3xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl md:italic md:tracking-tight lg:h-[108px] lg:w-[108px] lg:text-7xl">
+                <span className="relative inline-grid h-[58px] w-[58px] place-items-center font-display text-3xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl lg:h-[108px] lg:w-[108px] lg:text-7xl">
                   {t("common.vs")}
                 </span>
               </div>
