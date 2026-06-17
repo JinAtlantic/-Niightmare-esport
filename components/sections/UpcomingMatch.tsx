@@ -74,7 +74,7 @@ function TeamSide({
         className={`pointer-events-none absolute inset-0 ${
           home
             ? "bg-gradient-to-b from-amethyst/[0.14] via-amethyst/[0.03] to-transparent md:bg-gradient-to-r"
-            : "bg-gradient-to-b from-loss/[0.07] via-loss/[0.015] to-transparent md:bg-gradient-to-l"
+            : "bg-gradient-to-b from-loss/[0.035] via-amethyst/[0.018] to-transparent md:bg-gradient-to-l md:from-loss/[0.045]"
         }`}
       />
       <div
@@ -248,7 +248,7 @@ export default function UpcomingMatch() {
             <TeamSide logo="/logo.png" name="NIIGHTMARE" home />
 
             {/* the blade seam + forged VS — the matchup's centerpiece */}
-            <div className="relative flex items-center justify-center py-2 md:px-2 md:py-0">
+            <div className="relative z-10 flex items-center justify-center py-0 md:px-2">
               {/* seam: a soft horizontal fade on mobile, a faint skewed blade on ≥md */}
               <span
                 aria-hidden
@@ -272,7 +272,7 @@ export default function UpcomingMatch() {
                   aria-hidden
                   className="absolute h-[46px] w-[46px] rotate-45 rounded-sm border border-amethyst/25 md:h-[74px] md:w-[74px] lg:h-[88px] lg:w-[88px]"
                 />
-                <span className="relative inline-block translate-x-[0.06em] font-display text-3xl font-bold uppercase italic leading-none tracking-tight text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:text-6xl lg:text-7xl">
+                <span className="relative inline-grid h-[58px] w-[58px] place-items-center font-display text-3xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl md:italic md:tracking-tight lg:h-[108px] lg:w-[108px] lg:text-7xl">
                   {t("common.vs")}
                 </span>
               </div>
