@@ -44,6 +44,7 @@ const GAME_BLADE: Record<GameId, string> = {
 };
 
 const MATCH_LOGO_SIZE = 64;
+const MOBILE_MATCH_LOGO_SIZE = 72;
 
 function StatsStrip({
   wins,
@@ -140,10 +141,39 @@ function MatchCard({ match }: { match: Match }) {
         {pick(match.tournament)}
       </p>
 
-      {/* head-to-head: (NM logo) NIIGHTMARE · score · opponent (opponent logo)
-          Stacks vertically on mobile (full names) and lays out horizontally
-          with logos on the outer edges from md up. */}
-      <div className="mt-4 flex flex-col gap-3 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
+      <div className="relative mt-5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/25 py-4 md:hidden">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/50 to-transparent"
+        />
+        <div className="flex min-w-0 flex-col items-center gap-2 text-center">
+          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={MOBILE_MATCH_LOGO_SIZE} />
+          <span className="keep-latin max-w-[104px] break-words font-display text-xs font-bold uppercase leading-tight text-soul">
+            NIIGHTMARE
+          </span>
+        </div>
+
+        <div className="flex min-w-[74px] flex-col items-center">
+          <span className={`keep-latin font-display text-4xl font-bold leading-none tracking-[0.08em] ${accent.score}`}>
+            {match.score}
+          </span>
+          <span
+            className={`mt-2 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] ${accent.badge}`}
+          >
+            {t(RESULT_KEY[match.result])}
+          </span>
+        </div>
+
+        <div className="flex min-w-0 flex-col items-center gap-2 text-center">
+          <OpponentLogo src={match.opponentLogo} name={match.opponent} size={MOBILE_MATCH_LOGO_SIZE} />
+          <span className="keep-latin max-w-[104px] break-words font-display text-xs font-bold uppercase leading-tight text-soul">
+            {match.opponent}
+          </span>
+        </div>
+      </div>
+
+      {/* desktop head-to-head: names stay horizontal with logos on the outer edges. */}
+      <div className="mt-4 hidden md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
         {/* NIIGHTMARE side */}
         <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-start md:gap-3">
           <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={MATCH_LOGO_SIZE} />
