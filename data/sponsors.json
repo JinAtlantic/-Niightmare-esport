@@ -19,6 +19,60 @@
     "tiersIntro": {
       "en": "Three ways to put your brand in front of a passionate Lao gaming audience.",
       "lo": "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ."
+    },
+    "valueLabel": {
+      "en": "WHY PARTNER WITH US",
+      "lo": "ເປັນຫຍັງຕ້ອງຮ່ວມງານກັບເຮົາ"
+    },
+    "valueProps": [
+      {
+        "id": "brand-exposure",
+        "title": { "en": "BRAND EXPOSURE", "lo": "ການເຫັນແບຣນ" },
+        "body": {
+          "en": "Place your brand across jerseys, matchday assets, streams, and website surfaces.",
+          "lo": "ນໍາແບຣນຂອງທ່ານໄປຢູ່ເທິງເສື້ອແຂ່ງ, ສື່ວັນແຂ່ງ, ຖ່າຍທອດ ແລະ ເວັບໄຊ."
+        }
+      },
+      {
+        "id": "community-access",
+        "title": { "en": "COMMUNITY ACCESS", "lo": "ເຂົ້າເຖິງຊຸມຊົນ" },
+        "body": {
+          "en": "Reach young Lao gaming fans through team stories, announcements, and community moments.",
+          "lo": "ເຂົ້າເຖິງແຟນເກມລາວຜ່ານເລື່ອງລາວຂອງທີມ, ປະກາດ ແລະ ກິດຈະກໍາຊຸມຊົນ."
+        }
+      },
+      {
+        "id": "matchday-visibility",
+        "title": { "en": "MATCHDAY VISIBILITY", "lo": "ການເຫັນໃນວັນແຂ່ງ" },
+        "body": {
+          "en": "Attach your brand to fixtures, results, highlight content, and tournament moments.",
+          "lo": "ໃຫ້ແບຣນຂອງທ່ານຢູ່ກັບນັດແຂ່ງ, ຜົນແຂ່ງ, ໄຮໄລທ໌ ແລະ ຊ່ວງເວລາຂອງລາຍການ."
+        }
+      },
+      {
+        "id": "content-integration",
+        "title": { "en": "CONTENT INTEGRATION", "lo": "ການຮ່ວມຄອນເທນ" },
+        "body": {
+          "en": "Build campaigns around players, roster updates, behind-the-scenes media, and sponsor activations.",
+          "lo": "ສ້າງແຄມເປນຮ່ວມກັບນັກກິລາ, ການອັບເດດທີມ, ສື່ເບື້ອງຫຼັງ ແລະ ກິດຈະກໍາສະປອນເຊີ."
+        }
+      }
+    ],
+    "ctaTitle": {
+      "en": "READY TO BUILD A PARTNERSHIP?",
+      "lo": "ພ້ອມສ້າງພາກສ່ວນຮ່ວມກັນບໍ?"
+    },
+    "ctaBody": {
+      "en": "Tell us your goals and we will shape a package around your brand, budget, and activation window.",
+      "lo": "ບອກເປົ້າໝາຍຂອງທ່ານ ແລ້ວເຮົາຈະຈັດແພັກເກດໃຫ້ເໝາະກັບແບຣນ, ງົບປະມານ ແລະ ຊ່ວງເວລາແຄມເປນ."
+    },
+    "ctaPrimary": {
+      "label": { "en": "CONTACT PARTNERSHIPS", "lo": "ຕິດຕໍ່ພາກສ່ວນ" },
+      "href": "/contact"
+    },
+    "ctaSecondary": {
+      "label": { "en": "VIEW TEAM PROFILE", "lo": "ເບິ່ງໂປຣໄຟລ໌ທີມ" },
+      "href": "/"
     }
   },
   "sponsors": [

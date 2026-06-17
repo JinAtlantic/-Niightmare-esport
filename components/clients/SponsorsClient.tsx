@@ -6,7 +6,20 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import { useContent } from "@/components/context/ContentContext";
+import { ArrowRightIcon } from "@/components/ui/Icons";
+import sponsorsSeed from "@/data/sponsors.json";
 import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
+
+interface SponsorValueProp {
+  id: string;
+  title: Bilingual;
+  body: Bilingual;
+}
+
+interface SponsorCta {
+  label: Bilingual;
+  href: string;
+}
 
 interface SponsorsPageCopy {
   heroTitle: Bilingual;
@@ -14,21 +27,34 @@ interface SponsorsPageCopy {
   partnersLabel: Bilingual;
   tiersLabel: Bilingual;
   tiersIntro: Bilingual;
+  valueLabel: Bilingual;
+  valueProps: SponsorValueProp[];
+  ctaTitle: Bilingual;
+  ctaBody: Bilingual;
+  ctaPrimary: SponsorCta;
+  ctaSecondary: SponsorCta;
 }
 
-const FALLBACK_PAGE: SponsorsPageCopy = {
-  heroTitle: { en: "PARTNER WITH NIIGHTMARE", lo: "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE" },
-  heroSubtitle: {
-    en: "Join us as we dominate the Lao esports scene",
-    lo: "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ",
-  },
-  partnersLabel: { en: "OUR PARTNERS", lo: "ພາກສ່ວນຂອງພວກເຮົາ" },
-  tiersLabel: { en: "SPONSORSHIP TIERS", lo: "ລະດັບການສະໜັບສະໜູນ" },
-  tiersIntro: {
-    en: "Three ways to put your brand in front of a passionate Lao gaming audience.",
-    lo: "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ.",
-  },
-};
+const FALLBACK_PAGE = sponsorsSeed.page as SponsorsPageCopy;
+
+function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number }) {
+  const { pick } = useLanguage();
+  return (
+    <div className="relative overflow-hidden border border-edge bg-crypt/70 p-5">
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent"
+      />
+      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-amethyst">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <h3 className="mt-4 font-display text-lg font-bold uppercase tracking-[0.08em] text-soul">
+        {pick(item.title)}
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-ash">{pick(item.body)}</p>
+    </div>
+  );
+}
 
 function SponsorBox({ sponsor }: { sponsor: Sponsor }) {
   return (
@@ -92,12 +118,22 @@ export default function SponsorsClient() {
     tiers: SponsorTier[];
   };
   const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
+  const valueProps = page.valueProps?.length ? page.valueProps : FALLBACK_PAGE.valueProps;
 
   return (
     <>
       <PageHeader title={pick(page.heroTitle)} subtitle={pick(page.heroSubtitle)} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+        <div className="mb-16">
+          <SectionLabel>{pick(page.valueLabel)}</SectionLabel>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {valueProps.slice(0, 4).map((item, index) => (
+              <ValuePropCard key={item.id} item={item} index={index} />
+            ))}
+          </div>
+        </div>
+
         {/* Active partners */}
         <SectionLabel>{pick(page.partnersLabel)}</SectionLabel>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -116,6 +152,32 @@ export default function SponsorsClient() {
             {data.tiers.map((tier) => (
               <TierCard key={tier.id} tier={tier} />
             ))}
+          </div>
+        </div>
+
+        <div className="relative mt-20 overflow-hidden border border-edge-bright bg-gradient-to-br from-crypt via-crypt2/75 to-void p-6 text-center md:p-10">
+          <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
+          <h2 className="font-display text-2xl font-bold uppercase tracking-[0.12em] text-soul md:text-4xl">
+            {pick(page.ctaTitle)}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ash md:text-base">
+            {pick(page.ctaBody)}
+          </p>
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href={page.ctaPrimary.href}
+              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.24)] transition-colors hover:bg-amethyst/25"
+            >
+              {pick(page.ctaPrimary.label)}
+              <ArrowRightIcon size={16} />
+            </Link>
+            <Link
+              href={page.ctaSecondary.href}
+              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/40 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
+            >
+              {pick(page.ctaSecondary.label)}
+              <ArrowRightIcon size={16} />
+            </Link>
           </div>
         </div>
       </section>

@@ -3,6 +3,7 @@
 import React from "react";
 import { useData } from "@/components/admin/useData";
 import { BilingualField, Button, Card, Label, TextArea, TextField } from "@/components/admin/ui";
+import sponsorsSeed from "@/data/sponsors.json";
 import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
 
 interface SponsorsPageCopy {
@@ -11,6 +12,23 @@ interface SponsorsPageCopy {
   partnersLabel: Bilingual;
   tiersLabel: Bilingual;
   tiersIntro: Bilingual;
+  valueLabel: Bilingual;
+  valueProps: SponsorValueProp[];
+  ctaTitle: Bilingual;
+  ctaBody: Bilingual;
+  ctaPrimary: SponsorCta;
+  ctaSecondary: SponsorCta;
+}
+
+interface SponsorValueProp {
+  id: string;
+  title: Bilingual;
+  body: Bilingual;
+}
+
+interface SponsorCta {
+  label: Bilingual;
+  href: string;
 }
 
 interface SponsorsFile {
@@ -19,19 +37,7 @@ interface SponsorsFile {
   tiers: SponsorTier[];
 }
 
-const DEFAULT_PAGE: SponsorsPageCopy = {
-  heroTitle: { en: "PARTNER WITH NIIGHTMARE", lo: "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE" },
-  heroSubtitle: {
-    en: "Join us as we dominate the Lao esports scene",
-    lo: "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ",
-  },
-  partnersLabel: { en: "OUR PARTNERS", lo: "ພາກສ່ວນຂອງພວກເຮົາ" },
-  tiersLabel: { en: "SPONSORSHIP TIERS", lo: "ລະດັບການສະໜັບສະໜູນ" },
-  tiersIntro: {
-    en: "Three ways to put your brand in front of a passionate Lao gaming audience.",
-    lo: "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ.",
-  },
-};
+const DEFAULT_PAGE = sponsorsSeed.page as SponsorsPageCopy;
 
 const uid = (prefix: string) =>
   `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
@@ -88,6 +94,12 @@ export default function SponsorsEditor() {
   const page = { ...DEFAULT_PAGE, ...(data.page ?? {}) };
   const patchPage = (patch: Partial<SponsorsPageCopy>) =>
     setData({ ...data, page: { ...page, ...patch } });
+  const patchValueProp = (index: number, patch: Partial<SponsorValueProp>) => {
+    const valueProps = page.valueProps.map((item, idx) =>
+      idx === index ? { ...item, ...patch } : item
+    );
+    patchPage({ valueProps });
+  };
   const setSponsors = (next: Sponsor[]) => setData({ ...data, sponsors: next });
   const setTiers = (next: SponsorTier[]) => setData({ ...data, tiers: next });
 
@@ -176,6 +188,83 @@ export default function SponsorsEditor() {
             value={page.tiersIntro}
             onChange={(tiersIntro) => patchPage({ tiersIntro })}
           />
+          <BilingualField
+            label="Value strip label"
+            value={page.valueLabel}
+            onChange={(valueLabel) => patchPage({ valueLabel })}
+          />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {page.valueProps.slice(0, 4).map((item, i) => (
+              <Card key={item.id} className="space-y-3 bg-void/35">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                    Value Prop {i + 1}
+                  </h3>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim">
+                    {item.id}
+                  </span>
+                </div>
+                <BilingualField
+                  label="Title"
+                  value={item.title}
+                  onChange={(title) => patchValueProp(i, { title })}
+                />
+                <BilingualTextArea
+                  label="Body"
+                  value={item.body}
+                  rows={3}
+                  onChange={(body) => patchValueProp(i, { body })}
+                />
+              </Card>
+            ))}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-3">
+              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                CTA Copy
+              </h3>
+              <BilingualField
+                label="CTA title"
+                value={page.ctaTitle}
+                onChange={(ctaTitle) => patchPage({ ctaTitle })}
+              />
+              <BilingualTextArea
+                label="CTA body"
+                value={page.ctaBody}
+                rows={3}
+                onChange={(ctaBody) => patchPage({ ctaBody })}
+              />
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                CTA Buttons
+              </h3>
+              <BilingualField
+                label="Primary button"
+                value={page.ctaPrimary.label}
+                onChange={(label) => patchPage({ ctaPrimary: { ...page.ctaPrimary, label } })}
+              />
+              <TextField
+                label="Primary link"
+                value={page.ctaPrimary.href}
+                onChange={(href) => patchPage({ ctaPrimary: { ...page.ctaPrimary, href } })}
+              />
+              <BilingualField
+                label="Secondary button"
+                value={page.ctaSecondary.label}
+                onChange={(label) =>
+                  patchPage({ ctaSecondary: { ...page.ctaSecondary, label } })
+                }
+              />
+              <TextField
+                label="Secondary link"
+                value={page.ctaSecondary.href}
+                onChange={(href) => patchPage({ ctaSecondary: { ...page.ctaSecondary, href } })}
+              />
+            </div>
+          </div>
         </Card>
       </section>
 
