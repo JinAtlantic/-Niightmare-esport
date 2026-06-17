@@ -41,7 +41,37 @@
     "upcoming_status_practice": { "en": "IN SCRIMS", "lo": "ຊ່ວງຊ້ອມທີມ" },
     "upcoming_practice_label": { "en": "TEAM PRACTICE", "lo": "ການຊ້ອມຂອງທີມ" },
     "watch_live": { "en": "WATCH LIVE", "lo": "ເບິ່ງຖ່າຍທອດສົດ" },
-    "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" }
+    "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" },
+    "home_snapshot_kicker": { "en": "PARTNER-READY CLUB PROFILE", "lo": "ໂປຣໄຟລ໌ທີມສໍາລັບພາກສ່ວນ" },
+    "home_snapshot_title": { "en": "TEAM SNAPSHOT", "lo": "ພາບລວມຂອງທີມ" },
+    "home_snapshot_intro": {
+      "en": "A fast read for fans, media, and brands: the competitions we play, the roster behind the tag, and the sponsor paths built into the club.",
+      "lo": "ພາບລວມສໍາລັບແຟນ, ສື່ ແລະ ແບຣນ: ລາຍການທີ່ເຮົາແຂ່ງ, ນັກກິລາໃນທີມ ແລະ ເສັ້ນທາງສໍາລັບພາກສ່ວນທີ່ຢາກຮ່ວມງານ."
+    },
+    "home_snapshot_stat_divisions": { "en": "DIVISIONS", "lo": "ປະເພດເກມ" },
+    "home_snapshot_stat_roster": { "en": "ROSTER", "lo": "ນັກກິລາ" },
+    "home_snapshot_stat_roster_detail": { "en": "Active players across the current lineup.", "lo": "ນັກກິລາທີ່ຢູ່ໃນລາຍຊື່ປັດຈຸບັນ." },
+    "home_snapshot_stat_honours": { "en": "HONOURS", "lo": "ລາງວັນ" },
+    "home_snapshot_stat_honours_detail": { "en": "Tournament placements already in the cabinet.", "lo": "ຜົນງານການແຂ່ງຂັນທີ່ຢູ່ໃນຕູ້ລາງວັນ." },
+    "home_snapshot_stat_partners": { "en": "PARTNER TIERS", "lo": "ລະດັບພາກສ່ວນ" },
+    "home_snapshot_stat_partners_detail": { "en": "Structured options for brands and community partners.", "lo": "ທາງເລືອກສໍາລັບແບຣນ ແລະ ພາກສ່ວນຊຸມຊົນ." },
+    "home_snapshot_pillar_matchday": { "en": "MATCHDAY PRESENCE", "lo": "ພ້ອມສໍາລັບວັນແຂ່ງ" },
+    "home_snapshot_pillar_matchday_body": {
+      "en": "The headline fixture gives visitors the next battle, opponent, tournament, and kickoff without digging through pages.",
+      "lo": "ຜູ້ເຂົ້າຊົມເຫັນນັດຕໍ່ໄປ, ຄູ່ແຂ່ງ, ລາຍການ ແລະ ເວລາເລີ່ມໄດ້ທັນທີ."
+    },
+    "home_snapshot_pillar_proof": { "en": "PROOF OF LEVEL", "lo": "ຫຼັກຖານຂອງລະດັບ" },
+    "home_snapshot_pillar_proof_body": {
+      "en": "Honours, match history, and news make the team look active instead of like a static logo page.",
+      "lo": "ລາງວັນ, ປະຫວັດການແຂ່ງ ແລະ ຂ່າວ ຊ່ວຍໃຫ້ທີມເບິ່ງມີການເຄື່ອນໄຫວ."
+    },
+    "home_snapshot_pillar_partners": { "en": "BUSINESS FLOW", "lo": "ເສັ້ນທາງທຸລະກິດ" },
+    "home_snapshot_pillar_partners_body": {
+      "en": "Sponsor and contact routes are visible from the home page, which helps with price discussions and partner trust.",
+      "lo": "ລິ້ງສໍາລັບສະປອນເຊີ ແລະ ການຕິດຕໍ່ຢູ່ໃນໜ້າຫຼັກ ຊ່ວຍໃນການຕໍ່ລອງ ແລະ ສ້າງຄວາມເຊື່ອໃຈ."
+    },
+    "home_snapshot_cta_sponsors": { "en": "VIEW SPONSOR PATHS", "lo": "ເບິ່ງທາງເລືອກສະປອນເຊີ" },
+    "home_snapshot_cta_contact": { "en": "START A DEAL", "lo": "ເລີ່ມຕິດຕໍ່ທຸລະກິດ" }
   },
   "common": {
     "read_more": { "en": "READ MORE", "lo": "ອ່ານເພີ່ມ" },

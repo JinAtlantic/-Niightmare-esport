@@ -1,6 +1,7 @@
 import React from "react";
 import Hero from "@/components/sections/Hero";
 import UpcomingMatch from "@/components/sections/UpcomingMatch";
+import TeamSnapshot from "@/components/sections/TeamSnapshot";
 import TrophyCabinet from "@/components/sections/TrophyCabinet";
 import NewsSection from "@/components/sections/NewsSection";
 import JsonLd from "@/components/seo/JsonLd";
@@ -12,6 +13,7 @@ export default function HomePage() {
       <JsonLd data={upcomingEventSchema()} />
       <Hero />
       <UpcomingMatch />
+      <TeamSnapshot />
       <TrophyCabinet />
       <NewsSection />
     </>
