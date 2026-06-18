@@ -125,6 +125,15 @@ export default function RootLayout({
           as="image"
           href="/home-reaper.webp"
           type="image/webp"
+          media="(max-width: 1023px)"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/home-reaper-desktop.webp"
+          type="image/webp"
+          media="(min-width: 1024px)"
           fetchPriority="high"
         />
       </head>
