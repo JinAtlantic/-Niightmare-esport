@@ -474,12 +474,12 @@ html.lang-lo .keep-latin {
   animation: fx-rise 0.85s ease 0.22s both,
     home-wordmark-breath 5.5s ease-in-out 1.2s infinite;
 }
-.home-hero-wordmark span {
+.home-hero-wordmark > span {
   position: relative;
   width: fit-content;
   max-width: 100%;
 }
-.home-hero-wordmark span:first-child {
+.home-hero-main {
   background-image: linear-gradient(
     105deg,
     #f7f2ff 0%,
@@ -498,7 +498,21 @@ html.lang-lo .keep-latin {
   color: transparent;
   animation: home-wordmark-fill-sweep 6.8s cubic-bezier(0.22, 1, 0.36, 1) 1.35s infinite;
 }
-.home-hero-wordmark span:last-child {
+.home-hero-double-i {
+  display: inline-block;
+  background-image: linear-gradient(180deg, #f4e7ff 0%, #c77dff 42%, #8f3df0 100%);
+  background-size: 100% 100%;
+  background-position: 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow:
+    0 0 16px rgba(199, 125, 255, 0.78),
+    0 0 34px rgba(168, 85, 247, 0.64);
+  filter: drop-shadow(0 0 16px rgba(199, 125, 255, 0.42));
+}
+.home-hero-sub {
   color: transparent;
   -webkit-text-stroke: 1px rgba(236, 231, 242, 0.82);
   text-shadow:
@@ -577,7 +591,7 @@ html.lang-lo .home-hero-tagline {
   .home-hero-wordmark {
     animation: fx-rise 0.85s ease 0.22s both;
   }
-  .home-hero-wordmark span:first-child {
+  .home-hero-main {
     animation: none;
     background-position: 50% 0;
   }

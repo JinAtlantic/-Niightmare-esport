@@ -29,8 +29,10 @@ export default function Hero() {
       <div className="relative z-[2] w-full max-w-7xl">
         <div className="home-hero-copy">
           <h1 className="home-hero-wordmark keep-latin font-display">
-            <span>NIIGHTMARE</span>
-            <span>ESPORT</span>
+            <span className="home-hero-main">
+              N<span className="home-hero-double-i">II</span>GHTMARE
+            </span>
+            <span className="home-hero-sub">ESPORT</span>
           </h1>
         </div>
 
