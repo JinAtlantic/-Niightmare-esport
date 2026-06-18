@@ -67,18 +67,18 @@ function TeamSide({
   home?: boolean;
 }) {
   return (
-    <div className="group relative flex flex-1 flex-col items-center justify-center gap-3.5 overflow-hidden px-5 py-8 md:gap-5 md:py-14 lg:py-16">
+    <div className="group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-2.5 overflow-hidden px-2 py-6 md:gap-5 md:px-5 md:py-14 lg:py-16">
       {/* directional wash — softly fading toward the centre seam */}
       <span
         aria-hidden
         className={`pointer-events-none absolute inset-0 ${
           home
-            ? "bg-gradient-to-b from-amethyst/[0.14] via-amethyst/[0.03] to-transparent md:bg-gradient-to-r"
-            : "bg-gradient-to-b from-loss/[0.035] via-amethyst/[0.018] to-transparent md:bg-gradient-to-l md:from-loss/[0.045]"
+            ? "bg-gradient-to-r from-amethyst/[0.14] via-amethyst/[0.03] to-transparent"
+            : "bg-gradient-to-l from-loss/[0.045] via-amethyst/[0.018] to-transparent"
         }`}
       />
       <div
-        className="relative grid h-[88px] w-[88px] shrink-0 place-items-center transition-transform duration-300 group-hover:scale-[1.06] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
+        className="relative grid h-[68px] w-[68px] shrink-0 place-items-center transition-transform duration-300 group-hover:scale-[1.06] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
       >
         {logo ? (
           <Image
@@ -94,7 +94,7 @@ function TeamSide({
           />
         ) : (
           <span
-            className="keep-latin font-display text-2xl font-bold text-ash md:text-5xl"
+            className="keep-latin font-display text-xl font-bold text-ash md:text-5xl"
             aria-hidden
           >
             {initials(name)}
@@ -102,7 +102,7 @@ function TeamSide({
         )}
       </div>
       <span
-        className={`keep-latin relative text-center font-display text-lg font-bold uppercase leading-tight tracking-[0.07em] md:text-3xl lg:text-4xl ${
+        className={`keep-latin relative max-w-full text-center font-display text-[0.95rem] font-bold uppercase leading-tight tracking-[0.04em] md:text-3xl md:tracking-[0.07em] lg:text-4xl ${
           home ? "text-soul" : "text-spectre"
         }`}
       >
@@ -202,9 +202,9 @@ export default function UpcomingMatch() {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-4xl px-4 py-20 md:max-w-5xl md:px-6 md:py-28 lg:max-w-6xl">
+      <div className="relative mx-auto max-w-4xl px-4 py-16 md:max-w-5xl md:px-6 md:py-28 lg:max-w-6xl">
         {/* section title — bold headline */}
-        <div className="mb-9 text-center md:mb-12">
+        <div className="mb-7 text-center md:mb-12">
           <h2 className="font-display text-3xl font-extrabold uppercase tracking-[0.16em] text-soul [text-shadow:0_0_34px_rgba(168,85,247,0.5)] md:text-5xl lg:text-6xl">
             {t("sections.upcoming_match")}
           </h2>
@@ -244,19 +244,15 @@ export default function UpcomingMatch() {
           </div>
 
           {/* ── the clash: split arena, stacked on mobile / side-by-side on ≥md ── */}
-          <div className="relative grid grid-cols-1 items-stretch md:grid-cols-[1fr_auto_1fr]">
+          <div className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch">
             <TeamSide logo="/logo.png" name="NIIGHTMARE" home />
 
             {/* the blade seam + forged VS — the matchup's centerpiece */}
-            <div className="relative z-10 flex items-center justify-center py-0 md:px-2">
-              {/* seam: a soft horizontal fade on mobile, a faint skewed blade on ≥md */}
+            <div className="relative z-10 flex items-center justify-center px-1 py-0 md:px-2">
+              {/* seam: a faint skewed blade through the matchup */}
               <span
                 aria-hidden
-                className="absolute inset-x-6 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-amethyst/35 to-transparent md:hidden"
-              />
-              <span
-                aria-hidden
-                className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 -skew-x-[12deg] bg-gradient-to-b from-transparent via-amethyst/40 to-transparent md:block"
+                className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 -skew-x-[12deg] bg-gradient-to-b from-transparent via-amethyst/40 to-transparent"
               />
               <div className="relative grid place-items-center">
                 <span
@@ -266,13 +262,13 @@ export default function UpcomingMatch() {
                 />
                 <span
                   aria-hidden
-                  className="absolute h-[58px] w-[58px] rotate-45 rounded-sm border border-amethyst/55 bg-gradient-to-br from-crypt2 to-void shadow-[0_0_26px_rgba(168,85,247,0.4)] md:h-[92px] md:w-[92px] lg:h-[108px] lg:w-[108px]"
+                  className="absolute h-[52px] w-[52px] rotate-45 rounded-sm border border-amethyst/55 bg-gradient-to-br from-crypt2 to-void shadow-[0_0_26px_rgba(168,85,247,0.4)] md:h-[92px] md:w-[92px] lg:h-[108px] lg:w-[108px]"
                 />
                 <span
                   aria-hidden
-                  className="absolute h-[46px] w-[46px] rotate-45 rounded-sm border border-amethyst/25 md:h-[74px] md:w-[74px] lg:h-[88px] lg:w-[88px]"
+                  className="absolute h-[42px] w-[42px] rotate-45 rounded-sm border border-amethyst/25 md:h-[74px] md:w-[74px] lg:h-[88px] lg:w-[88px]"
                 />
-                <span className="relative inline-grid h-[58px] w-[58px] place-items-center font-display text-3xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl lg:h-[108px] lg:w-[108px] lg:text-7xl">
+                <span className="relative inline-grid h-[52px] w-[52px] place-items-center font-display text-2xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl lg:h-[108px] lg:w-[108px] lg:text-7xl">
                   {t("common.vs")}
                 </span>
               </div>
