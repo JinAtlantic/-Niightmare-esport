@@ -28,12 +28,6 @@ export default function Hero() {
 
       <div className="relative z-[2] w-full max-w-7xl">
         <div className="home-hero-copy">
-          <p
-            className="fx-rise mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-spectre/80 md:text-xs"
-            style={{ animationDelay: "0.18s" }}
-          >
-            Lao PDR / MLBB / eFootball
-          </p>
           <h1 className="home-hero-wordmark keep-latin font-display">
             <span>NIIGHTMARE</span>
             <span>ESPORT</span>
