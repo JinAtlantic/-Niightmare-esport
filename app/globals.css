@@ -502,7 +502,7 @@ html.lang-lo .keep-latin {
 }
 .home-hero-double-i {
   display: inline-block;
-  background-image: linear-gradient(180deg, #f4e7ff 0%, #c77dff 42%, #8f3df0 100%);
+  background-image: linear-gradient(180deg, #d8bbf4 0%, #a855f7 44%, #6f26c2 100%);
   background-size: 100% 100%;
   background-position: 0 0;
   -webkit-background-clip: text;
@@ -510,9 +510,9 @@ html.lang-lo .keep-latin {
   -webkit-text-fill-color: transparent;
   color: transparent;
   text-shadow:
-    0 0 16px rgba(199, 125, 255, 0.78),
-    0 0 34px rgba(168, 85, 247, 0.64);
-  filter: drop-shadow(0 0 16px rgba(199, 125, 255, 0.42));
+    0 0 10px rgba(199, 125, 255, 0.48),
+    0 0 24px rgba(168, 85, 247, 0.38);
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.3));
 }
 .home-hero-sub {
   color: transparent;
