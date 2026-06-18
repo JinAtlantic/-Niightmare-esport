@@ -6,7 +6,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
-import { EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
+import { PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
@@ -64,6 +64,11 @@ const GAME_BLADE: Record<GameId, string> = {
 
 const MATCH_LOGO_SIZE = 64;
 const MOBILE_MATCH_LOGO_SIZE = 72;
+const GAME_LABEL: Record<GameId, string> = {
+  mlbb: "MOBILE LEGENDS: BANG BANG",
+  efootball: "eFOOTBALL",
+};
+const GAME_ORDER: GameId[] = ["mlbb", "efootball"];
 
 interface TournamentMatchGroup {
   key: string;
@@ -329,12 +334,20 @@ function TournamentRecordGroup({
   page: MatchesPageCopy;
 }) {
   const { pick } = useLanguage();
+  const [open, setOpen] = useState(false);
   const tournament = group.tournament;
-  const GameIcon = group.game === "mlbb" ? MlbbIcon : EfootballIcon;
+  const matchCount = group.matches.length;
 
   return (
     <section className="clip-esports overflow-hidden border border-edge bg-crypt/45">
-      <div className="relative overflow-hidden border-b border-edge bg-gradient-to-br from-crypt2/70 via-crypt/55 to-void px-5 py-5 md:px-6">
+      <div className="group relative overflow-hidden border-b border-edge bg-gradient-to-br from-crypt2/70 via-crypt/55 to-void px-5 py-5 transition-colors hover:bg-amethyst/[0.04] md:px-6">
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+          aria-label={`${open ? "Hide" : "View"} matches for ${pick(group.name)}`}
+          className="absolute inset-0 z-10 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+        />
         <span
           aria-hidden
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/80 to-transparent"
@@ -343,11 +356,15 @@ function TournamentRecordGroup({
           aria-hidden
           className="absolute -right-16 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl"
         />
-        <div className="relative grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="pointer-events-none relative grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <div className="inline-flex items-center gap-2 border border-edge-bright bg-void/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
-              <GameIcon size={15} className="text-amethyst" />
-              {group.game}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex border border-edge-bright bg-void/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
+                {matchCount} {matchCount === 1 ? "match" : "matches"}
+              </span>
+              <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-glow">
+                {open ? "hide matches" : "view matches"}
+              </span>
             </div>
             <h2 className="mt-4 font-display text-2xl font-bold uppercase leading-tight tracking-[0.04em] text-soul md:text-3xl">
               {pick(group.name)}
@@ -387,21 +404,66 @@ function TournamentRecordGroup({
         </div>
       </div>
 
-      <div className="relative flex flex-col gap-3 p-3 md:p-4">
-        <span
-          aria-hidden
-          className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
-        />
-        {group.matches.map((match, i) => (
-          <Reveal key={match.id} delay={i * 55}>
-            <div className="grid gap-3 md:grid-cols-[44px_1fr] md:items-stretch">
-              <div className="hidden md:grid md:place-items-center">
-                <span className="relative z-[1] grid h-9 w-9 place-items-center border border-amethyst/60 bg-void font-mono text-[11px] font-bold text-glow shadow-[0_0_16px_rgba(168,85,247,0.35)]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+      {open && (
+        <div className="relative flex flex-col gap-3 p-3 md:p-4">
+          <span
+            aria-hidden
+            className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
+          />
+          {group.matches.map((match, i) => (
+            <Reveal key={match.id} delay={i * 55}>
+              <div className="grid gap-3 md:grid-cols-[44px_1fr] md:items-stretch">
+                <div className="hidden md:grid md:place-items-center">
+                  <span className="relative z-[1] grid h-9 w-9 place-items-center border border-amethyst/60 bg-void font-mono text-[11px] font-bold text-glow shadow-[0_0_16px_rgba(168,85,247,0.35)]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <MatchCard match={match} page={page} showTournament={false} />
               </div>
-              <MatchCard match={match} page={page} showTournament={false} />
-            </div>
+            </Reveal>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function GameTournamentSection({
+  game,
+  groups,
+  page,
+}: {
+  game: GameId;
+  groups: TournamentMatchGroup[];
+  page: MatchesPageCopy;
+}) {
+  return (
+    <section className="relative overflow-hidden border border-edge bg-void/45 p-3 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-5">
+      <span
+        aria-hidden
+        className={`absolute inset-x-0 top-0 h-[2px] ${
+          game === "mlbb"
+            ? "bg-gradient-to-r from-transparent via-amethyst to-transparent"
+            : "bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent"
+        }`}
+      />
+      <div className="mb-4 flex flex-col gap-2 border border-edge bg-crypt/55 px-4 py-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-amethyst">
+            Game Division
+          </p>
+          <h2 className="keep-latin mt-2 font-display text-3xl font-bold uppercase leading-none tracking-[0.04em] text-soul [text-shadow:0_0_24px_rgba(199,125,255,0.28)] md:text-5xl">
+            {GAME_LABEL[game]}
+          </h2>
+        </div>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-spectre">
+          {groups.length} {groups.length === 1 ? "Tournament" : "Tournaments"}
+        </p>
+      </div>
+      <div className="grid gap-4">
+        {groups.map((group, i) => (
+          <Reveal key={group.key} delay={i * 70}>
+            <TournamentRecordGroup group={group} page={page} />
           </Reveal>
         ))}
       </div>
@@ -448,6 +510,14 @@ export default function MatchesClient() {
   const tournamentGroups = useMemo(
     () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament),
     [filtered, data.tournaments, page.unknownTournament]
+  );
+  const groupsByGame = useMemo(
+    () =>
+      GAME_ORDER.map((game) => ({
+        game,
+        groups: tournamentGroups.filter((group) => group.game === game),
+      })).filter((section) => section.groups.length > 0),
+    [tournamentGroups]
   );
 
   return (
@@ -501,11 +571,11 @@ export default function MatchesClient() {
           </div>
         </Reveal>
 
-        <div key={filter} className="mt-8 flex flex-col gap-5">
-          {tournamentGroups.length > 0 ? (
-            tournamentGroups.map((group, i) => (
-              <Reveal key={group.key} delay={i * 70}>
-                <TournamentRecordGroup group={group} page={page} />
+        <div key={filter} className="mt-8 grid gap-6">
+          {groupsByGame.length > 0 ? (
+            groupsByGame.map(({ game, groups }, i) => (
+              <Reveal key={game} delay={i * 90}>
+                <GameTournamentSection game={game} groups={groups} page={page} />
               </Reveal>
             ))
           ) : (
