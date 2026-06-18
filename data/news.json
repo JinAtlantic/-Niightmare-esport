@@ -1,4 +1,80 @@
 {
+  "page": {
+    "kicker": {
+      "en": "Media Room",
+      "lo": "ຫ້ອງຂ່າວ"
+    },
+    "title": {
+      "en": "NIIGHTMARE Newsroom",
+      "lo": "ຂ່າວສານ NIIGHTMARE"
+    },
+    "intro": {
+      "en": "Official announcements, match reports, roster updates, and partner-ready team stories.",
+      "lo": "ປະກາດທາງການ, ລາຍງານການແຂ່ງ, ອັບເດດລາຍຊື່ ແລະ ເລື່ອງລາວຂອງທີມສໍາລັບພາກສ່ວນ."
+    },
+    "deskLabel": {
+      "en": "Press Desk",
+      "lo": "ສູນຂ່າວ"
+    },
+    "deskIntro": {
+      "en": "A clean source for sponsors, media, and fans to track the club's latest movement.",
+      "lo": "ແຫຼ່ງຂໍ້ມູນທີ່ອ່ານງ່າຍສໍາລັບສະປອນເຊີ, ສື່ ແລະ ແຟນທີ່ຕ້ອງການຕິດຕາມຄວາມເຄື່ອນໄຫວ."
+    },
+    "featuredLabel": {
+      "en": "Featured Dispatch",
+      "lo": "ຂ່າວເດັ່ນ"
+    },
+    "feedLabel": {
+      "en": "Latest Feed",
+      "lo": "ຟີດຫຼ້າສຸດ"
+    },
+    "emptyTitle": {
+      "en": "No dispatches yet",
+      "lo": "ຍັງບໍ່ມີຂ່າວ"
+    },
+    "emptyBody": {
+      "en": "Publish the first article from the admin newsroom editor.",
+      "lo": "ເຜີຍແຜ່ຂ່າວທໍາອິດຈາກໜ້າຈັດການຂ່າວ."
+    },
+    "statArticles": {
+      "en": "Articles",
+      "lo": "ຂ່າວ"
+    },
+    "statCategories": {
+      "en": "Categories",
+      "lo": "ໝວດໝູ່"
+    },
+    "statLatest": {
+      "en": "Latest Update",
+      "lo": "ອັບເດດຫຼ້າສຸດ"
+    },
+    "ctaLabel": {
+      "en": "Media Access",
+      "lo": "ການເຂົ້າເຖິງສື່"
+    },
+    "ctaTitle": {
+      "en": "Need assets, quotes, or a team interview?",
+      "lo": "ຕ້ອງການຊຸດສື່, ຄໍາກ່າວ ຫຼື ສໍາພາດທີມບໍ?"
+    },
+    "ctaBody": {
+      "en": "Send a brief to the partnership desk and we will route it to the right NIIGHTMARE contact.",
+      "lo": "ສົ່ງ brief ໃຫ້ຝ່າຍພາກສ່ວນ ແລ້ວພວກເຮົາຈະສົ່ງຕໍ່ໃຫ້ຄົນທີ່ເໝາະສົມ."
+    },
+    "ctaPrimary": {
+      "label": {
+        "en": "Contact Media Desk",
+        "lo": "ຕິດຕໍ່ຝ່າຍສື່"
+      },
+      "href": "/contact"
+    },
+    "ctaSecondary": {
+      "label": {
+        "en": "View Partners",
+        "lo": "ເບິ່ງພາກສ່ວນ"
+      },
+      "href": "/sponsors"
+    }
+  },
   "articles": [
     {
       "id": 8,

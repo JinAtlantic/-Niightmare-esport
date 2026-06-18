@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { rowToStaff, type MemberRow } from "./members";
+import { readSection } from "./store";
 import type { Player, Socials } from "./types";
 
 /**
@@ -75,14 +76,24 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     );
     if (firstError?.error) throw new Error(firstError.error.message);
 
+    const [storedRoster, storedMatches, storedNews, storedSponsors, storedSite] = await Promise.all([
+      readSection("roster") as Promise<Record<string, unknown>>,
+      readSection("matches") as Promise<Record<string, unknown>>,
+      readSection("news") as Promise<Record<string, unknown>>,
+      readSection("sponsors") as Promise<Record<string, unknown>>,
+      readSection("site") as Promise<Record<string, unknown>>,
+    ]);
+
     const all = (players.data ?? []) as Record<string, unknown>[];
     const roster = {
+      ...storedRoster,
       mlbb: { players: all.filter((r) => r.game === "mlbb").map(toPlayer) },
       efootball: { players: all.filter((r) => r.game === "efootball").map(toPlayer) },
       staff: ((members.data ?? []) as MemberRow[]).map(rowToStaff),
     };
 
     const matchesOut = {
+      ...storedMatches,
       matches: ((matches.data ?? []) as Record<string, unknown>[]).map((r) => ({
         id: String(r.id),
         date: (r.match_date as string) ?? "",
@@ -106,6 +117,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     };
 
     const newsOut = {
+      ...storedNews,
       articles: ((news.data ?? []) as Record<string, unknown>[]).map((r, i) => ({
         id: i + 1,
         date: (r.news_date as string) ?? "",
@@ -117,6 +129,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     };
 
     const sponsorsOut = {
+      ...storedSponsors,
       sponsors: ((sponsors.data ?? []) as Record<string, unknown>[]).map((r) => ({
         id: String(r.id),
         name: (r.name as string) ?? "",
@@ -133,6 +146,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     const u = (um.data ?? null) as Record<string, unknown> | null;
     const c = (ss.data ?? {}) as Record<string, unknown>;
     const site = {
+      ...storedSite,
       team: {
         name: (c.team_name as string) ?? "NIIGHTMARE",
         fullName: (c.team_full_name as string) ?? "NIIGHTMARE ESPORTS",

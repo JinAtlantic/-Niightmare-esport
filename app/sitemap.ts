@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 const SITE_URL = "https://niightmare-esport.vercel.app";
 
 // Public, indexable routes. /admin is intentionally excluded.
-const ROUTES = ["", "/roster", "/matches", "/sponsors", "/contact"];
+const ROUTES = ["", "/news", "/roster", "/matches", "/sponsors", "/contact"];
 // Legal pages — indexable but low priority / rarely change.
 const LEGAL_ROUTES = ["/privacy", "/terms"];
 

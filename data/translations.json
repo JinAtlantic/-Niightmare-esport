@@ -1,5 +1,6 @@
 {
   "nav": {
+    "news": { "en": "NEWS", "lo": "ຂ່າວ" },
     "home": { "en": "HOME", "lo": "ໜ້າຫຼັກ" },
     "roster": { "en": "ROSTER", "lo": "ນັກກີລາ" },
     "matches": { "en": "MATCHES", "lo": "ການແຂ່ງຂັນ" },

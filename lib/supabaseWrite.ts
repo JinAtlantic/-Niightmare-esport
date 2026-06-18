@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "./supabaseAdmin";
+import { writeSection } from "./store";
 import {
   playerRows,
   memberRows,
@@ -109,6 +110,12 @@ export async function writeSectionToSupabase(
         media_kit_url: s(site.mediaKitUrl),
       });
       if (error) throw new Error(`site_settings: ${error.message}`);
+    }
+    try {
+      await writeSection(key, value);
+    } catch {
+      // Supabase remains the source of truth for list/table data. The Blob copy
+      // preserves page-level JSON copy when cloud storage is configured.
     }
     return { ok: true };
   } catch (e) {
