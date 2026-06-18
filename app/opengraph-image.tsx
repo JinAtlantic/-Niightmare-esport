@@ -24,9 +24,12 @@ export default function OpengraphImage() {
           backgroundColor: "#0B0710",
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${SITE_URL}/home-reaper.webp`}
+          src={`${SITE_URL}/home-reaper-og.jpg`}
           alt=""
+          width={1200}
+          height={630}
           style={{
             position: "absolute",
             inset: 0,
