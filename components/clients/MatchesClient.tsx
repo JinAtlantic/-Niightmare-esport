@@ -3,12 +3,10 @@
 import React, { useMemo, useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
-import SectionLabel from "@/components/ui/SectionLabel";
-import TournamentAccordion from "@/components/sections/TournamentAccordion";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
-import { PlayIcon } from "@/components/ui/Icons";
+import { EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
@@ -66,6 +64,84 @@ const GAME_BLADE: Record<GameId, string> = {
 
 const MATCH_LOGO_SIZE = 64;
 const MOBILE_MATCH_LOGO_SIZE = 72;
+
+interface TournamentMatchGroup {
+  key: string;
+  name: Bilingual;
+  game: GameId;
+  tournament?: Tournament;
+  matches: Match[];
+  latestDate: string;
+}
+
+function normalizeValue(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function tournamentKey(match: Match) {
+  const name = normalizeValue(match.tournament.en || match.tournament.lo);
+  return `${match.game}:${name || "unknown"}`;
+}
+
+function roundRank(match: Match) {
+  const round = normalizeValue(`${match.round?.en ?? ""} ${match.round?.lo ?? ""}`);
+
+  if (!round) return 45;
+  if (/wild|qualifier|qualification|play[-\s]?in|prelim/.test(round)) return 10;
+  if (/group|league|swiss/.test(round)) return 20;
+  if (/round\s*of\s*16|last\s*16|ro16/.test(round)) return 30;
+  if (/quarter|qf|last\s*8|ro8/.test(round)) return 40;
+  if (/semi|sf/.test(round)) return 50;
+  if (/grand\s*final|finals/.test(round)) return 70;
+  if (/final/.test(round)) return 60;
+
+  return 45;
+}
+
+function sortMatchesByRound(a: Match, b: Match) {
+  const roundDelta = roundRank(a) - roundRank(b);
+  if (roundDelta !== 0) return roundDelta;
+  return (a.date ?? "").localeCompare(b.date ?? "");
+}
+
+function groupMatchesByTournament(matches: Match[], tournaments: Tournament[], fallbackName: Bilingual) {
+  const tournamentByKey = new Map(
+    tournaments.map((tournament) => [
+      `${tournament.game}:${normalizeValue(tournament.name.en || tournament.name.lo)}`,
+      tournament,
+    ])
+  );
+  const groups = new Map<string, TournamentMatchGroup>();
+
+  for (const match of matches) {
+    const key = tournamentKey(match);
+    const tournament = tournamentByKey.get(key);
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.matches.push(match);
+      if ((match.date ?? "") > existing.latestDate) existing.latestDate = match.date;
+      continue;
+    }
+
+    groups.set(key, {
+      key,
+      name: match.tournament.en || match.tournament.lo ? match.tournament : fallbackName,
+      game: match.game,
+      tournament,
+      matches: [match],
+      latestDate: match.date,
+    });
+  }
+
+  return [...groups.values()]
+    .map((group) => ({ ...group, matches: [...group.matches].sort(sortMatchesByRound) }))
+    .sort((a, b) => {
+      const seasonDelta = (b.tournament?.season ?? "").localeCompare(a.tournament?.season ?? "");
+      if (seasonDelta !== 0) return seasonDelta;
+      return (b.latestDate ?? "").localeCompare(a.latestDate ?? "");
+    });
+}
 
 function StatsStrip({
   wins,
@@ -137,7 +213,15 @@ function VodButton({ href, page }: { href: string | null; page: MatchesPageCopy 
   );
 }
 
-function MatchCard({ match, page }: { match: Match; page: MatchesPageCopy }) {
+function MatchCard({
+  match,
+  page,
+  showTournament = true,
+}: {
+  match: Match;
+  page: MatchesPageCopy;
+  showTournament?: boolean;
+}) {
   const { pick, lang } = useLanguage();
   const accent = RESULT_ACCENT[match.result];
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
@@ -161,12 +245,13 @@ function MatchCard({ match, page }: { match: Match; page: MatchesPageCopy }) {
         )}
       </div>
 
-      {/* tournament name — enlarged */}
-      <p className="mt-3 text-center font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-xl">
-        {tournamentName}
-      </p>
+      {showTournament && (
+        <p className="mt-3 text-center font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-xl">
+          {tournamentName}
+        </p>
+      )}
 
-      <div className="relative mt-5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/25 py-4 md:hidden">
+      <div className="relative mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/25 py-4 md:hidden">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/50 to-transparent"
@@ -236,6 +321,94 @@ function MatchCard({ match, page }: { match: Match; page: MatchesPageCopy }) {
   );
 }
 
+function TournamentRecordGroup({
+  group,
+  page,
+}: {
+  group: TournamentMatchGroup;
+  page: MatchesPageCopy;
+}) {
+  const { pick } = useLanguage();
+  const tournament = group.tournament;
+  const GameIcon = group.game === "mlbb" ? MlbbIcon : EfootballIcon;
+
+  return (
+    <section className="clip-esports overflow-hidden border border-edge bg-crypt/45">
+      <div className="relative overflow-hidden border-b border-edge bg-gradient-to-br from-crypt2/70 via-crypt/55 to-void px-5 py-5 md:px-6">
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/80 to-transparent"
+        />
+        <span
+          aria-hidden
+          className="absolute -right-16 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl"
+        />
+        <div className="relative grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <div className="inline-flex items-center gap-2 border border-edge-bright bg-void/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
+              <GameIcon size={15} className="text-amethyst" />
+              {group.game}
+            </div>
+            <h2 className="mt-4 font-display text-2xl font-bold uppercase leading-tight tracking-[0.04em] text-soul md:text-3xl">
+              {pick(group.name)}
+            </h2>
+          </div>
+
+          {tournament && (
+            <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[520px]">
+              <div className="border border-edge bg-void/45 px-3 py-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+                  {pick(page.tournamentLabels.placement)}
+                </p>
+                <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-glow">
+                  {pick(tournament.placement)}
+                </p>
+              </div>
+              <div className="border border-edge bg-void/45 px-3 py-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+                  {pick(page.tournamentLabels.season)}
+                </p>
+                <p className="keep-latin mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre">
+                  {tournament.season}
+                </p>
+              </div>
+              {tournament.prize && tournament.prize.trim() && (
+                <div className="border border-edge bg-void/45 px-3 py-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+                    {pick(page.tournamentLabels.prize)}
+                  </p>
+                  <p className="keep-latin mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre">
+                    {tournament.prize}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="relative flex flex-col gap-3 p-3 md:p-4">
+        <span
+          aria-hidden
+          className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
+        />
+        {group.matches.map((match, i) => (
+          <Reveal key={match.id} delay={i * 55}>
+            <div className="grid gap-3 md:grid-cols-[44px_1fr] md:items-stretch">
+              <div className="hidden md:grid md:place-items-center">
+                <span className="relative z-[1] grid h-9 w-9 place-items-center border border-amethyst/60 bg-void font-mono text-[11px] font-bold text-glow shadow-[0_0_16px_rgba(168,85,247,0.35)]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <MatchCard match={match} page={page} showTournament={false} />
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function MatchesClient() {
   const { pick } = useLanguage();
   const data = useContent().matches as {
@@ -271,6 +444,11 @@ export default function MatchesClient() {
       }
     });
   }, [filter, data]);
+
+  const tournamentGroups = useMemo(
+    () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament),
+    [filtered, data.tournaments, page.unknownTournament]
+  );
 
   return (
     <>
@@ -323,12 +501,11 @@ export default function MatchesClient() {
           </div>
         </Reveal>
 
-        {/* Results list — re-keyed per filter so rows re-enter on change */}
-        <div key={filter} className="mt-8 flex flex-col gap-3">
-          {filtered.length > 0 ? (
-            filtered.map((match, i) => (
-              <Reveal key={match.id} delay={i * 55}>
-                <MatchCard match={match} page={page} />
+        <div key={filter} className="mt-8 flex flex-col gap-5">
+          {tournamentGroups.length > 0 ? (
+            tournamentGroups.map((group, i) => (
+              <Reveal key={group.key} delay={i * 70}>
+                <TournamentRecordGroup group={group} page={page} />
               </Reveal>
             ))
           ) : (
@@ -336,16 +513,6 @@ export default function MatchesClient() {
               {pick(page.noResults)}
             </p>
           )}
-        </div>
-
-        {/* Tournament history */}
-        <div className="mt-20">
-          <SectionLabel kicker={pick(page.historyKicker)}>
-            {pick(page.historyTitle)}
-          </SectionLabel>
-          <div className="mt-8">
-            <TournamentAccordion tournaments={data.tournaments} labels={page.tournamentLabels} />
-          </div>
         </div>
       </section>
     </>
