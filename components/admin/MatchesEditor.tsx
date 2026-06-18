@@ -15,6 +15,7 @@ import matchesSeed from "@/data/matches.json";
 import type { Bilingual, Match, MatchResult, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
+type GameFilter = "all" | Match["game"];
 
 interface MatchesPageCopy {
   kicker: Bilingual;
@@ -112,6 +113,8 @@ export default function MatchesEditor() {
   const [view, setView] = useState<"records" | "page">("records");
   const [openTournamentId, setOpenTournamentId] = useState<string | null>(null);
   const [unassignedOpen, setUnassignedOpen] = useState(false);
+  const [recordQuery, setRecordQuery] = useState("");
+  const [gameFilter, setGameFilter] = useState<GameFilter>("all");
 
   if (loading) return <p className="font-mono text-sm text-ash">Loading...</p>;
   if (!data) return <p className="font-mono text-sm text-loss">Could not load matches data.</p>;
@@ -187,6 +190,27 @@ export default function MatchesEditor() {
     setOpenTournamentId(nextTournament.id);
   };
 
+  const duplicateMatch = (i: number) => {
+    const current = matches[i];
+    if (!current) return;
+    const clone: Match = {
+      ...current,
+      id: uid("m"),
+      tournament: { ...current.tournament },
+      round: current.round ? { ...current.round } : undefined,
+    };
+    const next = matches.slice();
+    next.splice(i + 1, 0, clone);
+    setMatches(next);
+  };
+
+  const assignMatchToTournament = (matchIndex: number, tournamentId: string) => {
+    const target = tournaments.find((t) => t.id === tournamentId);
+    if (!target) return;
+    patchMatch(matchIndex, { game: target.game, tournament: { ...target.name } });
+    setOpenTournamentId(target.id);
+  };
+
   const matchRefs: MatchRef[] = matches.map((match, index) => ({ match, index }));
   const assignedIndexes = new Set<number>();
   const tournamentGroups = tournaments.map((tournament) => {
@@ -198,6 +222,47 @@ export default function MatchesEditor() {
     return { tournament, items };
   });
   const unassignedMatches = matchRefs.filter((ref) => !assignedIndexes.has(ref.index));
+  const query = norm(recordQuery);
+  const tournamentOptions = tournaments.map((t) => ({
+    value: t.id,
+    label: `${t.game === "mlbb" ? "MLBB" : "eFootball"} / ${t.name.en || t.name.lo || "Untitled tournament"}`,
+  }));
+  const filteredTournamentGroups = tournamentGroups.filter(({ tournament, items }) => {
+    const matchesGame = gameFilter === "all" || tournament.game === gameFilter;
+    const matchesQuery =
+      !query ||
+      [
+        tournament.name.en,
+        tournament.name.lo,
+        tournament.season,
+        tournament.placement.en,
+        tournament.placement.lo,
+        tournament.prize,
+        ...items.flatMap(({ match }) => [
+          match.opponent,
+          match.score,
+          match.round?.en ?? "",
+          match.round?.lo ?? "",
+          match.tournament.en,
+          match.tournament.lo,
+        ]),
+      ].some((value) => norm(value).includes(query));
+    return matchesGame && matchesQuery;
+  });
+  const filteredUnassignedMatches = unassignedMatches.filter(({ match }) => {
+    const matchesGame = gameFilter === "all" || match.game === gameFilter;
+    const matchesQuery =
+      !query ||
+      [
+        match.opponent,
+        match.score,
+        match.tournament.en,
+        match.tournament.lo,
+        match.round?.en ?? "",
+        match.round?.lo ?? "",
+      ].some((value) => norm(value).includes(query));
+    return matchesGame && matchesQuery;
+  });
 
   const renderMatchEditor = (ref: MatchRef, options?: { compact?: boolean; showTournament?: boolean }) => {
     const { match: m, index: i } = ref;
@@ -220,6 +285,9 @@ export default function MatchesEditor() {
             </Button>
             <Button onClick={() => setMatches(move(matches, i, 1))} className="min-h-[32px] px-2 py-1">
               Down
+            </Button>
+            <Button onClick={() => duplicateMatch(i)} className="min-h-[32px] px-2 py-1">
+              Duplicate
             </Button>
             {!showTournament && (
               <Button
@@ -250,6 +318,16 @@ export default function MatchesEditor() {
           {showTournament && (
             <div className="md:col-span-2">
               <BilingualField label="Tournament" value={m.tournament} onChange={(v) => patchMatch(i, { tournament: v })} />
+            </div>
+          )}
+          {showTournament && tournamentOptions.length > 0 && (
+            <div className="md:col-span-2">
+              <SelectField
+                label="Move into tournament"
+                value=""
+                onChange={(v) => assignMatchToTournament(i, v)}
+                options={[{ value: "", label: "Select tournament..." }, ...tournamentOptions]}
+              />
             </div>
           )}
           <div className="md:col-span-2">
@@ -458,8 +536,65 @@ export default function MatchesEditor() {
             </div>
           </div>
 
+          <Card className="bg-crypt2/80">
+            <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
+              <TextField
+                label="Search tournament / opponent / round"
+                value={recordQuery}
+                onChange={setRecordQuery}
+                placeholder="MPL, ONIC, Final..."
+              />
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { id: "all", label: "All Games" },
+                  { id: "mlbb", label: "MLBB" },
+                  { id: "efootball", label: "eFootball" },
+                ] as const).map((item) => {
+                  const active = gameFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setGameFilter(item.id)}
+                      className={`min-h-[40px] border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                        active
+                          ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                          : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+                {(recordQuery || gameFilter !== "all") && (
+                  <Button
+                    onClick={() => {
+                      setRecordQuery("");
+                      setGameFilter("all");
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </div>
+            <p className="mt-3 font-mono text-[11px] text-ash">
+              Showing {filteredTournamentGroups.length} of {tournamentGroups.length} tournaments /{" "}
+              {filteredUnassignedMatches.length} unassigned matches
+            </p>
+          </Card>
+
           <div className="grid gap-4">
-            {tournamentGroups.map(({ tournament, items }, tournamentIndex) => {
+            {filteredTournamentGroups.length === 0 && (
+              <Card className="border-dashed bg-void/35">
+                <p className="font-mono text-xs text-ash">
+                  No tournaments match the current search/filter. Clear filters or add a new tournament.
+                </p>
+              </Card>
+            )}
+
+            {filteredTournamentGroups.map(({ tournament, items }) => {
+              const tournamentIndex = tournaments.findIndex((item) => item.id === tournament.id);
               const open = openTournamentId === tournament.id;
               return (
                 <Card key={tournament.id} className={open ? "border-amethyst/70 bg-crypt2" : ""}>
@@ -576,7 +711,7 @@ export default function MatchesEditor() {
                 <button type="button" onClick={() => setUnassignedOpen(!unassignedOpen)} className="text-left">
                   <p className="font-display text-base font-bold uppercase tracking-wide text-soul">Unassigned Matches</p>
                   <p className="mt-1 font-mono text-[11px] text-ash">
-                    {unassignedMatches.length} matches not linked to a tournament record.
+                    {filteredUnassignedMatches.length} matches not linked to a tournament record.
                   </p>
                 </button>
                 <div className="flex flex-wrap gap-2">
@@ -587,11 +722,11 @@ export default function MatchesEditor() {
 
               {unassignedOpen && (
                 <div className="mt-4 space-y-3 border-t border-edge pt-4">
-                  {unassignedMatches.length > 0 ? (
-                    unassignedMatches.map((ref) => renderMatchEditor(ref, { showTournament: true }))
+                  {filteredUnassignedMatches.length > 0 ? (
+                    filteredUnassignedMatches.map((ref) => renderMatchEditor(ref, { showTournament: true }))
                   ) : (
                     <div className="border border-dashed border-edge bg-void/35 p-4 font-mono text-xs text-ash">
-                      No unassigned matches. Everything is grouped under a tournament.
+                      No unassigned matches match the current search/filter.
                     </div>
                   )}
                 </div>
