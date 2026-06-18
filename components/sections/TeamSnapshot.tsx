@@ -69,18 +69,22 @@ function StatTile({
   detail: string;
 }) {
   return (
-    <div className="group relative overflow-hidden border border-edge bg-crypt/55 px-5 py-6 transition-colors duration-300 hover:border-amethyst/65">
+    <div className="group relative min-h-[154px] overflow-hidden border border-edge bg-gradient-to-br from-crypt/80 via-crypt/45 to-void/70 px-4 py-4 transition-colors duration-300 hover:border-amethyst/65 sm:min-h-[176px] sm:px-5 sm:py-6">
       <span
         aria-hidden
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-70"
       />
-      <p className="font-display text-4xl font-bold uppercase leading-none text-soul [text-shadow:0_0_24px_rgba(168,85,247,0.35)] md:text-5xl">
+      <span
+        aria-hidden
+        className="absolute -right-10 -top-10 h-24 w-24 border border-amethyst/20 bg-amethyst/5 blur-sm transition-opacity duration-300 group-hover:opacity-80"
+      />
+      <p className="relative font-display text-4xl font-bold uppercase leading-none text-soul [text-shadow:0_0_24px_rgba(168,85,247,0.35)] md:text-5xl">
         {value}
       </p>
-      <p className="mt-3 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-amethyst">
+      <p className="relative mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-amethyst sm:text-[11px] sm:tracking-[0.22em]">
         {label}
       </p>
-      <p className="mt-2 text-sm leading-relaxed text-ash">{detail}</p>
+      <p className="relative mt-2 text-xs leading-relaxed text-ash sm:text-sm">{detail}</p>
     </div>
   );
 }
@@ -95,14 +99,20 @@ function Pillar({
   body: string;
 }) {
   return (
-    <div className="relative border border-edge bg-void/45 p-5">
-      <div className="mb-4 grid h-11 w-11 place-items-center border border-amethyst/45 bg-amethyst/10 text-glow shadow-[0_0_18px_rgba(168,85,247,0.22)]">
+    <div className="group relative flex gap-4 overflow-hidden border border-edge bg-void/55 p-4 transition-colors duration-300 hover:border-amethyst/55 md:block md:p-5">
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-amethyst/55 to-transparent opacity-60"
+      />
+      <div className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/45 bg-amethyst/10 text-glow shadow-[0_0_18px_rgba(168,85,247,0.22)] md:mb-4">
         {icon}
       </div>
-      <h3 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul">
-        {title}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-ash">{body}</p>
+      <div>
+        <h3 className="font-display text-base font-bold uppercase tracking-[0.08em] text-soul md:text-lg">
+          {title}
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-ash">{body}</p>
+      </div>
     </div>
   );
 }
@@ -120,6 +130,10 @@ export default function TeamSnapshot() {
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
       <div
         aria-hidden
+        className="pointer-events-none absolute left-1/2 top-8 h-64 w-[min(760px,92vw)] -translate-x-1/2 bg-amethyst/10 blur-3xl"
+      />
+      <div
+        aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.045] [mask-image:linear-gradient(180deg,transparent,#000_18%,#000_82%,transparent)]"
         style={{
           backgroundImage:
@@ -128,19 +142,19 @@ export default function TeamSnapshot() {
         }}
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+      <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-24 md:px-6 md:py-24">
         <Reveal>
           <div className="mx-auto max-w-3xl text-center">
             <SectionLabel centered kicker={pick(snapshot.kicker)}>
               {pick(snapshot.title)}
             </SectionLabel>
-            <p className="mt-5 text-base leading-relaxed text-ash md:text-lg">
+            <p className="mt-4 text-sm leading-relaxed text-ash sm:text-base md:mt-5 md:text-lg">
               {pick(snapshot.intro)}
             </p>
           </div>
         </Reveal>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 lg:grid-cols-4">
           {stats.slice(0, 4).map((stat, i) => (
             <Reveal key={stat.id} delay={i * 80}>
               <StatTile value={stat.value} label={pick(stat.label)} detail={pick(stat.detail)} />
@@ -148,7 +162,7 @@ export default function TeamSnapshot() {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:gap-4 lg:mt-6 lg:grid-cols-3">
           {pillars.slice(0, 3).map((pillar, i) => (
             <Reveal key={pillar.id} delay={i * 80}>
               <Pillar icon={icons[i] ?? icons[0]} title={pick(pillar.title)} body={pick(pillar.body)} />
@@ -157,17 +171,17 @@ export default function TeamSnapshot() {
         </div>
 
         <Reveal delay={220}>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center">
             <Link
               href={snapshot.primaryCta.href}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.24)] transition-colors hover:bg-amethyst/25"
+              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.24)] transition-colors hover:bg-amethyst/25 sm:px-6 sm:text-sm sm:tracking-[0.16em]"
             >
               {pick(snapshot.primaryCta.label)}
               <ArrowRightIcon size={16} />
             </Link>
             <Link
               href={snapshot.secondaryCta.href}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/40 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
+              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/40 px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul sm:px-6 sm:text-sm sm:tracking-[0.16em]"
             >
               {pick(snapshot.secondaryCta.label)}
               <ArrowRightIcon size={16} />
