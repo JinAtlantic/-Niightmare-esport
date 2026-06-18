@@ -370,6 +370,9 @@ html.lang-lo .keep-latin {
   overflow: hidden;
   background: var(--void);
 }
+.hero-section--reaper {
+  isolation: isolate;
+}
 /* one disciplined light source rising from below */
 .hero-section::before {
   content: "";
@@ -427,6 +430,11 @@ html.lang-lo .keep-latin {
   object-position: 50% 62%;
   opacity: 0.74;
 }
+.hero-bg--reaper {
+  object-position: 50% 36%;
+  opacity: 1;
+  filter: saturate(1.08) contrast(1.05);
+}
 .hero-bg-veil {
   position: absolute;
   inset: 0;
@@ -438,6 +446,69 @@ html.lang-lo .keep-latin {
       rgba(14, 9, 22, 0.85) 100%
     ),
     radial-gradient(ellipse 78% 66% at 50% 42%, transparent 48%, rgba(14, 9, 22, 0.36) 100%);
+}
+.hero-section--reaper .hero-bg-veil {
+  background:
+    linear-gradient(90deg, rgba(8, 5, 12, 0.94) 0%, rgba(8, 5, 12, 0.52) 30%, rgba(8, 5, 12, 0.08) 54%, rgba(8, 5, 12, 0.18) 100%),
+    linear-gradient(180deg, rgba(8, 5, 12, 0.44) 0%, transparent 32%, rgba(8, 5, 12, 0.24) 66%, rgba(8, 5, 12, 0.9) 100%),
+    radial-gradient(ellipse 92% 68% at 53% 33%, transparent 42%, rgba(8, 5, 12, 0.54) 100%);
+}
+.home-hero-copy {
+  max-width: min(760px, 96vw);
+}
+.home-hero-wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.02em;
+  font-weight: 800;
+  font-size: clamp(3.2rem, 10.5vw, 8.8rem);
+  line-height: 0.82;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  color: #f7f2ff;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.55),
+    0 10px 42px rgba(0, 0, 0, 0.82),
+    0 0 48px rgba(168, 85, 247, 0.62);
+  opacity: 0;
+  animation: fx-rise 0.85s ease 0.22s both;
+}
+.home-hero-wordmark span:last-child {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236, 231, 242, 0.82);
+  text-shadow:
+    0 10px 38px rgba(0, 0, 0, 0.75),
+    0 0 34px rgba(199, 125, 255, 0.6);
+}
+.home-hero-tagline {
+  margin-top: 1.2rem;
+  max-width: 720px;
+  color: #ece7f2;
+  font-size: clamp(1.05rem, 2.7vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.82),
+    0 0 30px rgba(168, 85, 247, 0.42);
+}
+@media (max-width: 767px) {
+  .hero-bg--reaper {
+    object-position: 56% 28%;
+  }
+  .hero-section--reaper .hero-bg-veil {
+    background:
+      linear-gradient(180deg, rgba(8, 5, 12, 0.26) 0%, rgba(8, 5, 12, 0.05) 30%, rgba(8, 5, 12, 0.38) 64%, rgba(8, 5, 12, 0.94) 100%),
+      radial-gradient(ellipse 90% 48% at 50% 76%, rgba(8, 5, 12, 0.86) 0%, rgba(8, 5, 12, 0.5) 48%, transparent 100%);
+  }
+  .home-hero-wordmark {
+    font-size: clamp(2.75rem, 14.5vw, 4.8rem);
+  }
+  .home-hero-tagline {
+    max-width: 360px;
+    letter-spacing: 0.06em;
+  }
 }
 /* drifting fog */
 .hero-fog {

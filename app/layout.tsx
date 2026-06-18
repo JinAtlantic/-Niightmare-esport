@@ -119,11 +119,11 @@ export default function RootLayout({
             __html: `(function(){try{var l=localStorage.getItem("niightmare-lang");if(l==="lo"){var r=document.documentElement;r.setAttribute("lang","lo");r.classList.add("lang-lo");}}catch(e){}})();`,
           }}
         />
-        {/* Start fetching the hero logo (the LCP element) immediately. */}
+        {/* Start fetching the home hero image (the LCP element) immediately. */}
         <link
           rel="preload"
           as="image"
-          href="/repper.webp"
+          href="/home-reaper.webp"
           type="image/webp"
           fetchPriority="high"
         />

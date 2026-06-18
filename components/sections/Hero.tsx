@@ -7,14 +7,15 @@ export default function Hero() {
   const { t } = useLanguage();
 
   return (
-    <section
-      className="hero-section flex flex-col items-center justify-center px-5 pb-20 pt-10 text-center md:px-14"
-      style={{ minHeight: "calc(100svh - 4rem)" }}
-    >
-      {/* atmospheric depth — dim background scene, drifting fog, embers */}
+    <section className="hero-section hero-section--reaper flex min-h-[calc(100svh-1.5rem)] flex-col justify-end px-5 pb-10 pt-28 text-left md:min-h-[calc(100svh-2rem)] md:px-14 md:pb-14">
       <div className="hero-atmos" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="hero-bg" src="/background.jpg" alt="" />
+        <img
+          className="hero-bg hero-bg--reaper"
+          src="/home-reaper.webp"
+          alt=""
+          fetchPriority="high"
+        />
         <span className="hero-bg-veil" />
         <span className="hero-fog hero-fog--1" />
         <span className="hero-fog hero-fog--2" />
@@ -25,33 +26,23 @@ export default function Hero() {
 
       <div className="hero-grain" aria-hidden />
 
-      <div className="relative z-[2] w-full max-w-[1180px]">
-        {/* reaper portrait with ghost-haunt afterimage — a still focal point;
-            the moving accent now lives in the wordmark below it. */}
-        <h1 className="logo-stage logo-stage--repper">
-          <span className="logo-aura" aria-hidden />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="logo-ghost" src="/repper.webp" aria-hidden alt="" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="logo-main"
-            src="/repper.webp"
-            alt="NIIGHTMARE Esports — Lao PDR"
-            fetchPriority="high"
-          />
-        </h1>
+      <div className="relative z-[2] w-full max-w-7xl">
+        <div className="home-hero-copy">
+          <p
+            className="fx-rise mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-spectre/80 md:text-xs"
+            style={{ animationDelay: "0.18s" }}
+          >
+            Lao PDR / MLBB / eFootball
+          </p>
+          <h1 className="home-hero-wordmark keep-latin font-display">
+            <span>NIIGHTMARE</span>
+            <span>ESPORT</span>
+          </h1>
+        </div>
 
-        {/* brand wordmark — white glyphs with a slow violet light sweep.
-            NB: no `fx-rise` class here — the rise + sweep are both driven by
-            `.repper-wordmark` so `.fx-rise` can't override the sweep. */}
-        <p className="repper-wordmark font-display keep-latin">
-          NIIGHTMARE<span className="repper-esport">ESPORT</span>
-        </p>
-
-        {/* tagline — the slogan, hard and bright with an accented key word */}
         <p
-          className="fx-rise font-display text-[clamp(1.05rem,3vw,2.1rem)] font-bold uppercase leading-[1.05] tracking-[0.12em] text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.35)]"
-          style={{ animationDelay: "0.32s" }}
+          className="home-hero-tagline fx-rise keep-latin font-display"
+          style={{ animationDelay: "0.34s" }}
         >
           {t("hero.tagline")}{" "}
           <span className="tagline-accent text-glow">
@@ -59,9 +50,8 @@ export default function Hero() {
           </span>
         </p>
 
-        {/* scythe-blade divider */}
         <div
-          className="fx-rise mx-auto mt-6 h-[2px] w-[120px] -skew-x-[24deg] bg-gradient-to-r from-transparent via-amethyst to-glow shadow-[0_0_16px_rgba(168,85,247,0.6)]"
+          className="fx-rise mt-6 h-[2px] w-[180px] -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_18px_rgba(168,85,247,0.65)]"
           style={{ animationDelay: "0.42s" }}
           aria-hidden
         />
