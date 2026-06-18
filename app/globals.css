@@ -461,7 +461,7 @@ html.lang-lo .keep-latin {
   flex-direction: column;
   gap: 0.02em;
   font-weight: 800;
-  font-size: clamp(3.2rem, 10.5vw, 8.8rem);
+  font-size: clamp(2.55rem, 8vw, 7rem);
   line-height: 0.82;
   text-transform: uppercase;
   letter-spacing: 0;
@@ -475,9 +475,11 @@ html.lang-lo .keep-latin {
     home-wordmark-breath 5.5s ease-in-out 1.2s infinite;
 }
 .home-hero-wordmark > span {
+  display: block;
   position: relative;
   width: fit-content;
   max-width: 100%;
+  white-space: nowrap;
 }
 .home-hero-main {
   background-image: linear-gradient(
@@ -520,26 +522,27 @@ html.lang-lo .keep-latin {
     0 0 34px rgba(199, 125, 255, 0.6);
 }
 .home-hero-tagline {
-  margin-top: 1.2rem;
+  margin-top: 1rem;
   max-width: 720px;
   color: #ece7f2;
-  font-size: clamp(1.05rem, 2.7vw, 2.25rem);
+  font-size: clamp(0.92rem, 2vw, 1.65rem);
   font-weight: 800;
   line-height: 1.05;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: nowrap;
   text-shadow:
     0 6px 28px rgba(0, 0, 0, 0.82),
     0 0 30px rgba(168, 85, 247, 0.42);
 }
 html.lang-lo .home-hero-wordmark {
-  font-size: clamp(3.0118rem, 10.5vw, 8.2824rem);
+  font-size: clamp(2.4rem, 8vw, 6.5882rem);
   line-height: 0.82;
   letter-spacing: 0;
 }
 html.lang-lo .home-hero-tagline {
-  margin-top: 1.1294rem;
-  font-size: clamp(0.9882rem, 2.7vw, 2.1176rem);
+  margin-top: 0.9412rem;
+  font-size: clamp(0.8659rem, 2vw, 1.5529rem);
   line-height: 1.05;
   letter-spacing: 0.08em;
 }
@@ -553,16 +556,18 @@ html.lang-lo .home-hero-tagline {
       radial-gradient(ellipse 90% 48% at 50% 76%, rgba(8, 5, 12, 0.86) 0%, rgba(8, 5, 12, 0.5) 48%, transparent 100%);
   }
   .home-hero-wordmark {
-    font-size: clamp(2.75rem, 14.5vw, 4.8rem);
+    font-size: clamp(2.35rem, 12.4vw, 4.05rem);
   }
   html.lang-lo .home-hero-wordmark {
-    font-size: clamp(2.5882rem, 14.5vw, 4.5176rem);
+    font-size: clamp(2.2118rem, 12.4vw, 3.8118rem);
   }
   .home-hero-tagline {
     max-width: 360px;
+    font-size: clamp(0.9rem, 4.1vw, 1.08rem);
     letter-spacing: 0.06em;
   }
   html.lang-lo .home-hero-tagline {
+    font-size: clamp(0.8471rem, 4.1vw, 1.0165rem);
     letter-spacing: 0.06em;
   }
 }
