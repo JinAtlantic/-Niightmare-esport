@@ -29,7 +29,7 @@ export default function Hero() {
 
       <div className="hero-grain" aria-hidden />
 
-      <div className="relative z-[2] w-full max-w-7xl">
+      <div className="home-hero-content relative z-[2] w-full max-w-7xl">
         <div className="home-hero-copy">
           <h1 className="home-hero-wordmark keep-latin font-display">
             <span className="home-hero-main">

@@ -456,6 +456,9 @@ html.lang-lo .keep-latin {
 .home-hero-copy {
   max-width: min(760px, 96vw);
 }
+.home-hero-content {
+  transform: translateY(0);
+}
 .home-hero-wordmark {
   display: flex;
   flex-direction: column;
@@ -547,6 +550,9 @@ html.lang-lo .home-hero-tagline {
   letter-spacing: 0.08em;
 }
 @media (max-width: 767px) {
+  .home-hero-content {
+    transform: translateY(clamp(-4.25rem, -7svh, -2.75rem));
+  }
   .hero-bg--reaper {
     object-position: 56% 28%;
   }
