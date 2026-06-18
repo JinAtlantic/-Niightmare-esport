@@ -19,6 +19,12 @@ interface TournamentLabels {
   season: { en: string; lo: string };
 }
 
+const FALLBACK_TOURNAMENT_LABELS: TournamentLabels = {
+  placement: { en: "Placement", lo: "ອັນດັບ" },
+  prize: { en: "Prize", lo: "ເງິນລາງວັນ" },
+  season: { en: "Season", lo: "ລະດູການ" },
+};
+
 function TrophyCard({
   tournament,
   labels,
@@ -126,11 +132,7 @@ export default function TrophyCabinet() {
     page?: { tournamentLabels?: TournamentLabels };
     tournaments: Tournament[];
   };
-  const labels = data.page?.tournamentLabels ?? {
-    placement: { en: t("matches.placement"), lo: t("matches.placement") },
-    prize: { en: t("matches.prize"), lo: t("matches.prize") },
-    season: { en: t("matches.season"), lo: t("matches.season") },
-  };
+  const labels = data.page?.tournamentLabels ?? FALLBACK_TOURNAMENT_LABELS;
 
   // Champions first, then most recent season — the cabinet reads top-down.
   const tournaments = useMemo(() => {
