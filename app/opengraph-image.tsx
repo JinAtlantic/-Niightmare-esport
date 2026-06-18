@@ -1,17 +1,15 @@
 import { ImageResponse } from "next/og";
 
-// A true 1200×630 social card in the brand's "Premium Violet Void" language —
-// generated at build time so Facebook / Discord / X render a full-bleed branded
-// preview instead of the small letterboxed logo we used to ship.
-
-export const alt = "NIIGHTMARE Esports — Lao PDR | MLBB & eFootball";
+export const alt = "NIIGHTMARE ESPORT - WE HAUNT THE META";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const VOID = "#0B0710";
 const AMETHYST = "#A855F7";
 const GLOW = "#C77DFF";
 const SOUL = "#ECE7F2";
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://niightmare-esport.vercel.app"
+).replace(/\/$/, "");
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -21,93 +19,137 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: VOID,
-          backgroundImage:
-            "radial-gradient(120% 90% at 50% 118%, rgba(124,47,214,0.55) 0%, rgba(124,47,214,0.12) 40%, transparent 70%), radial-gradient(80% 60% at 50% -10%, rgba(14,9,22,0.9) 0%, transparent 60%)",
           position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#0B0710",
         }}
       >
-        {/* top hairline */}
+        <img
+          src={`${SITE_URL}/home-reaper.webp`}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "50% 34%",
+          }}
+        />
+
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: 4,
-            backgroundImage: `linear-gradient(90deg, transparent, ${AMETHYST} 35%, ${GLOW} 60%, transparent)`,
+            inset: 0,
+            background:
+              "linear-gradient(90deg, rgba(8,5,12,0.92) 0%, rgba(8,5,12,0.58) 34%, rgba(8,5,12,0.18) 70%, rgba(8,5,12,0.28) 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(180deg, rgba(8,5,12,0.22) 0%, rgba(8,5,12,0.08) 36%, rgba(8,5,12,0.78) 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: -160,
+            bottom: -260,
+            width: 900,
+            height: 560,
+            borderRadius: 999,
+            background:
+              "radial-gradient(ellipse at center, rgba(168,85,247,0.52) 0%, rgba(168,85,247,0.18) 42%, transparent 72%)",
+            filter: "blur(18px)",
           }}
         />
 
-        {/* eyebrow */}
         <div
           style={{
+            position: "absolute",
+            left: 72,
+            right: 72,
+            bottom: 64,
             display: "flex",
-            fontSize: 26,
-            letterSpacing: 10,
-            fontWeight: 600,
-            color: "#C9B4F6",
-            marginBottom: 28,
+            flexDirection: "column",
+            alignItems: "flex-start",
           }}
         >
-          LAO PDR / MLBB & EFOOTBALL
-        </div>
-
-        {/* wordmark */}
-        <div style={{ display: "flex", alignItems: "baseline", lineHeight: 1 }}>
           <div
             style={{
-              fontSize: 150,
+              display: "flex",
+              fontSize: 96,
+              lineHeight: 0.84,
               fontWeight: 800,
-              letterSpacing: 2,
-              backgroundImage: `linear-gradient(180deg, #ffffff 0%, #ead7ff 42%, ${AMETHYST} 82%, #7C2FD6 100%)`,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
+              letterSpacing: 0,
+              color: SOUL,
+              textShadow:
+                "0 8px 34px rgba(0,0,0,0.82), 0 0 42px rgba(168,85,247,0.52)",
             }}
           >
-            NIIGHTMARE
+            N
+            <span
+              style={{
+                color: AMETHYST,
+                textShadow:
+                  "0 0 12px rgba(199,125,255,0.48), 0 0 28px rgba(168,85,247,0.38)",
+              }}
+            >
+              II
+            </span>
+            GHTMARE
           </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            fontSize: 76,
-            fontWeight: 800,
-            letterSpacing: 28,
-            color: GLOW,
-            marginTop: 6,
-          }}
-        >
-          ESPORT
-        </div>
 
-        {/* scythe divider */}
-        <div
-          style={{
-            width: 180,
-            height: 4,
-            marginTop: 44,
-            transform: "skewX(-24deg)",
-            backgroundImage: `linear-gradient(90deg, transparent, ${AMETHYST}, ${GLOW}, transparent)`,
-          }}
-        />
+          <div
+            style={{
+              display: "flex",
+              marginTop: 10,
+              fontSize: 86,
+              lineHeight: 0.88,
+              fontWeight: 800,
+              letterSpacing: 3,
+              color: "transparent",
+              WebkitTextStroke: "2px rgba(236,231,242,0.86)",
+              textShadow:
+                "0 8px 34px rgba(0,0,0,0.78), 0 0 34px rgba(199,125,255,0.48)",
+            }}
+          >
+            ESPORT
+          </div>
 
-        {/* tagline */}
-        <div
-          style={{
-            display: "flex",
-            fontSize: 30,
-            letterSpacing: 8,
-            fontWeight: 700,
-            color: SOUL,
-            marginTop: 40,
-          }}
-        >
-          WE HAUNT THE META
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 18,
+              marginTop: 34,
+              fontSize: 30,
+              lineHeight: 1,
+              fontWeight: 800,
+              letterSpacing: 5,
+              color: SOUL,
+              textShadow: "0 6px 24px rgba(0,0,0,0.82)",
+            }}
+          >
+            <span>WE HAUNT THE</span>
+            <span style={{ color: GLOW, textShadow: "0 0 24px rgba(199,125,255,0.72)" }}>
+              META
+            </span>
+          </div>
+
+          <div
+            style={{
+              width: 220,
+              height: 4,
+              marginTop: 34,
+              transform: "skewX(-24deg)",
+              background: `linear-gradient(90deg, ${AMETHYST}, ${GLOW}, transparent)`,
+              boxShadow: "0 0 20px rgba(168,85,247,0.7)",
+            }}
+          />
         </div>
       </div>
     ),
