@@ -68,6 +68,15 @@ const RESULT_OPTS = [
   { value: "loss", label: "แพ้ (Loss)" },
 ];
 
+const ROUND_PRESETS: { id: string; label: string; value: Bilingual }[] = [
+  { id: "wild-card", label: "Wild Card", value: { en: "Wild Card", lo: "Wild Card" } },
+  { id: "group-stage", label: "Group Stage", value: { en: "Group Stage", lo: "Group Stage" } },
+  { id: "quarter-final", label: "Quarter-Final", value: { en: "Quarter-Final", lo: "Quarter-Final" } },
+  { id: "semi-final", label: "Semi-Final", value: { en: "Semi-Final", lo: "Semi-Final" } },
+  { id: "final", label: "Final", value: { en: "Final", lo: "Final" } },
+  { id: "grand-final", label: "Grand Final", value: { en: "Grand Final", lo: "Grand Final" } },
+];
+
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
 
 function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
@@ -301,14 +310,42 @@ export default function MatchesEditor() {
                 />
                 <div className="md:col-span-2">
                   <BilingualField
-                    label="ทัวร์นาเมนต์"
+                    label="Tournament"
                     value={m.tournament}
                     onChange={(v) => patchMatch(i, { tournament: v })}
                   />
                 </div>
                 <div className="md:col-span-2">
+                  <div className="mb-3 border border-edge bg-void/35 p-3">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
+                        Round presets
+                      </p>
+                      <p className="font-mono text-[10px] text-ash-dim">
+                        Outer rounds first, finals last on /matches
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {ROUND_PRESETS.map((preset) => (
+                        <Button
+                          key={preset.id}
+                          onClick={() => patchMatch(i, { round: preset.value })}
+                          className="min-h-[34px] px-3 py-1 text-[10px] tracking-[0.12em]"
+                        >
+                          {preset.label}
+                        </Button>
+                      ))}
+                      <Button
+                        variant="danger"
+                        onClick={() => patchMatch(i, { round: { en: "", lo: "" } })}
+                        className="min-h-[34px] px-3 py-1 text-[10px] tracking-[0.12em]"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
                   <BilingualField
-                    label="รอบการแข่งขัน (เช่น รอบแบ่งกลุ่ม / รอบชิง — เว้นว่างได้)"
+                    label="Round / Stage"
                     value={m.round ?? { en: "", lo: "" }}
                     onChange={(v) => patchMatch(i, { round: v })}
                   />
