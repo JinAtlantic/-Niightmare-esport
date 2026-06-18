@@ -4,52 +4,110 @@ import React, { useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import {
+  ArrowRightIcon,
   DiscordIcon,
   FacebookIcon,
+  InstagramIcon,
   MailIcon,
+  TiktokIcon,
   YoutubeIcon,
-  ArrowRightIcon,
 } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
+import siteSeed from "@/data/site.json";
+import type { Bilingual } from "@/lib/types";
 
 type Status = "idle" | "submitting" | "success" | "error";
+type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord";
+type FieldKey = "name" | "email" | "company" | "type" | "message";
+type TypeKey = "sponsorship" | "media" | "general" | "tryout";
 
-// text-base (16px) keeps iOS from auto-zooming on focus; min-h-[44px] meets the
-// mobile touch-target minimum.
+interface ContactPageCopy {
+  kicker: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  deskLabel: Bilingual;
+  deskIntro: Bilingual;
+  infoLabel: Bilingual;
+  mediaKitLabel: Bilingual;
+  mediaKitDesc: Bilingual;
+  mediaKitButton: Bilingual;
+  formLabel: Bilingual;
+  formIntro: Bilingual;
+  fieldLabels: Record<FieldKey, Bilingual>;
+  typeLabels: Record<TypeKey, Bilingual>;
+  channelLabels: Record<ContactKey, Bilingual>;
+  submit: Bilingual;
+  submitting: Bilingual;
+  success: Bilingual;
+  error: Bilingual;
+}
+
+const pageSeed = siteSeed.contactPage as ContactPageCopy;
+
 const inputClass =
-  "w-full border border-edge bg-void/60 px-4 py-3 text-base min-h-[44px] text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-primary focus:shadow-glow-soft";
+  "min-h-[44px] w-full border border-edge bg-void/60 px-4 py-3 text-base text-soul placeholder:text-ash/70 outline-none transition-colors focus:border-amethyst focus:shadow-glow-soft";
+
+function mergeContactPage(page?: Partial<ContactPageCopy>): ContactPageCopy {
+  return {
+    ...pageSeed,
+    ...page,
+    fieldLabels: { ...pageSeed.fieldLabels, ...(page?.fieldLabels ?? {}) },
+    typeLabels: { ...pageSeed.typeLabels, ...(page?.typeLabels ?? {}) },
+    channelLabels: { ...pageSeed.channelLabels, ...(page?.channelLabels ?? {}) },
+  };
+}
 
 export default function ContactClient() {
-  const { t } = useLanguage();
+  const { pick } = useLanguage();
   const { site } = useContent();
   const [status, setStatus] = useState<Status>("idle");
+  const page = mergeContactPage((site as { contactPage?: Partial<ContactPageCopy> }).contactPage);
+  const contact = site.contact as Partial<Record<ContactKey, string>>;
 
   const contactRows = [
     {
-      label: site.contact.email,
-      href: `mailto:${site.contact.email}`,
+      key: "email" as const,
+      value: contact.email,
+      href: contact.email ? `mailto:${contact.email}` : "",
       Icon: MailIcon,
       external: false,
     },
     {
-      label: "Facebook",
-      href: site.contact.facebook,
+      key: "facebook" as const,
+      value: contact.facebook,
+      href: contact.facebook,
       Icon: FacebookIcon,
       external: true,
     },
     {
-      label: "YouTube",
-      href: site.contact.youtube,
+      key: "instagram" as const,
+      value: contact.instagram,
+      href: contact.instagram,
+      Icon: InstagramIcon,
+      external: true,
+    },
+    {
+      key: "youtube" as const,
+      value: contact.youtube,
+      href: contact.youtube,
       Icon: YoutubeIcon,
       external: true,
     },
     {
-      label: "Discord",
-      href: site.contact.discord,
+      key: "tiktok" as const,
+      value: contact.tiktok,
+      href: contact.tiktok,
+      Icon: TiktokIcon,
+      external: true,
+    },
+    {
+      key: "discord" as const,
+      value: contact.discord,
+      href: contact.discord,
       Icon: DiscordIcon,
       external: true,
     },
-  ];
+  ].filter((row) => row.href);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -74,122 +132,163 @@ export default function ContactClient() {
 
   return (
     <>
-      <PageHeader title={t("sections.contact_us")} subtitle={t("contact.intro")} />
+      <PageHeader kicker={pick(page.kicker)} title={pick(page.title)} subtitle={pick(page.intro)} />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-        <div className="grid gap-10 lg:grid-cols-2">
-          {/* Contact info */}
-          <div>
-            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-text-primary">
-              {t("contact.info_label")}
-            </h2>
-            <div className="mt-6 flex flex-col gap-3">
-              {contactRows.map(({ label, href, Icon, external }) => (
+      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
+        <div className="mb-10 border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
+          <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="flex min-h-[170px] flex-col justify-between border border-edge bg-void/45 p-5">
+              <div>
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
+                  {pick(page.deskLabel)}
+                </p>
+                <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
+                  {pick(page.deskIntro)}
+                </p>
+              </div>
+              <div
+                aria-hidden
+                className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {contactRows.map(({ key, value, href, Icon, external }) => (
                 <a
-                  key={label}
+                  key={key}
                   href={href}
                   target={external ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  className="hover-glow flex items-center gap-4 border border-edge bg-card p-4 text-text-primary"
+                  rel={external ? "noopener noreferrer" : undefined}
+                  className="hover-glow group relative min-h-[150px] overflow-hidden border border-edge bg-void/55 p-4 text-soul"
                 >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/60 text-accent">
+                  <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
+                  <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5" />
+                  <span className="grid h-11 w-11 place-items-center border border-edge-bright bg-crypt text-amethyst transition-colors group-hover:text-glow">
                     <Icon size={20} />
                   </span>
-                  <span className="break-all text-sm">{label}</span>
+                  <p className="mt-5 font-display text-sm font-bold uppercase tracking-[0.12em] text-spectre">
+                    {pick(page.channelLabels[key])}
+                  </p>
+                  <p className="keep-latin mt-2 break-words text-xs leading-relaxed text-ash">
+                    {key === "email" ? value : href}
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr]">
+          <div>
+            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
+              {pick(page.infoLabel)}
+            </h2>
+            <div className="mt-6 flex flex-col gap-3">
+              {contactRows.map(({ key, value, href, Icon, external }) => (
+                <a
+                  key={key}
+                  href={href}
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener noreferrer" : undefined}
+                  className="hover-glow flex items-center gap-4 border border-edge bg-crypt p-4 text-soul"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/60 text-amethyst">
+                    <Icon size={20} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                      {pick(page.channelLabels[key])}
+                    </span>
+                    <span className="keep-latin mt-1 block break-all text-sm">
+                      {key === "email" ? value : href}
+                    </span>
+                  </span>
                 </a>
               ))}
             </div>
 
-            {/* Media kit */}
-            <div className="mt-8 border border-edge bg-card p-6">
-              <h3 className="font-display text-base font-semibold uppercase tracking-[0.18em] text-text-primary">
-                {t("contact.mediakit_label")}
+            <div className="mt-8 border border-edge bg-crypt p-6">
+              <h3 className="font-display text-base font-semibold uppercase tracking-[0.18em] text-soul">
+                {pick(page.mediaKitLabel)}
               </h3>
-              <p className="mt-2 text-sm text-text-muted">{t("contact.mediakit_desc")}</p>
+              <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.mediaKitDesc)}</p>
               <a
                 href={site.mediaKitUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover-glow mt-4 inline-flex min-h-[44px] items-center gap-2 border border-primary px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-text-primary hover:bg-primary/15"
+                className="hover-glow mt-4 inline-flex min-h-[44px] items-center gap-2 border border-amethyst px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-soul hover:bg-amethyst/15"
               >
-                {t("contact.mediakit_btn")}
+                {pick(page.mediaKitButton)}
                 <ArrowRightIcon size={16} />
               </a>
             </div>
           </div>
 
-          {/* Contact form */}
           <div>
-            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-text-primary">
-              {t("contact.form_label")}
+            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
+              {pick(page.formLabel)}
             </h2>
+            <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.formIntro)}</p>
 
             <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
               <div>
-                <label htmlFor="name" className="mb-1.5 block text-sm text-text-muted">
-                  {t("contact.field_name")}
+                <label htmlFor="name" className="mb-1.5 block text-sm text-ash">
+                  {pick(page.fieldLabels.name)}
                 </label>
                 <input id="name" name="name" type="text" required className={inputClass} />
               </div>
 
               <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm text-text-muted">
-                  {t("contact.field_email")}
+                <label htmlFor="email" className="mb-1.5 block text-sm text-ash">
+                  {pick(page.fieldLabels.email)}
                 </label>
                 <input id="email" name="email" type="email" required className={inputClass} />
               </div>
 
               <div>
-                <label htmlFor="company" className="mb-1.5 block text-sm text-text-muted">
-                  {t("contact.field_company")}
+                <label htmlFor="company" className="mb-1.5 block text-sm text-ash">
+                  {pick(page.fieldLabels.company)}
                 </label>
                 <input id="company" name="company" type="text" className={inputClass} />
               </div>
 
               <div>
-                <label htmlFor="type" className="mb-1.5 block text-sm text-text-muted">
-                  {t("contact.field_type")}
+                <label htmlFor="type" className="mb-1.5 block text-sm text-ash">
+                  {pick(page.fieldLabels.type)}
                 </label>
                 <select id="type" name="type" className={inputClass} defaultValue="">
                   <option value="" disabled>
-                    —
+                    -
                   </option>
-                  <option value="Sponsorship">{t("contact.type_sponsorship")}</option>
-                  <option value="Media">{t("contact.type_media")}</option>
-                  <option value="General">{t("contact.type_general")}</option>
-                  <option value="Tryout">{t("contact.type_tryout")}</option>
+                  <option value="Sponsorship">{pick(page.typeLabels.sponsorship)}</option>
+                  <option value="Media">{pick(page.typeLabels.media)}</option>
+                  <option value="General">{pick(page.typeLabels.general)}</option>
+                  <option value="Tryout">{pick(page.typeLabels.tryout)}</option>
                 </select>
               </div>
 
               <div>
-                <label htmlFor="message" className="mb-1.5 block text-sm text-text-muted">
-                  {t("contact.field_message")}
+                <label htmlFor="message" className="mb-1.5 block text-sm text-ash">
+                  {pick(page.fieldLabels.message)}
                 </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={5}
-                  required
-                  className={`${inputClass} resize-y`}
-                />
+                <textarea id="message" name="message" rows={5} required className={`${inputClass} resize-y`} />
               </div>
 
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="hover-glow w-full bg-primary px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.14em] text-white transition-opacity disabled:opacity-60"
+                className="hover-glow w-full bg-amethyst px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.14em] text-white transition-opacity disabled:opacity-60"
               >
-                {status === "submitting" ? "..." : t("contact.submit")}
+                {status === "submitting" ? pick(page.submitting) : pick(page.submit)}
               </button>
 
               {status === "success" ? (
                 <p className="border border-win/60 bg-win/10 px-4 py-3 text-sm text-win">
-                  Message sent — we will get back to you soon.
+                  {pick(page.success)}
                 </p>
               ) : null}
               {status === "error" ? (
                 <p className="border border-loss/60 bg-loss/10 px-4 py-3 text-sm text-loss">
-                  Something went wrong. Please email {site.contact.email} directly.
+                  {pick(page.error)} {contact.email}.
                 </p>
               ) : null}
             </form>

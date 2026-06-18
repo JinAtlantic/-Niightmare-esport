@@ -15,6 +15,89 @@
     "tiktok": "https://tiktok.com/@niightmareesports",
     "discord": "https://discord.gg/niightmare"
   },
+  "contactPage": {
+    "kicker": {
+      "en": "Business Desk",
+      "lo": "ຝ່າຍຕິດຕໍ່ທຸລະກິດ"
+    },
+    "title": {
+      "en": "Contact NIIGHTMARE",
+      "lo": "ຕິດຕໍ່ NIIGHTMARE"
+    },
+    "intro": {
+      "en": "Open the right conversation for sponsorship, media, recruitment, or community collaborations.",
+      "lo": "ເລີ່ມຕົ້ນການຕິດຕໍ່ທີ່ຖືກທາງ ສໍາລັບສະປອນເຊີ, ສື່, ການຮັບສະໝັກ ຫຼື ການຮ່ວມມືກັບຊຸມຊົນ."
+    },
+    "deskLabel": {
+      "en": "Partnership Desk",
+      "lo": "ສູນຕິດຕໍ່ພາກສ່ວນ"
+    },
+    "deskIntro": {
+      "en": "For sponsor pricing, media access, events, scrims, and official team enquiries.",
+      "lo": "ສໍາລັບລາຄາສະປອນເຊີ, ການເຂົ້າເຖິງສື່, ອີເວັນ, scrim ແລະ ການສອບຖາມຢ່າງເປັນທາງການ."
+    },
+    "infoLabel": {
+      "en": "Direct Channels",
+      "lo": "ຊ່ອງທາງໂດຍກົງ"
+    },
+    "mediaKitLabel": {
+      "en": "Media Kit",
+      "lo": "ຊຸດສື່"
+    },
+    "mediaKitDesc": {
+      "en": "Logos, brand usage, player profiles, and partner-ready club assets.",
+      "lo": "ໂລໂກ້, ຄູ່ມືການໃຊ້ແບຣນ, ໂປຣໄຟລ໌ນັກກິລາ ແລະ ຊຸດຂໍ້ມູນສໍາລັບພາກສ່ວນ."
+    },
+    "mediaKitButton": {
+      "en": "Download Media Kit",
+      "lo": "ດາວໂຫຼດຊຸດສື່"
+    },
+    "formLabel": {
+      "en": "Start the Conversation",
+      "lo": "ເລີ່ມການຕິດຕໍ່"
+    },
+    "formIntro": {
+      "en": "Send the team your brief. We will route it to the right person.",
+      "lo": "ສົ່ງ brief ຂອງທ່ານໃຫ້ທີມ ແລ້ວພວກເຮົາຈະສົ່ງຕໍ່ໃຫ້ຜູ້ຮັບຜິດຊອບ."
+    },
+    "fieldLabels": {
+      "name": { "en": "Name", "lo": "ຊື່" },
+      "email": { "en": "Email", "lo": "ອີເມວ" },
+      "company": { "en": "Company / Organization", "lo": "ບໍລິສັດ / ອົງກອນ" },
+      "type": { "en": "Enquiry Type", "lo": "ປະເພດການຕິດຕໍ່" },
+      "message": { "en": "Message", "lo": "ຂໍ້ຄວາມ" }
+    },
+    "typeLabels": {
+      "sponsorship": { "en": "Sponsorship", "lo": "ສະປອນເຊີ" },
+      "media": { "en": "Media", "lo": "ສື່" },
+      "general": { "en": "General", "lo": "ທົ່ວໄປ" },
+      "tryout": { "en": "Tryout", "lo": "ທົດສອບທີມ" }
+    },
+    "channelLabels": {
+      "email": { "en": "Business Email", "lo": "ອີເມວທຸລະກິດ" },
+      "facebook": { "en": "Facebook", "lo": "Facebook" },
+      "instagram": { "en": "Instagram", "lo": "Instagram" },
+      "youtube": { "en": "YouTube", "lo": "YouTube" },
+      "tiktok": { "en": "TikTok", "lo": "TikTok" },
+      "discord": { "en": "Discord", "lo": "Discord" }
+    },
+    "submit": {
+      "en": "Send Message",
+      "lo": "ສົ່ງຂໍ້ຄວາມ"
+    },
+    "submitting": {
+      "en": "Sending...",
+      "lo": "ກໍາລັງສົ່ງ..."
+    },
+    "success": {
+      "en": "Message sent. We will get back to you soon.",
+      "lo": "ສົ່ງຂໍ້ຄວາມແລ້ວ. ພວກເຮົາຈະຕອບກັບໄວໆນີ້."
+    },
+    "error": {
+      "en": "Something went wrong. Please email us directly at",
+      "lo": "ມີບາງຢ່າງຜິດພາດ. ກະລຸນາສົ່ງອີເມວໂດຍກົງຫາ"
+    }
+  },
   "communityUrl": "https://discord.gg/niightmare",
   "formspreeEndpoint": "https://formspree.io/f/your-form-id",
   "mediaKitUrl": "/media-kit.pdf",

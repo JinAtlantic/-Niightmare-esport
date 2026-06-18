@@ -18,6 +18,7 @@ import {
   FacebookIcon,
   InstagramIcon,
   YoutubeIcon,
+  TiktokIcon,
   DiscordIcon,
 } from "@/components/ui/Icons";
 import type { UpcomingMatch } from "@/lib/types";
@@ -28,6 +29,7 @@ interface Contact {
   facebook?: string;
   instagram?: string;
   youtube?: string;
+  tiktok?: string;
   discord?: string;
   [key: string]: string | undefined;
 }
@@ -60,11 +62,37 @@ interface HomeSnapshot {
   secondaryCta: SnapshotCta;
 }
 
+type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord";
+type ContactFieldKey = "name" | "email" | "company" | "type" | "message";
+type ContactTypeKey = "sponsorship" | "media" | "general" | "tryout";
+
+interface ContactPageCopy {
+  kicker: Bilingual;
+  title: Bilingual;
+  intro: Bilingual;
+  deskLabel: Bilingual;
+  deskIntro: Bilingual;
+  infoLabel: Bilingual;
+  mediaKitLabel: Bilingual;
+  mediaKitDesc: Bilingual;
+  mediaKitButton: Bilingual;
+  formLabel: Bilingual;
+  formIntro: Bilingual;
+  fieldLabels: Record<ContactFieldKey, Bilingual>;
+  typeLabels: Record<ContactTypeKey, Bilingual>;
+  channelLabels: Record<ContactKey, Bilingual>;
+  submit: Bilingual;
+  submitting: Bilingual;
+  success: Bilingual;
+  error: Bilingual;
+}
+
 /** site.json — we edit `upcomingMatch` and `contact`; everything else is preserved. */
 interface SiteFile {
   upcomingMatch: UpcomingMatch;
   contact?: Contact;
   homeSnapshot?: HomeSnapshot;
+  contactPage?: ContactPageCopy;
   [key: string]: unknown;
 }
 
@@ -90,6 +118,57 @@ const DEFAULT_HOME_SNAPSHOT: HomeSnapshot = {
   secondaryCta: { label: { en: "START A DEAL", lo: "ເລີ່ມຕິດຕໍ່ທຸລະກິດ" }, href: "/contact" },
 };
 
+const DEFAULT_CONTACT_PAGE: ContactPageCopy = {
+  kicker: { en: "Business Desk", lo: "ຝ່າຍຕິດຕໍ່ທຸລະກິດ" },
+  title: { en: "Contact NIIGHTMARE", lo: "ຕິດຕໍ່ NIIGHTMARE" },
+  intro: {
+    en: "Open the right conversation for sponsorship, media, recruitment, or community collaborations.",
+    lo: "ເລີ່ມຕົ້ນການຕິດຕໍ່ທີ່ຖືກທາງ ສໍາລັບສະປອນເຊີ, ສື່, ການຮັບສະໝັກ ຫຼື ການຮ່ວມມືກັບຊຸມຊົນ.",
+  },
+  deskLabel: { en: "Partnership Desk", lo: "ສູນຕິດຕໍ່ພາກສ່ວນ" },
+  deskIntro: {
+    en: "For sponsor pricing, media access, events, scrims, and official team enquiries.",
+    lo: "ສໍາລັບລາຄາສະປອນເຊີ, ການເຂົ້າເຖິງສື່, ອີເວັນ, scrim ແລະ ການສອບຖາມຢ່າງເປັນທາງການ.",
+  },
+  infoLabel: { en: "Direct Channels", lo: "ຊ່ອງທາງໂດຍກົງ" },
+  mediaKitLabel: { en: "Media Kit", lo: "ຊຸດສື່" },
+  mediaKitDesc: {
+    en: "Logos, brand usage, player profiles, and partner-ready club assets.",
+    lo: "ໂລໂກ້, ຄູ່ມືການໃຊ້ແບຣນ, ໂປຣໄຟລ໌ນັກກິລາ ແລະ ຊຸດຂໍ້ມູນສໍາລັບພາກສ່ວນ.",
+  },
+  mediaKitButton: { en: "Download Media Kit", lo: "ດາວໂຫຼດຊຸດສື່" },
+  formLabel: { en: "Start the Conversation", lo: "ເລີ່ມການຕິດຕໍ່" },
+  formIntro: {
+    en: "Send the team your brief. We will route it to the right person.",
+    lo: "ສົ່ງ brief ຂອງທ່ານໃຫ້ທີມ ແລ້ວພວກເຮົາຈະສົ່ງຕໍ່ໃຫ້ຜູ້ຮັບຜິດຊອບ.",
+  },
+  fieldLabels: {
+    name: { en: "Name", lo: "ຊື່" },
+    email: { en: "Email", lo: "ອີເມວ" },
+    company: { en: "Company / Organization", lo: "ບໍລິສັດ / ອົງກອນ" },
+    type: { en: "Enquiry Type", lo: "ປະເພດການຕິດຕໍ່" },
+    message: { en: "Message", lo: "ຂໍ້ຄວາມ" },
+  },
+  typeLabels: {
+    sponsorship: { en: "Sponsorship", lo: "ສະປອນເຊີ" },
+    media: { en: "Media", lo: "ສື່" },
+    general: { en: "General", lo: "ທົ່ວໄປ" },
+    tryout: { en: "Tryout", lo: "ທົດສອບທີມ" },
+  },
+  channelLabels: {
+    email: { en: "Business Email", lo: "ອີເມວທຸລະກິດ" },
+    facebook: { en: "Facebook", lo: "Facebook" },
+    instagram: { en: "Instagram", lo: "Instagram" },
+    youtube: { en: "YouTube", lo: "YouTube" },
+    tiktok: { en: "TikTok", lo: "TikTok" },
+    discord: { en: "Discord", lo: "Discord" },
+  },
+  submit: { en: "Send Message", lo: "ສົ່ງຂໍ້ຄວາມ" },
+  submitting: { en: "Sending...", lo: "ກໍາລັງສົ່ງ..." },
+  success: { en: "Message sent. We will get back to you soon.", lo: "ສົ່ງຂໍ້ຄວາມແລ້ວ. ພວກເຮົາຈະຕອບກັບໄວໆນີ້." },
+  error: { en: "Something went wrong. Please email us directly at", lo: "ມີບາງຢ່າງຜິດພາດ. ກະລຸນາສົ່ງອີເມວໂດຍກົງຫາ" },
+};
+
 /** The footer/contact channels, in footer order, each with its icon + hint. */
 const CONTACT_FIELDS: {
   key: keyof Contact;
@@ -101,6 +180,7 @@ const CONTACT_FIELDS: {
   { key: "facebook", label: "Facebook", Icon: FacebookIcon, placeholder: "https://facebook.com/…" },
   { key: "instagram", label: "Instagram", Icon: InstagramIcon, placeholder: "https://instagram.com/…" },
   { key: "youtube", label: "YouTube", Icon: YoutubeIcon, placeholder: "https://youtube.com/@…" },
+  { key: "tiktok", label: "TikTok", Icon: TiktokIcon, placeholder: "https://tiktok.com/@…" },
   { key: "discord", label: "Discord", Icon: DiscordIcon, placeholder: "https://discord.gg/…" },
 ];
 
@@ -172,6 +252,16 @@ export default function HomeEditor() {
     const next = { ...contact, [key]: value.trim() || undefined };
     setData({ ...data, contact: next });
   };
+  const rawContactPage = data.contactPage;
+  const contactPage: ContactPageCopy = {
+    ...DEFAULT_CONTACT_PAGE,
+    ...(rawContactPage ?? {}),
+    fieldLabels: { ...DEFAULT_CONTACT_PAGE.fieldLabels, ...(rawContactPage?.fieldLabels ?? {}) },
+    typeLabels: { ...DEFAULT_CONTACT_PAGE.typeLabels, ...(rawContactPage?.typeLabels ?? {}) },
+    channelLabels: { ...DEFAULT_CONTACT_PAGE.channelLabels, ...(rawContactPage?.channelLabels ?? {}) },
+  };
+  const patchContactPage = (p: Partial<ContactPageCopy>) =>
+    setData({ ...data, contactPage: { ...contactPage, ...p } });
 
   const rawSnapshot = data.homeSnapshot;
   const snapshot: HomeSnapshot = {
@@ -469,6 +559,161 @@ export default function HomeEditor() {
             Email ใส่เป็นที่อยู่อีเมลธรรมดา (เช่น contact@niightmare.gg) — ระบบจะทำลิงก์ mailto ให้เอง
           </p>
         </Card>
+      </section>
+
+      <section>
+        <div className="mb-4">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
+            Contact Page Copy
+          </h2>
+          <p className="mt-1 font-mono text-[11px] text-ash">
+            ข้อความในหน้า /contact ทั้งหมด แก้ตรงนี้ได้โดยไม่ต้อง deploy
+          </p>
+        </div>
+
+        <Card>
+          <div className="grid gap-3">
+            <BilingualField
+              label="Hero kicker"
+              value={contactPage.kicker}
+              onChange={(kicker) => patchContactPage({ kicker })}
+            />
+            <BilingualField
+              label="Hero title"
+              value={contactPage.title}
+              onChange={(title) => patchContactPage({ title })}
+            />
+            <BilingualTextArea
+              label="Hero intro"
+              value={contactPage.intro}
+              onChange={(intro) => patchContactPage({ intro })}
+            />
+            <BilingualField
+              label="Partnership desk label"
+              value={contactPage.deskLabel}
+              onChange={(deskLabel) => patchContactPage({ deskLabel })}
+            />
+            <BilingualTextArea
+              label="Partnership desk intro"
+              value={contactPage.deskIntro}
+              onChange={(deskIntro) => patchContactPage({ deskIntro })}
+            />
+            <BilingualField
+              label="Direct channels heading"
+              value={contactPage.infoLabel}
+              onChange={(infoLabel) => patchContactPage({ infoLabel })}
+            />
+            <BilingualField
+              label="Media kit heading"
+              value={contactPage.mediaKitLabel}
+              onChange={(mediaKitLabel) => patchContactPage({ mediaKitLabel })}
+            />
+            <BilingualTextArea
+              label="Media kit description"
+              value={contactPage.mediaKitDesc}
+              onChange={(mediaKitDesc) => patchContactPage({ mediaKitDesc })}
+            />
+            <BilingualField
+              label="Media kit button"
+              value={contactPage.mediaKitButton}
+              onChange={(mediaKitButton) => patchContactPage({ mediaKitButton })}
+            />
+            <BilingualField
+              label="Form heading"
+              value={contactPage.formLabel}
+              onChange={(formLabel) => patchContactPage({ formLabel })}
+            />
+            <BilingualTextArea
+              label="Form intro"
+              value={contactPage.formIntro}
+              onChange={(formIntro) => patchContactPage({ formIntro })}
+            />
+          </div>
+        </Card>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <Card>
+            <h3 className="mb-3 font-display text-base font-bold uppercase tracking-wide text-soul">
+              Form labels
+            </h3>
+            <div className="grid gap-3">
+              {(["name", "email", "company", "type", "message"] as ContactFieldKey[]).map((key) => (
+                <BilingualField
+                  key={key}
+                  label={key}
+                  value={contactPage.fieldLabels[key]}
+                  onChange={(label) =>
+                    patchContactPage({ fieldLabels: { ...contactPage.fieldLabels, [key]: label } })
+                  }
+                />
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="mb-3 font-display text-base font-bold uppercase tracking-wide text-soul">
+              Enquiry types
+            </h3>
+            <div className="grid gap-3">
+              {(["sponsorship", "media", "general", "tryout"] as ContactTypeKey[]).map((key) => (
+                <BilingualField
+                  key={key}
+                  label={key}
+                  value={contactPage.typeLabels[key]}
+                  onChange={(label) =>
+                    patchContactPage({ typeLabels: { ...contactPage.typeLabels, [key]: label } })
+                  }
+                />
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="mb-3 font-display text-base font-bold uppercase tracking-wide text-soul">
+              Channel labels
+            </h3>
+            <div className="grid gap-3">
+              {(["email", "facebook", "instagram", "youtube", "tiktok", "discord"] as ContactKey[]).map((key) => (
+                <BilingualField
+                  key={key}
+                  label={key}
+                  value={contactPage.channelLabels[key]}
+                  onChange={(label) =>
+                    patchContactPage({ channelLabels: { ...contactPage.channelLabels, [key]: label } })
+                  }
+                />
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="mb-3 font-display text-base font-bold uppercase tracking-wide text-soul">
+              Form states
+            </h3>
+            <div className="grid gap-3">
+              <BilingualField
+                label="Submit"
+                value={contactPage.submit}
+                onChange={(submit) => patchContactPage({ submit })}
+              />
+              <BilingualField
+                label="Submitting"
+                value={contactPage.submitting}
+                onChange={(submitting) => patchContactPage({ submitting })}
+              />
+              <BilingualTextArea
+                label="Success message"
+                value={contactPage.success}
+                onChange={(success) => patchContactPage({ success })}
+              />
+              <BilingualTextArea
+                label="Error message prefix"
+                value={contactPage.error}
+                onChange={(error) => patchContactPage({ error })}
+              />
+            </div>
+          </Card>
+        </div>
       </section>
     </div>
   );
