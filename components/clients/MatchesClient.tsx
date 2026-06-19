@@ -14,7 +14,7 @@ import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/ty
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 type ResultFilter = "all" | "wins" | "losses";
-type SortOrder = "newest" | "oldest";
+type SortOrder = "newest" | "oldest" | "prize-high" | "prize-low";
 
 const GAME_FILTERS: GameId[] = ["mlbb", "efootball"];
 const RESULT_FILTERS: ResultFilter[] = ["all", "wins", "losses"];
@@ -35,6 +35,8 @@ interface MatchesPageCopy {
   sortLabel: Bilingual;
   sortNewest: Bilingual;
   sortOldest: Bilingual;
+  sortPrizeHigh: Bilingual;
+  sortPrizeLow: Bilingual;
   yearLabel: Bilingual;
   allYears: Bilingual;
   defaultGame: GameId;
@@ -108,6 +110,20 @@ function matchTournamentKey(match: Pick<Match, "game" | "tournament">) {
   return `${match.game}:${name || "unknown"}`;
 }
 
+function parsePrizeValue(value?: string) {
+  const text = (value ?? "").trim().toLowerCase();
+  if (!text || text === "-") return 0;
+  const multiplier = text.includes("b") ? 1_000_000_000 : text.includes("m") ? 1_000_000 : text.includes("k") ? 1_000 : 1;
+  const numeric = text.match(/\d[\d.,]*/)?.[0] ?? "";
+  if (!numeric) return 0;
+
+  if (multiplier > 1 && /^\d+[.,]\d+$/.test(numeric)) {
+    return Number(numeric.replace(",", ".")) * multiplier;
+  }
+
+  return Number(numeric.replace(/\D/g, "")) * multiplier || 0;
+}
+
 function roundRank(match: Match) {
   const round = normalizeValue(`${match.round?.en ?? ""} ${match.round?.lo ?? ""}`);
 
@@ -125,9 +141,9 @@ function roundRank(match: Match) {
 
 function sortMatchesByDate(a: Match, b: Match, sortOrder: SortOrder) {
   const dateDelta =
-    sortOrder === "newest"
-      ? (b.date ?? "").localeCompare(a.date ?? "")
-      : (a.date ?? "").localeCompare(b.date ?? "");
+    sortOrder === "oldest"
+      ? (a.date ?? "").localeCompare(b.date ?? "")
+      : (b.date ?? "").localeCompare(a.date ?? "");
   if (dateDelta !== 0) return dateDelta;
   return roundRank(a) - roundRank(b);
 }
@@ -172,9 +188,14 @@ function groupMatchesByTournament(
   return [...groups.values()]
     .map((group) => ({ ...group, matches: [...group.matches].sort((a, b) => sortMatchesByDate(a, b, sortOrder)) }))
     .sort((a, b) => {
-      const dateDelta = sortOrder === "newest"
-        ? (b.latestDate ?? "").localeCompare(a.latestDate ?? "")
-        : (a.earliestDate ?? "").localeCompare(b.earliestDate ?? "");
+      if (sortOrder === "prize-high" || sortOrder === "prize-low") {
+        const prizeDelta = parsePrizeValue(a.tournament?.prize) - parsePrizeValue(b.tournament?.prize);
+        if (prizeDelta !== 0) return sortOrder === "prize-high" ? -prizeDelta : prizeDelta;
+      }
+
+      const dateDelta = sortOrder === "oldest"
+        ? (a.earliestDate ?? "").localeCompare(b.earliestDate ?? "")
+        : (b.latestDate ?? "").localeCompare(a.latestDate ?? "");
       if (dateDelta !== 0) return dateDelta;
       return normalizeValue(a.name.en || a.name.lo).localeCompare(normalizeValue(b.name.en || b.name.lo));
     });
@@ -631,9 +652,6 @@ export default function MatchesClient() {
                 </div>
                 {yearOptions.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2 border-l-2 border-edge-bright/70 pl-3">
-                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
-                      {pick(page.yearLabel)}
-                    </span>
                     {[
                       { id: "all", label: pick(page.allYears) },
                       ...yearOptions.map((year) => ({ id: year, label: year })),
@@ -679,12 +697,11 @@ export default function MatchesClient() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 border border-edge bg-void/45 p-2">
-                <span className="px-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
-                  {pick(page.sortLabel)}
-                </span>
                 {([
                   { id: "newest", label: pick(page.sortNewest) },
                   { id: "oldest", label: pick(page.sortOldest) },
+                  { id: "prize-high", label: pick(page.sortPrizeHigh) },
+                  { id: "prize-low", label: pick(page.sortPrizeLow) },
                 ] as const).map((option) => {
                   const active = sortOrder === option.id;
                   return (

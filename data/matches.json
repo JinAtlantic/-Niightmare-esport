@@ -60,6 +60,14 @@
       "en": "Oldest first",
       "lo": "ເກົ່າສຸດກ່ອນ"
     },
+    "sortPrizeHigh": {
+      "en": "Highest prize",
+      "lo": "ເງິນລາງວັນສູງສຸດ"
+    },
+    "sortPrizeLow": {
+      "en": "Lowest prize",
+      "lo": "ເງິນລາງວັນຕ່ຳສຸດ"
+    },
     "yearLabel": {
       "en": "Year",
       "lo": "ປີ"

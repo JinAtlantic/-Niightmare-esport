@@ -33,6 +33,8 @@ interface MatchesPageCopy {
   sortLabel: Bilingual;
   sortNewest: Bilingual;
   sortOldest: Bilingual;
+  sortPrizeHigh: Bilingual;
+  sortPrizeLow: Bilingual;
   yearLabel: Bilingual;
   allYears: Bilingual;
   defaultGame: Match["game"];
@@ -623,6 +625,8 @@ export default function MatchesEditor() {
               <BilingualField label="Sort control label" value={page.sortLabel} onChange={(v) => patchPage({ sortLabel: v })} />
               <BilingualField label="Sort newest first" value={page.sortNewest} onChange={(v) => patchPage({ sortNewest: v })} />
               <BilingualField label="Sort oldest first" value={page.sortOldest} onChange={(v) => patchPage({ sortOldest: v })} />
+              <BilingualField label="Sort highest prize" value={page.sortPrizeHigh} onChange={(v) => patchPage({ sortPrizeHigh: v })} />
+              <BilingualField label="Sort lowest prize" value={page.sortPrizeLow} onChange={(v) => patchPage({ sortPrizeLow: v })} />
               <BilingualField label="Year filter label" value={page.yearLabel} onChange={(v) => patchPage({ yearLabel: v })} />
               <BilingualField label="All years label" value={page.allYears} onChange={(v) => patchPage({ allYears: v })} />
               <SelectField
