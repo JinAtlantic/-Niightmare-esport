@@ -45,7 +45,7 @@ interface ContactPageCopy {
 const pageSeed = siteSeed.contactPage as ContactPageCopy;
 
 const inputClass =
-  "min-h-[44px] w-full border border-edge bg-void/60 px-4 py-3 text-base text-soul placeholder:text-ash/70 outline-none transition-colors focus:border-amethyst focus:shadow-glow-soft";
+  "min-h-[48px] w-full border border-edge bg-void/70 px-4 py-3 text-base text-soul placeholder:text-ash/70 outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-glow-soft";
 
 function mergeContactPage(page?: Partial<ContactPageCopy>): ContactPageCopy {
   return {
@@ -135,21 +135,40 @@ export default function ContactClient() {
       <PageHeader kicker={pick(page.kicker)} title={pick(page.title)} subtitle={pick(page.intro)} />
 
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
-        <div className="mb-10 border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
-          <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
-            <div className="flex min-h-[170px] flex-col justify-between border border-edge bg-void/45 p-5">
+        <div className="relative mb-10 overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.16),transparent_34%),linear-gradient(135deg,rgba(28,20,40,0.74),rgba(11,7,16,0.94))] p-4 shadow-glow-soft md:p-6">
+          <span
+            aria-hidden
+            className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-glow/70 to-transparent"
+          />
+          <span aria-hidden className="absolute -right-24 -top-24 h-56 w-56 bg-amethyst/10 blur-3xl" />
+          <div className="relative grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
+            <div className="flex min-h-[230px] flex-col justify-between border border-edge bg-void/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6">
               <div>
                 <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
                   {pick(page.deskLabel)}
                 </p>
-                <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
+                <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-spectre md:text-lg">
                   {pick(page.deskIntro)}
                 </p>
               </div>
-              <div
-                aria-hidden
-                className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
-              />
+              <div className="mt-8 grid grid-cols-2 border border-edge bg-crypt/45">
+                <div className="border-r border-edge px-4 py-3">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
+                    {pick(page.formLabel)}
+                  </p>
+                  <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">
+                    {pick(page.typeLabels.sponsorship)}
+                  </p>
+                </div>
+                <div className="px-4 py-3">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
+                    {pick(page.mediaKitLabel)}
+                  </p>
+                  <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-glow">
+                    {pick(page.mediaKitButton)}
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
               {contactRows.map(({ key, value, href, Icon, external }) => (
@@ -158,11 +177,11 @@ export default function ContactClient() {
                   href={href}
                   target={external ? "_blank" : undefined}
                   rel={external ? "noopener noreferrer" : undefined}
-                  className="hover-glow group relative min-h-[150px] overflow-hidden border border-edge bg-void/55 p-4 text-soul"
+                  className="hover-glow group relative min-h-[152px] overflow-hidden border border-edge bg-void/60 p-4 text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
                 >
                   <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
-                  <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5" />
-                  <span className="grid h-11 w-11 place-items-center border border-edge-bright bg-crypt text-amethyst transition-colors group-hover:text-glow">
+                  <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/20 bg-amethyst/5 transition-transform duration-300 group-hover:scale-110" />
+                  <span className="grid h-11 w-11 place-items-center border border-edge-bright bg-crypt text-amethyst shadow-[0_0_18px_rgba(168,85,247,0.12)] transition-colors group-hover:text-glow">
                     <Icon size={20} />
                   </span>
                   <p className="mt-5 font-display text-sm font-bold uppercase tracking-[0.12em] text-spectre">
@@ -177,36 +196,39 @@ export default function ContactClient() {
           </div>
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr]">
-          <div>
-            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="space-y-6">
+            <div className="border border-edge bg-crypt/45 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] md:p-6">
+              <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
               {pick(page.infoLabel)}
-            </h2>
-            <div className="mt-6 flex flex-col gap-3">
-              {contactRows.map(({ key, value, href, Icon, external }) => (
-                <a
-                  key={key}
-                  href={href}
-                  target={external ? "_blank" : undefined}
-                  rel={external ? "noopener noreferrer" : undefined}
-                  className="hover-glow flex items-center gap-4 border border-edge bg-crypt p-4 text-soul"
-                >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/60 text-amethyst">
-                    <Icon size={20} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
-                      {pick(page.channelLabels[key])}
+              </h2>
+              <div className="mt-5 flex flex-col gap-2.5">
+                {contactRows.map(({ key, value, href, Icon, external }) => (
+                  <a
+                    key={key}
+                    href={href}
+                    target={external ? "_blank" : undefined}
+                    rel={external ? "noopener noreferrer" : undefined}
+                    className="hover-glow group flex items-center gap-4 border border-edge bg-void/55 p-4 text-soul"
+                  >
+                    <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-crypt text-amethyst transition-colors group-hover:text-glow">
+                      <Icon size={20} />
                     </span>
-                    <span className="keep-latin mt-1 block break-all text-sm">
-                      {key === "email" ? value : href}
+                    <span className="min-w-0">
+                      <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                        {pick(page.channelLabels[key])}
+                      </span>
+                      <span className="keep-latin mt-1 block break-all text-sm">
+                        {key === "email" ? value : href}
+                      </span>
                     </span>
-                  </span>
-                </a>
-              ))}
+                  </a>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-8 border border-edge bg-crypt p-6">
+            <div className="relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(22,16,31,0.9)_42%,rgba(11,7,16,0.95))] p-6">
+              <span aria-hidden className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
               <h3 className="font-display text-base font-semibold uppercase tracking-[0.18em] text-soul">
                 {pick(page.mediaKitLabel)}
               </h3>
@@ -223,11 +245,16 @@ export default function ContactClient() {
             </div>
           </div>
 
-          <div>
-            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
-              {pick(page.formLabel)}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.formIntro)}</p>
+          <div className="border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.74),rgba(11,7,16,0.92))] p-5 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-6">
+            <div className="border-b border-edge pb-5">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-amethyst">
+                {pick(page.deskLabel)}
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-soul">
+                {pick(page.formLabel)}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.formIntro)}</p>
+            </div>
 
             <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
               <div>
