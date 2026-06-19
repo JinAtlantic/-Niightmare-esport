@@ -60,6 +60,14 @@
       "en": "Oldest first",
       "lo": "ເກົ່າສຸດກ່ອນ"
     },
+    "yearLabel": {
+      "en": "Year",
+      "lo": "ປີ"
+    },
+    "allYears": {
+      "en": "All years",
+      "lo": "ທຸກປີ"
+    },
     "defaultGame": "mlbb",
     "filters": {
       "all": {

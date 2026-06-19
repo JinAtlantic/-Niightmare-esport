@@ -35,6 +35,8 @@ interface MatchesPageCopy {
   sortLabel: Bilingual;
   sortNewest: Bilingual;
   sortOldest: Bilingual;
+  yearLabel: Bilingual;
+  allYears: Bilingual;
   defaultGame: GameId;
   filters: Record<Filter, Bilingual>;
   stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
@@ -91,7 +93,17 @@ function normalizeValue(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function extractYear(value?: string | null) {
+  const match = value?.match(/\b(20\d{2}|19\d{2})\b/);
+  return match?.[1] ?? "";
+}
+
 function tournamentKey(match: Match) {
+  const name = normalizeValue(match.tournament.en || match.tournament.lo);
+  return `${match.game}:${name || "unknown"}`;
+}
+
+function matchTournamentKey(match: Pick<Match, "game" | "tournament">) {
   const name = normalizeValue(match.tournament.en || match.tournament.lo);
   return `${match.game}:${name || "unknown"}`;
 }
@@ -500,21 +512,49 @@ export default function MatchesClient() {
   const page = mergePageCopy(data.page);
   const [selectedGame, setSelectedGame] = useState<GameId>(page.defaultGame);
 
+  const tournamentYearByKey = useMemo(() => {
+    return new Map(
+      (data.tournaments ?? []).map((tournament) => [
+        `${tournament.game}:${normalizeValue(tournament.name.en || tournament.name.lo)}`,
+        extractYear(tournament.season),
+      ])
+    );
+  }, [data.tournaments]);
+
   const gameMatches = useMemo(
     () => data.matches.filter((match) => match.game === selectedGame),
     [data.matches, selectedGame]
   );
 
+  const yearOptions = useMemo(() => {
+    const years = new Set<string>();
+    for (const match of gameMatches) {
+      const year = tournamentYearByKey.get(matchTournamentKey(match)) || extractYear(match.date);
+      if (year) years.add(year);
+    }
+    return [...years].sort((a, b) => b.localeCompare(a));
+  }, [gameMatches, tournamentYearByKey]);
+
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+
+  const gameYearMatches = useMemo(() => {
+    if (selectedYear === "all") return gameMatches;
+    return gameMatches.filter((match) => {
+      const year = tournamentYearByKey.get(matchTournamentKey(match)) || extractYear(match.date);
+      return year === selectedYear;
+    });
+  }, [gameMatches, selectedYear, tournamentYearByKey]);
+
   const stats = useMemo(() => {
-    const count = (r: MatchResult) => gameMatches.filter((m) => m.result === r).length;
+    const count = (r: MatchResult) => gameYearMatches.filter((m) => m.result === r).length;
     const wins = count("win");
     const losses = count("loss");
     const total = wins + losses || 1;
     return { wins, losses, winrate: Math.round((wins / total) * 100) };
-  }, [gameMatches]);
+  }, [gameYearMatches]);
 
   const filtered = useMemo(() => {
-    return gameMatches.filter((m) => {
+    return gameYearMatches.filter((m) => {
       switch (resultFilter) {
         case "wins":
           return m.result === "win";
@@ -524,7 +564,7 @@ export default function MatchesClient() {
           return true;
       }
     });
-  }, [resultFilter, gameMatches]);
+  }, [resultFilter, gameYearMatches]);
 
   const tournamentGroups = useMemo(
     () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder),
@@ -574,6 +614,7 @@ export default function MatchesClient() {
                         type="button"
                         onClick={() => {
                           setSelectedGame(id);
+                          setSelectedYear("all");
                           setResultFilter("all");
                         }}
                         aria-pressed={active}
@@ -588,6 +629,34 @@ export default function MatchesClient() {
                     );
                   })}
                 </div>
+                {yearOptions.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 border-l-2 border-edge-bright/70 pl-3">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                      {pick(page.yearLabel)}
+                    </span>
+                    {[
+                      { id: "all", label: pick(page.allYears) },
+                      ...yearOptions.map((year) => ({ id: year, label: year })),
+                    ].map((option) => {
+                      const active = selectedYear === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => setSelectedYear(option.id)}
+                          aria-pressed={active}
+                          className={`inline-flex min-h-[38px] items-center border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                            active
+                              ? "border-amethyst bg-amethyst/15 text-soul"
+                              : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2 border-l-2 border-amethyst/50 pl-3">
                   {RESULT_FILTERS.map((id) => {
                     const active = resultFilter === id;
@@ -639,7 +708,7 @@ export default function MatchesClient() {
           </div>
         </Reveal>
 
-        <div key={`${selectedGame}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
+        <div key={`${selectedGame}-${selectedYear}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
           {groupsByGame.some((section) => section.groups.length > 0) ? (
             groupsByGame.map(({ game, groups }, i) => (
               <Reveal key={game} delay={i * 90}>

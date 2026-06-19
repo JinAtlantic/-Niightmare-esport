@@ -33,6 +33,8 @@ interface MatchesPageCopy {
   sortLabel: Bilingual;
   sortNewest: Bilingual;
   sortOldest: Bilingual;
+  yearLabel: Bilingual;
+  allYears: Bilingual;
   defaultGame: Match["game"];
   filters: Record<Filter, Bilingual>;
   stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
@@ -47,6 +49,7 @@ interface MatchesFile {
 }
 
 type MatchRef = { match: Match; index: number };
+type YearFilter = "all" | string;
 
 const pageSeed = matchesSeed.page as MatchesPageCopy;
 const filterIds: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
@@ -102,6 +105,11 @@ function norm(value?: string) {
   return (value ?? "").trim().toLowerCase();
 }
 
+function extractYear(value?: string | null) {
+  const match = value?.match(/\b(20\d{2}|19\d{2})\b/);
+  return match?.[1] ?? "";
+}
+
 function sameTournamentName(a?: Bilingual, b?: Bilingual) {
   const aEn = norm(a?.en);
   const aLo = norm(a?.lo);
@@ -114,6 +122,10 @@ function matchBelongsToTournament(match: Match, tournament: Tournament) {
   return match.game === tournament.game && sameTournamentName(match.tournament, tournament.name);
 }
 
+function groupYear(tournament: Tournament, items: MatchRef[]) {
+  return extractYear(tournament.season) || extractYear(items[0]?.match.date);
+}
+
 export default function MatchesEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<MatchesFile>("matches");
   const [view, setView] = useState<"records" | "page">("records");
@@ -121,6 +133,7 @@ export default function MatchesEditor() {
   const [unassignedOpen, setUnassignedOpen] = useState(false);
   const [recordQuery, setRecordQuery] = useState("");
   const [gameFilter, setGameFilter] = useState<GameFilter>("all");
+  const [yearFilter, setYearFilter] = useState<YearFilter>("all");
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
 
   if (loading) return <p className="font-mono text-sm text-ash">Loading...</p>;
@@ -246,8 +259,15 @@ export default function MatchesEditor() {
     value: t.id,
     label: `${t.game === "mlbb" ? "MLBB" : "eFootball"} / ${t.name.en || t.name.lo || "Untitled tournament"}`,
   }));
+  const yearOptions = [
+    ...new Set([
+      ...tournamentGroups.map(({ tournament, items }) => groupYear(tournament, items)).filter(Boolean),
+      ...unassignedMatches.map(({ match }) => extractYear(match.date)).filter(Boolean),
+    ]),
+  ].sort((a, b) => b.localeCompare(a));
   const filteredTournamentGroups = tournamentGroups.filter(({ tournament, items }) => {
     const matchesGame = gameFilter === "all" || tournament.game === gameFilter;
+    const matchesYear = yearFilter === "all" || groupYear(tournament, items) === yearFilter;
     const matchesQuery =
       !query ||
       [
@@ -266,10 +286,11 @@ export default function MatchesEditor() {
           match.tournament.lo,
         ]),
       ].some((value) => norm(value).includes(query));
-    return matchesGame && matchesQuery;
+    return matchesGame && matchesYear && matchesQuery;
   });
   const filteredUnassignedMatches = unassignedMatches.filter(({ match }) => {
     const matchesGame = gameFilter === "all" || match.game === gameFilter;
+    const matchesYear = yearFilter === "all" || extractYear(match.date) === yearFilter;
     const matchesQuery =
       !query ||
       [
@@ -280,7 +301,7 @@ export default function MatchesEditor() {
         match.round?.en ?? "",
         match.round?.lo ?? "",
       ].some((value) => norm(value).includes(query));
-    return matchesGame && matchesQuery;
+    return matchesGame && matchesYear && matchesQuery;
   });
 
   const renderMatchEditor = (ref: MatchRef, options?: { compact?: boolean; showTournament?: boolean }) => {
@@ -602,6 +623,8 @@ export default function MatchesEditor() {
               <BilingualField label="Sort control label" value={page.sortLabel} onChange={(v) => patchPage({ sortLabel: v })} />
               <BilingualField label="Sort newest first" value={page.sortNewest} onChange={(v) => patchPage({ sortNewest: v })} />
               <BilingualField label="Sort oldest first" value={page.sortOldest} onChange={(v) => patchPage({ sortOldest: v })} />
+              <BilingualField label="Year filter label" value={page.yearLabel} onChange={(v) => patchPage({ yearLabel: v })} />
+              <BilingualField label="All years label" value={page.allYears} onChange={(v) => patchPage({ allYears: v })} />
               <SelectField
                 label="Default game on /matches"
                 value={page.defaultGame}
@@ -699,37 +722,69 @@ export default function MatchesEditor() {
                 onChange={setRecordQuery}
                 placeholder="MPL, ONIC, Final..."
               />
-              <div className="flex flex-wrap gap-2">
-                {([
-                  { id: "all", label: "All Games" },
-                  { id: "mlbb", label: "MLBB" },
-                  { id: "efootball", label: "eFootball" },
-                ] as const).map((item) => {
-                  const active = gameFilter === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setGameFilter(item.id)}
-                      className={`min-h-[40px] border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                        active
-                          ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.25)]"
-                          : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                      }`}
+              <div className="grid gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {([
+                    { id: "all", label: "All Games" },
+                    { id: "mlbb", label: "MLBB" },
+                    { id: "efootball", label: "eFootball" },
+                  ] as const).map((item) => {
+                    const active = gameFilter === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setGameFilter(item.id)}
+                        className={`min-h-[40px] border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                          active
+                            ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                            : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {yearOptions.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
+                      {page.yearLabel.en || "Year"}
+                    </span>
+                    {[
+                      { id: "all", label: page.allYears.en || "All years" },
+                      ...yearOptions.map((year) => ({ id: year, label: year })),
+                    ].map((item) => {
+                      const active = yearFilter === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setYearFilter(item.id)}
+                          className={`min-h-[34px] border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                            active
+                              ? "border-amethyst bg-amethyst/15 text-soul"
+                              : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {(recordQuery || gameFilter !== "all" || yearFilter !== "all") && (
+                  <div>
+                    <Button
+                      onClick={() => {
+                        setRecordQuery("");
+                        setGameFilter("all");
+                        setYearFilter("all");
+                      }}
                     >
-                      {item.label}
-                    </button>
-                  );
-                })}
-                {(recordQuery || gameFilter !== "all") && (
-                  <Button
-                    onClick={() => {
-                      setRecordQuery("");
-                      setGameFilter("all");
-                    }}
-                  >
-                    Clear
-                  </Button>
+                      Clear
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
