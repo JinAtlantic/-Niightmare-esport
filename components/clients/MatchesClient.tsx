@@ -284,13 +284,18 @@ function MatchCard({
   const opponentName = match.opponent.trim() || pick(page.unknownOpponent);
 
   return (
-    <article className="hover-glow group relative overflow-hidden border border-edge bg-crypt p-5 pl-6 md:p-6 md:pl-7">
+    <article className="hover-glow group relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))] p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7">
       {/* left accent blade — colored by game type (MLBB = violet, eFootball = cyan) */}
       <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${GAME_BLADE[match.game]}`} />
+      <span
+        aria-hidden
+        className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-spectre/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+      />
+      <span aria-hidden className="absolute -right-20 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl" />
 
       {/* header: date | round */}
-      <div className="flex items-center justify-between gap-3">
-        <time className="whitespace-nowrap font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
+      <div className="relative flex items-center justify-between gap-3">
+        <time className="whitespace-nowrap border border-edge bg-void/35 px-2.5 py-1 font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
           {formatDate(match.date, lang)}
         </time>
         {round && (
@@ -306,7 +311,7 @@ function MatchCard({
         </p>
       )}
 
-      <div className="relative mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/25 py-4 md:hidden">
+      <div className="relative mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/35 py-4 md:hidden">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/50 to-transparent"
@@ -318,7 +323,7 @@ function MatchCard({
           </span>
         </div>
 
-        <div className="flex min-w-[74px] flex-col items-center">
+        <div className="flex min-w-[74px] flex-col items-center border-x border-edge/70 px-2">
           <span className={`keep-latin font-display text-4xl font-bold leading-none tracking-[0.08em] ${accent.score}`}>
             {match.score}
           </span>
@@ -338,7 +343,11 @@ function MatchCard({
       </div>
 
       {/* desktop head-to-head: names stay horizontal with logos on the outer edges. */}
-      <div className="mt-4 hidden md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
+      <div className="relative mt-4 hidden border-y border-edge/70 bg-void/30 px-4 py-4 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-1/2 w-px bg-gradient-to-b from-transparent via-edge-bright to-transparent"
+        />
         {/* NIIGHTMARE side */}
         <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-start md:gap-3">
           <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={MATCH_LOGO_SIZE} />
@@ -348,7 +357,7 @@ function MatchCard({
         </div>
 
         {/* score + result */}
-        <div className="flex flex-col items-center">
+        <div className="relative z-[1] flex min-w-[132px] flex-col items-center border border-edge-bright bg-crypt/80 px-4 py-3 shadow-[0_0_24px_rgba(168,85,247,0.12)]">
           <span className={`keep-latin font-display text-3xl font-bold tracking-[0.1em] md:text-4xl ${accent.score}`}>
             {match.score}
           </span>
@@ -383,14 +392,17 @@ function TournamentRecordGroup({
   group: TournamentMatchGroup;
   page: MatchesPageCopy;
 }) {
-  const { pick } = useLanguage();
+  const { pick, lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const tournament = group.tournament;
   const matchCount = group.matches.length;
+  const wins = group.matches.filter((match) => match.result === "win").length;
+  const losses = group.matches.filter((match) => match.result === "loss").length;
+  const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
 
   return (
-    <section className="clip-esports overflow-hidden border border-edge bg-crypt/45">
-      <div className="group relative overflow-hidden border-b border-edge bg-gradient-to-br from-crypt2/70 via-crypt/55 to-void px-5 py-5 transition-colors hover:bg-amethyst/[0.04] md:px-6">
+    <section className="clip-esports overflow-hidden border border-edge bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void shadow-[0_0_28px_rgba(168,85,247,0.1)]">
+      <div className="group relative overflow-hidden border-b border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-5 py-5 transition-colors hover:bg-amethyst/[0.04] md:px-6 md:py-6">
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
@@ -404,26 +416,51 @@ function TournamentRecordGroup({
         />
         <span
           aria-hidden
+          className="absolute bottom-0 left-0 h-px w-2/3 bg-gradient-to-r from-amethyst/70 via-glow/30 to-transparent"
+        />
+        <span
+          aria-hidden
           className="absolute -right-16 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl"
         />
-        <div className="pointer-events-none relative grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="pointer-events-none relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex border border-edge-bright bg-void/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
+              <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-glow">
                 {matchCount} {matchCount === 1 ? "match" : "matches"}
               </span>
-              <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-glow">
+              <span className="inline-flex border border-edge-bright bg-void/55 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
                 {open ? "hide matches" : "view matches"}
               </span>
+              {latestDate && (
+                <span className="inline-flex border border-edge bg-void/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                  {latestDate}
+                </span>
+              )}
             </div>
-            <h2 className="mt-4 font-display text-2xl font-bold uppercase leading-tight tracking-[0.04em] text-soul md:text-3xl">
+            <h2 className="mt-4 max-w-4xl font-display text-2xl font-bold uppercase leading-tight tracking-[0.04em] text-soul [text-shadow:0_0_28px_rgba(199,125,255,0.22)] md:text-4xl">
               {pick(group.name)}
             </h2>
+            <div className="mt-4 grid max-w-lg grid-cols-3 border border-edge bg-void/35">
+              <div className="border-r border-edge px-3 py-2">
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.wins)}</p>
+                <p className="mt-1 font-display text-lg font-bold text-win">{wins}</p>
+              </div>
+              <div className="border-r border-edge px-3 py-2">
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.losses)}</p>
+                <p className="mt-1 font-display text-lg font-bold text-loss">{losses}</p>
+              </div>
+              <div className="px-3 py-2">
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.winrate)}</p>
+                <p className="mt-1 font-display text-lg font-bold text-glow">
+                  {Math.round((wins / Math.max(1, wins + losses)) * 100)}%
+                </p>
+              </div>
+            </div>
           </div>
 
           {tournament && (
             <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[520px]">
-              <div className="border border-edge bg-void/45 px-3 py-3">
+              <div className="border border-edge bg-void/55 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
                   {pick(page.tournamentLabels.placement)}
                 </p>
@@ -431,7 +468,7 @@ function TournamentRecordGroup({
                   {pick(tournament.placement)}
                 </p>
               </div>
-              <div className="border border-edge bg-void/45 px-3 py-3">
+              <div className="border border-edge bg-void/55 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
                   {pick(page.tournamentLabels.season)}
                 </p>
@@ -440,7 +477,7 @@ function TournamentRecordGroup({
                 </p>
               </div>
               {tournament.prize && tournament.prize.trim() && (
-                <div className="border border-edge bg-void/45 px-3 py-3">
+                <div className="border border-edge bg-void/55 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
                     {pick(page.tournamentLabels.prize)}
                   </p>
@@ -455,7 +492,7 @@ function TournamentRecordGroup({
       </div>
 
       {open && (
-        <div className="relative flex flex-col gap-3 p-3 md:p-4">
+        <div className="relative flex flex-col gap-3 bg-void/35 p-3 md:p-4">
           <span
             aria-hidden
             className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
@@ -468,7 +505,13 @@ function TournamentRecordGroup({
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <MatchCard match={match} page={page} showTournament={false} />
+                <div className="relative">
+                  <span
+                    aria-hidden
+                    className="absolute -left-3 top-1/2 hidden h-px w-3 bg-edge-bright md:block"
+                  />
+                  <MatchCard match={match} page={page} showTournament={false} />
+                </div>
               </div>
             </Reveal>
           ))}
@@ -488,7 +531,7 @@ function GameTournamentSection({
   page: MatchesPageCopy;
 }) {
   return (
-    <section className="relative overflow-hidden border border-edge bg-void/45 p-3 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-5">
+    <section className="relative overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.13),transparent_32%),linear-gradient(180deg,rgba(28,20,40,0.62),rgba(11,7,16,0.82))] p-3 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-5">
       <span
         aria-hidden
         className={`absolute inset-x-0 top-0 h-[2px] ${
@@ -497,7 +540,7 @@ function GameTournamentSection({
             : "bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent"
         }`}
       />
-      <div className="mb-4 flex flex-col gap-2 border border-edge bg-crypt/55 px-4 py-4 md:flex-row md:items-end md:justify-between">
+      <div className="mb-4 flex flex-col gap-2 border border-edge bg-crypt/55 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:flex-row md:items-end md:justify-between">
         <div>
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-amethyst">
             Game Division
@@ -506,7 +549,7 @@ function GameTournamentSection({
             {GAME_LABEL[game]}
           </h2>
         </div>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-spectre">
+        <p className="border border-edge bg-void/45 px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-spectre">
           {groups.length} {groups.length === 1 ? "Tournament" : "Tournaments"}
         </p>
       </div>
