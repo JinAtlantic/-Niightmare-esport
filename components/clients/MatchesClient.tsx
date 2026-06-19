@@ -610,21 +610,7 @@ export default function MatchesClient() {
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
         <Reveal>
           <div className="border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
-            <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-              <div className="flex min-h-[170px] flex-col justify-between border border-edge bg-void/45 p-5">
-                <div>
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
-                    {pick(page.recordLabel)}
-                  </p>
-                  <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
-                    {pick(page.recordIntro)}
-                  </p>
-                </div>
-                <div
-                  aria-hidden
-                  className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
-                />
-              </div>
+            <div>
               <StatsStrip {...stats} page={page} />
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
