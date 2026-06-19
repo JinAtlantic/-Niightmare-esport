@@ -133,6 +133,13 @@ export default function MatchesEditor() {
 
   const setMatches = (next: Match[]) => setData({ ...data, matches: next });
   const setTournaments = (next: Tournament[]) => setData({ ...data, tournaments: next });
+  const openMatchesPreview = () => {
+    window.open(`/matches?adminPreview=${Date.now()}`, "_blank", "noopener,noreferrer");
+  };
+  const saveAndPreview = async () => {
+    const saved = await save();
+    if (saved) openMatchesPreview();
+  };
 
   const patchMatch = (i: number, patch: Partial<Match>) =>
     setMatches(matches.map((m, idx) => (idx === i ? { ...m, ...patch } : m)));
@@ -539,9 +546,15 @@ export default function MatchesEditor() {
         <p className="font-mono text-xs text-ash">
           {matches.length} matches / {tournaments.length} tournaments
         </p>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-2 md:gap-3">
           {error && <span className="font-mono text-[11px] text-loss">{error}</span>}
           {savedAt && !error && !saving && <span className="font-mono text-[11px] text-win">Saved</span>}
+          <Button onClick={openMatchesPreview} className="px-3">
+            Preview /matches
+          </Button>
+          <Button onClick={saveAndPreview} disabled={saving} className="px-3">
+            {saving ? "Saving..." : "Save + preview"}
+          </Button>
           <Button variant="primary" onClick={save} disabled={saving}>
             {saving ? "Saving..." : "Save changes"}
           </Button>

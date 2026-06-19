@@ -37,7 +37,7 @@ export function useData<T>(file: string) {
   }, [file]);
 
   const save = useCallback(async () => {
-    if (data == null) return;
+    if (data == null) return false;
     setSaving(true);
     setError("");
     try {
@@ -49,8 +49,10 @@ export function useData<T>(file: string) {
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || "บันทึกไม่สำเร็จ");
       setSavedAt(Date.now());
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
+      return false;
     } finally {
       setSaving(false);
     }

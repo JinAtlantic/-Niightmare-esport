@@ -180,7 +180,7 @@ export function Button({
   className = "",
 }: {
   children: React.ReactNode;
-  onClick?: () => void;
+  onClick?: () => void | Promise<unknown>;
   variant?: "primary" | "ghost" | "danger";
   type?: "button" | "submit";
   disabled?: boolean;
