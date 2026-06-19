@@ -549,9 +549,6 @@ export default function MatchesEditor() {
           <Button onClick={saveAndPreview} disabled={saving} className="px-3">
             {saving ? "Saving..." : "Save + preview"}
           </Button>
-          <Button variant="primary" onClick={save} disabled={saving}>
-            {saving ? "Saving..." : "Save changes"}
-          </Button>
         </div>
       </div>
 
@@ -692,24 +689,6 @@ export default function MatchesEditor() {
               </Button>
               <Button onClick={addMatch}>+ Standalone Match</Button>
             </div>
-          </div>
-
-          <div className="grid gap-2 md:grid-cols-3">
-            {[
-              ["1", "Add Tournament", "Create one event per game, season, or bracket."],
-              ["2", "Open Matches", "Edit date, round, opponent, score, and result in the quick table."],
-              ["3", "Save + Preview", "Push changes, then check the public /matches page."],
-            ].map(([step, title, body]) => (
-              <div key={step} className="border border-edge bg-crypt/70 p-3">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="grid h-6 w-6 place-items-center border border-amethyst/50 bg-amethyst/10 font-mono text-[10px] font-bold text-amethyst">
-                    {step}
-                  </span>
-                  <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-soul">{title}</p>
-                </div>
-                <p className="font-mono text-[10px] leading-relaxed text-ash">{body}</p>
-              </div>
-            ))}
           </div>
 
           <Card className="bg-crypt2/80">
@@ -922,7 +901,6 @@ export default function MatchesEditor() {
                 </button>
                 <div className="flex flex-wrap gap-2">
                   <Button onClick={() => setUnassignedOpen(!unassignedOpen)}>{unassignedOpen ? "Close" : "Open"}</Button>
-                  <Button onClick={addMatch}>+ Standalone Match</Button>
                 </div>
               </div>
 
