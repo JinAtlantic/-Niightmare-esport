@@ -852,15 +852,6 @@ export default function MatchesEditor() {
 
                   {open && (
                     <div className="mt-4 space-y-4 border-t border-edge pt-4">
-                      <div className="border border-edge bg-void/35 p-3">
-                        <TextField
-                          label="Prize money"
-                          value={tournament.prize}
-                          onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { prize: v })}
-                          placeholder="$1,000"
-                        />
-                      </div>
-
                       <div className="flex flex-wrap items-center justify-between gap-2 border-y border-edge bg-void/35 px-3 py-3">
                         <div>
                           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-spectre">
@@ -920,6 +911,12 @@ export default function MatchesEditor() {
                               label="Season"
                               value={tournament.season}
                               onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { season: v })}
+                            />
+                            <TextField
+                              label="Prize money"
+                              value={tournament.prize}
+                              onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { prize: v })}
+                              placeholder="$1,000"
                             />
                             <div className="md:col-span-2">
                               <BilingualField
