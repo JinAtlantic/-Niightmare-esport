@@ -92,7 +92,7 @@ const ROUND_PRESETS: { id: string; label: string; value: Bilingual }[] = [
 
 const emptyText: Bilingual = { en: "", lo: "" };
 const compactInputClass =
-  "h-9 w-full border border-edge bg-void/70 px-2 font-mono text-xs text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst";
+  "h-8 w-full border border-edge bg-void/70 px-2 font-mono text-xs text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst";
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
 
 function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
@@ -312,8 +312,8 @@ export default function MatchesEditor() {
     const showTournament = options?.showTournament ?? false;
 
     return (
-      <div key={m.id} className="border border-edge bg-void/45 p-3 md:p-4">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <div key={m.id} className="border border-edge bg-void/45 p-2 md:p-3">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} size={24} />
             <span className="truncate font-mono text-xs text-ash">
@@ -322,19 +322,19 @@ export default function MatchesEditor() {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <Button onClick={() => setMatches(move(matches, i, -1))} className="min-h-[32px] px-2 py-1">
+            <Button onClick={() => setMatches(move(matches, i, -1))} className="min-h-[30px] px-2 py-1 text-[10px]">
               Up
             </Button>
-            <Button onClick={() => setMatches(move(matches, i, 1))} className="min-h-[32px] px-2 py-1">
+            <Button onClick={() => setMatches(move(matches, i, 1))} className="min-h-[30px] px-2 py-1 text-[10px]">
               Down
             </Button>
-            <Button onClick={() => duplicateMatch(i)} className="min-h-[32px] px-2 py-1">
-              Duplicate
+            <Button onClick={() => duplicateMatch(i)} className="min-h-[30px] px-2 py-1 text-[10px]">
+              Copy
             </Button>
             {!showTournament && (
               <Button
                 onClick={() => patchMatch(i, { tournament: { ...emptyText } })}
-                className="min-h-[32px] px-2 py-1"
+                className="min-h-[30px] px-2 py-1 text-[10px]"
               >
                 Unassign
               </Button>
@@ -342,14 +342,14 @@ export default function MatchesEditor() {
             <Button
               variant="danger"
               onClick={() => setMatches(matches.filter((_, idx) => idx !== i))}
-              className="min-h-[32px] px-2 py-1"
+              className="min-h-[30px] px-2 py-1 text-[10px]"
             >
               Delete
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-2 md:grid-cols-2">
           <TextField label="Date" type="date" value={m.date} onChange={(v) => patchMatch(i, { date: v })} />
           <SelectField
             label="Game"
@@ -373,19 +373,19 @@ export default function MatchesEditor() {
             </div>
           )}
           <div className="md:col-span-2">
-            <div className="mb-3 border border-edge bg-crypt/60 p-3">
+            <div className="mb-2 border border-edge bg-crypt/60 p-2">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
                   Round presets
                 </p>
                 {!compact && <p className="font-mono text-[10px] text-ash-dim">Outer rounds first.</p>}
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {ROUND_PRESETS.map((preset) => (
                   <Button
                     key={preset.id}
                     onClick={() => patchMatch(i, { round: preset.value })}
-                    className="min-h-[32px] px-2 py-1 text-[10px] tracking-[0.1em]"
+                    className="min-h-[30px] px-2 py-1 text-[10px] tracking-[0.08em]"
                   >
                     {preset.label}
                   </Button>
@@ -393,7 +393,7 @@ export default function MatchesEditor() {
                 <Button
                   variant="danger"
                   onClick={() => patchMatch(i, { round: { ...emptyText } })}
-                  className="min-h-[32px] px-2 py-1 text-[10px] tracking-[0.1em]"
+                  className="min-h-[30px] px-2 py-1 text-[10px] tracking-[0.08em]"
                 >
                   Clear
                 </Button>
@@ -439,7 +439,7 @@ export default function MatchesEditor() {
 
     return (
       <div key={m.id} className="border border-edge bg-void/35">
-        <div className="hidden min-w-[900px] grid-cols-[118px_170px_minmax(180px,1fr)_88px_112px_230px] items-center gap-2 p-2 md:grid">
+        <div className="hidden min-w-[820px] grid-cols-[110px_142px_minmax(160px,1fr)_72px_94px_184px] items-center gap-1.5 p-1.5 md:grid">
           <input
             type="date"
             className={compactInputClass}
@@ -480,7 +480,7 @@ export default function MatchesEditor() {
           </select>
           <div className="flex items-center gap-1.5">
             <select
-              className={`${compactInputClass} w-[94px]`}
+              className={`${compactInputClass} w-[84px]`}
               value=""
               onChange={(e) => {
                 const preset = ROUND_PRESETS.find((item) => item.id === e.target.value);
@@ -495,15 +495,15 @@ export default function MatchesEditor() {
                 </option>
               ))}
             </select>
-            <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
+            <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[32px] px-2 py-1 text-[10px]">
               {expanded ? "Hide" : "More"}
             </Button>
-            <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
+            <Button onClick={() => duplicateMatch(i)} className="min-h-[32px] px-2 py-1 text-[10px]">
               Copy
             </Button>
           </div>
         </div>
-        <div className="grid gap-2 p-2 md:hidden">
+        <div className="grid gap-1.5 p-2 md:hidden">
           <div className="grid grid-cols-2 gap-2">
             <input
               type="date"
@@ -544,11 +544,11 @@ export default function MatchesEditor() {
             />
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
+            <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[32px] px-2 py-1 text-[10px]">
               {expanded ? "Hide" : "More"}
             </Button>
-            <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
-              Duplicate
+            <Button onClick={() => duplicateMatch(i)} className="min-h-[32px] px-2 py-1 text-[10px]">
+              Copy
             </Button>
           </div>
         </div>
@@ -558,18 +558,18 @@ export default function MatchesEditor() {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="sticky top-0 z-10 -mx-4 flex flex-col items-start justify-between gap-3 border-b border-edge bg-void/95 px-4 py-3 backdrop-blur md:-mx-6 md:flex-row md:items-center md:px-6">
+    <div className="space-y-6">
+      <div className="sticky top-0 z-10 -mx-4 flex flex-col items-start justify-between gap-2 border-b border-edge bg-void/95 px-4 py-2 backdrop-blur md:-mx-6 md:flex-row md:items-center md:px-6">
         <p className="font-mono text-xs text-ash">
           {matches.length} matches / {tournaments.length} tournaments
         </p>
-        <div className="flex flex-wrap items-center justify-end gap-2 md:gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {error && <span className="font-mono text-[11px] text-loss">{error}</span>}
           {savedAt && !error && !saving && <span className="font-mono text-[11px] text-win">Saved</span>}
-          <Button onClick={openMatchesPreview} className="px-3">
+          <Button onClick={openMatchesPreview} className="min-h-[34px] px-3 py-1">
             Preview
           </Button>
-          <Button onClick={saveAndPreview} disabled={saving} className="px-3">
+          <Button onClick={saveAndPreview} disabled={saving} className="min-h-[34px] px-3 py-1">
             {saving ? "Saving..." : "Save + view"}
           </Button>
         </div>
@@ -587,7 +587,7 @@ export default function MatchesEditor() {
               type="button"
               onClick={() => setView(id)}
               aria-pressed={active}
-              className={`inline-flex min-h-[40px] items-center gap-2 border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+              className={`inline-flex min-h-[34px] items-center gap-2 border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${
                 active
                   ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.3)]"
                   : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
@@ -702,102 +702,70 @@ export default function MatchesEditor() {
       )}
 
       {view === "records" && (
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Records</h2>
-              <p className="mt-1 max-w-2xl font-mono text-xs text-ash">
+              <p className="mt-0.5 max-w-2xl font-mono text-[11px] text-ash">
                 Open a tournament, edit matches, save once.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={addTournament} variant="primary">
+              <Button onClick={addTournament} variant="primary" className="min-h-[34px] px-3 py-1">
                 + Add Tournament
               </Button>
-              <Button onClick={addMatch}>+ Standalone</Button>
+              <Button onClick={addMatch} className="min-h-[34px] px-3 py-1">+ Standalone</Button>
             </div>
           </div>
 
           <Card className="bg-crypt2/80">
-            <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="grid gap-2 lg:grid-cols-[minmax(220px,1fr)_180px_130px] lg:items-end">
               <TextField
                 label="Search"
                 value={recordQuery}
                 onChange={setRecordQuery}
                 placeholder="MPL, ONIC, Final..."
               />
-              <div className="grid gap-2">
-                <div className="flex flex-wrap gap-2">
-                  {([
-                    { id: "all", label: "All Games" },
-                    { id: "mlbb", label: "MLBB" },
-                    { id: "efootball", label: "eFootball" },
-                  ] as const).map((item) => {
-                    const active = gameFilter === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setGameFilter(item.id)}
-                        className={`min-h-[40px] border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                          active
-                            ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.25)]"
-                            : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                {yearOptions.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
-                      {page.yearLabel.en || "Year"}
-                    </span>
-                    {[
-                      { id: "all", label: page.allYears.en || "All years" },
-                      ...yearOptions.map((year) => ({ id: year, label: year })),
-                    ].map((item) => {
-                      const active = yearFilter === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setYearFilter(item.id)}
-                          className={`min-h-[34px] border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                            active
-                              ? "border-amethyst bg-amethyst/15 text-soul"
-                              : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {(recordQuery || gameFilter !== "all" || yearFilter !== "all") && (
-                  <div>
-                    <Button
-                      onClick={() => {
-                        setRecordQuery("");
-                        setGameFilter("all");
-                        setYearFilter("all");
-                      }}
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <SelectField
+                label="Game"
+                value={gameFilter}
+                onChange={(v) => setGameFilter(v as GameFilter)}
+                options={[
+                  { value: "all", label: "All Games" },
+                  { value: "mlbb", label: "MLBB" },
+                  { value: "efootball", label: "eFootball" },
+                ]}
+              />
+              <SelectField
+                label={page.yearLabel.en || "Year"}
+                value={yearFilter}
+                onChange={setYearFilter}
+                options={[
+                  { value: "all", label: page.allYears.en || "All years" },
+                  ...yearOptions.map((year) => ({ value: year, label: year })),
+                ]}
+              />
             </div>
-            <p className="mt-3 font-mono text-[11px] text-ash">
-              {filteredTournamentGroups.length}/{tournamentGroups.length} tournaments / {filteredUnassignedMatches.length} unassigned
-            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="font-mono text-[11px] text-ash">
+                {filteredTournamentGroups.length}/{tournamentGroups.length} tournaments / {filteredUnassignedMatches.length} unassigned
+              </p>
+              {(recordQuery || gameFilter !== "all" || yearFilter !== "all") && (
+                <Button
+                  onClick={() => {
+                    setRecordQuery("");
+                    setGameFilter("all");
+                    setYearFilter("all");
+                  }}
+                  className="min-h-[30px] px-2 py-1 text-[10px]"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
           </Card>
 
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {filteredTournamentGroups.length === 0 && (
               <Card className="border-dashed bg-void/35">
                 <p className="font-mono text-xs text-ash">
@@ -811,69 +779,69 @@ export default function MatchesEditor() {
               const open = openTournamentId === tournament.id;
               return (
                 <Card key={tournament.id} className={open ? "border-amethyst/70 bg-crypt2 shadow-[0_0_22px_rgba(168,85,247,0.12)]" : ""}>
-                  <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+                  <div className="grid gap-2 lg:grid-cols-[1fr_auto] lg:items-center">
                     <button
                       type="button"
                       onClick={() => setOpenTournamentId(open ? null : tournament.id)}
                       className="min-w-0 flex-1 text-left"
                     >
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <span className="border border-amethyst/50 bg-amethyst/15 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-amethyst">
+                      <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                        <span className="border border-amethyst/50 bg-amethyst/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-amethyst">
                           {tournament.game === "mlbb" ? "MLBB" : "eFootball"}
                         </span>
-                        <span className="border border-edge bg-void/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                        <span className="border border-edge bg-void/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
                           {items.length} matches
                         </span>
                         {tournament.season && (
-                          <span className="border border-edge bg-void/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                          <span className="border border-edge bg-void/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
                             {tournament.season}
                           </span>
                         )}
                         {tournament.prize && tournament.prize.trim() && tournament.prize !== "-" && (
-                          <span className="border border-amethyst/40 bg-amethyst/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-spectre">
+                          <span className="border border-amethyst/40 bg-amethyst/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-spectre">
                             Prize {tournament.prize}
                           </span>
                         )}
                       </div>
-                      <p className="truncate font-display text-xl font-bold uppercase tracking-wide text-soul">
+                      <p className="truncate font-display text-lg font-bold uppercase tracking-wide text-soul">
                           {tournament.name.en || "Untitled tournament"}
                       </p>
-                      <p className="mt-1 font-mono text-[11px] text-ash">{tournament.placement.en || "No placement yet"}</p>
+                      <p className="mt-0.5 font-mono text-[11px] text-ash">{tournament.placement.en || "No placement yet"}</p>
                     </button>
-                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                    <div className="flex flex-wrap items-center gap-1.5 lg:justify-end">
                       <Button
                         onClick={() => setOpenTournamentId(open ? null : tournament.id)}
-                        className="min-h-[38px] px-3"
+                        className="min-h-[34px] px-3 py-1"
                       >
-                        {open ? "Close" : "Open Matches"}
+                        {open ? "Close" : "Open"}
                       </Button>
-                      <Button onClick={() => addMatchForTournament(tournament)} variant="primary" className="min-h-[38px] px-3">
+                      <Button onClick={() => addMatchForTournament(tournament)} variant="primary" className="min-h-[34px] px-3 py-1">
                         + Add Match
                       </Button>
                     </div>
                   </div>
 
                   {open && (
-                    <div className="mt-4 space-y-4 border-t border-edge pt-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-y border-edge bg-void/35 px-3 py-3">
+                    <div className="mt-3 space-y-3 border-t border-edge pt-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-y border-edge bg-void/35 px-2 py-2">
                         <div>
                           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-spectre">
                             Matches
                           </p>
-                          <p className="mt-1 font-mono text-[10px] text-ash-dim">
+                          <p className="mt-0.5 font-mono text-[10px] text-ash-dim">
                             Date, round, opponent, score, result.
                           </p>
                         </div>
-                        <Button onClick={() => addMatchForTournament(tournament)} variant="primary">
+                        <Button onClick={() => addMatchForTournament(tournament)} variant="primary" className="min-h-[32px] px-2 py-1 text-[10px]">
                           + Add Match
                         </Button>
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {items.length > 0 ? (
                           <div className="space-y-2">
                             <div className="overflow-x-auto border border-edge bg-crypt/55">
-                              <div className="hidden min-w-[900px] grid-cols-[118px_170px_minmax(180px,1fr)_88px_112px_230px] gap-2 border-b border-edge px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ash md:grid">
+                              <div className="hidden min-w-[820px] grid-cols-[110px_142px_minmax(160px,1fr)_72px_94px_184px] gap-1.5 border-b border-edge px-1.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ash md:grid">
                                 <span>Date</span>
                                 <span>Round</span>
                                 <span>Opponent</span>
@@ -881,21 +849,21 @@ export default function MatchesEditor() {
                                 <span>Result</span>
                                 <span>Tools</span>
                               </div>
-                              <div className="space-y-2 p-2">{items.map((ref) => renderMatchQuickRow(ref))}</div>
+                              <div className="space-y-1.5 p-1.5">{items.map((ref) => renderMatchQuickRow(ref))}</div>
                             </div>
                           </div>
                         ) : (
-                          <div className="border border-dashed border-edge bg-void/35 p-4 font-mono text-xs text-ash">
+                          <div className="border border-dashed border-edge bg-void/35 p-3 font-mono text-xs text-ash">
                             No matches yet.
                           </div>
                         )}
                       </div>
 
                       <details className="border border-edge bg-void/35">
-                        <summary className="cursor-pointer px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
+                        <summary className="cursor-pointer px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
                           Settings
                         </summary>
-                        <div className="space-y-4 border-t border-edge p-3 md:p-4">
+                        <div className="space-y-3 border-t border-edge p-3">
                           <div className="grid gap-3 md:grid-cols-2">
                             <div className="md:col-span-2">
                               <BilingualField
