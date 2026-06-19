@@ -82,6 +82,8 @@ const ROUND_PRESETS: { id: string; label: string; value: Bilingual }[] = [
 ];
 
 const emptyText: Bilingual = { en: "", lo: "" };
+const compactInputClass =
+  "h-9 w-full border border-edge bg-void/70 px-2 font-mono text-xs text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst";
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
 
 function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
@@ -115,6 +117,7 @@ export default function MatchesEditor() {
   const [unassignedOpen, setUnassignedOpen] = useState(false);
   const [recordQuery, setRecordQuery] = useState("");
   const [gameFilter, setGameFilter] = useState<GameFilter>("all");
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
 
   if (loading) return <p className="font-mono text-sm text-ash">Loading...</p>;
   if (!data) return <p className="font-mono text-sm text-loss">Could not load matches data.</p>;
@@ -209,6 +212,11 @@ export default function MatchesEditor() {
     if (!target) return;
     patchMatch(matchIndex, { game: target.game, tournament: { ...target.name } });
     setOpenTournamentId(target.id);
+  };
+
+  const patchRound = (matchIndex: number, round: Partial<Bilingual>) => {
+    const current = matches[matchIndex]?.round ?? emptyText;
+    patchMatch(matchIndex, { round: { ...current, ...round } });
   };
 
   const matchRefs: MatchRef[] = matches.map((match, index) => ({ match, index }));
@@ -387,6 +395,136 @@ export default function MatchesEditor() {
             />
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const renderMatchQuickRow = (ref: MatchRef) => {
+    const { match: m, index: i } = ref;
+    const expanded = expandedMatchId === m.id;
+
+    return (
+      <div key={m.id} className="border border-edge bg-void/35">
+        <div className="hidden min-w-[980px] grid-cols-[118px_140px_140px_minmax(180px,1fr)_88px_112px_230px] items-center gap-2 p-2 md:grid">
+          <input
+            type="date"
+            className={compactInputClass}
+            value={m.date}
+            onChange={(e) => patchMatch(i, { date: e.target.value })}
+          />
+          <input
+            className={compactInputClass}
+            value={m.round?.en ?? ""}
+            onChange={(e) => patchRound(i, { en: e.target.value })}
+            placeholder="Round EN"
+          />
+          <input
+            className={compactInputClass}
+            value={m.round?.lo ?? ""}
+            onChange={(e) => patchRound(i, { lo: e.target.value })}
+            placeholder="Round LO"
+          />
+          <div className="flex min-w-0 items-center gap-2">
+            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} size={24} />
+            <input
+              className={compactInputClass}
+              value={m.opponent}
+              onChange={(e) => patchMatch(i, { opponent: e.target.value })}
+              placeholder="Opponent"
+            />
+          </div>
+          <input
+            className={compactInputClass}
+            value={m.score}
+            onChange={(e) => patchMatch(i, { score: e.target.value })}
+            placeholder="0-0"
+          />
+          <select
+            className={compactInputClass}
+            value={m.result}
+            onChange={(e) => patchMatch(i, { result: e.target.value as Match["result"] })}
+          >
+            {RESULT_OPTS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="flex items-center gap-1.5">
+            <select
+              className={`${compactInputClass} w-[94px]`}
+              value=""
+              onChange={(e) => {
+                const preset = ROUND_PRESETS.find((item) => item.id === e.target.value);
+                if (preset) patchMatch(i, { round: preset.value });
+              }}
+              aria-label="Round preset"
+            >
+              <option value="">Preset</option>
+              {ROUND_PRESETS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+            <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
+              {expanded ? "Hide" : "Details"}
+            </Button>
+            <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
+              Copy
+            </Button>
+          </div>
+        </div>
+        <div className="grid gap-2 p-2 md:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="date"
+              className={compactInputClass}
+              value={m.date}
+              onChange={(e) => patchMatch(i, { date: e.target.value })}
+            />
+            <select
+              className={compactInputClass}
+              value={m.result}
+              onChange={(e) => patchMatch(i, { result: e.target.value as Match["result"] })}
+            >
+              {RESULT_OPTS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <input
+            className={compactInputClass}
+            value={m.opponent}
+            onChange={(e) => patchMatch(i, { opponent: e.target.value })}
+            placeholder="Opponent"
+          />
+          <div className="grid grid-cols-[1fr_88px] gap-2">
+            <input
+              className={compactInputClass}
+              value={m.round?.en ?? ""}
+              onChange={(e) => patchRound(i, { en: e.target.value })}
+              placeholder="Round"
+            />
+            <input
+              className={compactInputClass}
+              value={m.score}
+              onChange={(e) => patchMatch(i, { score: e.target.value })}
+              placeholder="0-0"
+            />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
+              {expanded ? "Hide details" : "Details"}
+            </Button>
+            <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
+              Duplicate
+            </Button>
+          </div>
+        </div>
+        {expanded && <div className="border-t border-edge p-2">{renderMatchEditor(ref, { compact: true })}</div>}
       </div>
     );
   };
@@ -693,7 +831,20 @@ export default function MatchesEditor() {
 
                       <div className="space-y-3">
                         {items.length > 0 ? (
-                          items.map((ref) => renderMatchEditor(ref, { compact: true }))
+                          <div className="space-y-2">
+                            <div className="overflow-x-auto border border-edge bg-crypt/55">
+                              <div className="hidden min-w-[980px] grid-cols-[118px_140px_140px_minmax(180px,1fr)_88px_112px_230px] gap-2 border-b border-edge px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ash md:grid">
+                                <span>Date</span>
+                                <span>Round EN</span>
+                                <span>Round LO</span>
+                                <span>Opponent</span>
+                                <span>Score</span>
+                                <span>Result</span>
+                                <span>Tools</span>
+                              </div>
+                              <div className="space-y-2 p-2">{items.map((ref) => renderMatchQuickRow(ref))}</div>
+                            </div>
+                          </div>
                         ) : (
                           <div className="border border-dashed border-edge bg-void/35 p-4 font-mono text-xs text-ash">
                             No matches yet. Use + Add Match to create the first match under this tournament.
