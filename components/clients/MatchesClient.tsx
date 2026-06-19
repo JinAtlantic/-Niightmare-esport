@@ -35,6 +35,7 @@ interface MatchesPageCopy {
   sortLabel: Bilingual;
   sortNewest: Bilingual;
   sortOldest: Bilingual;
+  defaultGame: GameId;
   filters: Record<Filter, Bilingual>;
   stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
   results: Record<MatchResult, Bilingual>;
@@ -47,6 +48,7 @@ function mergePageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
   return {
     ...pageSeed,
     ...page,
+    defaultGame: page?.defaultGame === "efootball" ? "efootball" : "mlbb",
     filters: { ...pageSeed.filters, ...(page?.filters ?? {}) },
     stats: { ...pageSeed.stats, ...(page?.stats ?? {}) },
     results: { ...pageSeed.results, ...(page?.results ?? {}) },
@@ -493,10 +495,10 @@ export default function MatchesClient() {
     matches: Match[];
     tournaments: Tournament[];
   };
-  const [selectedGame, setSelectedGame] = useState<GameId>("mlbb");
   const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const page = mergePageCopy(data.page);
+  const [selectedGame, setSelectedGame] = useState<GameId>(page.defaultGame);
 
   const gameMatches = useMemo(
     () => data.matches.filter((match) => match.game === selectedGame),

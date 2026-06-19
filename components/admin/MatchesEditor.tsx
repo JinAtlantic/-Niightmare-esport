@@ -33,6 +33,7 @@ interface MatchesPageCopy {
   sortLabel: Bilingual;
   sortNewest: Bilingual;
   sortOldest: Bilingual;
+  defaultGame: Match["game"];
   filters: Record<Filter, Bilingual>;
   stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
   results: Record<MatchResult, Bilingual>;
@@ -57,6 +58,7 @@ function pageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
   return {
     ...pageSeed,
     ...page,
+    defaultGame: page?.defaultGame === "efootball" ? "efootball" : "mlbb",
     filters: { ...pageSeed.filters, ...(page?.filters ?? {}) },
     stats: { ...pageSeed.stats, ...(page?.stats ?? {}) },
     results: { ...pageSeed.results, ...(page?.results ?? {}) },
@@ -596,6 +598,12 @@ export default function MatchesEditor() {
               <BilingualField label="Sort control label" value={page.sortLabel} onChange={(v) => patchPage({ sortLabel: v })} />
               <BilingualField label="Sort newest first" value={page.sortNewest} onChange={(v) => patchPage({ sortNewest: v })} />
               <BilingualField label="Sort oldest first" value={page.sortOldest} onChange={(v) => patchPage({ sortOldest: v })} />
+              <SelectField
+                label="Default game on /matches"
+                value={page.defaultGame}
+                onChange={(v) => patchPage({ defaultGame: v as Match["game"] })}
+                options={GAME_OPTS}
+              />
             </div>
           </Card>
 

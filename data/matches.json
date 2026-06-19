@@ -60,6 +60,7 @@
       "en": "Oldest first",
       "lo": "ເກົ່າສຸດກ່ອນ"
     },
+    "defaultGame": "mlbb",
     "filters": {
       "all": {
         "en": "All",
