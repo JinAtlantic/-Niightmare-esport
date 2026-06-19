@@ -49,8 +49,8 @@ type MatchRef = { match: Match; index: number };
 
 const pageSeed = matchesSeed.page as MatchesPageCopy;
 const filterIds: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
-const statIds = ["wins", "draws", "losses", "winrate"] as const;
-const resultIds: MatchResult[] = ["win", "draw", "loss"];
+const statIds = ["wins", "losses", "winrate"] as const;
+const resultIds: MatchResult[] = ["win", "loss"];
 const tournamentLabelIds = ["placement", "prize", "season"] as const;
 
 function pageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
@@ -71,7 +71,6 @@ const GAME_OPTS = [
 
 const RESULT_OPTS = [
   { value: "win", label: "Win" },
-  { value: "draw", label: "Draw" },
   { value: "loss", label: "Loss" },
 ];
 

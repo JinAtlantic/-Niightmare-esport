@@ -13,9 +13,11 @@ import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
+type ResultFilter = "all" | "wins" | "losses";
 type SortOrder = "newest" | "oldest";
 
-const FILTERS: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
+const GAME_FILTERS: GameId[] = ["mlbb", "efootball"];
+const RESULT_FILTERS: ResultFilter[] = ["all", "wins", "losses"];
 
 interface MatchesPageCopy {
   kicker: Bilingual;
@@ -72,7 +74,6 @@ const GAME_LABEL: Record<GameId, string> = {
   mlbb: "MOBILE LEGENDS: BANG BANG",
   efootball: "eFOOTBALL",
 };
-const GAME_ORDER: GameId[] = ["mlbb", "efootball"];
 
 interface TournamentMatchGroup {
   key: string;
@@ -167,13 +168,11 @@ function groupMatchesByTournament(
 
 function StatsStrip({
   wins,
-  draws,
   losses,
   winrate,
   page,
 }: {
   wins: number;
-  draws: number;
   losses: number;
   winrate: number;
   page: MatchesPageCopy;
@@ -181,12 +180,11 @@ function StatsStrip({
   const { pick } = useLanguage();
   const tiles = [
     { value: wins, suffix: "", label: pick(page.stats.wins), tone: "text-win" },
-    { value: draws, suffix: "", label: pick(page.stats.draws), tone: "text-ash" },
     { value: losses, suffix: "", label: pick(page.stats.losses), tone: "text-loss" },
     { value: winrate, suffix: "%", label: pick(page.stats.winrate), tone: "text-glow" },
   ];
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       {tiles.map((s, i) => (
         <div key={i} className="clip-diagonal border border-edge bg-crypt px-5 py-4">
           <CountUp
@@ -495,26 +493,27 @@ export default function MatchesClient() {
     matches: Match[];
     tournaments: Tournament[];
   };
-  const [filter, setFilter] = useState<Filter>("all");
+  const [selectedGame, setSelectedGame] = useState<GameId>("mlbb");
+  const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const page = mergePageCopy(data.page);
 
+  const gameMatches = useMemo(
+    () => data.matches.filter((match) => match.game === selectedGame),
+    [data.matches, selectedGame]
+  );
+
   const stats = useMemo(() => {
-    const count = (r: MatchResult) => data.matches.filter((m) => m.result === r).length;
+    const count = (r: MatchResult) => gameMatches.filter((m) => m.result === r).length;
     const wins = count("win");
     const losses = count("loss");
-    const draws = count("draw");
-    const total = data.matches.length || 1;
-    return { wins, losses, draws, winrate: Math.round((wins / total) * 100) };
-  }, [data]);
+    const total = wins + losses || 1;
+    return { wins, losses, winrate: Math.round((wins / total) * 100) };
+  }, [gameMatches]);
 
   const filtered = useMemo(() => {
-    return data.matches.filter((m) => {
-      switch (filter) {
-        case "mlbb":
-          return m.game === "mlbb";
-        case "efootball":
-          return m.game === "efootball";
+    return gameMatches.filter((m) => {
+      switch (resultFilter) {
         case "wins":
           return m.result === "win";
         case "losses":
@@ -523,19 +522,15 @@ export default function MatchesClient() {
           return true;
       }
     });
-  }, [filter, data]);
+  }, [resultFilter, gameMatches]);
 
   const tournamentGroups = useMemo(
     () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder),
     [filtered, data.tournaments, page.unknownTournament, sortOrder]
   );
   const groupsByGame = useMemo(
-    () =>
-      GAME_ORDER.map((game) => ({
-        game,
-        groups: tournamentGroups.filter((group) => group.game === game),
-      })).filter((section) => section.groups.length > 0),
-    [tournamentGroups]
+    () => [{ game: selectedGame, groups: tournamentGroups.filter((group) => group.game === selectedGame) }],
+    [selectedGame, tournamentGroups]
   );
 
   return (
@@ -567,25 +562,50 @@ export default function MatchesClient() {
               <StatsStrip {...stats} page={page} />
             </div>
             <div className="mt-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div className="flex flex-wrap gap-2">
-                {FILTERS.map((id) => {
-                  const active = filter === id;
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setFilter(id)}
-                      aria-pressed={active}
-                      className={`inline-flex min-h-[44px] items-center border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
-                        active
-                          ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
-                          : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
-                      }`}
-                    >
-                      {pick(page.filters[id])}
-                    </button>
-                  );
-                })}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap gap-2">
+                  {GAME_FILTERS.map((id) => {
+                    const active = selectedGame === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedGame(id);
+                          setResultFilter("all");
+                        }}
+                        aria-pressed={active}
+                        className={`inline-flex min-h-[46px] items-center border px-5 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
+                          active
+                            ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+                            : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
+                        }`}
+                      >
+                        {pick(page.filters[id])}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-2 border-l-2 border-amethyst/50 pl-3">
+                  {RESULT_FILTERS.map((id) => {
+                    const active = resultFilter === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setResultFilter(id)}
+                        aria-pressed={active}
+                        className={`inline-flex min-h-[38px] items-center border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                          active
+                            ? "border-amethyst bg-amethyst/15 text-soul"
+                            : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+                        }`}
+                      >
+                        {pick(page.filters[id])}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 border border-edge bg-void/45 p-2">
                 <span className="px-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
@@ -617,8 +637,8 @@ export default function MatchesClient() {
           </div>
         </Reveal>
 
-        <div key={`${filter}-${sortOrder}`} className="mt-8 grid gap-6">
-          {groupsByGame.length > 0 ? (
+        <div key={`${selectedGame}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
+          {groupsByGame.some((section) => section.groups.length > 0) ? (
             groupsByGame.map(({ game, groups }, i) => (
               <Reveal key={game} delay={i * 90}>
                 <GameTournamentSection game={game} groups={groups} page={page} />
