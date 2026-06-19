@@ -378,7 +378,7 @@ export default function MatchesEditor() {
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
                   Round presets
                 </p>
-                {!compact && <p className="font-mono text-[10px] text-ash-dim">Use outer rounds first, finals last.</p>}
+                {!compact && <p className="font-mono text-[10px] text-ash-dim">Outer rounds first.</p>}
               </div>
               <div className="flex flex-wrap gap-2">
                 {ROUND_PRESETS.map((preset) => (
@@ -496,7 +496,7 @@ export default function MatchesEditor() {
               ))}
             </select>
             <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
-              {expanded ? "Hide" : "Advanced"}
+              {expanded ? "Hide" : "More"}
             </Button>
             <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
               Copy
@@ -545,7 +545,7 @@ export default function MatchesEditor() {
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
-              {expanded ? "Hide advanced" : "Advanced"}
+              {expanded ? "Hide" : "More"}
             </Button>
             <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
               Duplicate
@@ -567,18 +567,18 @@ export default function MatchesEditor() {
           {error && <span className="font-mono text-[11px] text-loss">{error}</span>}
           {savedAt && !error && !saving && <span className="font-mono text-[11px] text-win">Saved</span>}
           <Button onClick={openMatchesPreview} className="px-3">
-            Preview /matches
+            Preview
           </Button>
           <Button onClick={saveAndPreview} disabled={saving} className="px-3">
-            {saving ? "Saving..." : "Save + preview"}
+            {saving ? "Saving..." : "Save + view"}
           </Button>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
         {([
-          { id: "records", label: "Match Results", count: tournaments.length },
-          { id: "page", label: "Page Settings", count: 4 },
+          { id: "records", label: "Records", count: tournaments.length },
+          { id: "page", label: "Copy", count: 4 },
         ] as const).map(({ id, label, count }) => {
           const active = view === id;
           return (
@@ -606,15 +606,15 @@ export default function MatchesEditor() {
             <div className="mb-4">
               <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Matches page copy</h2>
               <p className="mt-1 font-mono text-xs text-ash">
-                Edit public /matches labels here. Save once after all changes.
+                Public /matches labels.
               </p>
             </div>
             <div className="grid gap-3">
               <BilingualField label="Hero kicker" value={page.kicker} onChange={(v) => patchPage({ kicker: v })} />
               <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
               <BilingualField label="Hero intro" value={page.intro} onChange={(v) => patchPage({ intro: v })} />
-              <BilingualField label="Record panel label" value={page.recordLabel} onChange={(v) => patchPage({ recordLabel: v })} />
-              <BilingualField label="Record panel intro" value={page.recordIntro} onChange={(v) => patchPage({ recordIntro: v })} />
+              <BilingualField label="Record label" value={page.recordLabel} onChange={(v) => patchPage({ recordLabel: v })} />
+              <BilingualField label="Record intro" value={page.recordIntro} onChange={(v) => patchPage({ recordIntro: v })} />
               <BilingualField label="History kicker" value={page.historyKicker} onChange={(v) => patchPage({ historyKicker: v })} />
               <BilingualField label="History title" value={page.historyTitle} onChange={(v) => patchPage({ historyTitle: v })} />
               <BilingualField label="No results message" value={page.noResults} onChange={(v) => patchPage({ noResults: v })} />
@@ -641,7 +641,7 @@ export default function MatchesEditor() {
           <Card>
             <div className="mb-4">
               <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Filters, stats, results</h2>
-              <p className="mt-1 font-mono text-xs text-ash">Labels for filters, stat cards, result badges, and tournament accordions.</p>
+              <p className="mt-1 font-mono text-xs text-ash">Public labels.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="border border-edge bg-void/40 p-4">
@@ -705,23 +705,23 @@ export default function MatchesEditor() {
         <section className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Tournament Records</h2>
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Records</h2>
               <p className="mt-1 max-w-2xl font-mono text-xs text-ash">
-                Open one tournament, add or edit matches first. Tournament settings stay tucked away until you need them.
+                Open a tournament, edit matches, save once.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={addTournament} variant="primary">
                 + Add Tournament
               </Button>
-              <Button onClick={addMatch}>+ Standalone Match</Button>
+              <Button onClick={addMatch}>+ Standalone</Button>
             </div>
           </div>
 
           <Card className="bg-crypt2/80">
             <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
               <TextField
-                label="Search tournament / opponent / round"
+                label="Search"
                 value={recordQuery}
                 onChange={setRecordQuery}
                 placeholder="MPL, ONIC, Final..."
@@ -793,8 +793,7 @@ export default function MatchesEditor() {
               </div>
             </div>
             <p className="mt-3 font-mono text-[11px] text-ash">
-              Showing {filteredTournamentGroups.length} of {tournamentGroups.length} tournaments /{" "}
-              {filteredUnassignedMatches.length} unassigned matches
+              {filteredTournamentGroups.length}/{tournamentGroups.length} tournaments / {filteredUnassignedMatches.length} unassigned
             </p>
           </Card>
 
@@ -802,7 +801,7 @@ export default function MatchesEditor() {
             {filteredTournamentGroups.length === 0 && (
               <Card className="border-dashed bg-void/35">
                 <p className="font-mono text-xs text-ash">
-                  No tournaments match the current search/filter. Clear filters or add a new tournament.
+                  No tournaments match.
                 </p>
               </Card>
             )}
@@ -859,10 +858,10 @@ export default function MatchesEditor() {
                       <div className="flex flex-wrap items-center justify-between gap-2 border-y border-edge bg-void/35 px-3 py-3">
                         <div>
                           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-spectre">
-                            Quick match editor
+                            Matches
                           </p>
                           <p className="mt-1 font-mono text-[10px] text-ash-dim">
-                            Daily work stays here: date, round, opponent, score, and result.
+                            Date, round, opponent, score, result.
                           </p>
                         </div>
                         <Button onClick={() => addMatchForTournament(tournament)} variant="primary">
@@ -887,14 +886,14 @@ export default function MatchesEditor() {
                           </div>
                         ) : (
                           <div className="border border-dashed border-edge bg-void/35 p-4 font-mono text-xs text-ash">
-                            No matches yet. Use + Add Match to create the first match under this tournament.
+                            No matches yet.
                           </div>
                         )}
                       </div>
 
                       <details className="border border-edge bg-void/35">
                         <summary className="cursor-pointer px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
-                          Tournament settings
+                          Settings
                         </summary>
                         <div className="space-y-4 border-t border-edge p-3 md:p-4">
                           <div className="grid gap-3 md:grid-cols-2">
@@ -961,7 +960,7 @@ export default function MatchesEditor() {
                 <button type="button" onClick={() => setUnassignedOpen(!unassignedOpen)} className="text-left">
                   <p className="font-display text-base font-bold uppercase tracking-wide text-soul">Unassigned Matches</p>
                   <p className="mt-1 font-mono text-[11px] text-ash">
-                    {filteredUnassignedMatches.length} matches not linked to a tournament record.
+                    {filteredUnassignedMatches.length} unassigned matches.
                   </p>
                 </button>
                 <div className="flex flex-wrap gap-2">
