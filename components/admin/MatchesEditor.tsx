@@ -416,7 +416,7 @@ export default function MatchesEditor() {
 
     return (
       <div key={m.id} className="border border-edge bg-void/35">
-        <div className="hidden min-w-[980px] grid-cols-[118px_140px_140px_minmax(180px,1fr)_88px_112px_230px] items-center gap-2 p-2 md:grid">
+        <div className="hidden min-w-[900px] grid-cols-[118px_170px_minmax(180px,1fr)_88px_112px_230px] items-center gap-2 p-2 md:grid">
           <input
             type="date"
             className={compactInputClass}
@@ -428,12 +428,6 @@ export default function MatchesEditor() {
             value={m.round?.en ?? ""}
             onChange={(e) => patchRound(i, { en: e.target.value })}
             placeholder="Round EN"
-          />
-          <input
-            className={compactInputClass}
-            value={m.round?.lo ?? ""}
-            onChange={(e) => patchRound(i, { lo: e.target.value })}
-            placeholder="Round LO"
           />
           <div className="flex min-w-0 items-center gap-2">
             <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} size={24} />
@@ -479,7 +473,7 @@ export default function MatchesEditor() {
               ))}
             </select>
             <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
-              {expanded ? "Hide" : "Details"}
+              {expanded ? "Hide" : "Advanced"}
             </Button>
             <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
               Copy
@@ -528,7 +522,7 @@ export default function MatchesEditor() {
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Button onClick={() => setExpandedMatchId(expanded ? null : m.id)} className="min-h-[34px] px-2 py-1">
-              {expanded ? "Hide details" : "Details"}
+              {expanded ? "Hide advanced" : "Advanced"}
             </Button>
             <Button onClick={() => duplicateMatch(i)} className="min-h-[34px] px-2 py-1">
               Duplicate
@@ -542,7 +536,7 @@ export default function MatchesEditor() {
 
   return (
     <div className="space-y-10">
-      <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 border-b border-edge bg-void/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-10 -mx-4 flex flex-col items-start justify-between gap-3 border-b border-edge bg-void/95 px-4 py-3 backdrop-blur md:-mx-6 md:flex-row md:items-center md:px-6">
         <p className="font-mono text-xs text-ash">
           {matches.length} matches / {tournaments.length} tournaments
         </p>
@@ -563,8 +557,8 @@ export default function MatchesEditor() {
 
       <div className="flex flex-wrap gap-2">
         {([
-          { id: "records", label: "Tournament Records", count: tournaments.length },
-          { id: "page", label: "Matches Page Copy", count: 4 },
+          { id: "records", label: "Match Results", count: tournaments.length },
+          { id: "page", label: "Page Settings", count: 4 },
         ] as const).map(({ id, label, count }) => {
           const active = view === id;
           return (
@@ -689,7 +683,7 @@ export default function MatchesEditor() {
             <div>
               <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Tournament Records</h2>
               <p className="mt-1 max-w-2xl font-mono text-xs text-ash">
-                Open one tournament, edit its info, then add or edit matches inside it. Matches follow the tournament name and game automatically.
+                Open one tournament, add or edit matches first. Tournament settings stay tucked away until you need them.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -698,6 +692,24 @@ export default function MatchesEditor() {
               </Button>
               <Button onClick={addMatch}>+ Standalone Match</Button>
             </div>
+          </div>
+
+          <div className="grid gap-2 md:grid-cols-3">
+            {[
+              ["1", "Add Tournament", "Create one event per game, season, or bracket."],
+              ["2", "Open Matches", "Edit date, round, opponent, score, and result in the quick table."],
+              ["3", "Save + Preview", "Push changes, then check the public /matches page."],
+            ].map(([step, title, body]) => (
+              <div key={step} className="border border-edge bg-crypt/70 p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="grid h-6 w-6 place-items-center border border-amethyst/50 bg-amethyst/10 font-mono text-[10px] font-bold text-amethyst">
+                    {step}
+                  </span>
+                  <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-soul">{title}</p>
+                </div>
+                <p className="font-mono text-[10px] leading-relaxed text-ash">{body}</p>
+              </div>
+            ))}
           </div>
 
           <Card className="bg-crypt2/80">
@@ -761,93 +773,53 @@ export default function MatchesEditor() {
               const tournamentIndex = tournaments.findIndex((item) => item.id === tournament.id);
               const open = openTournamentId === tournament.id;
               return (
-                <Card key={tournament.id} className={open ? "border-amethyst/70 bg-crypt2" : ""}>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                <Card key={tournament.id} className={open ? "border-amethyst/70 bg-crypt2 shadow-[0_0_22px_rgba(168,85,247,0.12)]" : ""}>
+                  <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
                     <button
                       type="button"
                       onClick={() => setOpenTournamentId(open ? null : tournament.id)}
                       className="min-w-0 flex-1 text-left"
                     >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="border border-amethyst/40 bg-amethyst/10 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <span className="border border-amethyst/50 bg-amethyst/15 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-amethyst">
                           {tournament.game === "mlbb" ? "MLBB" : "eFootball"}
                         </span>
-                        <span className="truncate font-display text-base font-bold uppercase tracking-wide text-soul">
-                          {tournament.name.en || "Untitled tournament"}
+                        <span className="border border-edge bg-void/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                          {items.length} matches
                         </span>
+                        {tournament.season && (
+                          <span className="border border-edge bg-void/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                            {tournament.season}
+                          </span>
+                        )}
                       </div>
-                      <p className="mt-1 font-mono text-[11px] text-ash">
-                        {tournament.season || "No season"} / {items.length} matches / {tournament.placement.en || "No placement"}
+                      <p className="truncate font-display text-xl font-bold uppercase tracking-wide text-soul">
+                          {tournament.name.en || "Untitled tournament"}
                       </p>
+                      <p className="mt-1 font-mono text-[11px] text-ash">{tournament.placement.en || "No placement yet"}</p>
                     </button>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Button onClick={() => setTournaments(move(tournaments, tournamentIndex, -1))} className="min-h-[34px] px-3 py-1">
-                        Up
-                      </Button>
-                      <Button onClick={() => setTournaments(move(tournaments, tournamentIndex, 1))} className="min-h-[34px] px-3 py-1">
-                        Down
-                      </Button>
+                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                       <Button
                         onClick={() => setOpenTournamentId(open ? null : tournament.id)}
-                        className="min-h-[34px] px-3 py-1"
+                        className="min-h-[38px] px-3"
                       >
-                        {open ? "Close" : "Edit"}
+                        {open ? "Close" : "Open Matches"}
                       </Button>
-                      <Button
-                        variant="danger"
-                        onClick={() => {
-                          setTournaments(tournaments.filter((_, idx) => idx !== tournamentIndex));
-                          if (openTournamentId === tournament.id) setOpenTournamentId(null);
-                        }}
-                        className="min-h-[34px] px-3 py-1"
-                      >
-                        Delete
+                      <Button onClick={() => addMatchForTournament(tournament)} variant="primary" className="min-h-[38px] px-3">
+                        + Add Match
                       </Button>
                     </div>
                   </div>
 
                   {open && (
                     <div className="mt-4 space-y-4 border-t border-edge pt-4">
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div className="md:col-span-2">
-                          <BilingualField
-                            label="Tournament name"
-                            value={tournament.name}
-                            onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { name: v })}
-                          />
-                        </div>
-                        <SelectField
-                          label="Game"
-                          value={tournament.game}
-                          onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { game: v as Tournament["game"] })}
-                          options={GAME_OPTS}
-                        />
-                        <TextField
-                          label="Season"
-                          value={tournament.season}
-                          onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { season: v })}
-                        />
-                        <div className="md:col-span-2">
-                          <BilingualField
-                            label="Placement / Result"
-                            value={tournament.placement}
-                            onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { placement: v })}
-                          />
-                        </div>
-                        <TextField
-                          label="Prize"
-                          value={tournament.prize}
-                          onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { prize: v })}
-                        />
-                      </div>
-
                       <div className="flex flex-wrap items-center justify-between gap-2 border-y border-edge bg-void/35 px-3 py-3">
                         <div>
                           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-spectre">
-                            Matches in this tournament
+                            Quick match editor
                           </p>
                           <p className="mt-1 font-mono text-[10px] text-ash-dim">
-                            Add match here to prefill game and tournament automatically.
+                            Daily work stays here: date, round, opponent, score, and result.
                           </p>
                         </div>
                         <Button onClick={() => addMatchForTournament(tournament)} variant="primary">
@@ -859,10 +831,9 @@ export default function MatchesEditor() {
                         {items.length > 0 ? (
                           <div className="space-y-2">
                             <div className="overflow-x-auto border border-edge bg-crypt/55">
-                              <div className="hidden min-w-[980px] grid-cols-[118px_140px_140px_minmax(180px,1fr)_88px_112px_230px] gap-2 border-b border-edge px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ash md:grid">
+                              <div className="hidden min-w-[900px] grid-cols-[118px_170px_minmax(180px,1fr)_88px_112px_230px] gap-2 border-b border-edge px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ash md:grid">
                                 <span>Date</span>
-                                <span>Round EN</span>
-                                <span>Round LO</span>
+                                <span>Round</span>
                                 <span>Opponent</span>
                                 <span>Score</span>
                                 <span>Result</span>
@@ -877,6 +848,64 @@ export default function MatchesEditor() {
                           </div>
                         )}
                       </div>
+
+                      <details className="border border-edge bg-void/35">
+                        <summary className="cursor-pointer px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
+                          Tournament settings
+                        </summary>
+                        <div className="space-y-4 border-t border-edge p-3 md:p-4">
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <div className="md:col-span-2">
+                              <BilingualField
+                                label="Tournament name"
+                                value={tournament.name}
+                                onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { name: v })}
+                              />
+                            </div>
+                            <SelectField
+                              label="Game"
+                              value={tournament.game}
+                              onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { game: v as Tournament["game"] })}
+                              options={GAME_OPTS}
+                            />
+                            <TextField
+                              label="Season"
+                              value={tournament.season}
+                              onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { season: v })}
+                            />
+                            <div className="md:col-span-2">
+                              <BilingualField
+                                label="Placement / Result"
+                                value={tournament.placement}
+                                onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { placement: v })}
+                              />
+                            </div>
+                            <TextField
+                              label="Prize"
+                              value={tournament.prize}
+                              onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { prize: v })}
+                            />
+                          </div>
+                          <div className="flex flex-wrap gap-2 border-t border-edge pt-3">
+                            <Button onClick={() => setTournaments(move(tournaments, tournamentIndex, -1))} className="min-h-[34px] px-3 py-1">
+                              Move Up
+                            </Button>
+                            <Button onClick={() => setTournaments(move(tournaments, tournamentIndex, 1))} className="min-h-[34px] px-3 py-1">
+                              Move Down
+                            </Button>
+                            <Button
+                              variant="danger"
+                              onClick={() => {
+                                setTournaments(tournaments.filter((_, idx) => idx !== tournamentIndex));
+                                if (openTournamentId === tournament.id) setOpenTournamentId(null);
+                              }}
+                              className="min-h-[34px] px-3 py-1"
+                            >
+                              Delete Tournament
+                            </Button>
+                          </div>
+                        </div>
+                      </details>
                     </div>
                   )}
                 </Card>
