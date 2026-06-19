@@ -826,6 +826,11 @@ export default function MatchesEditor() {
                             {tournament.season}
                           </span>
                         )}
+                        {tournament.prize && tournament.prize.trim() && tournament.prize !== "-" && (
+                          <span className="border border-amethyst/40 bg-amethyst/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-spectre">
+                            Prize {tournament.prize}
+                          </span>
+                        )}
                       </div>
                       <p className="truncate font-display text-xl font-bold uppercase tracking-wide text-soul">
                           {tournament.name.en || "Untitled tournament"}
@@ -847,6 +852,15 @@ export default function MatchesEditor() {
 
                   {open && (
                     <div className="mt-4 space-y-4 border-t border-edge pt-4">
+                      <div className="border border-edge bg-void/35 p-3">
+                        <TextField
+                          label="Prize money"
+                          value={tournament.prize}
+                          onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { prize: v })}
+                          placeholder="$1,000"
+                        />
+                      </div>
+
                       <div className="flex flex-wrap items-center justify-between gap-2 border-y border-edge bg-void/35 px-3 py-3">
                         <div>
                           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-spectre">
@@ -914,11 +928,6 @@ export default function MatchesEditor() {
                                 onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { placement: v })}
                               />
                             </div>
-                            <TextField
-                              label="Prize"
-                              value={tournament.prize}
-                              onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { prize: v })}
-                            />
                           </div>
                           <div className="flex flex-wrap gap-2 border-t border-edge pt-3">
                             <Button onClick={() => setTournaments(move(tournaments, tournamentIndex, -1))} className="min-h-[34px] px-3 py-1">
