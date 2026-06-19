@@ -30,6 +30,9 @@ interface MatchesPageCopy {
   unknownTournament: Bilingual;
   vodSoon: Bilingual;
   watchVod: Bilingual;
+  sortLabel: Bilingual;
+  sortNewest: Bilingual;
+  sortOldest: Bilingual;
   filters: Record<Filter, Bilingual>;
   stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
   results: Record<MatchResult, Bilingual>;
@@ -591,6 +594,9 @@ export default function MatchesEditor() {
               <BilingualField label="Unknown tournament fallback" value={page.unknownTournament} onChange={(v) => patchPage({ unknownTournament: v })} />
               <BilingualField label="VOD soon label" value={page.vodSoon} onChange={(v) => patchPage({ vodSoon: v })} />
               <BilingualField label="Watch VOD label" value={page.watchVod} onChange={(v) => patchPage({ watchVod: v })} />
+              <BilingualField label="Sort control label" value={page.sortLabel} onChange={(v) => patchPage({ sortLabel: v })} />
+              <BilingualField label="Sort newest first" value={page.sortNewest} onChange={(v) => patchPage({ sortNewest: v })} />
+              <BilingualField label="Sort oldest first" value={page.sortOldest} onChange={(v) => patchPage({ sortOldest: v })} />
             </div>
           </Card>
 

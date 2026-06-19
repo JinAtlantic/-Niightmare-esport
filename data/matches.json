@@ -48,6 +48,18 @@
       "en": "Watch VOD",
       "lo": "ເບິ່ງ VOD"
     },
+    "sortLabel": {
+      "en": "Sort by date",
+      "lo": "ຈັດລຳດັບຕາມວັນທີ"
+    },
+    "sortNewest": {
+      "en": "Newest first",
+      "lo": "ໃໝ່ສຸດກ່ອນ"
+    },
+    "sortOldest": {
+      "en": "Oldest first",
+      "lo": "ເກົ່າສຸດກ່ອນ"
+    },
     "filters": {
       "all": {
         "en": "All",

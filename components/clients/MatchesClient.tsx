@@ -13,6 +13,7 @@ import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
+type SortOrder = "newest" | "oldest";
 
 const FILTERS: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
 
@@ -29,6 +30,9 @@ interface MatchesPageCopy {
   unknownTournament: Bilingual;
   vodSoon: Bilingual;
   watchVod: Bilingual;
+  sortLabel: Bilingual;
+  sortNewest: Bilingual;
+  sortOldest: Bilingual;
   filters: Record<Filter, Bilingual>;
   stats: Record<"wins" | "draws" | "losses" | "winrate", Bilingual>;
   results: Record<MatchResult, Bilingual>;
@@ -77,6 +81,7 @@ interface TournamentMatchGroup {
   tournament?: Tournament;
   matches: Match[];
   latestDate: string;
+  earliestDate: string;
 }
 
 function normalizeValue(value: string) {
@@ -103,13 +108,21 @@ function roundRank(match: Match) {
   return 45;
 }
 
-function sortMatchesByRound(a: Match, b: Match) {
-  const roundDelta = roundRank(a) - roundRank(b);
-  if (roundDelta !== 0) return roundDelta;
-  return (a.date ?? "").localeCompare(b.date ?? "");
+function sortMatchesByDate(a: Match, b: Match, sortOrder: SortOrder) {
+  const dateDelta =
+    sortOrder === "newest"
+      ? (b.date ?? "").localeCompare(a.date ?? "")
+      : (a.date ?? "").localeCompare(b.date ?? "");
+  if (dateDelta !== 0) return dateDelta;
+  return roundRank(a) - roundRank(b);
 }
 
-function groupMatchesByTournament(matches: Match[], tournaments: Tournament[], fallbackName: Bilingual) {
+function groupMatchesByTournament(
+  matches: Match[],
+  tournaments: Tournament[],
+  fallbackName: Bilingual,
+  sortOrder: SortOrder
+) {
   const tournamentByKey = new Map(
     tournaments.map((tournament) => [
       `${tournament.game}:${normalizeValue(tournament.name.en || tournament.name.lo)}`,
@@ -126,6 +139,7 @@ function groupMatchesByTournament(matches: Match[], tournaments: Tournament[], f
     if (existing) {
       existing.matches.push(match);
       if ((match.date ?? "") > existing.latestDate) existing.latestDate = match.date;
+      if ((match.date ?? "") < existing.earliestDate) existing.earliestDate = match.date;
       continue;
     }
 
@@ -136,15 +150,18 @@ function groupMatchesByTournament(matches: Match[], tournaments: Tournament[], f
       tournament,
       matches: [match],
       latestDate: match.date,
+      earliestDate: match.date,
     });
   }
 
   return [...groups.values()]
-    .map((group) => ({ ...group, matches: [...group.matches].sort(sortMatchesByRound) }))
+    .map((group) => ({ ...group, matches: [...group.matches].sort((a, b) => sortMatchesByDate(a, b, sortOrder)) }))
     .sort((a, b) => {
-      const seasonDelta = (b.tournament?.season ?? "").localeCompare(a.tournament?.season ?? "");
-      if (seasonDelta !== 0) return seasonDelta;
-      return (b.latestDate ?? "").localeCompare(a.latestDate ?? "");
+      const dateDelta = sortOrder === "newest"
+        ? (b.latestDate ?? "").localeCompare(a.latestDate ?? "")
+        : (a.earliestDate ?? "").localeCompare(b.earliestDate ?? "");
+      if (dateDelta !== 0) return dateDelta;
+      return normalizeValue(a.name.en || a.name.lo).localeCompare(normalizeValue(b.name.en || b.name.lo));
     });
 }
 
@@ -479,6 +496,7 @@ export default function MatchesClient() {
     tournaments: Tournament[];
   };
   const [filter, setFilter] = useState<Filter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const page = mergePageCopy(data.page);
 
   const stats = useMemo(() => {
@@ -508,8 +526,8 @@ export default function MatchesClient() {
   }, [filter, data]);
 
   const tournamentGroups = useMemo(
-    () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament),
-    [filtered, data.tournaments, page.unknownTournament]
+    () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder),
+    [filtered, data.tournaments, page.unknownTournament, sortOrder]
   );
   const groupsByGame = useMemo(
     () =>
@@ -548,30 +566,58 @@ export default function MatchesClient() {
               </div>
               <StatsStrip {...stats} page={page} />
             </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {FILTERS.map((id) => {
-                const active = filter === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setFilter(id)}
-                    aria-pressed={active}
-                    className={`inline-flex min-h-[44px] items-center border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
-                      active
-                        ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
-                        : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
-                    }`}
-                  >
-                    {pick(page.filters[id])}
-                  </button>
-                );
-              })}
+            <div className="mt-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+              <div className="flex flex-wrap gap-2">
+                {FILTERS.map((id) => {
+                  const active = filter === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setFilter(id)}
+                      aria-pressed={active}
+                      className={`inline-flex min-h-[44px] items-center border px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
+                        active
+                          ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+                          : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
+                      }`}
+                    >
+                      {pick(page.filters[id])}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center gap-2 border border-edge bg-void/45 p-2">
+                <span className="px-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                  {pick(page.sortLabel)}
+                </span>
+                {([
+                  { id: "newest", label: pick(page.sortNewest) },
+                  { id: "oldest", label: pick(page.sortOldest) },
+                ] as const).map((option) => {
+                  const active = sortOrder === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setSortOrder(option.id)}
+                      aria-pressed={active}
+                      className={`inline-flex min-h-[38px] items-center border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                        active
+                          ? "border-amethyst bg-amethyst/15 text-soul"
+                          : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </Reveal>
 
-        <div key={filter} className="mt-8 grid gap-6">
+        <div key={`${filter}-${sortOrder}`} className="mt-8 grid gap-6">
           {groupsByGame.length > 0 ? (
             groupsByGame.map(({ game, groups }, i) => (
               <Reveal key={game} delay={i * 90}>
