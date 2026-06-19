@@ -521,6 +521,9 @@ function GameTournamentSection({
   );
 }
 
+const selectClass =
+  "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
+
 export default function MatchesClient() {
   const { pick } = useLanguage();
   const data = useContent().matches as {
@@ -624,103 +627,76 @@ export default function MatchesClient() {
               </div>
               <StatsStrip {...stats} page={page} />
             </div>
-            <div className="mt-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap gap-2">
-                  {GAME_FILTERS.map((id) => {
-                    const active = selectedGame === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedGame(id);
-                          setSelectedYear("all");
-                          setResultFilter("all");
-                        }}
-                        aria-pressed={active}
-                        className={`inline-flex min-h-[46px] items-center border px-5 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-200 ${
-                          active
-                            ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_16px_rgba(168,85,247,0.35)]"
-                            : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
-                        }`}
-                      >
-                        {pick(page.filters[id])}
-                      </button>
-                    );
-                  })}
-                </div>
-                {yearOptions.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 border-l-2 border-edge-bright/70 pl-3">
-                    {[
-                      { id: "all", label: pick(page.allYears) },
-                      ...yearOptions.map((year) => ({ id: year, label: year })),
-                    ].map((option) => {
-                      const active = selectedYear === option.id;
-                      return (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() => setSelectedYear(option.id)}
-                          aria-pressed={active}
-                          className={`inline-flex min-h-[38px] items-center border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
-                            active
-                              ? "border-amethyst bg-amethyst/15 text-soul"
-                              : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2 border-l-2 border-amethyst/50 pl-3">
-                  {RESULT_FILTERS.map((id) => {
-                    const active = resultFilter === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setResultFilter(id)}
-                        aria-pressed={active}
-                        className={`inline-flex min-h-[38px] items-center border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
-                          active
-                            ? "border-amethyst bg-amethyst/15 text-soul"
-                            : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                        }`}
-                      >
-                        {pick(page.filters[id])}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 border border-edge bg-void/45 p-2">
-                {([
-                  { id: "newest", label: pick(page.sortNewest) },
-                  { id: "oldest", label: pick(page.sortOldest) },
-                  { id: "prize-high", label: pick(page.sortPrizeHigh) },
-                  { id: "prize-low", label: pick(page.sortPrizeLow) },
-                ] as const).map((option) => {
-                  const active = sortOrder === option.id;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => setSortOrder(option.id)}
-                      aria-pressed={active}
-                      className={`inline-flex min-h-[38px] items-center border px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
-                        active
-                          ? "border-amethyst bg-amethyst/15 text-soul"
-                          : "border-edge bg-crypt text-ash hover:border-edge-bright hover:text-soul"
-                      }`}
-                    >
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <label className="block border border-edge bg-crypt/55 p-2">
+                <span className="sr-only">Game</span>
+                <select
+                  value={selectedGame}
+                  onChange={(event) => {
+                    setSelectedGame(event.target.value as GameId);
+                    setSelectedYear("all");
+                    setResultFilter("all");
+                  }}
+                  className={selectClass}
+                >
+                  {GAME_FILTERS.map((id) => (
+                    <option key={id} value={id}>
+                      {pick(page.filters[id])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block border border-edge bg-crypt/55 p-2">
+                <span className="sr-only">{pick(page.yearLabel)}</span>
+                <select
+                  value={selectedYear}
+                  onChange={(event) => setSelectedYear(event.target.value)}
+                  className={selectClass}
+                >
+                  <option value="all">{pick(page.allYears)}</option>
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block border border-edge bg-crypt/55 p-2">
+                <span className="sr-only">Result</span>
+                <select
+                  value={resultFilter}
+                  onChange={(event) => setResultFilter(event.target.value as ResultFilter)}
+                  className={selectClass}
+                >
+                  {RESULT_FILTERS.map((id) => (
+                    <option key={id} value={id}>
+                      {pick(page.filters[id])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block border border-edge bg-crypt/55 p-2">
+                <span className="sr-only">{pick(page.sortLabel)}</span>
+                <select
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+                  className={selectClass}
+                >
+                  {([
+                    { id: "newest", label: pick(page.sortNewest) },
+                    { id: "oldest", label: pick(page.sortOldest) },
+                    { id: "prize-high", label: pick(page.sortPrizeHigh) },
+                    { id: "prize-low", label: pick(page.sortPrizeLow) },
+                  ] as const).map((option) => (
+                    <option key={option.id} value={option.id}>
                       {option.label}
-                    </button>
-                  );
-                })}
-              </div>
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
           </div>
         </Reveal>
