@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useData } from "@/components/admin/useData";
-import { BilingualField, Button, Card, Label, TextArea, TextField } from "@/components/admin/ui";
+import { BilingualField, Button, Card, Collapsible, Label, Section, TextArea, TextField } from "@/components/admin/ui";
 import sponsorsSeed from "@/data/sponsors.json";
 import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
 
@@ -150,15 +150,10 @@ export default function SponsorsEditor() {
         </div>
       </div>
 
-      <section>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-            Sponsors Page Copy
-          </h2>
-          <p className="mt-1 font-mono text-[11px] text-ash">
-            ข้อความบนหน้า Sponsors ทั้งหมดควรแก้จากตรงนี้ ไม่ต้องแก้โค้ด
-          </p>
-        </div>
+      <Collapsible
+        title="ข้อความหน้า Sponsors"
+        hint="ข้อความทั้งหมดบนหน้า Sponsors — แก้นานๆ ครั้ง"
+      >
 
         <Card className="space-y-4">
           <BilingualField
@@ -266,20 +261,13 @@ export default function SponsorsEditor() {
             </div>
           </div>
         </Card>
-      </section>
+      </Collapsible>
 
-      <section>
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-              Partners
-            </h2>
-            <p className="mt-1 font-mono text-[11px] text-ash">
-              รายชื่อพาร์ทเนอร์ที่แสดงในหน้า Sponsors
-            </p>
-          </div>
-          <Button onClick={addSponsor}>+ เพิ่ม partner</Button>
-        </div>
+      <Section
+        title="Partners"
+        hint="รายชื่อพาร์ทเนอร์ที่แสดงในหน้า Sponsors"
+        action={<Button onClick={addSponsor}>+ เพิ่ม partner</Button>}
+      >
 
         <div className="grid gap-4 md:grid-cols-2">
           {sponsors.map((sponsor, i) => (
@@ -313,20 +301,13 @@ export default function SponsorsEditor() {
             </Card>
           ))}
         </div>
-      </section>
+      </Section>
 
-      <section>
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-              Sponsorship Tiers
-            </h2>
-            <p className="mt-1 font-mono text-[11px] text-ash">
-              แพ็กเกจสปอนเซอร์และสิทธิประโยชน์ที่ใช้ต่อรองราคา
-            </p>
-          </div>
-          <Button onClick={addTier}>+ เพิ่ม tier</Button>
-        </div>
+      <Section
+        title="Sponsorship Tiers"
+        hint="แพ็กเกจสปอนเซอร์และสิทธิประโยชน์ที่ใช้ต่อรองราคา"
+        action={<Button onClick={addTier}>+ เพิ่ม tier</Button>}
+      >
 
         <div className="space-y-4">
           {tiers.map((tier, i) => (
@@ -408,7 +389,7 @@ export default function SponsorsEditor() {
             </Card>
           ))}
         </div>
-      </section>
+      </Section>
     </div>
   );
 }

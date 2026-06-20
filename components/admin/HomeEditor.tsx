@@ -5,6 +5,8 @@ import { useData } from "@/components/admin/useData";
 import {
   Button,
   Card,
+  Collapsible,
+  Section,
   TextField,
   TextArea,
   SelectField,
@@ -305,16 +307,10 @@ export default function HomeEditor() {
         </div>
       </div>
 
-      <section>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-            Team Snapshot (หน้า Home)
-          </h2>
-          <p className="mt-1 font-mono text-[11px] text-ash">
-            แก้ข้อความ ตัวเลข การ์ดจุดขาย และปุ่ม CTA ของ section ที่ใช้คุยกับสปอนเซอร์
-          </p>
-        </div>
-
+      <Section
+        title="Team Snapshot (หน้า Home)"
+        hint="ตัวเลข การ์ดจุดขาย และปุ่มของ section บนหน้าแรก"
+      >
         <Card className="space-y-5">
           <div className="grid gap-3 md:grid-cols-2">
             <BilingualField
@@ -434,18 +430,12 @@ export default function HomeEditor() {
             </div>
           </div>
         </Card>
-      </section>
+      </Section>
 
-      <section>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-            นัดต่อไป (หน้า Home)
-          </h2>
-          <p className="mt-1 font-mono text-[11px] text-ash">
-            แก้ไขการ์ดการแข่งขันที่โชว์เด่นอยู่หน้าแรก
-          </p>
-        </div>
-
+      <Section
+        title="นัดต่อไป (หน้า Home)"
+        hint="การ์ดการแข่งขันที่โชว์เด่นอยู่หน้าแรก"
+      >
         <Card>
           {/* live preview line */}
           <div className="mb-4 flex items-center gap-3 border-b border-edge pb-4">
@@ -523,19 +513,13 @@ export default function HomeEditor() {
             </p>
           )}
         </Card>
-      </section>
+      </Section>
 
-      {/* Footer / contact links */}
-      <section>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-            ลิงก์ติดต่อ & Footer
-          </h2>
-          <p className="mt-1 font-mono text-[11px] text-ash">
-            ไอคอนท้ายเว็บ (Footer) — เว้นว่างช่องไหน ไอคอนนั้นจะถูกซ่อนอัตโนมัติ
-          </p>
-        </div>
-
+      {/* Footer / contact links — rarely edited, collapsed */}
+      <Collapsible
+        title="ลิงก์ติดต่อ & Footer"
+        hint="ไอคอนท้ายเว็บ — เว้นว่างช่องไหน ไอคอนนั้นจะถูกซ่อน"
+      >
         <Card>
           <div className="space-y-3">
             {CONTACT_FIELDS.map(({ key, label, Icon, placeholder }) => (
@@ -559,18 +543,13 @@ export default function HomeEditor() {
             Email ใส่เป็นที่อยู่อีเมลธรรมดา (เช่น contact@niightmare.gg) — ระบบจะทำลิงก์ mailto ให้เอง
           </p>
         </Card>
-      </section>
+      </Collapsible>
 
-      <section>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-            Contact Page Copy
-          </h2>
-          <p className="mt-1 font-mono text-[11px] text-ash">
-            ข้อความในหน้า /contact ทั้งหมด แก้ตรงนี้ได้โดยไม่ต้อง deploy
-          </p>
-        </div>
-
+      {/* Contact page copy + form labels — rarely edited, collapsed */}
+      <Collapsible
+        title="ข้อความหน้า Contact & ฟอร์ม"
+        hint="ข้อความทั้งหมดในหน้า /contact และป้ายกำกับฟอร์ม"
+      >
         <Card>
           <div className="grid gap-3">
             <BilingualField
@@ -714,7 +693,7 @@ export default function HomeEditor() {
             </div>
           </Card>
         </div>
-      </section>
+      </Collapsible>
     </div>
   );
 }
