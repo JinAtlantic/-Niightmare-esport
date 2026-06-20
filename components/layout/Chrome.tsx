@@ -4,6 +4,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import LiveBanner from "@/components/layout/LiveBanner";
 import Preloader from "@/components/ui/Preloader";
 
 /**
@@ -22,7 +23,10 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
     <>
       <Preloader />
       <Navbar />
-      <main className="min-h-screen pt-16">{children}</main>
+      <main className="min-h-screen pt-16">
+        <LiveBanner />
+        {children}
+      </main>
       <Footer />
     </>
   );
