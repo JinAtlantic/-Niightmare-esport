@@ -49,7 +49,7 @@ export function organizationSchema() {
     alternateName: "NIIGHTMARE",
     url: SITE_URL,
     logo: abs("/logo.png"),
-    image: abs("/repper.webp"),
+    image: abs("/opengraph-image.png"),
     email: site.contact.email,
     description:
       "Official esports organization from Lao PDR competing in Mobile Legends: Bang Bang (MLBB) and eFootball.",

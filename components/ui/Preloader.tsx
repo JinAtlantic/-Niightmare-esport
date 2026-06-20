@@ -14,7 +14,10 @@ export default function Preloader() {
 
   useEffect(() => {
     // Unmount once the CSS fade-out (see .preloader-overlay) has finished.
-    const hideTimer = window.setTimeout(() => setVisible(false), 1900);
+    // Kept short so the intro is a quick brand flash, not a wait — the page
+    // behind it is already painted, so the overlay is the only thing delaying
+    // the first interaction.
+    const hideTimer = window.setTimeout(() => setVisible(false), 1000);
     return () => window.clearTimeout(hideTimer);
   }, []);
 

@@ -78,11 +78,11 @@ html.lang-lo .keep-latin {
    timer when JS runs; this is the no-JS safety net.
 ------------------------------------------------------------------ */
 .preloader-overlay {
-  animation: preloaderOut 1.8s ease forwards;
+  animation: preloaderOut 0.9s ease forwards;
 }
 @keyframes preloaderOut {
   0%,
-  65% {
+  35% {
     opacity: 1;
   }
   100% {
@@ -94,7 +94,7 @@ html.lang-lo .keep-latin {
 @media (prefers-reduced-motion: reduce) {
   /* Don't trap reduced-motion users behind a non-animating overlay. */
   .preloader-overlay {
-    animation-duration: 0.6s;
+    animation-duration: 0.35s;
   }
 }
 
