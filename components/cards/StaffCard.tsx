@@ -49,10 +49,17 @@ export default function StaffCard({ member }: { member: StaffMember }) {
               className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
             />
           ) : (
-            <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-amethyst-deep/40 via-crypt to-void transition-transform duration-500 ease-out group-hover:scale-110">
-              <span className="keep-latin select-none font-display text-7xl font-bold tracking-tight text-spectre/20">
-                {monogram}
-              </span>
+            <div className="absolute inset-0 overflow-hidden bg-gradient-to-br from-amethyst-deep/40 via-crypt to-void transition-transform duration-500 ease-out group-hover:scale-110">
+              {/* layered motif so a photoless card still has depth: a violet
+                  glow behind the monogram, a bladed streak, and a top hairline */}
+              <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(168,85,247,0.2),transparent_62%)]" />
+              <div aria-hidden className="absolute left-1/2 top-1/2 h-[2px] w-[150%] -translate-x-1/2 -translate-y-1/2 -rotate-[18deg] bg-gradient-to-r from-transparent via-amethyst/25 to-transparent" />
+              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/40 to-transparent" />
+              <div className="absolute inset-0 grid place-items-center">
+                <span className="keep-latin select-none font-display text-7xl font-bold tracking-tight text-spectre/25 transition-colors duration-500 group-hover:text-spectre/40">
+                  {monogram}
+                </span>
+              </div>
             </div>
           )}
 

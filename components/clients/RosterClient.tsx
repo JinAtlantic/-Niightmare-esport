@@ -58,11 +58,12 @@ function mergePageCopy(page?: Partial<RosterPageCopy>): RosterPageCopy {
  */
 function TierRow({ label, members }: { label: string; members: StaffMember[] }) {
   if (members.length === 0) return null;
-  // Match the player grid cell exactly (2 / 3 / 4 cols, gap-4 → sm:gap-5) so
-  // staff cards are the same size as player cards, while flex-wrap + center
-  // keeps partial rows balanced instead of left-aligned like a raw grid.
+  // Staff tiers are often a single card, so a quarter-width grid cell left a
+  // lone portrait stranded in a wide empty band. Pin a fixed, comfortable card
+  // size from sm up (two-up on phones) so flex-wrap + center reads as an
+  // intentional cluster: one card = a focused portrait, three = a centred trio.
   const cell =
-    "w-[calc(50%-0.5rem)] sm:w-[calc(50%-0.625rem)] md:w-[calc(33.333%-0.834rem)] lg:w-[calc(25%-0.9375rem)]";
+    "w-[calc(50%-0.5rem)] sm:w-[220px] md:w-[232px] lg:w-[244px]";
   return (
     <div className="mt-12 first:mt-10">
       <div className="mb-6 flex items-center justify-center gap-3">
@@ -125,8 +126,10 @@ export default function RosterClient() {
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
         <div className="mb-16 border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
           <div className="grid gap-5 lg:grid-cols-[0.9fr_1.4fr] lg:items-stretch">
-            <div className="flex min-h-[180px] flex-col justify-between border border-edge bg-void/45 p-5">
-              <div>
+            <div className="relative flex min-h-[180px] flex-col justify-between overflow-hidden border border-edge bg-void/45 p-5">
+              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
+              <div aria-hidden className="absolute -right-10 -top-10 h-28 w-28 rotate-45 border border-amethyst/15 bg-amethyst/5" />
+              <div className="relative">
                 <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
                   {pick(page.overviewLabel)}
                 </p>
@@ -136,7 +139,7 @@ export default function RosterClient() {
               </div>
               <div
                 aria-hidden
-                className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
+                className="relative mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
               />
             </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
