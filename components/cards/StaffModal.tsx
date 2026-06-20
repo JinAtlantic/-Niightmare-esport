@@ -80,11 +80,14 @@ export default function StaffModal({
         exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 8 }}
         transition={reduce ? { duration: 0.15 } : { type: "spring", stiffness: 260, damping: 24, mass: 0.7 }}
       >
-        <div className="modal-scroll clip-esports relative flex max-h-[85vh] flex-col overflow-y-auto overscroll-contain border border-amethyst/45 bg-crypt shadow-[0_0_60px_rgba(168,85,247,0.35)] md:max-h-[80vh] md:flex-row md:overflow-hidden">
+        <div className="modal-scroll clip-esports relative flex max-h-[85vh] flex-col overflow-y-auto overscroll-contain border border-amethyst/45 bg-crypt shadow-[0_0_60px_rgba(168,85,247,0.35)] md:max-h-[80vh] md:min-h-[440px] md:flex-row md:overflow-hidden">
           <span
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
           />
+          {/* HUD corner ticks — broadcast frame (square corners left by clip-esports) */}
+          <span aria-hidden className="pointer-events-none absolute right-0 top-0 z-20 h-4 w-4 border-r-2 border-t-2 border-amethyst/55" />
+          <span aria-hidden className="pointer-events-none absolute bottom-0 left-0 z-20 h-4 w-4 border-b-2 border-l-2 border-amethyst/40" />
 
           {/* LEFT — portrait (pinned on desktop) */}
           <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden border-b border-edge bg-gradient-to-br from-amethyst-deep/30 via-crypt to-void md:aspect-auto md:w-[42%] md:border-b-0 md:border-r">
@@ -97,12 +100,18 @@ export default function StaffModal({
                 className="object-cover object-top"
               />
             ) : (
-              <div className="absolute inset-0 grid place-items-center">
-                <span className="keep-latin select-none font-display text-8xl font-bold text-spectre/20">
-                  {monogram}
-                </span>
+              <div className="absolute inset-0 overflow-hidden">
+                <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(168,85,247,0.22),transparent_62%)]" />
+                <div aria-hidden className="absolute left-1/2 top-1/2 h-[2px] w-[150%] -translate-x-1/2 -translate-y-1/2 -rotate-[18deg] bg-gradient-to-r from-transparent via-amethyst/25 to-transparent" />
+                <div className="absolute inset-0 grid place-items-center">
+                  <span className="keep-latin select-none font-display text-8xl font-bold text-spectre/25">
+                    {monogram}
+                  </span>
+                </div>
               </div>
             )}
+            {/* base gradient grounds the portrait into the panel */}
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-24 bg-gradient-to-t from-crypt via-crypt/25 to-transparent" />
           </div>
 
           {/* RIGHT — scrollable content (desktop) */}
@@ -141,8 +150,8 @@ export default function StaffModal({
               <p className="text-sm leading-relaxed text-ash">{bio}</p>
             </div>
 
-            {/* Contact — business email + socials */}
-            <div className="mt-7 border-t border-edge pt-6">
+            {/* Contact — business email + socials (pinned to bottom on desktop) */}
+            <div className="mt-7 border-t border-edge pt-6 md:mt-auto">
               <div className="flex flex-wrap items-center gap-2">
                 <CopyEmailButton email={email} />
                 <SocialLinks socials={member.socials} size={18} />

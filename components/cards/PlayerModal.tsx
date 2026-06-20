@@ -8,8 +8,6 @@ import {
   X,
   Smartphone,
   Headphones,
-  Swords,
-  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
@@ -63,7 +61,6 @@ export default function PlayerModal({
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const tba = t("roster.tba");
-  const winRate = player.winRate || "—";
 
   // ESC to close + lock body scroll + focus the close button.
   useEffect(() => {
@@ -108,11 +105,15 @@ export default function PlayerModal({
       >
         {/* panel: mobile = whole panel scrolls; desktop = fixed height, only the
             right column scrolls (left portrait is pinned). */}
-        <div className="modal-scroll clip-esports relative flex max-h-[85vh] flex-col overflow-y-auto overscroll-contain border border-amethyst/45 bg-crypt shadow-[0_0_60px_rgba(168,85,247,0.35)] md:max-h-[80vh] md:flex-row md:overflow-hidden">
+        <div className="modal-scroll clip-esports relative flex max-h-[85vh] flex-col overflow-y-auto overscroll-contain border border-amethyst/45 bg-crypt shadow-[0_0_60px_rgba(168,85,247,0.35)] md:max-h-[80vh] md:min-h-[440px] md:flex-row md:overflow-hidden">
           <span
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
           />
+          {/* HUD corner ticks — broadcast frame (on the square corners that
+              clip-esports leaves intact: top-right + bottom-left) */}
+          <span aria-hidden className="pointer-events-none absolute right-0 top-0 z-20 h-4 w-4 border-r-2 border-t-2 border-amethyst/55" />
+          <span aria-hidden className="pointer-events-none absolute bottom-0 left-0 z-20 h-4 w-4 border-b-2 border-l-2 border-amethyst/40" />
 
           {/* LEFT — portrait (pinned on desktop, fills the column height) */}
           <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden border-b border-edge bg-gradient-to-br from-amethyst-deep/30 via-crypt to-void md:aspect-auto md:w-[42%] md:border-b-0 md:border-r">
@@ -130,12 +131,18 @@ export default function PlayerModal({
                 className="object-cover"
               />
             ) : (
-              <div className="absolute inset-0 grid place-items-center">
-                <span className="keep-latin select-none font-display text-8xl font-bold text-spectre/20">
-                  {monogram}
-                </span>
+              <div className="absolute inset-0 overflow-hidden">
+                <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(168,85,247,0.22),transparent_62%)]" />
+                <div aria-hidden className="absolute left-1/2 top-1/2 h-[2px] w-[150%] -translate-x-1/2 -translate-y-1/2 -rotate-[18deg] bg-gradient-to-r from-transparent via-amethyst/25 to-transparent" />
+                <div className="absolute inset-0 grid place-items-center">
+                  <span className="keep-latin select-none font-display text-8xl font-bold text-spectre/25">
+                    {monogram}
+                  </span>
+                </div>
               </div>
             )}
+            {/* base gradient grounds the portrait into the panel */}
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-24 bg-gradient-to-t from-crypt via-crypt/25 to-transparent" />
             <span
               className={`absolute left-3 top-3 z-10 border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] backdrop-blur-sm ${
                 player.sub
@@ -169,45 +176,8 @@ export default function PlayerModal({
               <p className="mt-2 font-mono text-sm text-spectre">{player.name}</p>
             )}
 
-            {/* SIGNATURE HEROES + WIN RATE */}
-            <div className="mt-6">
-              <div className="mb-3 flex items-end justify-between gap-3">
-                <p className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-spectre/80">
-                  <Swords size={14} strokeWidth={2} className="text-amethyst" />
-                  {t("roster.signature_heroes")}
-                </p>
-                <div className="text-right leading-none">
-                  <p className="flex items-center justify-end gap-1 font-mono text-[9px] uppercase tracking-[0.2em] text-ash-dim">
-                    <Trophy size={11} className="text-amethyst" />
-                    {t("roster.win_rate")}
-                  </p>
-                  <p className="mt-1 font-display text-xl font-bold tabular-nums text-glow">
-                    {winRate}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {[0, 1, 2].map((i) => {
-                  const name = player.heroes?.[i];
-                  return (
-                    <div
-                      key={i}
-                      className="flex flex-col items-center justify-center gap-2 rounded-xl border border-amethyst/40 bg-void/40 p-3 transition-colors duration-300 hover:border-amethyst/70"
-                    >
-                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-amethyst/10 text-amethyst">
-                        <Swords size={18} strokeWidth={1.75} />
-                      </span>
-                      <span className="keep-latin w-full truncate text-center font-mono text-[10px] uppercase tracking-wide text-soul">
-                        {name || "—"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* GEAR */}
-            <div className="mt-6">
+            <div className="mt-7">
               <SectionHead Icon={Smartphone} label={t("roster.gear_label")} />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <GearRow Icon={Smartphone} label={t("roster.gear_device")} value={player.gear?.device || tba} />
@@ -215,8 +185,8 @@ export default function PlayerModal({
               </div>
             </div>
 
-            {/* SOCIAL — bottom (business email copy button shown when set) */}
-            <div className="mt-7 border-t border-edge pt-6">
+            {/* SOCIAL — pinned to the bottom on desktop so the column fills evenly */}
+            <div className="mt-7 border-t border-edge pt-6 md:mt-auto">
               <div className="flex flex-wrap items-center gap-2">
                 {player.email && <CopyEmailButton email={player.email} />}
                 <SocialLinks socials={player.socials} size={18} />
