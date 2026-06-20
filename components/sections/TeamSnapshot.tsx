@@ -67,22 +67,26 @@ function StatTile({
   detail: string;
 }) {
   return (
-    <div className="group relative min-h-[154px] overflow-hidden border border-edge bg-gradient-to-br from-crypt/80 via-crypt/45 to-void/70 px-4 py-4 transition-colors duration-300 hover:border-amethyst/65 sm:min-h-[176px] sm:px-5 sm:py-6">
+    <div className="group relative flex min-h-[160px] flex-col overflow-hidden border border-edge bg-gradient-to-br from-crypt/80 via-crypt/45 to-void/70 px-4 py-5 transition-all duration-300 hover:border-amethyst/65 hover:shadow-[0_0_30px_-6px_rgba(168,85,247,0.45)] sm:min-h-[192px] sm:px-5 sm:py-6">
       <span
         aria-hidden
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-70"
       />
       <span
         aria-hidden
-        className="absolute -right-10 -top-10 h-24 w-24 border border-amethyst/20 bg-amethyst/5 blur-sm transition-opacity duration-300 group-hover:opacity-80"
+        className="absolute -right-10 -top-10 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5 transition-opacity duration-300 group-hover:opacity-80"
       />
-      <p className="relative font-display text-4xl font-bold uppercase leading-none text-soul [text-shadow:0_0_24px_rgba(168,85,247,0.35)] md:text-5xl">
+      <p className="relative font-display text-5xl font-extrabold uppercase leading-none text-soul [text-shadow:0_0_28px_rgba(168,85,247,0.42)] md:text-6xl">
         {value}
       </p>
-      <p className="relative mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-amethyst sm:text-[11px] sm:tracking-[0.22em]">
+      <p className="relative mt-3 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-glow sm:text-xs sm:tracking-[0.24em]">
         {label}
       </p>
-      <p className="relative mt-2 text-xs leading-relaxed text-ash sm:text-sm">{detail}</p>
+      <p className="relative mt-2 text-xs leading-relaxed text-spectre/75 sm:text-sm">{detail}</p>
+      <span
+        aria-hidden
+        className="relative mt-auto block h-[3px] w-10 -skew-x-[24deg] bg-gradient-to-r from-amethyst to-glow pt-0 transition-all duration-300 group-hover:w-16 group-hover:shadow-[0_0_14px_rgba(168,85,247,0.7)]"
+      />
     </div>
   );
 }

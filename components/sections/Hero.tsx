@@ -1,10 +1,16 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { useContent } from "@/components/context/ContentContext";
+import { ArrowRightIcon, DiscordIcon } from "@/components/ui/Icons";
 
 export default function Hero() {
   const { t } = useLanguage();
+  const { site } = useContent();
+  const communityUrl =
+    (site as { communityUrl?: string }).communityUrl || "/contact";
 
   return (
     <section className="hero-section hero-section--reaper flex min-h-[calc(100svh-1.5rem)] flex-col justify-end px-5 pb-10 pt-28 text-left md:min-h-[calc(100svh-2rem)] md:px-14 md:pb-14">
@@ -54,6 +60,30 @@ export default function Hero() {
           style={{ animationDelay: "0.42s" }}
           aria-hidden
         />
+
+        {/* Primary path for new visitors: convert the first impression into a
+            follow (community) or a click into the team (roster). */}
+        <div
+          className="fx-rise mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+          style={{ animationDelay: "0.52s" }}
+        >
+          <a
+            href={communityUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center justify-center gap-2.5 rounded-md border border-amethyst/70 bg-gradient-to-b from-amethyst to-amethyst-deep px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.18em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.45)] transition-all duration-300 hover:from-glow hover:to-amethyst hover:shadow-[0_0_48px_rgba(168,85,247,0.75)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
+          >
+            <DiscordIcon size={18} className="transition-transform duration-300 group-hover:scale-110" />
+            {t("nav.join_community")}
+          </a>
+          <Link
+            href="/roster"
+            className="group inline-flex items-center justify-center gap-2 rounded-md border border-edge-bright bg-void/40 px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.18em] text-spectre backdrop-blur-sm transition-all duration-300 hover:border-amethyst/60 hover:text-soul focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
+          >
+            {t("hero.btn_roster")}
+            <ArrowRightIcon size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </div>
       </div>
     </section>
   );
