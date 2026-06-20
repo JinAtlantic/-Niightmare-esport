@@ -5,7 +5,9 @@ import { useData } from "@/components/admin/useData";
 import {
   Button,
   Card,
+  Collapsible,
   Label,
+  Section,
   TextField,
   TextArea,
   BilingualField,
@@ -171,17 +173,10 @@ export default function NewsEditor() {
         </div>
       </div>
 
-      <section>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-            Newsroom Page Copy
-          </h2>
-          <p className="mt-1 font-mono text-[11px] text-ash">
-            Header, labels, stats, empty state, and CTA copy for /news.
-          </p>
-        </div>
-
-        <Card>
+      <Collapsible
+        title="ข้อความ & ป้ายกำกับหน้า News"
+        hint="หัวข้อ ป้าย สถิติ และ CTA ของหน้า /news — แก้นานๆ ครั้ง"
+      >
           <div className="grid gap-3">
             <BilingualField
               label="Hero kicker"
@@ -283,22 +278,13 @@ export default function NewsEditor() {
               />
             </div>
           </div>
-        </Card>
-      </section>
+      </Collapsible>
 
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">
-              ข่าวสารล่าสุด (Latest News)
-            </h2>
-            <p className="mt-1 font-mono text-[11px] text-ash">
-              4 ข่าวบนสุดจะโชว์ที่หน้าแรก · ลากลำดับด้วยปุ่ม ↑ ↓
-            </p>
-          </div>
-          <Button onClick={addArticle}>+ เพิ่มข่าว</Button>
-        </div>
-
+      <Section
+        title="ข่าวสาร"
+        hint="4 ข่าวบนสุดจะโชว์ที่หน้าแรก · เรียงลำดับด้วยปุ่ม ↑ ↓"
+        action={<Button onClick={addArticle}>+ เพิ่มข่าว</Button>}
+      >
         <div className="space-y-4">
           {articles.map((a, i) => (
             <Card key={a.id}>
@@ -364,7 +350,7 @@ export default function NewsEditor() {
             </Card>
           ))}
         </div>
-      </section>
+      </Section>
     </div>
   );
 }

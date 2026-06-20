@@ -290,3 +290,73 @@ export function ImageField({
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <div className={`border border-edge bg-crypt p-4 md:p-5 ${className}`}>{children}</div>;
 }
+
+/**
+ * A titled block — the building unit that keeps each editor in clearly separated
+ * sections. Optional `hint` is one short line; `action` sits on the right (e.g.
+ * an "+ add" button).
+ */
+export function Section({
+  title,
+  hint,
+  action,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="mb-3 flex items-end justify-between gap-3 border-b border-edge pb-2">
+        <div className="min-w-0">
+          <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">{title}</h2>
+          {hint && <p className="mt-0.5 font-mono text-[11px] leading-relaxed text-ash">{hint}</p>}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/**
+ * Collapsible block for settings that are edited rarely (page copy, labels) so
+ * they don't bury the day-to-day content. Collapsed by default.
+ */
+export function Collapsible({
+  title,
+  hint,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="border border-edge bg-crypt/40">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-crypt"
+      >
+        <span className="min-w-0">
+          <span className="block font-display text-sm font-bold uppercase tracking-wide text-soul">{title}</span>
+          {hint && <span className="mt-0.5 block font-mono text-[11px] text-ash">{hint}</span>}
+        </span>
+        <span
+          aria-hidden
+          className={`shrink-0 font-mono text-lg leading-none text-amethyst transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        >
+          ⌄
+        </span>
+      </button>
+      {open && <div className="border-t border-edge p-4 md:p-5">{children}</div>}
+    </section>
+  );
+}
