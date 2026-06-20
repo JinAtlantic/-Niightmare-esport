@@ -33,6 +33,8 @@
     "latest_news": { "en": "LATEST NEWS", "lo": "ຂ່າວຫຼ້າສຸດ" },
     "news_kicker": { "en": "TEAM DISPATCHES", "lo": "ຂ່າວສານຈາກທີມ" },
     "view_all_news": { "en": "ALL NEWS", "lo": "ຂ່າວທັງໝົດ" },
+    "highlights": { "en": "HIGHLIGHTS", "lo": "ໄຮໄລທ໌" },
+    "highlights_kicker": { "en": "WATCH & REPLAY", "lo": "ເບິ່ງ & ດູຍ້ອນຫຼັງ" },
     "our_roster": { "en": "OUR ROSTER", "lo": "ທີມງານຂອງເຮົາ" },
     "match_results": { "en": "MATCH RESULTS", "lo": "ຜົນການແຂ່ງ" },
     "our_partners": { "en": "OUR PARTNERS", "lo": "ຄູ່ຮ່ວມງານ" },

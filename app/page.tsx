@@ -4,6 +4,7 @@ import UpcomingMatch from "@/components/sections/UpcomingMatch";
 import TeamSnapshot from "@/components/sections/TeamSnapshot";
 import TrophyCabinet from "@/components/sections/TrophyCabinet";
 import HomeNews from "@/components/sections/HomeNews";
+import VideoSection from "@/components/sections/VideoSection";
 // PartnerStrip is built and ready, but hidden until real partners exist —
 // showing placeholder sponsors as social proof would mislead visitors.
 // To re-enable: import it and drop <PartnerStrip /> back after <UpcomingMatch />.
@@ -20,6 +21,7 @@ export default function HomePage() {
       <TeamSnapshot />
       <TrophyCabinet />
       <HomeNews />
+      <VideoSection />
     </>
   );
 }
