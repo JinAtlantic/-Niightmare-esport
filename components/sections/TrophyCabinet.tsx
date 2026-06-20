@@ -28,11 +28,9 @@ const FALLBACK_TOURNAMENT_LABELS: TournamentLabels = {
 function TrophyCard({
   tournament,
   labels,
-  featured = false,
 }: {
   tournament: Tournament;
   labels: TournamentLabels;
-  featured?: boolean;
 }) {
   const { pick } = useLanguage();
   const champ = isChampion(tournament);
@@ -40,12 +38,10 @@ function TrophyCard({
 
   return (
     <div
-      className={`clip-esports group relative flex w-full flex-col overflow-hidden border bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void px-5 py-6 transition-all duration-300 sm:px-7 sm:py-8 ${
-        featured ? "md:min-h-[330px]" : ""
-      } ${
+      className={`clip-esports group relative overflow-hidden border bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void px-3 py-3 transition-all duration-300 sm:px-5 sm:py-4 ${
         champ
-          ? "border-glow/45 shadow-[0_0_42px_rgba(168,85,247,0.18)] hover:border-glow/80 hover:shadow-[0_0_46px_rgba(199,125,255,0.28)]"
-          : "border-edge hover:border-amethyst/70 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+          ? "border-glow/45 shadow-[0_0_34px_rgba(168,85,247,0.16)] hover:border-glow/80 hover:shadow-[0_0_38px_rgba(199,125,255,0.24)]"
+          : "border-edge hover:border-amethyst/70 hover:shadow-[0_0_26px_rgba(168,85,247,0.24)]"
       }`}
     >
       <span
@@ -58,63 +54,68 @@ function TrophyCard({
       />
       <span
         aria-hidden
-        className="absolute -right-16 -top-20 h-48 w-48 bg-amethyst/10 blur-3xl transition-opacity duration-300 group-hover:opacity-90"
+        className="absolute -right-16 -top-20 h-40 w-40 bg-amethyst/10 blur-3xl transition-opacity duration-300 group-hover:opacity-90"
       />
       <span
         aria-hidden
         className="absolute bottom-0 left-0 h-px w-1/2 bg-gradient-to-r from-amethyst/70 to-transparent"
       />
 
-      <div className={`relative z-[1] ${featured ? "md:grid md:grid-cols-[auto_1fr] md:gap-8" : ""}`}>
-        <div className={featured ? "md:flex md:items-center" : ""}>
-          <div className="relative mx-auto mb-5 grid h-24 w-24 place-items-center md:mx-0">
-            <span
-              aria-hidden
-              className="absolute inset-0 rounded-full bg-amethyst/20 blur-xl"
-            />
-            <span
-              aria-hidden
-              className="absolute inset-2 rounded-full border border-glow/45"
-            />
-            <span className="relative grid h-20 w-20 place-items-center rounded-full border border-glow/65 bg-void text-glow shadow-[0_0_30px_rgba(199,125,255,0.22)] transition-transform duration-300 group-hover:scale-105">
-              <TrophyIcon size={34} />
-            </span>
-          </div>
+      <div className="relative z-[1] grid grid-cols-[auto_1fr] items-center gap-3 sm:gap-4">
+        <div className="relative grid h-[52px] w-[52px] place-items-center sm:h-[72px] sm:w-[72px]">
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-full bg-amethyst/18 blur-xl"
+          />
+          <span
+            aria-hidden
+            className="absolute inset-2 rounded-full border border-glow/35"
+          />
+          <span className="relative grid h-11 w-11 place-items-center rounded-full border border-glow/60 bg-void text-glow shadow-[0_0_24px_rgba(199,125,255,0.2)] transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14">
+            <TrophyIcon size={24} />
+          </span>
         </div>
 
-        <div className={featured ? "text-center md:text-left" : "text-center"}>
-          <p className="font-display text-3xl font-bold uppercase leading-none tracking-[0.04em] text-soul [text-shadow:0_0_26px_rgba(199,125,255,0.38)] md:text-[2.15rem]">
-            {pick(tournament.placement)}
-          </p>
+        <div className="min-w-0">
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+            <div className="min-w-0">
+              <p className="font-display text-lg font-bold uppercase leading-none tracking-[0.04em] text-soul [text-shadow:0_0_22px_rgba(199,125,255,0.32)] sm:text-2xl">
+                {pick(tournament.placement)}
+              </p>
+              <p className="mt-1.5 font-display text-xs font-semibold uppercase leading-snug tracking-[0.04em] text-soul sm:text-base">
+                {pick(tournament.name)}
+              </p>
+            </div>
+            <div className="hidden w-fit items-center gap-2 border border-edge bg-void/45 px-3 py-2 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre sm:inline-flex">
+              <GameIcon size={15} className="text-amethyst" />
+              {tournament.season}
+            </div>
+          </div>
 
-          <p className="mt-3 font-display text-base font-semibold uppercase leading-snug tracking-[0.04em] text-soul md:text-lg">
-            {pick(tournament.name)}
-          </p>
-
-          <div className="mt-6 grid gap-2 border-t border-edge pt-4 sm:grid-cols-3">
-            <div className="border border-edge bg-void/45 px-3 py-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+          <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-edge pt-3 sm:gap-2">
+            <div className="min-w-0 border border-edge bg-void/45 px-2 py-2 sm:px-3">
+              <p className="font-mono text-[8px] uppercase tracking-[0.06em] text-ash-dim sm:text-[10px] sm:tracking-[0.16em]">
                 {pick(labels.placement)}
               </p>
-              <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-glow">
+              <p className="mt-1 font-display text-[11px] font-bold uppercase tracking-[0.02em] text-glow sm:text-sm sm:tracking-[0.08em]">
                 {pick(tournament.placement)}
               </p>
             </div>
-            <div className="border border-edge bg-void/45 px-3 py-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+            <div className="min-w-0 border border-edge bg-void/45 px-2 py-2 sm:px-3">
+              <p className="font-mono text-[8px] uppercase tracking-[0.06em] text-ash-dim sm:text-[10px] sm:tracking-[0.16em]">
                 {pick(labels.season)}
               </p>
-              <p className="mt-1 inline-flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre">
-                <GameIcon size={15} className="text-amethyst" />
+              <p className="mt-1 inline-flex min-w-0 items-center gap-1.5 font-display text-[11px] font-bold uppercase tracking-[0.02em] text-spectre sm:gap-2 sm:text-sm sm:tracking-[0.08em]">
+                <GameIcon size={13} className="shrink-0 text-amethyst sm:size-[15px]" />
                 {tournament.season}
               </p>
             </div>
             {tournament.prize && tournament.prize.trim() && (
-              <div className="border border-edge bg-void/45 px-3 py-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+              <div className="min-w-0 border border-edge bg-void/45 px-2 py-2 sm:px-3">
+                <p className="font-mono text-[8px] uppercase tracking-[0.06em] text-ash-dim sm:text-[10px] sm:tracking-[0.16em]">
                   {pick(labels.prize)}
                 </p>
-                <p className="keep-latin mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre">
+                <p className="keep-latin mt-1 font-display text-[10px] font-bold uppercase tracking-[0.02em] text-spectre sm:text-sm sm:tracking-[0.08em]">
                   {tournament.prize}
                 </p>
               </div>
@@ -144,7 +145,7 @@ export default function TrophyCabinet() {
   }, [data]);
 
   return (
-    <section className="relative overflow-hidden border-t border-edge bg-gradient-to-b from-void via-crypt/25 to-void px-4 py-20 md:px-6 md:py-24">
+    <section className="relative overflow-hidden border-t border-edge bg-gradient-to-b from-void via-crypt/25 to-void px-4 py-14 md:px-6 md:py-16">
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
       <div
         aria-hidden
@@ -162,16 +163,18 @@ export default function TrophyCabinet() {
         </Reveal>
 
         {tournaments.length > 0 ? (
-          <div className="mx-auto mt-10 grid max-w-[720px] gap-5 md:mt-12">
-            {tournaments.map((tournament, i) => (
-              <Reveal
-                key={tournament.id}
-                delay={i * 80}
-                className="w-full"
-              >
-                <TrophyCard tournament={tournament} labels={labels} featured={i === 0} />
-              </Reveal>
-            ))}
+          <div className="mx-auto mt-7 max-w-4xl border border-edge/90 bg-void/35 p-2.5 shadow-[0_0_42px_rgba(168,85,247,0.12)] md:mt-9 md:p-4">
+            <div className="max-h-[360px] space-y-2.5 overflow-y-auto pr-1 [scrollbar-color:#A855F7_#16101F] [scrollbar-width:thin] sm:max-h-[420px] sm:space-y-3">
+              {tournaments.map((tournament, i) => (
+                <Reveal
+                  key={tournament.id}
+                  delay={Math.min(i * 45, 240)}
+                  className="w-full"
+                >
+                  <TrophyCard tournament={tournament} labels={labels} />
+                </Reveal>
+              ))}
+            </div>
           </div>
         ) : (
           <p className="mx-auto mt-10 max-w-md text-center font-mono text-sm text-ash">
