@@ -41,7 +41,7 @@ function TrophyCard({
   return (
     <div
       className={`clip-esports group relative flex w-full flex-col overflow-hidden border bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void px-5 py-6 transition-all duration-300 sm:px-7 sm:py-8 ${
-        featured ? "max-w-[620px] md:min-h-[330px]" : "max-w-[380px]"
+        featured ? "md:min-h-[330px]" : ""
       } ${
         champ
           ? "border-glow/45 shadow-[0_0_42px_rgba(168,85,247,0.18)] hover:border-glow/80 hover:shadow-[0_0_46px_rgba(199,125,255,0.28)]"
@@ -162,16 +162,14 @@ export default function TrophyCabinet() {
         </Reveal>
 
         {tournaments.length > 0 ? (
-          <div className="mt-10 grid place-items-center gap-5 md:mt-12 lg:grid-cols-3">
+          <div className="mx-auto mt-10 grid max-w-[720px] gap-5 md:mt-12">
             {tournaments.map((tournament, i) => (
               <Reveal
                 key={tournament.id}
                 delay={i * 80}
-                className={i === 0 ? "w-full lg:col-span-3" : "w-full"}
+                className="w-full"
               >
-                <div className="flex justify-center">
-                  <TrophyCard tournament={tournament} labels={labels} featured={i === 0} />
-                </div>
+                <TrophyCard tournament={tournament} labels={labels} featured={i === 0} />
               </Reveal>
             ))}
           </div>
