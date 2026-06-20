@@ -1,12 +1,10 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import Reveal from "@/components/ui/Reveal";
 import SectionLabel from "@/components/ui/SectionLabel";
-import { ArrowRightIcon, EfootballIcon, MlbbIcon, TrophyIcon } from "@/components/ui/Icons";
 import type { Bilingual } from "@/lib/types";
 
 interface SnapshotStat {
@@ -89,41 +87,11 @@ function StatTile({
   );
 }
 
-function Pillar({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="group relative flex gap-4 overflow-hidden border border-edge bg-void/55 p-4 transition-colors duration-300 hover:border-amethyst/55 md:block md:p-5">
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-amethyst/55 to-transparent opacity-60"
-      />
-      <div className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/45 bg-amethyst/10 text-glow shadow-[0_0_18px_rgba(168,85,247,0.22)] md:mb-4">
-        {icon}
-      </div>
-      <div>
-        <h3 className="font-display text-base font-bold uppercase tracking-[0.08em] text-soul md:text-lg">
-          {title}
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-ash">{body}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function TeamSnapshot() {
   const { pick } = useLanguage();
   const { site } = useContent();
   const snapshot = ((site as { homeSnapshot?: HomeSnapshot }).homeSnapshot ?? FALLBACK_SNAPSHOT);
   const stats = snapshot.stats.length ? snapshot.stats : FALLBACK_SNAPSHOT.stats;
-  const pillars = snapshot.pillars.length ? snapshot.pillars : FALLBACK_SNAPSHOT.pillars;
-  const icons = [<MlbbIcon key="mlbb" size={22} />, <TrophyIcon key="trophy" size={22} />, <EfootballIcon key="efb" size={22} />];
 
   return (
     <section className="relative overflow-hidden border-y border-edge bg-gradient-to-b from-void via-crypt/35 to-void">
@@ -161,33 +129,6 @@ export default function TeamSnapshot() {
             </Reveal>
           ))}
         </div>
-
-        <div className="mt-4 grid gap-3 sm:gap-4 lg:mt-6 lg:grid-cols-3">
-          {pillars.slice(0, 3).map((pillar, i) => (
-            <Reveal key={pillar.id} delay={i * 80}>
-              <Pillar icon={icons[i] ?? icons[0]} title={pick(pillar.title)} body={pick(pillar.body)} />
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={220}>
-          <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center">
-            <Link
-              href={snapshot.primaryCta.href}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.24)] transition-colors hover:bg-amethyst/25 sm:px-6 sm:text-sm sm:tracking-[0.16em]"
-            >
-              {pick(snapshot.primaryCta.label)}
-              <ArrowRightIcon size={16} />
-            </Link>
-            <Link
-              href={snapshot.secondaryCta.href}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/40 px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul sm:px-6 sm:text-sm sm:tracking-[0.16em]"
-            >
-              {pick(snapshot.secondaryCta.label)}
-              <ArrowRightIcon size={16} />
-            </Link>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
