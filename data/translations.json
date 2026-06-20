@@ -53,7 +53,12 @@
     "vs": { "en": "VS", "lo": "ປະທະ" },
     "watch_vod": { "en": "WATCH VOD", "lo": "ເບິ່ງ VOD" },
     "loading": { "en": "ENTERING THE VOID", "lo": "ກຳລັງເຂົ້າສູ່ຄວາມມືດ" },
-    "close": { "en": "Close", "lo": "ປິດ" }
+    "close": { "en": "Close", "lo": "ປິດ" },
+    "notfound_kicker": { "en": "404 · LOST IN THE VOID", "lo": "404 · ຫຼົງໃນຄວາມມືດ" },
+    "notfound_title": { "en": "This page vanished into the void", "lo": "ໜ້ານີ້ໄດ້ຫາຍໄປໃນຄວາມມືດ" },
+    "notfound_body": { "en": "The page you are looking for does not exist or has been moved.", "lo": "ໜ້າທີ່ທ່ານຊອກຫາບໍ່ມີ ຫຼື ຖືກຍ້າຍໄປແລ້ວ." },
+    "notfound_home": { "en": "BACK TO HOME", "lo": "ກັບໜ້າຫຼັກ" },
+    "notfound_matches": { "en": "VIEW MATCHES", "lo": "ເບິ່ງການແຂ່ງຂັນ" }
   },
   "roster": {
     "tab_mlbb": { "en": "MOBILE LEGENDS", "lo": "MOBILE LEGENDS" },
