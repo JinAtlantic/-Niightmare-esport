@@ -125,7 +125,7 @@ function CountdownBlock({ cd }: { cd: Countdown }) {
           {v}
         </span>
       </div>
-      <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-ash-dim">{label}</span>
+      <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.24em] text-soul/80">{label}</span>
     </div>
   );
   const sep = (
@@ -301,7 +301,7 @@ export default function UpcomingMatch() {
             </div>
             <div className="flex flex-col items-center gap-2 px-4 py-5 text-center md:py-6">
               <dt className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Round</dt>
-              <dd className="font-display text-lg font-bold uppercase tracking-[0.04em] text-spectre md:text-2xl">
+              <dd className="font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-2xl">
                 {round ? pick(round) : "—"}
               </dd>
             </div>
@@ -318,7 +318,7 @@ export default function UpcomingMatch() {
             <div className="flex flex-col items-center gap-5 border-t border-edge bg-white/[0.015] px-4 py-7 md:gap-6 md:px-6 md:py-9">
               {showCountdown && cd && (
                 <>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.36em] text-ash-dim">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-soul/80">
                     Starts in
                   </span>
                   <CountdownBlock cd={cd} />
