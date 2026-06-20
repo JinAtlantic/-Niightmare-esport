@@ -78,11 +78,10 @@ html.lang-lo .keep-latin {
    timer when JS runs; this is the no-JS safety net.
 ------------------------------------------------------------------ */
 .preloader-overlay {
-  animation: preloaderOut 0.9s ease forwards;
+  animation: preloaderOut 0.55s ease forwards;
 }
 @keyframes preloaderOut {
-  0%,
-  35% {
+  0% {
     opacity: 1;
   }
   100% {
@@ -473,9 +472,11 @@ html.lang-lo .keep-latin {
     0 0 2px rgba(255, 255, 255, 0.55),
     0 10px 42px rgba(0, 0, 0, 0.82),
     0 0 48px rgba(168, 85, 247, 0.62);
-  opacity: 0;
-  animation: fx-rise 0.85s ease 0.22s both,
-    home-wordmark-breath 5.5s ease-in-out 1.2s infinite;
+  /* The wordmark is the home page's LCP text element — it must paint at
+     full opacity immediately. No opacity/translate entrance here, or LCP
+     waits for the animation. Only the ambient breath (glow/scale) runs. */
+  opacity: 1;
+  animation: home-wordmark-breath 5.5s ease-in-out 1.2s infinite;
 }
 .home-hero-wordmark > span {
   display: block;
@@ -600,7 +601,8 @@ html.lang-lo .home-hero-tagline {
 }
 @media (prefers-reduced-motion: reduce) {
   .home-hero-wordmark {
-    animation: fx-rise 0.85s ease 0.22s both;
+    opacity: 1;
+    animation: none;
   }
   .home-hero-main {
     animation: none;
@@ -957,19 +959,23 @@ html.lang-lo .home-hero-tagline {
 
 /* ----------------------------------------------------------------
    Page transition — every route change re-mounts <Template>, which
-   carries .page-enter so the incoming page fades + rises a touch.
-   Kept gentle (10px / 0.45s) so it reads as a settle, not a jump.
+   carries .page-enter so the incoming page rises a touch.
+   Kept gentle (8px / 0.4s) so it reads as a settle, not a jump.
+
+   IMPORTANT (Core Web Vitals): this wraps EVERY page's content, so it
+   must NOT animate opacity from 0 — doing so hides the LCP element
+   (hero image / wordmark) behind the fade and pushes LCP/FCP back on
+   every route. Transform-only keeps the motion while the content paints
+   immediately at full opacity.
 ------------------------------------------------------------------ */
 .page-enter {
-  animation: page-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes page-enter {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
