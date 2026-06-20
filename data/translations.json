@@ -116,7 +116,14 @@
     "vod_soon": { "en": "VOD SOON", "lo": "ໄວໆນີ້" },
     "trophy_cabinet": { "en": "TROPHY CABINET", "lo": "ຕູ້ລາງວັນ" },
     "honours_kicker": { "en": "HONOURS", "lo": "ກຽດຕິຍົດ" },
-    "honours_empty": { "en": "Silverware incoming — the reapers are just getting started.", "lo": "ລາງວັນກຳລັງມາ — ທີມຫາກໍ່ເລີ່ມຕົ້ນ." }
+    "honours_empty": { "en": "Silverware incoming — the reapers are just getting started.", "lo": "ລາງວັນກຳລັງມາ — ທີມຫາກໍ່ເລີ່ມຕົ້ນ." },
+    "honours_filter_type": { "en": "Type", "lo": "ປະເພດ" },
+    "honours_filter_all": { "en": "All awards", "lo": "ລາງວັນທັງໝົດ" },
+    "honours_filter_champions": { "en": "Champions", "lo": "ແຊມປຽນ" },
+    "honours_filter_season": { "en": "Season", "lo": "ລະດູການ" },
+    "honours_filter_all_seasons": { "en": "All seasons", "lo": "ທຸກລະດູການ" },
+    "honours_count": { "en": "Awards", "lo": "ລາງວັນ" },
+    "honours_no_filter_results": { "en": "No awards match this filter.", "lo": "ບໍ່ມີລາງວັນທີ່ກົງກັບຕົວກອງນີ້." }
   },
   "sponsors": {
     "hero_title": { "en": "PARTNER WITH NIIGHTMARE", "lo": "ຮ່ວມເປັນຄູ່ຮ່ວມງານກັບ NIIGHTMARE" },

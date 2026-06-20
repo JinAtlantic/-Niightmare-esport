@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -134,6 +134,8 @@ export default function TrophyCabinet() {
     tournaments: Tournament[];
   };
   const labels = data.page?.tournamentLabels ?? FALLBACK_TOURNAMENT_LABELS;
+  const [placementFilter, setPlacementFilter] = useState<"all" | "champion">("all");
+  const [seasonFilter, setSeasonFilter] = useState("all");
 
   // Champions first, then most recent season — the cabinet reads top-down.
   const tournaments = useMemo(() => {
@@ -143,6 +145,20 @@ export default function TrophyCabinet() {
       return (b.season ?? "").localeCompare(a.season ?? "");
     });
   }, [data]);
+
+  const seasonOptions = useMemo(() => {
+    return Array.from(
+      new Set(tournaments.map((tournament) => tournament.season).filter(Boolean))
+    ).sort((a, b) => b.localeCompare(a));
+  }, [tournaments]);
+
+  const filteredTournaments = useMemo(() => {
+    return tournaments.filter((tournament) => {
+      const placementMatches = placementFilter === "all" || isChampion(tournament);
+      const seasonMatches = seasonFilter === "all" || tournament.season === seasonFilter;
+      return placementMatches && seasonMatches;
+    });
+  }, [placementFilter, seasonFilter, tournaments]);
 
   return (
     <section className="relative overflow-hidden border-t border-edge bg-gradient-to-b from-void via-crypt/25 to-void px-4 py-14 md:px-6 md:py-16">
@@ -164,16 +180,67 @@ export default function TrophyCabinet() {
 
         {tournaments.length > 0 ? (
           <div className="mx-auto mt-7 max-w-4xl border border-edge/90 bg-void/35 p-2.5 shadow-[0_0_42px_rgba(168,85,247,0.12)] md:mt-9 md:p-4">
-            <div className="max-h-[360px] space-y-2.5 overflow-y-auto pr-1 [scrollbar-color:#A855F7_#16101F] [scrollbar-width:thin] sm:max-h-[420px] sm:space-y-3">
-              {tournaments.map((tournament, i) => (
-                <Reveal
-                  key={tournament.id}
-                  delay={Math.min(i * 45, 240)}
-                  className="w-full"
+            <div className="mb-3 grid gap-2 border border-edge/80 bg-crypt/45 p-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <label className="block">
+                <span className="mb-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">
+                  {t("matches.honours_filter_type")}
+                </span>
+                <select
+                  value={placementFilter}
+                  onChange={(event) =>
+                    setPlacementFilter(event.target.value as "all" | "champion")
+                  }
+                  className="h-10 w-full border border-edge bg-void px-3 font-display text-sm font-bold uppercase tracking-[0.08em] text-soul outline-none transition-colors hover:border-amethyst/70 focus:border-glow"
                 >
-                  <TrophyCard tournament={tournament} labels={labels} />
-                </Reveal>
-              ))}
+                  <option value="all">{t("matches.honours_filter_all")}</option>
+                  <option value="champion">{t("matches.honours_filter_champions")}</option>
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">
+                  {t("matches.honours_filter_season")}
+                </span>
+                <select
+                  value={seasonFilter}
+                  onChange={(event) => setSeasonFilter(event.target.value)}
+                  className="h-10 w-full border border-edge bg-void px-3 font-display text-sm font-bold uppercase tracking-[0.08em] text-soul outline-none transition-colors hover:border-amethyst/70 focus:border-glow"
+                >
+                  <option value="all">{t("matches.honours_filter_all_seasons")}</option>
+                  {seasonOptions.map((season) => (
+                    <option key={season} value={season}>
+                      {season}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="border border-edge bg-void/55 px-3 py-2 text-center sm:min-w-[112px]">
+                <p className="font-display text-xl font-bold leading-none text-glow">
+                  {filteredTournaments.length}
+                </p>
+                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">
+                  {t("matches.honours_count")}
+                </p>
+              </div>
+            </div>
+
+            <div className="max-h-[360px] space-y-2.5 overflow-y-auto pr-1 [scrollbar-color:#A855F7_#16101F] [scrollbar-width:thin] sm:max-h-[420px] sm:space-y-3">
+              {filteredTournaments.length > 0 ? (
+                filteredTournaments.map((tournament, i) => (
+                  <Reveal
+                    key={tournament.id}
+                    delay={Math.min(i * 45, 240)}
+                    className="w-full"
+                  >
+                    <TrophyCard tournament={tournament} labels={labels} />
+                  </Reveal>
+                ))
+              ) : (
+                <p className="border border-edge bg-void/45 px-4 py-8 text-center font-mono text-sm text-ash">
+                  {t("matches.honours_no_filter_results")}
+                </p>
+              )}
             </div>
           </div>
         ) : (
