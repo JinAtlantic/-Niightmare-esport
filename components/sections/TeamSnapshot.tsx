@@ -113,7 +113,7 @@ export default function TeamSnapshot() {
       <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-24 md:px-6 md:py-24">
         <Reveal>
           <div className="mx-auto max-w-3xl text-center">
-            <SectionLabel centered kicker={pick(snapshot.kicker)}>
+            <SectionLabel centered>
               {pick(snapshot.title)}
             </SectionLabel>
             <p className="mt-4 text-sm leading-relaxed text-ash sm:text-base md:mt-5 md:text-lg">
