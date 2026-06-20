@@ -161,7 +161,7 @@ export default function TrophyCabinet() {
   }, [placementFilter, seasonFilter, tournaments]);
 
   return (
-    <section className="relative overflow-hidden border-t border-edge bg-gradient-to-b from-void via-crypt/25 to-void px-4 py-14 md:px-6 md:py-16">
+    <section className="relative overflow-hidden border-t border-edge bg-void px-4 py-14 md:px-6 md:py-16">
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
       <div
         aria-hidden

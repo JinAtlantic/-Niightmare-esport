@@ -98,11 +98,11 @@ export default function TeamSnapshot() {
   const stats = snapshot.stats.length ? snapshot.stats : FALLBACK_SNAPSHOT.stats;
 
   return (
-    <section className="relative overflow-hidden border-y border-edge bg-gradient-to-b from-void via-crypt/35 to-void">
+    <section className="relative overflow-hidden border-y border-edge bg-gradient-to-b from-crypt/25 via-crypt2/55 to-crypt/15">
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-8 h-64 w-[min(760px,92vw)] -translate-x-1/2 bg-amethyst/10 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-8 h-64 w-[min(760px,92vw)] -translate-x-1/2 bg-amethyst/16 blur-3xl"
       />
       <div
         aria-hidden
