@@ -2,16 +2,20 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
 import FitText from "@/components/ui/FitText";
-import StaffModal from "@/components/cards/StaffModal";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import type { StaffMember } from "@/lib/types";
+
+// Framer-Motion + the modal load on first profile open only, keeping the
+// roster grid's initial bundle light.
+const StaffModalHost = dynamic(() => import("@/components/cards/StaffModalHost"), { ssr: false });
 
 export default function StaffCard({ member }: { member: StaffMember }) {
   const { pick, t } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [armed, setArmed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = member.name || member.ign || "";
@@ -66,7 +70,10 @@ export default function StaffCard({ member }: { member: StaffMember }) {
           {/* whole-card trigger — opens the profile */}
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setArmed(true);
+              setOpen(true);
+            }}
             aria-label={`${title} — ${t("roster.view_profile")}`}
             className="absolute inset-0 z-[4] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
           />
@@ -98,15 +105,9 @@ export default function StaffCard({ member }: { member: StaffMember }) {
         </div>
       </article>
 
-      <AnimatePresence>
-        {open && (
-          <StaffModal
-            key={`sm-${member.id}`}
-            member={member}
-            onClose={() => setOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {armed && (
+        <StaffModalHost member={member} open={open} onClose={() => setOpen(false)} />
+      )}
     </>
   );
 }

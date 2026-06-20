@@ -2,15 +2,19 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
-import PlayerModal from "@/components/cards/PlayerModal";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import type { Player } from "@/lib/types";
+
+// Framer-Motion + the modal load on first profile open only, keeping the
+// roster grid's initial bundle light.
+const PlayerModalHost = dynamic(() => import("@/components/cards/PlayerModalHost"), { ssr: false });
 
 export default function PlayerCard({ player }: { player: Player }) {
   const { pick, t } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [armed, setArmed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
@@ -71,7 +75,10 @@ export default function PlayerCard({ player }: { player: Player }) {
               (pointer-events-auto), so only the links escape it. */}
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setArmed(true);
+              setOpen(true);
+            }}
             aria-label={`${player.ign} — ${t("roster.view_profile")}`}
             className="absolute inset-0 z-[4] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
           />
@@ -108,15 +115,9 @@ export default function PlayerCard({ player }: { player: Player }) {
         </div>
       </article>
 
-      <AnimatePresence>
-        {open && (
-          <PlayerModal
-            key={`pm-${player.id}`}
-            player={player}
-            onClose={() => setOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {armed && (
+        <PlayerModalHost player={player} open={open} onClose={() => setOpen(false)} />
+      )}
     </>
   );
 }
