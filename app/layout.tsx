@@ -119,23 +119,6 @@ export default function RootLayout({
             __html: `(function(){try{var l=localStorage.getItem("niightmare-lang");if(l==="lo"){var r=document.documentElement;r.setAttribute("lang","lo");r.classList.add("lang-lo");}}catch(e){}})();`,
           }}
         />
-        {/* Start fetching the home hero image (the LCP element) immediately. */}
-        <link
-          rel="preload"
-          as="image"
-          href="/home-reaper.webp"
-          type="image/webp"
-          media="(max-width: 1023px)"
-          fetchPriority="high"
-        />
-        <link
-          rel="preload"
-          as="image"
-          href="/home-reaper-desktop.webp"
-          type="image/webp"
-          media="(min-width: 1024px)"
-          fetchPriority="high"
-        />
       </head>
       <body>
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
