@@ -3,10 +3,14 @@ import SponsorsClient from "@/components/clients/SponsorsClient";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo";
 
+const sponsorsDescription =
+  "Partner with NIIGHTMARE Esports. Explore our partners and sponsorship tiers as we dominate the Lao PDR esports scene.";
+
 export const metadata: Metadata = {
   title: "Sponsors & Partners",
-  description:
-    "Partner with NIIGHTMARE Esports. Explore our partners and sponsorship tiers as we dominate the Lao PDR esports scene.",
+  description: sponsorsDescription,
+  openGraph: { title: "Sponsors & Partners — NIIGHTMARE Esports", description: sponsorsDescription },
+  twitter: { title: "Sponsors & Partners — NIIGHTMARE Esports", description: sponsorsDescription },
 };
 
 export default function SponsorsPage() {

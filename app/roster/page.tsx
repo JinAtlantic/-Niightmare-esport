@@ -3,10 +3,14 @@ import RosterClient from "@/components/clients/RosterClient";
 import JsonLd from "@/components/seo/JsonLd";
 import { sportsTeamSchema, breadcrumbSchema } from "@/lib/seo";
 
+const rosterDescription =
+  "Meet the NIIGHTMARE Esports roster — our Mobile Legends: Bang Bang and eFootball players and staff from Lao PDR.";
+
 export const metadata: Metadata = {
   title: "Roster",
-  description:
-    "Meet the NIIGHTMARE Esports roster — our Mobile Legends: Bang Bang and eFootball players and staff from Lao PDR.",
+  description: rosterDescription,
+  openGraph: { title: "Roster — NIIGHTMARE Esports", description: rosterDescription },
+  twitter: { title: "Roster — NIIGHTMARE Esports", description: rosterDescription },
 };
 
 export default function RosterPage() {
