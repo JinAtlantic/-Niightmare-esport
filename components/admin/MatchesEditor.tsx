@@ -5,6 +5,7 @@ import { useData } from "@/components/admin/useData";
 import {
   Button,
   Card,
+  Section,
   TextField,
   SelectField,
   BilingualField,
@@ -602,13 +603,8 @@ export default function MatchesEditor() {
 
       {view === "page" && (
         <section className="space-y-4">
-          <Card>
-            <div className="mb-4">
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Matches page copy</h2>
-              <p className="mt-1 font-mono text-xs text-ash">
-                Public /matches labels.
-              </p>
-            </div>
+          <Section title="ข้อความหน้า Matches" hint="ป้ายกำกับบนหน้า /matches">
+            <Card>
             <div className="grid gap-3">
               <BilingualField label="Hero kicker" value={page.kicker} onChange={(v) => patchPage({ kicker: v })} />
               <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
@@ -636,13 +632,11 @@ export default function MatchesEditor() {
                 options={GAME_OPTS}
               />
             </div>
-          </Card>
+            </Card>
+          </Section>
 
-          <Card>
-            <div className="mb-4">
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Filters, stats, results</h2>
-              <p className="mt-1 font-mono text-xs text-ash">Public labels.</p>
-            </div>
+          <Section title="ฟิลเตอร์ สถิติ ผลแข่ง (labels)" hint="ป้ายกำกับสาธารณะ">
+            <Card>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="border border-edge bg-void/40 p-4">
                 <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Filters</p>
@@ -697,17 +691,18 @@ export default function MatchesEditor() {
                 </div>
               </div>
             </div>
-          </Card>
+            </Card>
+          </Section>
         </section>
       )}
 
       {view === "records" && (
         <section className="space-y-3">
-          <div className="flex flex-wrap items-end justify-between gap-2">
+          <div className="flex flex-wrap items-end justify-between gap-2 border-b border-edge pb-2">
             <div>
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Records</h2>
+              <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">Records</h2>
               <p className="mt-0.5 max-w-2xl font-mono text-[11px] text-ash">
-                Open a tournament, edit matches, save once.
+                เปิดทัวร์นาเมนต์ แก้ไขแมตช์ แล้วบันทึกครั้งเดียว
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

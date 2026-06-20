@@ -6,6 +6,7 @@ import PhotoCropEditor from "@/components/admin/PhotoCropEditor";
 import {
   Button,
   Card,
+  Section,
   TextField,
   SelectField,
   BilingualField,
@@ -116,11 +117,7 @@ function PlayerList({
   onSocial: (i: number, key: keyof Player["socials"], val: string) => void;
 }) {
   return (
-    <section>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{title}</h2>
-        <Button onClick={onAdd}>+ เพิ่มนักแข่ง</Button>
-      </div>
+    <Section title={title} action={<Button onClick={onAdd}>+ เพิ่มนักแข่ง</Button>}>
       <div className="space-y-4">
         {players.map((p, i) => {
           const setHero = (k: number, v: string) => {
@@ -236,7 +233,7 @@ function PlayerList({
           );
         })}
       </div>
-    </section>
+    </Section>
   );
 }
 
@@ -336,13 +333,8 @@ export default function RosterEditor() {
 
       {view === "page" && (
         <section className="space-y-4">
-          <Card>
-            <div className="mb-4">
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Roster page copy</h2>
-              <p className="mt-1 font-mono text-xs text-ash">
-                ข้อความทุกช่องนี้จะแสดงบนหน้า /roster และแก้ได้โดยไม่ต้อง deploy
-              </p>
-            </div>
+          <Section title="Roster page copy" hint="ข้อความบนหน้า /roster — แก้ได้โดยไม่ต้อง deploy">
+            <Card>
             <div className="grid gap-3">
               <BilingualField
                 label="Hero kicker"
@@ -364,15 +356,11 @@ export default function RosterEditor() {
               <BilingualField label="Lineup heading" value={page.lineupLabel} onChange={(v) => patchPage({ lineupLabel: v })} />
               <BilingualField label="Staff heading" value={page.staffLabel} onChange={(v) => patchPage({ staffLabel: v })} />
             </div>
-          </Card>
+            </Card>
+          </Section>
 
-          <Card>
-            <div className="mb-4">
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Navigation labels</h2>
-              <p className="mt-1 font-mono text-xs text-ash">
-                Labels ของ tab เกมและ tier ทีมงานบนหน้า roster
-              </p>
-            </div>
+          <Section title="Navigation labels" hint="Labels ของ tab เกมและ tier ทีมงานบนหน้า roster">
+            <Card>
             <div className="grid gap-3 md:grid-cols-2">
               <BilingualField
                 label="MLBB tab"
@@ -400,15 +388,11 @@ export default function RosterEditor() {
                 onChange={(v) => patchPage({ tierLabels: { ...page.tierLabels, technical: v } })}
               />
             </div>
-          </Card>
+            </Card>
+          </Section>
 
-          <Card>
-            <div className="mb-4">
-              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">Overview stats</h2>
-              <p className="mt-1 font-mono text-xs text-ash">
-                ตัวเลขคำนวณจากจำนวน player/staff ใน admin; แก้ label และคำอธิบายได้ที่นี่
-              </p>
-            </div>
+          <Section title="Overview stats" hint="ตัวเลขคำนวณจากจำนวน player/staff; แก้ label และคำอธิบายได้ที่นี่">
+            <Card>
             <div className="grid gap-4 md:grid-cols-2">
               {page.stats.map((stat) => (
                 <div key={stat.id} className="border border-edge bg-void/40 p-4">
@@ -422,7 +406,8 @@ export default function RosterEditor() {
                 </div>
               ))}
             </div>
-          </Card>
+            </Card>
+          </Section>
         </section>
       )}
 
@@ -435,9 +420,9 @@ export default function RosterEditor() {
 
       {/* staff */}
       {view === "staff" && (
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">ทีมงาน (Staff)</h2>
+      <Section
+        title="ทีมงาน (Staff)"
+        action={
           <Button
             onClick={() =>
               setData({
@@ -448,7 +433,8 @@ export default function RosterEditor() {
           >
             + เพิ่มทีมงาน
           </Button>
-        </div>
+        }
+      >
         <div className="space-y-4">
           {data.staff.map((s, i) => (
             <Card key={s.id}>
@@ -539,7 +525,7 @@ export default function RosterEditor() {
             </Card>
           ))}
         </div>
-      </section>
+      </Section>
       )}
     </div>
   );
