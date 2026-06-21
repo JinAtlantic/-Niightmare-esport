@@ -39,10 +39,7 @@ export function playerRows(players: Player[], game: string) {
     photo_zoom: p.photoCrop?.zoom ?? 1,
     photo_x: p.photoCrop?.x ?? 50,
     photo_y: p.photoCrop?.y ?? 50,
-    heroes: Array.isArray(p.heroes) ? p.heroes : [],
-    win_rate: s(p.winRate),
-    gear_device: s(p.gear?.device),
-    gear_audio: s(p.gear?.audio),
+    win_rate: s(p.fmvp), // legacy column name, now holds the FMVP count
     email: s(p.email),
     facebook: s(p.socials?.facebook),
     instagram: s(p.socials?.instagram),

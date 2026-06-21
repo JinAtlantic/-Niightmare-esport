@@ -29,6 +29,7 @@ export interface Player {
   ign: string;
   name?: string;
   role: Bilingual;
+  /** Optional short career bio shown in the profile modal's ABOUT section. */
   description?: Bilingual;
   /** Marks a substitute player (shows a SUB badge). */
   sub?: boolean;
@@ -37,13 +38,10 @@ export interface Player {
   /** Admin-controlled crop for the photo: zoom (scale, 1 = fit) and focal
    *  point x/y as percentages (0–100). */
   photoCrop?: { zoom: number; x: number; y: number };
-  /** Optional setup shown in the profile modal's GEAR section. Empty fields
-   *  fall back to a "TBA" placeholder — never fabricated. */
-  gear?: { device?: string; audio?: string };
-  /** Optional signature heroes (names) shown as boxes in the profile modal. */
-  heroes?: string[];
-  /** Optional win-rate string (e.g. "68%"). Shown as "—" when absent. */
-  winRate?: string;
+  /** Optional FMVP / finals-MVP count shown in the profile modal (free text,
+   *  e.g. "3×"). Empty falls back to a "no titles yet" placeholder.
+   *  Persisted in the legacy `win_rate` DB column (no schema migration). */
+  fmvp?: string;
   /** Optional contact email; when set, the profile modal shows a copy button. */
   email?: string;
   socials: Socials;

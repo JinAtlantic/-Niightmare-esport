@@ -6,8 +6,8 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   X,
-  Smartphone,
-  Headphones,
+  ScrollText,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
@@ -21,23 +21,6 @@ function SectionHead({ Icon, label }: { Icon: LucideIcon; label: string }) {
       <Icon size={14} strokeWidth={2} className="text-amethyst" />
       {label}
     </p>
-  );
-}
-
-/** A labelled gear row. */
-function GearRow({ Icon, label, value }: { Icon: LucideIcon; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="grid h-9 w-9 shrink-0 place-items-center border border-edge bg-void/50 text-amethyst">
-        <Icon size={17} strokeWidth={1.75} />
-      </span>
-      <div className="min-w-0">
-        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ash-dim">{label}</p>
-        <p className="keep-latin truncate font-display text-sm font-bold uppercase tracking-[0.04em] text-soul">
-          {value}
-        </p>
-      </div>
-    </div>
   );
 }
 
@@ -61,6 +44,7 @@ export default function PlayerModal({
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const tba = t("roster.tba");
+  const bio = player.description ? pick(player.description) : "";
 
   // ESC to close + lock body scroll + focus the close button.
   useEffect(() => {
@@ -176,12 +160,29 @@ export default function PlayerModal({
               <p className="mt-2 font-mono text-sm text-spectre">{player.name}</p>
             )}
 
-            {/* GEAR */}
+            {/* ABOUT — short career bio */}
             <div className="mt-7">
-              <SectionHead Icon={Smartphone} label={t("roster.gear_label")} />
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <GearRow Icon={Smartphone} label={t("roster.gear_device")} value={player.gear?.device || tba} />
-                <GearRow Icon={Headphones} label={t("roster.gear_audio")} value={player.gear?.audio || tba} />
+              <SectionHead Icon={ScrollText} label={t("roster.about_label")} />
+              {bio ? (
+                <p className="keep-latin text-sm leading-relaxed text-spectre">{bio}</p>
+              ) : (
+                <p className="font-mono text-sm text-ash-dim">{tba}</p>
+              )}
+            </div>
+
+            {/* HONORS — FMVP count */}
+            <div className="mt-6">
+              <SectionHead Icon={Trophy} label={t("roster.honors_label")} />
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/45 bg-amethyst/10 text-amethyst shadow-[0_0_14px_rgba(168,85,247,0.3)]">
+                  <Trophy size={20} strokeWidth={1.75} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ash-dim">FMVP</p>
+                  <p className="keep-latin truncate font-display text-lg font-bold uppercase tracking-[0.04em] text-soul">
+                    {player.fmvp || t("roster.honors_none")}
+                  </p>
+                </div>
               </div>
             </div>
 

@@ -120,17 +120,6 @@ function PlayerList({
     <Section title={title} action={<Button onClick={onAdd}>+ เพิ่มนักแข่ง</Button>}>
       <div className="space-y-4">
         {players.map((p, i) => {
-          const setHero = (k: number, v: string) => {
-            const arr = [...(p.heroes ?? [])];
-            while (arr.length < 3) arr.push("");
-            arr[k] = v;
-            const cleaned = arr.map((x) => x.trim());
-            onPatch(i, { heroes: cleaned.some(Boolean) ? cleaned : undefined });
-          };
-          const setGear = (key: "device" | "audio", v: string) => {
-            const gear = { ...p.gear, [key]: v.trim() || undefined };
-            onPatch(i, { gear: gear.device || gear.audio ? gear : undefined });
-          };
           return (
           <Card key={p.id}>
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -182,19 +171,24 @@ function PlayerList({
                 </div>
               )}
               {/* Profile extras shown in the player modal */}
-              <div className="md:col-span-2 grid gap-3 sm:grid-cols-3">
-                <TextField label="Signature Hero 1" value={p.heroes?.[0] ?? ""} onChange={(v) => setHero(0, v)} />
-                <TextField label="Signature Hero 2" value={p.heroes?.[1] ?? ""} onChange={(v) => setHero(1, v)} />
-                <TextField label="Signature Hero 3" value={p.heroes?.[2] ?? ""} onChange={(v) => setHero(2, v)} />
-              </div>
               <TextField
-                label="Win Rate (เช่น 68%)"
-                value={p.winRate ?? ""}
-                onChange={(v) => onPatch(i, { winRate: v || undefined })}
+                label="FMVP (จำนวนครั้งที่ได้ เช่น 3×)"
+                value={p.fmvp ?? ""}
+                onChange={(v) => onPatch(i, { fmvp: v.trim() || undefined })}
+                placeholder="เช่น 3×"
               />
               <div className="hidden md:block" />
-              <TextField label="GEAR — มือถือ/เครื่อง" value={p.gear?.device ?? ""} onChange={(v) => setGear("device", v)} />
-              <TextField label="GEAR — หูฟัง" value={p.gear?.audio ?? ""} onChange={(v) => setGear("audio", v)} />
+              <div className="md:col-span-2">
+                <BilingualField
+                  label="ประวัติคร่าวๆ (ABOUT — โชว์ในการ์ดโปรไฟล์)"
+                  value={p.description ?? { en: "", lo: "" }}
+                  onChange={(v) =>
+                    onPatch(i, {
+                      description: v.en?.trim() || v.lo?.trim() ? v : undefined,
+                    })
+                  }
+                />
+              </div>
 
               <div className="md:col-span-2">
                 <TextField

@@ -29,7 +29,6 @@ function socials(r: Record<string, unknown>): Socials {
 }
 
 function toPlayer(r: Record<string, unknown>): Player {
-  const heroes = Array.isArray(r.heroes) ? (r.heroes as string[]).filter(Boolean) : [];
   return {
     id: String(r.id),
     ign: (r.ign as string) ?? "",
@@ -43,12 +42,7 @@ function toPlayer(r: Record<string, unknown>): Player {
       r.photo_zoom != null || r.photo_x != null || r.photo_y != null
         ? { zoom: Number(r.photo_zoom ?? 1), x: Number(r.photo_x ?? 50), y: Number(r.photo_y ?? 50) }
         : undefined,
-    gear:
-      r.gear_device || r.gear_audio
-        ? { device: val(r.gear_device), audio: val(r.gear_audio) }
-        : undefined,
-    heroes: heroes.length ? heroes : undefined,
-    winRate: val(r.win_rate),
+    fmvp: val(r.win_rate), // legacy column name, now holds the FMVP count
     email: val(r.email),
     socials: socials(r),
   };

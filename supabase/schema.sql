@@ -42,9 +42,7 @@ create table if not exists public.players (
   photo_x         int     default 50,
   photo_y         int     default 50,
   heroes          text[]  default '{}',
-  win_rate        text,
-  gear_device     text,
-  gear_audio      text,
+  win_rate        text,           -- holds the FMVP count (legacy column name)
   email           text,
   facebook        text,
   instagram       text,
