@@ -1,0 +1,194 @@
+{
+  "page": {
+    "kicker": { "en": "EST. 2020 · LAO PDR", "lo": "ກໍ່ຕັ້ງ 2020 · ສປປ ລາວ" },
+    "title": { "en": "THE RECORD", "lo": "ບັນທຶກນັກຮົບ" },
+    "intro": {
+      "en": "Five years haunting the meta — every title, every world stage, and every name that carried the reaper's banner.",
+      "lo": "ຫ້າປີແຫ່ງການຄອງເກມ — ທຸກແຊมป์ ທຸກເວທີໂລກ ແລະ ທຸກຊື່ ທີ່ແບກຮັບ ສັກສີ ແຫ່ງຍົມມະທູດ."
+    }
+  },
+  "stats": [
+    {
+      "id": "established",
+      "value": "2020",
+      "label": { "en": "Established", "lo": "ປີກໍ່ຕັ້ງ" },
+      "detail": { "en": "Lao PDR · Southeast Asia", "lo": "ສປປ ລາວ · ອາຊີຕາເວັນອອກສຽງໃຕ້" }
+    },
+    {
+      "id": "winnings",
+      "value": "$84K",
+      "label": { "en": "Total Winnings", "lo": "ເງິນລາງວັນລວມ" },
+      "detail": { "en": "Across 19 placements", "lo": "ຈາກ 19 ລາຍການ" }
+    },
+    {
+      "id": "titles",
+      "value": "3×",
+      "label": { "en": "Championships", "lo": "ແຊມป์" },
+      "detail": { "en": "First-place finishes", "lo": "ຄອງອັນດັບ 1" }
+    },
+    {
+      "id": "worlds",
+      "value": "2×",
+      "label": { "en": "World Championship", "lo": "ຊິງແຊมป์ໂລກ" },
+      "detail": { "en": "M5 & M6 World stage", "lo": "ເວທີໂລກ M5 & M6" }
+    }
+  ],
+  "trophies": [
+    {
+      "tournament": "M Challenge Cup Mekong Season 5",
+      "date": "2025-06-08",
+      "result": "4:0",
+      "opponent": "LEON",
+      "prize": "$3,000",
+      "tier": "B"
+    },
+    {
+      "tournament": "M Challenge Cup Mekong Season 2",
+      "date": "2023-09-23",
+      "result": "4:0",
+      "opponent": "CREV",
+      "prize": "$3,072",
+      "tier": "B"
+    },
+    {
+      "tournament": "Lao National Championship 2020",
+      "date": "2020-12-27",
+      "result": "3:2",
+      "opponent": "Nine",
+      "prize": "$2,600",
+      "tier": "C"
+    }
+  ],
+  "campaign": [
+    {
+      "date": "2025-07-11",
+      "tournament": "MLBB Mid Season Cup 2025",
+      "place": "22–23rd",
+      "medal": null,
+      "tier": "S",
+      "result": "1:2",
+      "opponent": "ZETA",
+      "prize": "$30,000",
+      "worlds": false
+    },
+    {
+      "date": "2025-06-08",
+      "tournament": "M Challenge Cup Mekong Season 5",
+      "place": "1st",
+      "medal": "gold",
+      "tier": "B",
+      "result": "4:0",
+      "opponent": "LEON",
+      "prize": "$3,000",
+      "worlds": false
+    },
+    {
+      "date": "2024-11-23",
+      "tournament": "M6 World Championship",
+      "place": "Group Stage",
+      "medal": null,
+      "tier": "S",
+      "result": "0:3",
+      "opponent": "",
+      "prize": "$9,000",
+      "worlds": true
+    },
+    {
+      "date": "2024-10-22",
+      "tournament": "M Challenge Cup Mekong Season 4",
+      "place": "2nd",
+      "medal": "silver",
+      "tier": "B",
+      "result": "1:4",
+      "opponent": "LGE",
+      "prize": "$1,000",
+      "worlds": false
+    },
+    {
+      "date": "2024-02-27",
+      "tournament": "Games of the Future 2024",
+      "place": "13–16th",
+      "medal": null,
+      "tier": "A",
+      "result": "Group",
+      "opponent": "",
+      "prize": "$15,000",
+      "worlds": false
+    },
+    {
+      "date": "2023-11-26",
+      "tournament": "M5 World Championship",
+      "place": "17–18th",
+      "medal": null,
+      "tier": "S",
+      "result": "0:3",
+      "opponent": "Lil",
+      "prize": "$10,000",
+      "worlds": true
+    },
+    {
+      "date": "2023-09-23",
+      "tournament": "M Challenge Cup Mekong Season 2",
+      "place": "1st",
+      "medal": "gold",
+      "tier": "B",
+      "result": "4:0",
+      "opponent": "CREV",
+      "prize": "$3,072",
+      "worlds": false
+    },
+    {
+      "date": "2023-04-27",
+      "tournament": "MSC 2023 Mekong Qualifier",
+      "place": "2nd",
+      "medal": "silver",
+      "tier": "B",
+      "result": "2:3",
+      "opponent": "EVO",
+      "prize": "$2,000",
+      "worlds": false
+    },
+    {
+      "date": "2021-12-05",
+      "tournament": "Top Clans 2021 Winter Invitational",
+      "place": "3rd",
+      "medal": "bronze",
+      "tier": "B",
+      "result": "0:2",
+      "opponent": "IMP",
+      "prize": "$2,000",
+      "worlds": false
+    },
+    {
+      "date": "2020-12-27",
+      "tournament": "Lao National Championship 2020",
+      "place": "1st",
+      "medal": "gold",
+      "tier": "C",
+      "result": "3:2",
+      "opponent": "Nine",
+      "prize": "$2,600",
+      "worlds": false
+    }
+  ],
+  "formerPlayers": [
+    { "ign": "Jvckkk", "name": "Anousak Aphayasane", "role": "EXP Lane", "joined": "2022-04-19", "left": "2024-05-20", "note": "→ Leon Esports" },
+    { "ign": "BAI LUCI", "name": "Himaya Vasaya Zeke Swayze", "role": "EXP Lane", "joined": "2025-05-09", "left": "2025-10-14", "note": "→ Vigor Apex" },
+    { "ign": "Ninjaaa", "name": "", "role": "Jungler", "joined": "2025-10-14", "left": "2025-11-27", "note": "" },
+    { "ign": "Nanoship", "name": "Anousak Aphaiyasah", "role": "Roamer", "joined": "2020-12-14", "left": "2022-06-04", "note": "" },
+    { "ign": "Mybabyjaja", "name": "", "role": "EXP Lane", "joined": "2021-08-28", "left": "2021-12-01", "note": "" },
+    { "ign": "Achilles", "name": "", "role": "Roamer", "joined": "2021-05-25", "left": "2021-08-28", "note": "" },
+    { "ign": "BZY", "name": "", "role": "Gold Lane", "joined": "2021-05-25", "left": "2021-08-28", "note": "" },
+    { "ign": "Linlyx", "name": "", "role": "Jungler", "joined": "2021-05-25", "left": "2021-08-28", "note": "" },
+    { "ign": "Grave", "name": "", "role": "EXP Lane", "joined": "2020-12-14", "left": "2021-05-25", "note": "" },
+    { "ign": "KimMoji", "name": "", "role": "Gold Lane", "joined": "2020-12-14", "left": "2021-05-25", "note": "" },
+    { "ign": "Memories", "name": "", "role": "EXP Lane", "joined": "2020-12-14", "left": "2021-05-25", "note": "" },
+    { "ign": "Yakuma", "name": "", "role": "Roamer", "joined": "2020-12-14", "left": "2021-05-25", "note": "" },
+    { "ign": "Zenitsu", "name": "", "role": "Middle", "joined": "2020-12-14", "left": "2021-05-25", "note": "" }
+  ],
+  "staff": [
+    { "ign": "Coach V", "role": { "en": "Head Coach", "lo": "ຫົວໜ້າຄູຝຶກ" }, "since": "2026" },
+    { "ign": "Kyle", "role": { "en": "Coach", "lo": "ຄູຝຶກ" }, "since": "2025" },
+    { "ign": "Xs0n", "role": { "en": "Coach", "lo": "ຄູຝຶກ" }, "since": "2024" }
+  ]
+}

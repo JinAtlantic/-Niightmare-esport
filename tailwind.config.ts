@@ -37,6 +37,13 @@ const config: Config = {
         win: "#34D399",
         loss: "#FB7185",
         draw: "#8B8298",
+
+        // Honors accent — reserved for champion/podium treatment on the
+        // Achievements page (the one place gold breaks the violet palette).
+        gold: "#F5C451",
+        "gold-deep": "#C8952B",
+        silver: "#CBD0DE",
+        bronze: "#CE8A57",
       },
       fontFamily: {
         // `display` and `rajdhani` both resolve to the display face, which is
@@ -65,6 +72,7 @@ const config: Config = {
         glow: "0 0 18px rgba(168, 85, 247, 0.55)",
         "glow-accent": "0 0 22px rgba(199, 125, 255, 0.6)",
         "glow-soft": "0 0 12px rgba(168, 85, 247, 0.35)",
+        "glow-gold": "0 0 20px rgba(245, 196, 81, 0.4)",
       },
       keyframes: {
         pulseGlow: {

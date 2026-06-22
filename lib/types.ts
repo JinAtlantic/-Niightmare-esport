@@ -146,3 +146,64 @@ export interface SponsorTier {
   color: string;
   benefits: Bilingual[];
 }
+
+// ── Achievements page (static, sourced from Liquipedia) ──────────────────
+export type TournamentTier = "S" | "A" | "B" | "C";
+export type Medal = "gold" | "silver" | "bronze";
+
+/** Big tale-of-the-tape number on the Achievements hero. */
+export interface AchievementStat {
+  id: string;
+  value: string;
+  label: Bilingual;
+  detail: Bilingual;
+}
+
+/** A first-place title shown in the Trophy Cabinet. */
+export interface Trophy {
+  tournament: string;
+  date: string;
+  result: string;
+  opponent: string;
+  prize: string;
+  tier: TournamentTier;
+}
+
+/** One result on the Campaign timeline. */
+export interface CampaignEntry {
+  date: string;
+  tournament: string;
+  place: string;
+  medal: Medal | null;
+  tier: TournamentTier;
+  result: string;
+  opponent: string;
+  prize: string;
+  worlds: boolean;
+}
+
+/** A past player in the Legacy roll. */
+export interface FormerPlayer {
+  ign: string;
+  name: string;
+  role: string;
+  joined: string;
+  left: string;
+  note: string;
+}
+
+/** A coach in the Achievements staff strip. */
+export interface AchievementStaff {
+  ign: string;
+  role: Bilingual;
+  since: string;
+}
+
+export interface AchievementsData {
+  page: { kicker: Bilingual; title: Bilingual; intro: Bilingual };
+  stats: AchievementStat[];
+  trophies: Trophy[];
+  campaign: CampaignEntry[];
+  formerPlayers: FormerPlayer[];
+  staff: AchievementStaff[];
+}

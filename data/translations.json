@@ -4,6 +4,7 @@
     "home": { "en": "HOME", "lo": "ໜ້າຫຼັກ" },
     "roster": { "en": "ROSTER", "lo": "ນັກກີລາ" },
     "matches": { "en": "MATCHES", "lo": "ການແຂ່ງຂັນ" },
+    "achievements": { "en": "ACHIEVEMENTS", "lo": "ຜົນງານ" },
     "sponsors": { "en": "SPONSORS", "lo": "ສະປອນເຊີ" },
     "contact": { "en": "CONTACT", "lo": "ຕິດຕໍ່" },
     "join_community": { "en": "JOIN COMMUNITY", "lo": "ເຂົ້າຮ່ວມຊຸມຊົນ" }

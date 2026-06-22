@@ -104,6 +104,7 @@
       {
         "id": "mlbb-1",
         "ign": "2EZ4LEXXY",
+        "name": "Mangkonethong Sinbandit",
         "role": {
           "en": "Jungle",
           "lo": "ປ່າ"
@@ -117,6 +118,7 @@
       {
         "id": "mlbb-2",
         "ign": "J4ZBIN",
+        "name": "Sengathit Phounsavat",
         "role": {
           "en": "Roam",
           "lo": "ໂຣມ"
@@ -128,6 +130,7 @@
       {
         "id": "mlbb-3",
         "ign": "I DID",
+        "name": "Marcelino Jr. Grijaldo Semontina",
         "role": {
           "en": "Mid Lane",
           "lo": "ເລນກາງ"
@@ -137,6 +140,7 @@
       {
         "id": "mlbb-4",
         "ign": "JUVIANA",
+        "name": "Phoutthavan Pheungpasomxay",
         "role": {
           "en": "Exp Lane",
           "lo": "ອອຟເລນ"
@@ -155,6 +159,7 @@
       {
         "id": "mlbb-6",
         "ign": "KHAMMY",
+        "name": "Khampaseuth Hanxana",
         "role": {
           "en": "Gold Lane",
           "lo": "ເລນທອງ"
@@ -167,6 +172,7 @@
       {
         "id": "mlbb-mqdu0zbu910",
         "ign": "SOSOUL",
+        "name": "Phonesana Inthavongxay",
         "role": {
           "en": "Mid Lane",
           "lo": "ເລນກາງ"

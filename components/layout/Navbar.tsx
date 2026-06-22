@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: "/news", key: "nav.news" },
   { href: "/roster", key: "nav.roster" },
   { href: "/matches", key: "nav.matches" },
+  { href: "/achievements", key: "nav.achievements" },
   { href: "/sponsors", key: "nav.sponsors" },
   { href: "/contact", key: "nav.contact" },
 ];
@@ -71,7 +72,7 @@ export default function Navbar() {
           </Link>
 
           {/* Center: nav links (desktop) */}
-          <ul className="hidden items-center gap-8 lg:flex">
+          <ul className="hidden items-center gap-5 lg:flex xl:gap-7">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
                 <Link

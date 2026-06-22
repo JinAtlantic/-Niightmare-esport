@@ -602,15 +602,18 @@ export default function MatchesClient() {
     return [...years].sort((a, b) => b.localeCompare(a));
   }, [gameMatches, tournamentYearByKey]);
 
-  const [selectedYear, setSelectedYear] = useState<string>("all");
+  // Empty = default to the most recent year so the page opens with one short
+  // year's worth of tournaments instead of all 21 groups at once.
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const activeYear = selectedYear || yearOptions[0] || "all";
 
   const gameYearMatches = useMemo(() => {
-    if (selectedYear === "all") return gameMatches;
+    if (activeYear === "all") return gameMatches;
     return gameMatches.filter((match) => {
       const year = tournamentYearByKey.get(matchTournamentKey(match)) || extractYear(match.date);
-      return year === selectedYear;
+      return year === activeYear;
     });
-  }, [gameMatches, selectedYear, tournamentYearByKey]);
+  }, [gameMatches, activeYear, tournamentYearByKey]);
 
   const stats = useMemo(() => {
     const count = (r: MatchResult) => gameYearMatches.filter((m) => m.result === r).length;
@@ -656,14 +659,14 @@ export default function MatchesClient() {
             <div>
               <StatsStrip {...stats} page={page} />
             </div>
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <label className="block border border-edge bg-crypt/55 p-2">
                 <span className="sr-only">Game</span>
                 <select
                   value={selectedGame}
                   onChange={(event) => {
                     setSelectedGame(event.target.value as GameId);
-                    setSelectedYear("all");
+                    setSelectedYear("");
                     setResultFilter("all");
                   }}
                   className={selectClass}
@@ -671,22 +674,6 @@ export default function MatchesClient() {
                   {GAME_FILTERS.map((id) => (
                     <option key={id} value={id}>
                       {pick(page.filters[id])}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block border border-edge bg-crypt/55 p-2">
-                <span className="sr-only">{pick(page.yearLabel)}</span>
-                <select
-                  value={selectedYear}
-                  onChange={(event) => setSelectedYear(event.target.value)}
-                  className={selectClass}
-                >
-                  <option value="all">{pick(page.allYears)}</option>
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
                     </option>
                   ))}
                 </select>
@@ -730,7 +717,31 @@ export default function MatchesClient() {
           </div>
         </Reveal>
 
-        <div key={`${selectedGame}-${selectedYear}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
+        {/* YEAR TABS — one season at a time keeps the list short and scannable */}
+        {yearOptions.length > 0 && (
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-1.5">
+            {["all", ...yearOptions].map((y) => {
+              const active = activeYear === y;
+              return (
+                <button
+                  key={y}
+                  type="button"
+                  onClick={() => setSelectedYear(y)}
+                  aria-pressed={active}
+                  className={`min-w-[44px] border px-4 py-2 text-center font-mono text-xs font-bold uppercase tracking-[0.14em] tabular-nums transition-colors ${
+                    active
+                      ? "border-amethyst bg-amethyst/15 text-glow shadow-[0_0_14px_rgba(168,85,247,0.3)]"
+                      : "border-edge bg-void/40 text-ash hover:border-edge-bright hover:text-soul"
+                  }`}
+                >
+                  {y === "all" ? pick(page.allYears) : y}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <div key={`${selectedGame}-${activeYear}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
           {groupsByGame.some((section) => section.groups.length > 0) ? (
             groupsByGame.map(({ game, groups }, i) => (
               <Reveal key={game} delay={i * 90}>
