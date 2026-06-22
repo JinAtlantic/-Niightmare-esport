@@ -194,28 +194,20 @@ export default function PlayerModal({
             <div className="mt-6">
               <SectionHead Icon={Trophy} label={t("roster.honors_label")} />
               {player.fmvp ? (
-                <div className="flex items-center gap-4 overflow-hidden border border-gold/35 bg-gradient-to-r from-gold/[0.1] via-gold/[0.04] to-transparent p-3.5 shadow-glow-gold">
-                  <span className="grid h-14 w-14 shrink-0 place-items-center border border-gold/50 bg-gold/10 text-gold shadow-[0_0_16px_rgba(245,196,81,0.35)]">
-                    <Trophy size={26} strokeWidth={1.75} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-gold/80">
-                      FMVP
-                    </p>
-                    <p className="keep-latin font-display text-4xl font-bold uppercase leading-none tracking-[0.02em] text-gold [text-shadow:0_2px_18px_rgba(245,196,81,0.45)] md:text-5xl">
-                      {player.fmvp}
-                    </p>
-                  </div>
+                <div className="overflow-hidden border border-gold/35 bg-gradient-to-r from-gold/[0.1] via-gold/[0.04] to-transparent p-4 shadow-glow-gold">
+                  <p className="font-display text-2xl font-bold uppercase tracking-[0.22em] text-gold/85">
+                    FMVP
+                  </p>
+                  <p className="keep-latin mt-1 font-display text-5xl font-bold uppercase leading-none tracking-[0.02em] text-gold [text-shadow:0_2px_18px_rgba(245,196,81,0.45)]">
+                    {player.fmvp}
+                  </p>
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center border border-edge bg-void/50 text-ash-dim">
-                    <Trophy size={20} strokeWidth={1.75} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ash-dim">FMVP</p>
-                    <p className="font-mono text-sm text-ash-dim">{t("roster.honors_none")}</p>
-                  </div>
+                <div>
+                  <p className="font-display text-2xl font-bold uppercase tracking-[0.22em] text-ash-dim">
+                    FMVP
+                  </p>
+                  <p className="mt-1 font-mono text-sm text-ash-dim">{t("roster.honors_none")}</p>
                 </div>
               )}
             </div>
