@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase";
-import type { Socials, StaffMember, StaffRole } from "./types";
+import type { GameId, Socials, StaffMember, StaffRole } from "./types";
 
 /**
  * Shape of one row in the Supabase `members` table (snake_case). Kept separate
@@ -11,6 +11,10 @@ export interface MemberRow {
   name: string | null;
   nickname: string | null;
   official_role: string | null;
+  /** Game lineup a coach belongs to ("mlbb" | "efootball"); null = back-office. */
+  game: string | null;
+  /** Explicit back-office row (1–3); null = infer from official_role. */
+  tier: number | null;
   role_en: string | null;
   role_lo: string | null;
   bio_en: string | null;
@@ -44,6 +48,8 @@ export function rowToStaff(row: MemberRow): StaffMember {
     name: clean(row.name),
     ign: clean(row.nickname),
     officialRole: (clean(row.official_role) as StaffRole) || undefined,
+    game: (clean(row.game) as GameId) || undefined,
+    tier: row.tier === 1 || row.tier === 2 || row.tier === 3 ? row.tier : undefined,
     role: { en: row.role_en ?? "", lo: row.role_lo ?? "" },
     bio: row.bio_en || row.bio_lo ? { en: row.bio_en ?? "", lo: row.bio_lo ?? "" } : undefined,
     email: clean(row.email),
@@ -59,6 +65,8 @@ export function staffToRow(member: StaffMember, sortOrder?: number): MemberRow {
     name: member.name ?? null,
     nickname: member.ign ?? null,
     official_role: member.officialRole ?? null,
+    game: member.game ?? null,
+    tier: member.tier ?? null,
     role_en: member.role?.en ?? null,
     role_lo: member.role?.lo ?? null,
     bio_en: member.bio?.en ?? null,

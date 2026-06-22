@@ -66,6 +66,7 @@
     "tab_efootball": { "en": "eFOOTBALL", "lo": "eFOOTBALL" },
     "lineup_label": { "en": "LINEUP", "lo": "ນັກກິລາ" },
     "staff_label": { "en": "Behind the Team", "lo": "ເບື້ອງຫຼັງທີມ" },
+    "coaching_staff": { "en": "Coaching Staff", "lo": "ທີມຄູຝຶກ" },
     "intro": {
       "en": "Meet the players who carry the reaper's banner",
       "lo": "ພົບກັບ ເຫຼົ່ານັກຮົບ ຜູ້ແບກຮັບ ສັກສີ ແຫ່ງຍົມມະທູດ"

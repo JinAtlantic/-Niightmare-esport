@@ -116,11 +116,6 @@ export default function StaffModal({
 
           {/* RIGHT — scrollable content (desktop) */}
           <div className="modal-scroll relative flex flex-1 flex-col p-6 md:max-h-[80vh] md:overflow-y-auto md:p-8">
-            <p className="mb-4 inline-flex items-center gap-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.34em] text-spectre/70">
-              <span className="h-[5px] w-[5px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
-              {t("roster.staff_kicker")}
-            </p>
-
             {/* Real name — prominent */}
             <h2 className="font-display text-3xl font-bold uppercase leading-tight tracking-wide text-soul [text-shadow:0_2px_24px_rgba(168,85,247,0.3)] md:text-4xl">
               {title}

@@ -5,15 +5,14 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import PlayerCard from "@/components/cards/PlayerCard";
 import StaffCard from "@/components/cards/StaffCard";
-import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
-import { EfootballIcon, MlbbIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
-import { groupStaffByTier, type StaffTier } from "@/lib/staff";
+import { groupStaffByTier, memberGame, type StaffTier } from "@/lib/staff";
 import rosterSeed from "@/data/roster.json";
 import type { Bilingual, GameId, Player, StaffMember } from "@/lib/types";
 
 type RosterStatId = "active" | "mlbb" | "efootball" | "staff";
+type RosterTab = GameId | "staff";
 
 interface RosterPageStat {
   id: RosterStatId | string;
@@ -85,15 +84,21 @@ function TierRow({ label, members }: { label: string; members: StaffMember[] }) 
 }
 
 export default function RosterClient() {
-  const { pick } = useLanguage();
+  const { pick, t } = useLanguage();
   const roster = useContent().roster as {
     page?: Partial<RosterPageCopy>;
     mlbb: { players: Player[] };
     efootball: { players: Player[] };
     staff: StaffMember[];
   };
-  const [division, setDivision] = useState<GameId>("mlbb");
+  const [tab, setTab] = useState<RosterTab>("mlbb");
   const page = mergePageCopy(roster.page);
+
+  // Coaches sit under their game's lineup (from each member's game field, with a
+  // text fallback for legacy entries); everyone else is the back-office group.
+  const coachesFor = (game: GameId) =>
+    roster.staff.filter((m) => memberGame(m) === game);
+  const backOffice = roster.staff.filter((m) => !memberGame(m));
 
   const counts: Record<RosterStatId, number> = {
     active: roster.mlbb.players.length + roster.efootball.players.length + roster.staff.length,
@@ -102,17 +107,11 @@ export default function RosterClient() {
     staff: roster.staff.length,
   };
 
-  const tabs: {
-    id: GameId;
-    label: Bilingual;
-    Icon: typeof MlbbIcon;
-    count: number;
-  }[] = [
-    { id: "mlbb", label: page.divisionLabels.mlbb, Icon: MlbbIcon, count: roster.mlbb.players.length },
-    { id: "efootball", label: page.divisionLabels.efootball, Icon: EfootballIcon, count: roster.efootball.players.length },
+  const tabs: { id: RosterTab; label: Bilingual; count: number }[] = [
+    { id: "mlbb", label: page.divisionLabels.mlbb, count: roster.mlbb.players.length },
+    { id: "efootball", label: page.divisionLabels.efootball, count: roster.efootball.players.length },
+    { id: "staff", label: page.staffLabel, count: backOffice.length },
   ];
-
-  const players = roster[division].players;
 
   return (
     <>
@@ -165,26 +164,20 @@ export default function RosterClient() {
           </div>
         </div>
 
-        <SectionLabel centered>{pick(page.lineupLabel)}</SectionLabel>
-
-        {/* Division tabs */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-1 border-b border-edge">
-          {tabs.map(({ id, label, Icon, count }) => {
-            const active = division === id;
+        {/* View tabs — MLBB / eFootball lineups, and the back-office team */}
+        <div className="flex flex-wrap items-center justify-center gap-1 border-b border-edge">
+          {tabs.map(({ id, label, count }) => {
+            const active = tab === id;
             return (
               <button
                 key={id}
                 type="button"
-                onClick={() => setDivision(id)}
+                onClick={() => setTab(id)}
                 aria-pressed={active}
-                className={`group relative -mb-px flex items-center gap-2.5 px-6 py-4 font-display text-sm font-semibold uppercase tracking-[0.14em] transition-colors duration-200 ${
+                className={`relative -mb-px flex items-center gap-2.5 px-5 py-4 font-display text-sm font-semibold uppercase tracking-[0.14em] transition-colors duration-200 md:px-7 md:text-base ${
                   active ? "text-soul" : "text-ash hover:text-soul"
                 }`}
               >
-                <Icon
-                  size={18}
-                  className={`transition-colors ${active ? "text-amethyst" : "text-ash group-hover:text-spectre"}`}
-                />
                 <span className="keep-latin">{pick(label)}</span>
                 <span className={`font-mono text-[11px] ${active ? "text-spectre" : "text-ash-dim"}`}>
                   {count}
@@ -200,29 +193,33 @@ export default function RosterClient() {
           })}
         </div>
 
-        {/* Player grid — re-keyed per division so cards re-enter on switch */}
-        <div key={division} className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-          {players.map((player, i) => (
-            <Reveal key={player.id} delay={i * 70} className="h-full">
-              <PlayerCard player={player} />
-            </Reveal>
-          ))}
-        </div>
-
-        {/* Behind the team — ordered by hierarchy tier */}
-        <div className="mt-20">
-          <SectionLabel centered>{pick(page.staffLabel)}</SectionLabel>
-          {(() => {
-            const tiers = groupStaffByTier(roster.staff);
-            const rows: { tier: StaffTier; label: string }[] = [
-              { tier: 1, label: pick(page.tierLabels.executive) },
-              { tier: 2, label: pick(page.tierLabels.operations) },
-              { tier: 3, label: pick(page.tierLabels.technical) },
-            ];
-            return rows.map(({ tier, label }) => (
-              <TierRow key={tier} label={label} members={tiers[tier]} />
-            ));
-          })()}
+        {/* re-keyed per tab so cards re-enter on switch */}
+        <div key={tab}>
+          {tab !== "staff" ? (
+            <>
+              <div className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+                {roster[tab].players.map((player, i) => (
+                  <Reveal key={player.id} delay={i * 70} className="h-full">
+                    <PlayerCard player={player} />
+                  </Reveal>
+                ))}
+              </div>
+              {/* coaches for this game sit right under its lineup */}
+              <TierRow label={t("roster.coaching_staff")} members={coachesFor(tab)} />
+            </>
+          ) : (
+            (() => {
+              const tiers = groupStaffByTier(backOffice);
+              const rows: { tier: StaffTier; label: string }[] = [
+                { tier: 1, label: pick(page.tierLabels.executive) },
+                { tier: 2, label: pick(page.tierLabels.operations) },
+                { tier: 3, label: pick(page.tierLabels.technical) },
+              ];
+              return <div className="mt-4">{rows.map(({ tier, label }) => (
+                <TierRow key={tier} label={label} members={tiers[tier]} />
+              ))}</div>;
+            })()
+          )}
         </div>
       </section>
     </>

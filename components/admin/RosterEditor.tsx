@@ -15,7 +15,7 @@ import {
 } from "@/components/admin/ui";
 import rosterSeed from "@/data/roster.json";
 import type { Bilingual, Player, StaffMember, GameId } from "@/lib/types";
-import { STAFF_ROLES, STAFF_ROLE_TIER, staffRoleKey } from "@/lib/staff";
+import { STAFF_ROLES, memberGame, staffRoleKey } from "@/lib/staff";
 
 const TIER_LABEL: Record<1 | 2 | 3, string> = {
   1: "แถว 1 · บริหาร",
@@ -23,10 +23,18 @@ const TIER_LABEL: Record<1 | 2 | 3, string> = {
   3: "แถว 3 · เทคนิค/สนับสนุน",
 };
 
-const STAFF_ROLE_OPTIONS = STAFF_ROLES.map((r) => ({
-  value: r.value,
-  label: `${r.label.en} — ${TIER_LABEL[STAFF_ROLE_TIER[r.value]]}`,
-}));
+/** Coach sections only need coaching/analysis roles. */
+const COACH_ROLE_OPTIONS = STAFF_ROLES.filter(
+  (r) => r.value === "head_coach" || r.value === "coach" || r.value === "analyst"
+).map((r) => ({ value: r.value, label: r.label.en }));
+
+/** Back-office row picker — empty = infer the row from the role text. */
+const TIER_OPTIONS = [
+  { value: "", label: "อัตโนมัติ (เดาจากชื่อตำแหน่ง)" },
+  { value: "1", label: TIER_LABEL[1] },
+  { value: "2", label: TIER_LABEL[2] },
+  { value: "3", label: TIER_LABEL[3] },
+];
 
 type RosterStatId = "active" | "mlbb" | "efootball" | "staff";
 type RosterTierKey = "executive" | "operations" | "technical";
@@ -274,6 +282,140 @@ function PlayerList({
   );
 }
 
+/**
+ * A staff section. Used twice: "coach" variant under each game lineup (no row
+ * picker — the section's game is what places them), and "office" variant for the
+ * back-office team (adds a row picker so each person's tier is chosen directly).
+ * Operates by member id so it works on a filtered slice of the flat staff array.
+ */
+function StaffList({
+  title,
+  members,
+  variant,
+  addLabel,
+  onAdd,
+  onMove,
+  onDelete,
+  onPatch,
+  onSocial,
+}: {
+  title: string;
+  members: StaffMember[];
+  variant: "coach" | "office";
+  addLabel: string;
+  onAdd: () => void;
+  onMove: (id: string, dir: -1 | 1) => void;
+  onDelete: (id: string) => void;
+  onPatch: (id: string, patch: Partial<StaffMember>) => void;
+  onSocial: (id: string, key: keyof StaffMember["socials"], val: string) => void;
+}) {
+  return (
+    <Section title={title} action={<Button onClick={onAdd}>{addLabel}</Button>}>
+      <div className="space-y-4">
+        {members.length === 0 && (
+          <p className="font-mono text-xs text-ash">— ยังไม่มีรายชื่อ —</p>
+        )}
+        {members.map((s) => (
+          <Card key={s.id}>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-spectre">{s.name || "—"}</span>
+              <div className="flex items-center gap-1.5">
+                <Button onClick={() => onMove(s.id, -1)}>↑</Button>
+                <Button onClick={() => onMove(s.id, 1)}>↓</Button>
+                <Button variant="danger" onClick={() => onDelete(s.id)}>
+                  ลบ
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <TextField label="ชื่อจริง" value={s.name ?? ""} onChange={(v) => onPatch(s.id, { name: v })} />
+              <TextField
+                label="ชื่อเล่น / Nickname (ไม่บังคับ)"
+                value={s.ign ?? ""}
+                onChange={(v) => onPatch(s.id, { ign: v || undefined })}
+              />
+              {variant === "coach" && (
+                <div className="md:col-span-2">
+                  <SelectField
+                    label="ตำแหน่งทางการ (จัดลำดับแถวอัตโนมัติ)"
+                    value={staffRoleKey(s)}
+                    onChange={(v) => onPatch(s.id, { officialRole: v as StaffMember["officialRole"] })}
+                    options={COACH_ROLE_OPTIONS}
+                  />
+                </div>
+              )}
+              {variant === "office" && (
+                <div className="md:col-span-2">
+                  <SelectField
+                    label="อยู่แถวไหน (เลือกเองได้)"
+                    value={s.tier ? String(s.tier) : ""}
+                    onChange={(v) => onPatch(s.id, { tier: v ? (Number(v) as 1 | 2 | 3) : undefined })}
+                    options={TIER_OPTIONS}
+                  />
+                </div>
+              )}
+              <div className="md:col-span-2">
+                <BilingualField
+                  label={variant === "office" ? "Role (ตำแหน่งที่แสดงบนการ์ด) — EN + ລາວ" : "ตำแหน่งที่แสดงบนการ์ด (Display)"}
+                  value={s.role}
+                  onChange={(v) => onPatch(s.id, { role: v })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <BilingualField
+                  label="หน้าที่รับผิดชอบ (Responsibility / Bio)"
+                  value={s.bio ?? { en: "", lo: "" }}
+                  onChange={(v) => onPatch(s.id, { bio: v.en || v.lo ? v : undefined })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <TextField
+                  label="อีเมลธุรกิจ (ไม่บังคับ — เว้นว่าง = ใช้อีเมลกลางของสโมสร)"
+                  value={s.email ?? ""}
+                  onChange={(v) => onPatch(s.id, { email: v.trim() || undefined })}
+                  placeholder="name@niightmare.gg"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <ImageField
+                  label="รูปทีมงาน"
+                  value={s.photo}
+                  folder="staff"
+                  onChange={(path) => onPatch(s.id, { photo: path || undefined })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label>ช่องทางติดต่อ (วางลิงก์เฉพาะที่มี — เว้นว่าง = ไม่โชว์)</Label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {([
+                    ["whatsapp", "WhatsApp"],
+                    ["facebook", "Facebook"],
+                    ["instagram", "Instagram"],
+                    ["tiktok", "TikTok"],
+                    ["youtube", "YouTube"],
+                  ] as const).map(([k, label]) => (
+                    <label key={k} className="flex items-center gap-2">
+                      <span className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
+                        {label}
+                      </span>
+                      <input
+                        className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
+                        placeholder="https://…"
+                        value={socialValue(s.socials[k])}
+                        onChange={(e) => onSocial(s.id, k, e.target.value)}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export default function RosterEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<RosterFile>("roster");
   const [view, setView] = useState<"page" | "players" | "staff">("players");
@@ -303,17 +445,39 @@ export default function RosterEditor() {
     patchPlayer(game, i, { socials });
   };
 
-  const patchStaff = (i: number, patch: Partial<StaffMember>) =>
-    setData({ ...data, staff: data.staff.map((x, idx) => (idx === i ? { ...x, ...patch } : x)) });
-  const moveStaff = (i: number, dir: -1 | 1) =>
-    setData({ ...data, staff: move(data.staff, i, dir) });
-  const setStaffSocial = (i: number, key: keyof StaffMember["socials"], val: string) => {
-    const socials = { ...data.staff[i].socials };
+  // Staff is one flat array; coaches (game set) are edited under their game,
+  // the rest under the back-office tab. Operate by id so a filtered slice works.
+  const backOffice = data.staff.filter((m) => !memberGame(m));
+  const coachesOf = (game: GameId) => data.staff.filter((m) => memberGame(m) === game);
+
+  const patchStaffId = (id: string, patch: Partial<StaffMember>) =>
+    setData({ ...data, staff: data.staff.map((m) => (m.id === id ? { ...m, ...patch } : m)) });
+  const deleteStaffId = (id: string) =>
+    setData({ ...data, staff: data.staff.filter((m) => m.id !== id) });
+  const setStaffSocialId = (id: string, key: keyof StaffMember["socials"], val: string) => {
+    const m = data.staff.find((x) => x.id === id);
+    if (!m) return;
+    const socials = { ...m.socials };
     const v = val.trim();
     if (!v || v === "#") delete socials[key];
     else socials[key] = v;
-    patchStaff(i, { socials });
+    patchStaffId(id, { socials });
   };
+  /** Reorder within a group by swapping with the prev/next member of that group. */
+  const moveStaffInGroup = (group: StaffMember[], id: string, dir: -1 | 1) => {
+    const target = group[group.findIndex((m) => m.id === id) + dir];
+    if (!target) return;
+    const a = data.staff.findIndex((m) => m.id === id);
+    const b = data.staff.findIndex((m) => m.id === target.id);
+    const next = data.staff.slice();
+    [next[a], next[b]] = [next[b], next[a]];
+    setData({ ...data, staff: next });
+  };
+  const addStaff = (extra: Partial<StaffMember>) =>
+    setData({
+      ...data,
+      staff: [...data.staff, { id: uid("staff"), name: "", role: { en: "", lo: "" }, socials: {}, ...extra }],
+    });
 
   const sectionProps = (game: GameId) => ({
     players: data[game].players,
@@ -345,8 +509,8 @@ export default function RosterEditor() {
       <div className="flex flex-wrap gap-2">
         {([
           { id: "page", label: "หน้า Roster (Page)", count: page.stats.length },
-          { id: "players", label: "นักกีฬา (Players)", count: data.mlbb.players.length + data.efootball.players.length },
-          { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: data.staff.length },
+          { id: "players", label: "นักกีฬา + โค้ช (Players)", count: data.mlbb.players.length + data.efootball.players.length + (data.staff.length - backOffice.length) },
+          { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: backOffice.length },
         ] as const).map(({ id, label, count }) => {
           const active = view === id;
           return (
@@ -451,118 +615,44 @@ export default function RosterEditor() {
       {view === "players" && (
         <>
           <PlayerList title="ทีม MLBB" {...sectionProps("mlbb")} />
+          <StaffList
+            title="โค้ช MLBB"
+            members={coachesOf("mlbb")}
+            variant="coach"
+            addLabel="+ เพิ่มโค้ช MLBB"
+            onAdd={() => addStaff({ game: "mlbb", officialRole: "head_coach" })}
+            onMove={(id, dir) => moveStaffInGroup(coachesOf("mlbb"), id, dir)}
+            onDelete={deleteStaffId}
+            onPatch={patchStaffId}
+            onSocial={setStaffSocialId}
+          />
           <PlayerList title="ทีม eFootball" {...sectionProps("efootball")} />
+          <StaffList
+            title="โค้ช eFootball"
+            members={coachesOf("efootball")}
+            variant="coach"
+            addLabel="+ เพิ่มโค้ช eFootball"
+            onAdd={() => addStaff({ game: "efootball", officialRole: "head_coach" })}
+            onMove={(id, dir) => moveStaffInGroup(coachesOf("efootball"), id, dir)}
+            onDelete={deleteStaffId}
+            onPatch={patchStaffId}
+            onSocial={setStaffSocialId}
+          />
         </>
       )}
 
-      {/* staff */}
       {view === "staff" && (
-      <Section
-        title="ทีมงาน (Staff)"
-        action={
-          <Button
-            onClick={() =>
-              setData({
-                ...data,
-                staff: [...data.staff, { id: uid("staff"), name: "", role: { en: "", lo: "" }, socials: {} }],
-              })
-            }
-          >
-            + เพิ่มทีมงาน
-          </Button>
-        }
-      >
-        <div className="space-y-4">
-          {data.staff.map((s, i) => (
-            <Card key={s.id}>
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="font-mono text-xs text-spectre">{s.name || "—"}</span>
-                <div className="flex items-center gap-1.5">
-                  <Button onClick={() => moveStaff(i, -1)}>↑</Button>
-                  <Button onClick={() => moveStaff(i, 1)}>↓</Button>
-                  <Button variant="danger" onClick={() => setData({ ...data, staff: data.staff.filter((_, idx) => idx !== i) })}>
-                    ลบ
-                  </Button>
-                </div>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <TextField
-                  label="ชื่อจริง"
-                  value={s.name ?? ""}
-                  onChange={(v) => patchStaff(i, { name: v })}
-                />
-                <TextField
-                  label="ชื่อเล่น / Nickname (ไม่บังคับ)"
-                  value={s.ign ?? ""}
-                  onChange={(v) => patchStaff(i, { ign: v || undefined })}
-                />
-                <div className="md:col-span-2">
-                  <SelectField
-                    label="ตำแหน่งทางการ (จัดลำดับแถวอัตโนมัติ)"
-                    value={staffRoleKey(s)}
-                    onChange={(v) => patchStaff(i, { officialRole: v as StaffMember["officialRole"] })}
-                    options={STAFF_ROLE_OPTIONS}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <BilingualField
-                    label="ตำแหน่งที่แสดงบนการ์ด (Display)"
-                    value={s.role}
-                    onChange={(v) => patchStaff(i, { role: v })}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <BilingualField
-                    label="หน้าที่รับผิดชอบ (Responsibility / Bio)"
-                    value={s.bio ?? { en: "", lo: "" }}
-                    onChange={(v) => patchStaff(i, { bio: v.en || v.lo ? v : undefined })}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <TextField
-                    label="อีเมลธุรกิจ (ไม่บังคับ — เว้นว่าง = ใช้อีเมลกลางของสโมสร)"
-                    value={s.email ?? ""}
-                    onChange={(v) => patchStaff(i, { email: v.trim() || undefined })}
-                    placeholder="name@niightmare.gg"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <ImageField
-                    label="รูปทีมงาน"
-                    value={s.photo}
-                    folder="staff"
-                    onChange={(path) => patchStaff(i, { photo: path || undefined })}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label>ช่องทางติดต่อ (วางลิงก์เฉพาะที่มี — เว้นว่าง = ไม่โชว์)</Label>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {([
-                      ["whatsapp", "WhatsApp"],
-                      ["facebook", "Facebook"],
-                      ["instagram", "Instagram"],
-                      ["tiktok", "TikTok"],
-                      ["youtube", "YouTube"],
-                    ] as const).map(([k, label]) => (
-                      <label key={k} className="flex items-center gap-2">
-                        <span className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
-                          {label}
-                        </span>
-                        <input
-                          className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs text-soul outline-none focus:border-amethyst"
-                          placeholder="https://…"
-                          value={socialValue(s.socials[k])}
-                          onChange={(e) => setStaffSocial(i, k, e.target.value)}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Section>
+        <StaffList
+          title="ทีมหลังบ้าน (Staff)"
+          members={backOffice}
+          variant="office"
+          addLabel="+ เพิ่มทีมงาน"
+          onAdd={() => addStaff({})}
+          onMove={(id, dir) => moveStaffInGroup(backOffice, id, dir)}
+          onDelete={deleteStaffId}
+          onPatch={patchStaffId}
+          onSocial={setStaffSocialId}
+        />
       )}
     </div>
   );

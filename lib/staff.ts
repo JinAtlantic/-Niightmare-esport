@@ -1,4 +1,4 @@
-import type { Bilingual, StaffMember, StaffRole } from "./types";
+import type { Bilingual, GameId, StaffMember, StaffRole } from "./types";
 
 export type StaffTier = 1 | 2 | 3;
 
@@ -62,11 +62,48 @@ export function staffTier(member: StaffMember): StaffTier {
 }
 
 /**
+ * Which game lineup this member belongs to, or null for back-office staff.
+ * Prefers the explicit `game` field (set in the admin); falls back to reading
+ * the game out of a coach's display role for legacy entries saved before the
+ * field existed.
+ */
+export function memberGame(member: StaffMember): GameId | null {
+  if (member.game) return member.game;
+  return isCoach(member) ? staffGame(member) : null;
+}
+
+/**
+ * Back-office row for a member. Prefers the explicit `tier` field (chosen in the
+ * admin); falls back to the tier implied by their official role.
+ */
+export function memberTier(member: StaffMember): StaffTier {
+  return member.tier ?? staffTier(member);
+}
+
+/** True for coaching roles (head coach / coach). */
+export function isCoach(member: StaffMember): boolean {
+  const r = staffRoleKey(member);
+  return r === "head_coach" || r === "coach";
+}
+
+/**
+ * Which game a coach belongs to, read from the display role text (e.g.
+ * "Head Coach MLBB" → mlbb). Returns null when no game is named, so such a
+ * member stays in the back-office group rather than a game lineup.
+ */
+export function staffGame(member: StaffMember): GameId | null {
+  const r = `${member.role?.en ?? ""} ${member.role?.lo ?? ""}`.toLowerCase();
+  if (/e-?football|efoot|\befb\b|pes/.test(r)) return "efootball";
+  if (/mlbb|mobile\s*legend|\bml\b/.test(r)) return "mlbb";
+  return null;
+}
+
+/**
  * Split staff into the three hierarchy tiers, preserving the admin-defined
  * order within each tier. Empty tiers are dropped by the caller.
  */
 export function groupStaffByTier(staff: StaffMember[]): Record<StaffTier, StaffMember[]> {
   const groups: Record<StaffTier, StaffMember[]> = { 1: [], 2: [], 3: [] };
-  for (const member of staff) groups[staffTier(member)].push(member);
+  for (const member of staff) groups[memberTier(member)].push(member);
   return groups;
 }

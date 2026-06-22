@@ -81,6 +81,12 @@ export interface StaffMember {
   role: Bilingual;
   /** Official position used to place the member in the management hierarchy. */
   officialRole?: StaffRole;
+  /** When set, this member is a coach shown under that game's lineup (MLBB /
+   *  eFootball) instead of the back-office group. Unset = back-office staff. */
+  game?: GameId;
+  /** Explicit back-office row: 1 executive, 2 operations, 3 technical. When
+   *  unset, the row is inferred from officialRole. Ignored for game coaches. */
+  tier?: 1 | 2 | 3;
   /** Optional direct business email. Falls back to the club's contact email. */
   email?: string;
   /** Optional short responsibility / bio shown in the staff modal. */

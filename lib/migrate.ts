@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { readAll } from "./store";
+import { staffRoleKey } from "./staff";
 import type {
   Player,
   StaffMember,
@@ -57,7 +58,12 @@ export function memberRows(staff: StaffMember[]) {
   return staff.map((m, i) => ({
     name: s(m.name),
     nickname: s(m.ign),
-    official_role: s(m.officialRole),
+    // Persist the resolved role so official_role is never empty: use the chosen
+    // value, else the one inferred from the display role (what the admin dropdown
+    // already shows). Keeps the DB explicit instead of relying on render-time guesses.
+    official_role: s(m.officialRole) ?? staffRoleKey(m),
+    game: s(m.game),
+    tier: m.tier ?? null,
     role_en: en(m.role),
     role_lo: lo(m.role),
     bio_en: en(m.bio),

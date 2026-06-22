@@ -62,6 +62,8 @@ create table if not exists public.members (
   name            text,
   nickname        text,
   official_role   text,  -- owner|founder|ceo|manager|head_coach|coach|analyst|developer|designer|content|other
+  game            text,  -- mlbb|efootball for coaches shown under a game lineup; null = back-office
+  tier            int,   -- explicit back-office row 1|2|3; null = infer from official_role
   role_en         text,
   role_lo         text,
   bio_en          text,
