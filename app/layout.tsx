@@ -122,6 +122,9 @@ export default async function RootLayout({
   return (
     <html lang="en" className={fontVars}>
       <head>
+        {/* Deploy-pipeline check — confirms which Vercel project serves the
+            live domain. Safe to remove. */}
+        <meta name="deploy-check" content="dc-20260622-203934" />
         {/* Set the saved language before first paint so Lao users never see an
             English flash or a font swap (FOUC). Mirrors LanguageContext. */}
         <script
