@@ -46,8 +46,19 @@ that ships with the playwright-go bundle, launched against installed Edge:
 then `chromium.launch({ channel: 'msedge', headless: true })`.
 
 ## Deploy (Vercel)
-There is **no git remote** — deploys go straight from the local folder via the Vercel
-CLI (cloud build, so it does NOT touch local `.next`):
+**Primary: git push.** The repo now has a git remote and the production project is wired
+to auto-deploy on push to `main`:
+```powershell
+git push origin main   # -> builds + ships to https://niightmare-esport.vercel.app
+```
+- Remote `origin` = `https://github.com/JinAtlantic/-Niightmare-esport.git` — **note the
+  LEADING DASH** in the repo name. A second repo `JinAtlantic/Niightmare-Esport` (no dash)
+  exists and is stale; the live project must stay connected to the **dash** repo. Pushing
+  to the wrong repo silently fails to deploy.
+- Production branch is `main`. Every push to `main` triggers a production build.
+
+**Fallback: Vercel CLI** straight from the local folder (cloud build, does NOT touch local
+`.next`) — use if the git integration is ever broken:
 ```powershell
 $env:PATH = "C:\Users\iTAPE\AppData\Local\nodejs-portable\node-v22.12.0-win-x64;" + $env:PATH
 $tok = [System.Environment]::GetEnvironmentVariable('VERCEL_TOKEN','User')
@@ -55,14 +66,16 @@ Set-Location "D:\Picture D\Niigtmare Project\Website\niightmareesport\Niightmare
 npx --yes vercel@latest --prod --yes --token $tok --scope jinatlantics-projects
 ```
 - Token is a **User env var `VERCEL_TOKEN`** — read it from the *User* scope (a freshly
-  spawned shell won't see it in `$env:`). Never print/commit the token.
+  spawned shell won't see it in `$env:`). Never print/commit the token. Same token works
+  for direct REST calls to `api.vercel.com` (the sandbox CAN reach the API host).
 - `--scope jinatlantics-projects` is mandatory in non-interactive mode.
 - Project `niightmare-esport`, projectId `prj_OFnaJcx0iXKSM9RxGoBK2MWvfS0B`, teamId
   `team_AszcleMwKqTx5nCPfaKp5yMj`.
 - Deployment protection (sso login wall) is already disabled; if a new project re-enables
   it, PATCH `ssoProtection: null` via the Vercel API.
 - This sandbox can't reach `*.vercel.app` directly — verify the live site through the
-  jina proxy: `curl https://r.jina.ai/https://niightmare-esport.vercel.app`.
+  jina proxy, requesting raw HTML so meta/markers survive:
+  `Invoke-WebRequest "https://r.jina.ai/https://niightmare-esport.vercel.app" -Headers @{ "X-Return-Format"="html" }`.
 
 ## Gotchas (will burn time if ignored)
 - **`next/font/google` HANGS the build here** (silent, never returns). All fonts are
