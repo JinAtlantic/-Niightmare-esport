@@ -48,13 +48,9 @@ export default function PlayerModal({
   const tba = t("roster.tba");
   const bio = player.description ? pick(player.description) : "";
 
-  // Roster tenure: "<joined> – <left|Present>". Hidden entirely when no join
-  // date is set, so unfilled players just don't show the row.
-  const tenure = player.joinedDate
-    ? `${formatDate(player.joinedDate, lang)} – ${
-        player.leftDate ? formatDate(player.leftDate, lang) : t("roster.present")
-      }`
-    : "";
+  // Roster tenure periods — some players leave and return, so this can be
+  // several "<joined> – <left|Present>" spans. Empty when none are set.
+  const tenures = (player.tenures ?? []).filter((tn) => tn.joined);
 
   // ESC to close + lock body scroll + focus the close button.
   useEffect(() => {
@@ -170,14 +166,18 @@ export default function PlayerModal({
               <p className="mt-2 font-mono text-sm text-spectre">{player.name}</p>
             )}
 
-            {/* TIME ON ROSTER — joined → left/present (hidden if no join date) */}
-            {tenure && (
-              <p className="mt-3 inline-flex items-center gap-2 border border-edge bg-void/40 px-3 py-1.5">
-                <CalendarDays size={14} strokeWidth={2} className="text-amethyst" />
-                <span className="keep-latin font-mono text-xs font-medium tracking-wide text-spectre">
-                  {tenure}
-                </span>
-              </p>
+            {/* TIME ON ROSTER — one or more joined → left/present spans */}
+            {tenures.length > 0 && (
+              <div className="mt-3 inline-flex flex-col gap-1.5 border border-edge bg-void/40 px-3 py-2">
+                {tenures.map((tn, idx) => (
+                  <p key={idx} className="inline-flex items-center gap-2">
+                    <CalendarDays size={14} strokeWidth={2} className="shrink-0 text-amethyst" />
+                    <span className="keep-latin font-mono text-xs font-medium tracking-wide text-spectre">
+                      {formatDate(tn.joined, lang)} – {tn.left ? formatDate(tn.left, lang) : t("roster.present")}
+                    </span>
+                  </p>
+                ))}
+              </div>
             )}
 
             {/* ABOUT — short career bio */}

@@ -43,8 +43,8 @@ create table if not exists public.players (
   photo_y         int     default 50,
   heroes          text[]  default '{}',
   win_rate        text,           -- holds the FMVP count (legacy column name)
-  gear_device     text,           -- holds the roster join date (legacy column name)
-  gear_audio      text,           -- holds the roster leave date (legacy column name)
+  gear_device     text,           -- holds the roster tenure periods as JSON (legacy column name)
+  gear_audio      text,           -- unused (legacy column kept for compatibility)
   email           text,
   facebook        text,
   instagram       text,

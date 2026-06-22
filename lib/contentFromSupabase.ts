@@ -28,6 +28,21 @@ function socials(r: Record<string, unknown>): Socials {
   return out;
 }
 
+/** Parse the JSON tenure list stored in the legacy gear_device column. */
+function parseTenures(v: unknown): { joined: string; left?: string }[] | undefined {
+  if (typeof v !== "string" || !v.trim()) return undefined;
+  try {
+    const arr = JSON.parse(v);
+    if (!Array.isArray(arr)) return undefined;
+    const out = arr
+      .filter((x) => x && typeof x.joined === "string" && x.joined.trim())
+      .map((x) => ({ joined: x.joined, ...(x.left ? { left: String(x.left) } : {}) }));
+    return out.length ? out : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function toPlayer(r: Record<string, unknown>): Player {
   return {
     id: String(r.id),
@@ -43,8 +58,7 @@ function toPlayer(r: Record<string, unknown>): Player {
         ? { zoom: Number(r.photo_zoom ?? 1), x: Number(r.photo_x ?? 50), y: Number(r.photo_y ?? 50) }
         : undefined,
     fmvp: val(r.win_rate), // legacy column name, now holds the FMVP count
-    joinedDate: val(r.gear_device), // legacy column — now the roster join date
-    leftDate: val(r.gear_audio), // legacy column — now the roster leave date
+    tenures: parseTenures(r.gear_device), // legacy column — JSON tenure periods
     email: val(r.email),
     socials: socials(r),
   };

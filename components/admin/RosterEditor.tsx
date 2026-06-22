@@ -120,6 +120,24 @@ function PlayerList({
     <Section title={title} action={<Button onClick={onAdd}>+ เพิ่มนักแข่ง</Button>}>
       <div className="space-y-4">
         {players.map((p, i) => {
+          const tenures = p.tenures ?? [];
+          const setTenure = (idx: number, key: "joined" | "left", v: string) => {
+            const val = v.trim();
+            const next = tenures.map((tn, j) => {
+              if (j !== idx) return tn;
+              if (key === "left") {
+                const { left: _drop, ...rest } = tn;
+                return val ? { ...rest, left: val } : rest;
+              }
+              return { ...tn, joined: val };
+            });
+            onPatch(i, { tenures: next.length ? next : undefined });
+          };
+          const addTenure = () => onPatch(i, { tenures: [...tenures, { joined: "" }] });
+          const removeTenure = (idx: number) => {
+            const next = tenures.filter((_, j) => j !== idx);
+            onPatch(i, { tenures: next.length ? next : undefined });
+          };
           return (
           <Card key={p.id}>
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -178,18 +196,31 @@ function PlayerList({
                 placeholder="เช่น 3×"
               />
               <div className="hidden md:block" />
-              <TextField
-                label="เข้าทีมเมื่อ (ปี-เดือน-วัน เช่น 2021-12-01)"
-                value={p.joinedDate ?? ""}
-                onChange={(v) => onPatch(i, { joinedDate: v.trim() || undefined })}
-                placeholder="2021-12-01"
-              />
-              <TextField
-                label="ออกจากทีมเมื่อ (เว้นว่าง = ยังอยู่ปัจจุบัน)"
-                value={p.leftDate ?? ""}
-                onChange={(v) => onPatch(i, { leftDate: v.trim() || undefined })}
-                placeholder="2024-05-20"
-              />
+              <div className="md:col-span-2">
+                <Label>ระยะเวลาในทีม — เพิ่มได้หลายช่วง (ออกแล้วกลับมาก็กด “เพิ่มช่วงเวลา”)</Label>
+                <div className="mt-2 space-y-2">
+                  {tenures.map((tn, idx) => (
+                    <div key={idx} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+                      <TextField
+                        label="เข้าทีม (ปป-ดด-วว)"
+                        value={tn.joined ?? ""}
+                        onChange={(v) => setTenure(idx, "joined", v)}
+                        placeholder="2021-12-01"
+                      />
+                      <TextField
+                        label="ออกจากทีม (เว้นว่าง = ปัจจุบัน)"
+                        value={tn.left ?? ""}
+                        onChange={(v) => setTenure(idx, "left", v)}
+                        placeholder="2024-05-20"
+                      />
+                      <Button variant="danger" onClick={() => removeTenure(idx)}>
+                        ลบ
+                      </Button>
+                    </div>
+                  ))}
+                  <Button onClick={addTenure}>+ เพิ่มช่วงเวลา</Button>
+                </div>
+              </div>
               <div className="md:col-span-2">
                 <BilingualField
                   label="ประวัติคร่าวๆ (ABOUT — โชว์ในการ์ดโปรไฟล์)"
