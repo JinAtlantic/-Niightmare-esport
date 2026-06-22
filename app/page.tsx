@@ -1,9 +1,9 @@
 import React from "react";
 import Hero from "@/components/sections/Hero";
 import UpcomingMatch from "@/components/sections/UpcomingMatch";
-import TeamSnapshot from "@/components/sections/TeamSnapshot";
+import RecentResults from "@/components/sections/RecentResults";
+import RosterSpotlight from "@/components/sections/RosterSpotlight";
 import TrophyCabinet from "@/components/sections/TrophyCabinet";
-import HomeNews from "@/components/sections/HomeNews";
 import VideoSection from "@/components/sections/VideoSection";
 // PartnerStrip is built and ready, but hidden until real partners exist —
 // showing placeholder sponsors as social proof would mislead visitors.
@@ -18,9 +18,9 @@ export default function HomePage() {
       <JsonLd data={upcomingEventSchema()} />
       <Hero />
       <UpcomingMatch />
-      <TeamSnapshot />
+      <RecentResults />
+      <RosterSpotlight />
       <TrophyCabinet />
-      <HomeNews />
       <VideoSection />
     </>
   );
