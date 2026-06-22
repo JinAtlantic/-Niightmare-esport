@@ -4,10 +4,11 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { LanguageProvider } from "@/components/context/LanguageContext";
-import { ContentProvider } from "@/components/context/ContentContext";
+import { ContentProvider, type Content } from "@/components/context/ContentContext";
 import Chrome from "@/components/layout/Chrome";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema, SITE_URL } from "@/lib/seo";
+import { getSiteContent } from "@/lib/getContent";
 
 // All fonts are self-hosted (woff2 in ./fonts) via next/font/local — no
 // render-blocking request to Google Fonts, and the build never depends on the
@@ -104,11 +105,20 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Server-render the live content so the first paint shows real data (no
+  // client refetch, no seed→cloud reflow). Falls back to the seed on any error.
+  let initialContent: Partial<Content> | null = null;
+  try {
+    initialContent = (await getSiteContent()) as Partial<Content>;
+  } catch {
+    /* keep null — ContentProvider falls back to the bundled seed */
+  }
+
   return (
     <html lang="en" className={fontVars}>
       <head>
@@ -123,7 +133,7 @@ export default function RootLayout({
       <body>
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <LanguageProvider>
-          <ContentProvider>
+          <ContentProvider initial={initialContent}>
             <Chrome>{children}</Chrome>
           </ContentProvider>
         </LanguageProvider>
