@@ -42,6 +42,11 @@ export interface Player {
    *  e.g. "3×"). Empty falls back to a "no titles yet" placeholder.
    *  Persisted in the legacy `win_rate` DB column (no schema migration). */
   fmvp?: string;
+  /** Roster tenure (ISO dates) shown in the profile modal: when the player
+   *  joined and, if they left, when. An empty `leftDate` reads as "Present".
+   *  Persisted in the legacy gear_device/gear_audio columns (no migration). */
+  joinedDate?: string;
+  leftDate?: string;
   /** Optional contact email; when set, the profile modal shows a copy button. */
   email?: string;
   socials: Socials;

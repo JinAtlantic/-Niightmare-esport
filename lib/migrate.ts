@@ -40,6 +40,8 @@ export function playerRows(players: Player[], game: string) {
     photo_x: p.photoCrop?.x ?? 50,
     photo_y: p.photoCrop?.y ?? 50,
     win_rate: s(p.fmvp), // legacy column name, now holds the FMVP count
+    gear_device: s(p.joinedDate), // legacy column — now the roster join date
+    gear_audio: s(p.leftDate), // legacy column — now the roster leave date
     email: s(p.email),
     facebook: s(p.socials?.facebook),
     instagram: s(p.socials?.instagram),

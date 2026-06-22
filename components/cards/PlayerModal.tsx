@@ -8,11 +8,13 @@ import {
   X,
   ScrollText,
   Trophy,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
+import { formatDate } from "@/lib/format";
 import type { Player } from "@/lib/types";
 
 function SectionHead({ Icon, label }: { Icon: LucideIcon; label: string }) {
@@ -37,7 +39,7 @@ export default function PlayerModal({
   player: Player;
   onClose: () => void;
 }) {
-  const { pick, t } = useLanguage();
+  const { pick, t, lang } = useLanguage();
   const reduce = useReducedMotion();
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -45,6 +47,14 @@ export default function PlayerModal({
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const tba = t("roster.tba");
   const bio = player.description ? pick(player.description) : "";
+
+  // Roster tenure: "<joined> – <left|Present>". Hidden entirely when no join
+  // date is set, so unfilled players just don't show the row.
+  const tenure = player.joinedDate
+    ? `${formatDate(player.joinedDate, lang)} – ${
+        player.leftDate ? formatDate(player.leftDate, lang) : t("roster.present")
+      }`
+    : "";
 
   // ESC to close + lock body scroll + focus the close button.
   useEffect(() => {
@@ -160,6 +170,16 @@ export default function PlayerModal({
               <p className="mt-2 font-mono text-sm text-spectre">{player.name}</p>
             )}
 
+            {/* TIME ON ROSTER — joined → left/present (hidden if no join date) */}
+            {tenure && (
+              <p className="mt-3 inline-flex items-center gap-2 border border-edge bg-void/40 px-3 py-1.5">
+                <CalendarDays size={14} strokeWidth={2} className="text-amethyst" />
+                <span className="keep-latin font-mono text-xs font-medium tracking-wide text-spectre">
+                  {tenure}
+                </span>
+              </p>
+            )}
+
             {/* ABOUT — short career bio */}
             <div className="mt-7">
               <SectionHead Icon={ScrollText} label={t("roster.about_label")} />
@@ -170,20 +190,34 @@ export default function PlayerModal({
               )}
             </div>
 
-            {/* HONORS — FMVP count */}
+            {/* HONORS — FMVP count (champion gold, made prominent) */}
             <div className="mt-6">
               <SectionHead Icon={Trophy} label={t("roster.honors_label")} />
-              <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/45 bg-amethyst/10 text-amethyst shadow-[0_0_14px_rgba(168,85,247,0.3)]">
-                  <Trophy size={20} strokeWidth={1.75} />
-                </span>
-                <div className="min-w-0">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ash-dim">FMVP</p>
-                  <p className="keep-latin truncate font-display text-lg font-bold uppercase tracking-[0.04em] text-soul">
-                    {player.fmvp || t("roster.honors_none")}
-                  </p>
+              {player.fmvp ? (
+                <div className="flex items-center gap-4 overflow-hidden border border-gold/35 bg-gradient-to-r from-gold/[0.1] via-gold/[0.04] to-transparent p-3.5 shadow-glow-gold">
+                  <span className="grid h-14 w-14 shrink-0 place-items-center border border-gold/50 bg-gold/10 text-gold shadow-[0_0_16px_rgba(245,196,81,0.35)]">
+                    <Trophy size={26} strokeWidth={1.75} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-gold/80">
+                      FMVP
+                    </p>
+                    <p className="keep-latin font-display text-4xl font-bold uppercase leading-none tracking-[0.02em] text-gold [text-shadow:0_2px_18px_rgba(245,196,81,0.45)] md:text-5xl">
+                      {player.fmvp}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center border border-edge bg-void/50 text-ash-dim">
+                    <Trophy size={20} strokeWidth={1.75} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ash-dim">FMVP</p>
+                    <p className="font-mono text-sm text-ash-dim">{t("roster.honors_none")}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* SOCIAL — pinned to the bottom on desktop so the column fills evenly */}

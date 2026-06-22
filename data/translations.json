@@ -80,6 +80,7 @@
     "about_label": { "en": "ABOUT", "lo": "ປະຫວັດ" },
     "honors_label": { "en": "HONORS", "lo": "ລາງວັນ" },
     "honors_none": { "en": "No titles yet", "lo": "ຍັງບໍ່ມີ" },
+    "present": { "en": "Present", "lo": "ປັດຈຸບັນ" },
     "stats_label": { "en": "STATS", "lo": "ສະຖິຕິ" },
     "stat_division": { "en": "Division", "lo": "ສາຍແຂ່ງ" },
     "stat_status": { "en": "Status", "lo": "ສະຖານະ" },

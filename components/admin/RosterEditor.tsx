@@ -178,6 +178,18 @@ function PlayerList({
                 placeholder="เช่น 3×"
               />
               <div className="hidden md:block" />
+              <TextField
+                label="เข้าทีมเมื่อ (ปี-เดือน-วัน เช่น 2021-12-01)"
+                value={p.joinedDate ?? ""}
+                onChange={(v) => onPatch(i, { joinedDate: v.trim() || undefined })}
+                placeholder="2021-12-01"
+              />
+              <TextField
+                label="ออกจากทีมเมื่อ (เว้นว่าง = ยังอยู่ปัจจุบัน)"
+                value={p.leftDate ?? ""}
+                onChange={(v) => onPatch(i, { leftDate: v.trim() || undefined })}
+                placeholder="2024-05-20"
+              />
               <div className="md:col-span-2">
                 <BilingualField
                   label="ประวัติคร่าวๆ (ABOUT — โชว์ในการ์ดโปรไฟล์)"

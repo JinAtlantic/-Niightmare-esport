@@ -43,6 +43,8 @@ function toPlayer(r: Record<string, unknown>): Player {
         ? { zoom: Number(r.photo_zoom ?? 1), x: Number(r.photo_x ?? 50), y: Number(r.photo_y ?? 50) }
         : undefined,
     fmvp: val(r.win_rate), // legacy column name, now holds the FMVP count
+    joinedDate: val(r.gear_device), // legacy column — now the roster join date
+    leftDate: val(r.gear_audio), // legacy column — now the roster leave date
     email: val(r.email),
     socials: socials(r),
   };
