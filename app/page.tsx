@@ -5,6 +5,7 @@ import RecentResults from "@/components/sections/RecentResults";
 import RosterSpotlight from "@/components/sections/RosterSpotlight";
 import TrophyCabinet from "@/components/sections/TrophyCabinet";
 import VideoSection from "@/components/sections/VideoSection";
+import ClosingCTA from "@/components/sections/ClosingCTA";
 // PartnerStrip is built and ready, but hidden until real partners exist —
 // showing placeholder sponsors as social proof would mislead visitors.
 // To re-enable: import it and drop <PartnerStrip /> back after <UpcomingMatch />.
@@ -22,6 +23,7 @@ export default function HomePage() {
       <RosterSpotlight />
       <TrophyCabinet />
       <VideoSection />
+      <ClosingCTA />
     </>
   );
 }

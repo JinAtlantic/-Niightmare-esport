@@ -61,25 +61,70 @@
       "lo": "ສົ່ງ brief ຂອງທ່ານໃຫ້ທີມ ແລ້ວພວກເຮົາຈະສົ່ງຕໍ່ໃຫ້ຜູ້ຮັບຜິດຊອບ."
     },
     "fieldLabels": {
-      "name": { "en": "Name", "lo": "ຊື່" },
-      "email": { "en": "Email", "lo": "ອີເມວ" },
-      "company": { "en": "Company / Organization", "lo": "ບໍລິສັດ / ອົງກອນ" },
-      "type": { "en": "Enquiry Type", "lo": "ປະເພດການຕິດຕໍ່" },
-      "message": { "en": "Message", "lo": "ຂໍ້ຄວາມ" }
+      "name": {
+        "en": "Name",
+        "lo": "ຊື່"
+      },
+      "email": {
+        "en": "Email",
+        "lo": "ອີເມວ"
+      },
+      "company": {
+        "en": "Company / Organization",
+        "lo": "ບໍລິສັດ / ອົງກອນ"
+      },
+      "type": {
+        "en": "Enquiry Type",
+        "lo": "ປະເພດການຕິດຕໍ່"
+      },
+      "message": {
+        "en": "Message",
+        "lo": "ຂໍ້ຄວາມ"
+      }
     },
     "typeLabels": {
-      "sponsorship": { "en": "Sponsorship", "lo": "ສະປອນເຊີ" },
-      "media": { "en": "Media", "lo": "ສື່" },
-      "general": { "en": "General", "lo": "ທົ່ວໄປ" },
-      "tryout": { "en": "Tryout", "lo": "ທົດສອບທີມ" }
+      "sponsorship": {
+        "en": "Sponsorship",
+        "lo": "ສະປອນເຊີ"
+      },
+      "media": {
+        "en": "Media",
+        "lo": "ສື່"
+      },
+      "general": {
+        "en": "General",
+        "lo": "ທົ່ວໄປ"
+      },
+      "tryout": {
+        "en": "Tryout",
+        "lo": "ທົດສອບທີມ"
+      }
     },
     "channelLabels": {
-      "email": { "en": "Business Email", "lo": "ອີເມວທຸລະກິດ" },
-      "facebook": { "en": "Facebook", "lo": "Facebook" },
-      "instagram": { "en": "Instagram", "lo": "Instagram" },
-      "youtube": { "en": "YouTube", "lo": "YouTube" },
-      "tiktok": { "en": "TikTok", "lo": "TikTok" },
-      "discord": { "en": "Discord", "lo": "Discord" }
+      "email": {
+        "en": "Business Email",
+        "lo": "ອີເມວທຸລະກິດ"
+      },
+      "facebook": {
+        "en": "Facebook",
+        "lo": "Facebook"
+      },
+      "instagram": {
+        "en": "Instagram",
+        "lo": "Instagram"
+      },
+      "youtube": {
+        "en": "YouTube",
+        "lo": "YouTube"
+      },
+      "tiktok": {
+        "en": "TikTok",
+        "lo": "TikTok"
+      },
+      "discord": {
+        "en": "Discord",
+        "lo": "Discord"
+      }
     },
     "submit": {
       "en": "Send Message",
@@ -101,89 +146,6 @@
   "communityUrl": "https://discord.gg/niightmare",
   "formspreeEndpoint": "https://formspree.io/f/your-form-id",
   "mediaKitUrl": "/media-kit.pdf",
-  "homeSnapshot": {
-    "kicker": {
-      "en": "PARTNER-READY CLUB PROFILE",
-      "lo": "ໂປຣໄຟລ໌ທີມສໍາລັບພາກສ່ວນ"
-    },
-    "title": {
-      "en": "TEAM SNAPSHOT",
-      "lo": "ພາບລວມຂອງທີມ"
-    },
-    "intro": {
-      "en": "A fast read for fans, media, and brands: the competitions we play, the roster behind the tag, and the sponsor paths built into the club.",
-      "lo": "ພາບລວມສໍາລັບແຟນ, ສື່ ແລະ ແບຣນ: ລາຍການທີ່ເຮົາແຂ່ງ, ນັກກິລາໃນທີມ ແລະ ເສັ້ນທາງສໍາລັບພາກສ່ວນທີ່ຢາກຮ່ວມງານ."
-    },
-    "stats": [
-      {
-        "id": "divisions",
-        "value": "2",
-        "label": { "en": "DIVISIONS", "lo": "ປະເພດເກມ" },
-        "detail": { "en": "MLBB / eFootball", "lo": "MLBB / eFootball" }
-      },
-      {
-        "id": "roster",
-        "value": "8",
-        "label": { "en": "ROSTER", "lo": "ນັກກິລາ" },
-        "detail": {
-          "en": "Active players across the current lineup.",
-          "lo": "ນັກກິລາທີ່ຢູ່ໃນລາຍຊື່ປັດຈຸບັນ."
-        }
-      },
-      {
-        "id": "honours",
-        "value": "1",
-        "label": { "en": "HONOURS", "lo": "ລາງວັນ" },
-        "detail": {
-          "en": "Tournament placements already in the cabinet.",
-          "lo": "ຜົນງານການແຂ່ງຂັນທີ່ຢູ່ໃນຕູ້ລາງວັນ."
-        }
-      },
-      {
-        "id": "partners",
-        "value": "3+",
-        "label": { "en": "PARTNER TIERS", "lo": "ລະດັບພາກສ່ວນ" },
-        "detail": {
-          "en": "Structured options for brands and community partners.",
-          "lo": "ທາງເລືອກສໍາລັບແບຣນ ແລະ ພາກສ່ວນຊຸມຊົນ."
-        }
-      }
-    ],
-    "pillars": [
-      {
-        "id": "matchday",
-        "title": { "en": "MATCHDAY PRESENCE", "lo": "ພ້ອມສໍາລັບວັນແຂ່ງ" },
-        "body": {
-          "en": "The headline fixture gives visitors the next battle, opponent, tournament, and kickoff without digging through pages.",
-          "lo": "ຜູ້ເຂົ້າຊົມເຫັນນັດຕໍ່ໄປ, ຄູ່ແຂ່ງ, ລາຍການ ແລະ ເວລາເລີ່ມໄດ້ທັນທີ."
-        }
-      },
-      {
-        "id": "proof",
-        "title": { "en": "PROOF OF LEVEL", "lo": "ຫຼັກຖານຂອງລະດັບ" },
-        "body": {
-          "en": "Honours, match history, and news make the team look active instead of like a static logo page.",
-          "lo": "ລາງວັນ, ປະຫວັດການແຂ່ງ ແລະ ຂ່າວ ຊ່ວຍໃຫ້ທີມເບິ່ງມີການເຄື່ອນໄຫວ."
-        }
-      },
-      {
-        "id": "partners",
-        "title": { "en": "BUSINESS FLOW", "lo": "ເສັ້ນທາງທຸລະກິດ" },
-        "body": {
-          "en": "Sponsor and contact routes are visible from the home page, which helps with price discussions and partner trust.",
-          "lo": "ລິ້ງສໍາລັບສະປອນເຊີ ແລະ ການຕິດຕໍ່ຢູ່ໃນໜ້າຫຼັກ ຊ່ວຍໃນການຕໍ່ລອງ ແລະ ສ້າງຄວາມເຊື່ອໃຈ."
-        }
-      }
-    ],
-    "primaryCta": {
-      "label": { "en": "VIEW SPONSOR PATHS", "lo": "ເບິ່ງທາງເລືອກສະປອນເຊີ" },
-      "href": "/sponsors"
-    },
-    "secondaryCta": {
-      "label": { "en": "START A DEAL", "lo": "ເລີ່ມຕິດຕໍ່ທຸລະກິດ" },
-      "href": "/contact"
-    }
-  },
   "upcomingMatch": {
     "status": "next",
     "date": "2026-07-01T19:00:00+07:00",
