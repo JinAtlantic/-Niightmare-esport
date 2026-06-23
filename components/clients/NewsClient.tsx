@@ -1,163 +1,177 @@
 "use client";
 
-import React, { useMemo } from "react";
-import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import PageHeader from "@/components/layout/PageHeader";
-import NewsCard from "@/components/cards/NewsCard";
 import Reveal from "@/components/ui/Reveal";
-import { ArrowRightIcon } from "@/components/ui/Icons";
+import { ArrowRightIcon, CloseIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { formatDate } from "@/lib/format";
 import newsSeed from "@/data/news.json";
 import type { Bilingual, NewsArticle } from "@/lib/types";
 
-interface NewsCta {
-  label: Bilingual;
-  href: string;
-}
-
 interface NewsPageCopy {
   kicker: Bilingual;
   title: Bilingual;
   intro: Bilingual;
-  deskLabel: Bilingual;
-  deskIntro: Bilingual;
-  featuredLabel: Bilingual;
   feedLabel: Bilingual;
   emptyTitle: Bilingual;
   emptyBody: Bilingual;
-  statArticles: Bilingual;
-  statCategories: Bilingual;
-  statLatest: Bilingual;
-  ctaLabel: Bilingual;
-  ctaTitle: Bilingual;
-  ctaBody: Bilingual;
-  ctaPrimary: NewsCta;
-  ctaSecondary: NewsCta;
 }
+
+const READ_MORE: Bilingual = { en: "Read full article", lo: "ອ່ານຂ່າວເຕັມ" };
 
 const pageSeed = newsSeed.page as NewsPageCopy;
 
 function mergePageCopy(page?: Partial<NewsPageCopy>): NewsPageCopy {
-  return {
-    ...pageSeed,
-    ...page,
-    ctaPrimary: { ...pageSeed.ctaPrimary, ...(page?.ctaPrimary ?? {}) },
-    ctaSecondary: { ...pageSeed.ctaSecondary, ...(page?.ctaSecondary ?? {}) },
-  };
+  return { ...pageSeed, ...page };
 }
 
-function uniqueTags(articles: NewsArticle[], pick: (value: Bilingual) => string) {
-  return Array.from(new Set(articles.map((a) => pick(a.tag).trim()).filter(Boolean)));
-}
-
-function StatTile({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div className="clip-diagonal border border-edge bg-crypt px-4 py-4">
-      <span className="keep-latin block font-display text-2xl font-bold uppercase text-glow md:text-3xl">
-        {value}
-      </span>
-      <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function PressDesk({
-  page,
-  articles,
+/** A single headline row — tag, date, and title only. The body opens in a modal
+ *  on click so the feed stays scannable. */
+function HeadlineRow({
+  article,
+  onOpen,
 }: {
-  page: NewsPageCopy;
-  articles: NewsArticle[];
+  article: NewsArticle;
+  onOpen: () => void;
 }) {
   const { pick, lang } = useLanguage();
-  const tags = uniqueTags(articles, pick);
-  const latest = articles[0]?.date ? formatDate(articles[0].date, lang) : "-";
+  const tag = pick(article.tag).trim();
 
   return (
-    <Reveal>
-      <div className="border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
-        <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="flex min-h-[170px] flex-col justify-between border border-edge bg-void/45 p-5">
-            <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
-                {pick(page.deskLabel)}
-              </p>
-              <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
-                {pick(page.deskIntro)}
-              </p>
-            </div>
-            <div
-              aria-hidden
-              className="mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
-            />
-          </div>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group flex w-full items-center gap-4 px-1 py-5 text-left transition-colors duration-200 hover:bg-amethyst/[0.04] focus:outline-none focus-visible:bg-amethyst/[0.06] focus-visible:ring-1 focus-visible:ring-amethyst/50 md:gap-5 md:px-3"
+    >
+      {/* result blade — lights up on hover/focus */}
+      <span
+        aria-hidden
+        className="h-10 w-[3px] shrink-0 -skew-x-[24deg] bg-edge transition-colors duration-200 group-hover:bg-gradient-to-b group-hover:from-amethyst group-hover:to-glow group-focus-visible:from-amethyst group-focus-visible:to-glow"
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {tag && (
+            <span className="border border-amethyst/40 bg-amethyst/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-glow">
+              {tag}
+            </span>
+          )}
+          <time
+            dateTime={article.date}
+            className="font-mono text-[11px] uppercase tracking-[0.1em] text-ash-dim"
+          >
+            {formatDate(article.date, lang)}
+          </time>
+        </div>
+        <h3 className="mt-2 font-display text-lg font-bold uppercase leading-snug tracking-[0.01em] text-soul transition-colors duration-200 group-hover:text-glow md:text-xl">
+          {pick(article.title)}
+        </h3>
+      </div>
+      <ArrowRightIcon
+        size={18}
+        className="shrink-0 text-ash transition-all duration-300 group-hover:translate-x-1 group-hover:text-glow"
+      />
+    </button>
+  );
+}
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <StatTile value={articles.length} label={pick(page.statArticles)} />
-            <StatTile value={tags.length} label={pick(page.statCategories)} />
-            <StatTile value={latest} label={pick(page.statLatest)} />
+/** Reading modal — the article sits above a blurred backdrop; everything behind
+ *  is dimmed and blurred so only the open story is in focus. */
+function ArticleModal({
+  article,
+  onClose,
+}: {
+  article: NewsArticle;
+  onClose: () => void;
+}) {
+  const { pick, lang, t } = useLanguage();
+  const tag = pick(article.tag).trim();
+  const hasLink = Boolean(article.link && article.link.trim() && article.link !== "#");
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={pick(article.title)}
+    >
+      {/* blurred backdrop — click to dismiss */}
+      <div
+        className="absolute inset-0 bg-void/80 backdrop-blur-md"
+        onClick={onClose}
+        aria-hidden
+      />
+
+      <div className="relative z-10 max-h-[88vh] w-full max-w-2xl overflow-hidden border border-amethyst/45 bg-gradient-to-b from-crypt to-void shadow-[0_0_60px_rgba(168,85,247,0.3)]">
+        <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
+
+        <div className="flex items-center justify-between gap-4 border-b border-edge px-5 py-4 md:px-7">
+          <div className="flex flex-wrap items-center gap-3">
+            {tag && (
+              <span className="border border-amethyst/40 bg-amethyst/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-glow">
+                {tag}
+              </span>
+            )}
+            <time
+              dateTime={article.date}
+              className="font-mono text-[11px] uppercase tracking-[0.12em] text-ash"
+            >
+              {formatDate(article.date, lang)}
+            </time>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("common.close")}
+            className="grid h-9 w-9 shrink-0 place-items-center border border-edge bg-void/60 text-soul transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst"
+          >
+            <CloseIcon size={18} />
+          </button>
+        </div>
+
+        <div className="max-h-[calc(88vh-64px)] overflow-y-auto px-5 py-6 [scrollbar-color:#A855F7_#16101F] [scrollbar-width:thin] md:px-7 md:py-8">
+          <h2 className="font-display text-2xl font-bold uppercase leading-tight tracking-[0.01em] text-soul [text-shadow:0_0_28px_rgba(168,85,247,0.35)] md:text-3xl">
+            {pick(article.title)}
+          </h2>
+          <p className="mt-5 whitespace-pre-line text-sm leading-relaxed text-spectre md:text-base">
+            {pick(article.excerpt)}
+          </p>
+
+          {hasLink && (
+            <a
+              href={article.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group mt-7 inline-flex items-center gap-2.5 rounded-md border border-amethyst/60 bg-amethyst/10 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul transition-all duration-300 hover:bg-amethyst/20 hover:shadow-[0_0_28px_-6px_rgba(168,85,247,0.7)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+            >
+              {pick(READ_MORE)}
+              <ArrowRightIcon
+                size={15}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </a>
+          )}
         </div>
       </div>
-    </Reveal>
-  );
-}
-
-function EmptyState({ page }: { page: NewsPageCopy }) {
-  const { pick } = useLanguage();
-  return (
-    <div className="border border-edge bg-crypt p-8 text-center">
-      <p className="font-display text-xl font-bold uppercase text-soul">
-        {pick(page.emptyTitle)}
-      </p>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-ash">
-        {pick(page.emptyBody)}
-      </p>
-    </div>
-  );
-}
-
-function CtaBand({ page }: { page: NewsPageCopy }) {
-  const { pick } = useLanguage();
-  const ctas = [page.ctaPrimary, page.ctaSecondary].filter((cta) => cta.href);
-
-  return (
-    <Reveal>
-      <section className="mt-16 overflow-hidden border border-edge bg-crypt/55 p-6 shadow-glow-soft md:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.32em] text-amethyst">
-              {pick(page.ctaLabel)}
-            </p>
-            <h2 className="mt-4 max-w-3xl font-display text-2xl font-bold uppercase leading-tight text-soul md:text-4xl">
-              {pick(page.ctaTitle)}
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ash md:text-base">
-              {pick(page.ctaBody)}
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-            {ctas.map((cta, index) => (
-              <Link
-                key={`${cta.href}-${index}`}
-                href={cta.href}
-                className={`inline-flex min-h-[44px] items-center justify-center gap-2 border px-5 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-colors ${
-                  index === 0
-                    ? "border-amethyst bg-amethyst/15 text-soul hover:bg-amethyst/25"
-                    : "border-edge bg-void/50 text-ash hover:border-edge-bright hover:text-soul"
-                }`}
-              >
-                {pick(cta.label)}
-                <ArrowRightIcon size={15} />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-    </Reveal>
+    </div>,
+    document.body
   );
 }
 
@@ -168,8 +182,17 @@ export default function NewsClient() {
     articles: NewsArticle[];
   };
   const page = mergePageCopy(data.page);
-  const articles = useMemo(() => data.articles ?? [], [data.articles]);
-  const [featured, ...rest] = articles;
+
+  // Newest first so the feed reads top-down.
+  const articles = useMemo(
+    () =>
+      [...(data.articles ?? [])].sort((a, b) =>
+        (b.date ?? "").localeCompare(a.date ?? "")
+      ),
+    [data.articles]
+  );
+
+  const [active, setActive] = useState<NewsArticle | null>(null);
 
   return (
     <>
@@ -179,41 +202,35 @@ export default function NewsClient() {
         subtitle={pick(page.intro)}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
-        <PressDesk page={page} articles={articles} />
-
-        {featured ? (
-          <section className="mt-10 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+      <main className="mx-auto max-w-3xl px-4 py-14 md:px-6 md:py-16">
+        {articles.length > 0 ? (
+          <>
+            <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-amethyst">
+              {pick(page.feedLabel)}
+            </p>
             <Reveal>
-              <div>
-                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-amethyst">
-                  {pick(page.featuredLabel)}
-                </p>
-                <NewsCard article={featured} variant="featured" index={1} />
-              </div>
+              <ul className="divide-y divide-edge border-y border-edge">
+                {articles.map((article) => (
+                  <li key={article.id}>
+                    <HeadlineRow article={article} onOpen={() => setActive(article)} />
+                  </li>
+                ))}
+              </ul>
             </Reveal>
-
-            <Reveal delay={100}>
-              <div>
-                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-amethyst">
-                  {pick(page.feedLabel)}
-                </p>
-                <div className="grid gap-3">
-                  {rest.map((article, index) => (
-                    <NewsCard key={article.id} article={article} index={index + 2} />
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          </section>
+          </>
         ) : (
-          <div className="mt-10">
-            <EmptyState page={page} />
+          <div className="border border-edge bg-crypt p-8 text-center">
+            <p className="font-display text-xl font-bold uppercase text-soul">
+              {pick(page.emptyTitle)}
+            </p>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-ash">
+              {pick(page.emptyBody)}
+            </p>
           </div>
         )}
-
-        <CtaBand page={page} />
       </main>
+
+      {active && <ArticleModal article={active} onClose={() => setActive(null)} />}
     </>
   );
 }
