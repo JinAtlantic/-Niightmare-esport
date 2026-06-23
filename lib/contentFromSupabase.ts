@@ -1,7 +1,11 @@
 import "server-only";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { rowToStaff, type MemberRow } from "./members";
-import { readAll } from "./store";
+import rosterSeed from "@/data/roster.json";
+import matchesSeed from "@/data/matches.json";
+import newsSeed from "@/data/news.json";
+import sponsorsSeed from "@/data/sponsors.json";
+import siteSeed from "@/data/site.json";
 import type { Player, Socials } from "./types";
 
 /**
@@ -86,15 +90,16 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     );
     if (firstError?.error) throw new Error(firstError.error.message);
 
-    // One readAll() (a single Blob `list`) instead of five readSection() calls —
-    // each readSection re-ran readAll → an extra `list` advanced operation for
-    // the very same content object. Cuts Blob advanced ops on this path by ~80%.
-    const stored = (await readAll()) as Record<string, Record<string, unknown>>;
-    const storedRoster = stored.roster ?? {};
-    const storedMatches = stored.matches ?? {};
-    const storedNews = stored.news ?? {};
-    const storedSponsors = stored.sponsors ?? {};
-    const storedSite = stored.site ?? {};
+    // Page-label copy + static fields come from the committed seed, NOT Vercel
+    // Blob. Supabase (above) is the live source of truth; the only thing Blob
+    // added here was editable label overrides — but the Blob admin editor is
+    // gated off in production, and every readAll() costs a `list` advanced
+    // operation on each content build. Reading the seed makes that cost zero.
+    const storedRoster = rosterSeed as Record<string, unknown>;
+    const storedMatches = matchesSeed as Record<string, unknown>;
+    const storedNews = newsSeed as Record<string, unknown>;
+    const storedSponsors = sponsorsSeed as Record<string, unknown>;
+    const storedSite = siteSeed as Record<string, unknown>;
 
     const all = (players.data ?? []) as Record<string, unknown>[];
     const roster = {
