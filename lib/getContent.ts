@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { readAll } from "@/lib/store";
+import { bundled } from "@/lib/store";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 
 /**
@@ -25,8 +25,14 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
 
 export const getSiteContent = unstable_cache(
   async () =>
-    (await withTimeout(contentFromSupabase(), SUPABASE_TIMEOUT_MS)) ??
-    (await readAll()),
+    // Supabase is the source of truth. If it doesn't answer in time, fall
+    // straight to the bundled seed — NOT the Vercel Blob store. That store is
+    // legacy and blocked, and its `list()` has no timeout, so on a cold first
+    // request (empty cache) a blocked Blob read could hang SSR past Vercel's
+    // function limit → the browser shows "can't reach this site", then a
+    // refresh works because the cache is warm. The seed is in-bundle JSON, so
+    // this path is instant and the page always renders.
+    (await withTimeout(contentFromSupabase(), SUPABASE_TIMEOUT_MS)) ?? bundled(),
   ["site-content"],
   // 10-min backstop. Admin saves call revalidateTag("content") so edits still
   // appear immediately; a longer TTL just cuts background rebuilds (and the Blob

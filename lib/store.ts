@@ -23,7 +23,7 @@ export type Content = Record<ContentKey, unknown>;
 const PREFIX = "content/content-";
 const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 
-function bundled(): Content {
+export function bundled(): Content {
   // Deep clone so callers can't mutate the imported modules.
   return JSON.parse(JSON.stringify({ matches, roster, sponsors, news, site }));
 }
