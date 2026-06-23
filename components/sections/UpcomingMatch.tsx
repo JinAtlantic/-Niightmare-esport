@@ -52,6 +52,43 @@ const STATUS: Record<MatchStatus, { key: string; text: string; ring: string; glo
   },
 };
 
+/** A team crest that survives a dead logo URL: if the image fails to load
+ *  (404/403/removed from storage), it falls back to an initials monogram
+ *  instead of a broken-image icon. */
+function Crest({
+  logo,
+  name,
+  glow,
+  boxClass,
+  monoClass,
+}: {
+  logo?: string | null;
+  name: string;
+  glow: string;
+  boxClass: string;
+  monoClass: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className={`relative grid place-items-center ${boxClass}`}>
+      {logo && !failed ? (
+        <Image
+          src={logo}
+          alt={name}
+          fill
+          sizes="(min-width: 1024px) 184px, (min-width: 768px) 156px, 104px"
+          onError={() => setFailed(true)}
+          className={`object-contain ${glow}`}
+        />
+      ) : (
+        <span className={`keep-latin font-display font-bold text-ash ${monoClass}`} aria-hidden>
+          {initials(name)}
+        </span>
+      )}
+    </div>
+  );
+}
+
 /**
  * One contender's zone in the split arena: a side label, full crest and name
  * over a directional color wash — violet for the home side, rose-steel for the
@@ -77,30 +114,17 @@ function TeamSide({
             : "bg-gradient-to-l from-loss/[0.045] via-amethyst/[0.018] to-transparent"
         }`}
       />
-      <div
-        className="relative grid h-[68px] w-[68px] shrink-0 place-items-center transition-transform duration-300 group-hover:scale-[1.06] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
-      >
-        {logo ? (
-          <Image
-            src={logo}
-            alt={name}
-            fill
-            sizes="(min-width: 1024px) 184px, (min-width: 768px) 156px, 88px"
-            className={`object-contain ${
-              home
-                ? "drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
-                : "drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
-            }`}
-          />
-        ) : (
-          <span
-            className="keep-latin font-display text-xl font-bold text-ash md:text-5xl"
-            aria-hidden
-          >
-            {initials(name)}
-          </span>
-        )}
-      </div>
+      <Crest
+        logo={logo}
+        name={name}
+        glow={
+          home
+            ? "drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
+            : "drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
+        }
+        boxClass="h-[68px] w-[68px] shrink-0 transition-transform duration-300 group-hover:scale-[1.06] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
+        monoClass="text-xl md:text-5xl"
+      />
       <span
         className={`keep-latin relative max-w-full text-center font-display text-[0.95rem] font-bold uppercase leading-tight tracking-[0.04em] md:text-3xl md:tracking-[0.07em] lg:text-4xl ${
           home ? "text-soul" : "text-spectre"
@@ -252,15 +276,13 @@ export default function UpcomingMatch() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 bg-gradient-to-b from-amethyst/[0.16] via-amethyst/[0.03] to-transparent"
               />
-              <div className="relative grid h-[104px] w-[104px] place-items-center">
-                <Image
-                  src="/logo.png"
-                  alt="NIIGHTMARE"
-                  fill
-                  sizes="104px"
-                  className="object-contain drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
-                />
-              </div>
+              <Crest
+                logo="/logo.png"
+                name="NIIGHTMARE"
+                glow="drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
+                boxClass="h-[104px] w-[104px]"
+                monoClass="text-4xl"
+              />
               <span className="keep-latin relative max-w-full text-center font-display text-[1.7rem] font-bold uppercase leading-none tracking-[0.03em] text-soul">
                 NIIGHTMARE
               </span>
@@ -298,21 +320,13 @@ export default function UpcomingMatch() {
                   aria-hidden
                   className="pointer-events-none absolute inset-0 bg-gradient-to-t from-loss/[0.07] via-amethyst/[0.02] to-transparent"
                 />
-                <div className="relative grid h-[104px] w-[104px] place-items-center">
-                  {match.opponentLogo ? (
-                    <Image
-                      src={match.opponentLogo}
-                      alt={match.opponent}
-                      fill
-                      sizes="104px"
-                      className="object-contain drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
-                    />
-                  ) : (
-                    <span className="keep-latin font-display text-4xl font-bold text-ash" aria-hidden>
-                      {initials(match.opponent)}
-                    </span>
-                  )}
-                </div>
+                <Crest
+                  logo={match.opponentLogo}
+                  name={match.opponent}
+                  glow="drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
+                  boxClass="h-[104px] w-[104px]"
+                  monoClass="text-4xl"
+                />
                 <span className="keep-latin relative max-w-full text-center font-display text-[1.7rem] font-bold uppercase leading-none tracking-[0.03em] text-spectre">
                   {match.opponent}
                 </span>
