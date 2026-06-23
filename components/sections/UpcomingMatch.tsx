@@ -243,8 +243,97 @@ export default function UpcomingMatch() {
             </span>
           </div>
 
-          {/* ── the clash: split arena, stacked on mobile / side-by-side on ≥md ── */}
-          <div className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch">
+          {/* ── the clash: split arena ─────────────────────────────────────── */}
+          {/* MOBILE: a vertical fight-card stack — each camp gets the full width
+              and a big crest, split by the forged VS on a hairline seam. */}
+          <div className="relative md:hidden">
+            <div className="relative flex flex-col items-center gap-2.5 overflow-hidden px-5 pb-10 pt-9">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-gradient-to-b from-amethyst/[0.16] via-amethyst/[0.03] to-transparent"
+              />
+              <div className="relative grid h-[104px] w-[104px] place-items-center">
+                <Image
+                  src="/logo.png"
+                  alt="NIIGHTMARE"
+                  fill
+                  sizes="104px"
+                  className="object-contain drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
+                />
+              </div>
+              <span className="keep-latin relative max-w-full text-center font-display text-[1.7rem] font-bold uppercase leading-none tracking-[0.03em] text-soul">
+                NIIGHTMARE
+              </span>
+            </div>
+
+            {/* forged VS on a hairline seam between the two camps */}
+            <div className="relative z-10 flex h-0 items-center justify-center">
+              <span
+                aria-hidden
+                className="absolute inset-x-6 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-amethyst/45 to-transparent"
+              />
+              <div className="relative grid place-items-center">
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -z-10 blur-2xl"
+                  style={{ background: "radial-gradient(circle, rgba(199,125,255,0.40), transparent 70%)" }}
+                />
+                <span
+                  aria-hidden
+                  className="absolute h-[56px] w-[56px] rotate-45 rounded-sm border border-amethyst/55 bg-gradient-to-br from-crypt2 to-void shadow-[0_0_26px_rgba(168,85,247,0.4)]"
+                />
+                <span
+                  aria-hidden
+                  className="absolute h-[46px] w-[46px] rotate-45 rounded-sm border border-amethyst/25"
+                />
+                <span className="relative grid h-[56px] w-[56px] place-items-center font-display text-2xl font-bold uppercase leading-none text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)]">
+                  {t("common.vs")}
+                </span>
+              </div>
+            </div>
+
+            {hasOpponent ? (
+              <div className="relative flex flex-col items-center gap-2.5 overflow-hidden px-5 pb-9 pt-10">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-loss/[0.07] via-amethyst/[0.02] to-transparent"
+                />
+                <div className="relative grid h-[104px] w-[104px] place-items-center">
+                  {match.opponentLogo ? (
+                    <Image
+                      src={match.opponentLogo}
+                      alt={match.opponent}
+                      fill
+                      sizes="104px"
+                      className="object-contain drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
+                    />
+                  ) : (
+                    <span className="keep-latin font-display text-4xl font-bold text-ash" aria-hidden>
+                      {initials(match.opponent)}
+                    </span>
+                  )}
+                </div>
+                <span className="keep-latin relative max-w-full text-center font-display text-[1.7rem] font-bold uppercase leading-none tracking-[0.03em] text-spectre">
+                  {match.opponent}
+                </span>
+              </div>
+            ) : (
+              <div className="relative flex flex-col items-center gap-3 overflow-hidden px-5 pb-9 pt-10">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-ash-dim">
+                  {t("sections.upcoming_status_practice")}
+                </span>
+                <div className="grid h-[96px] w-[96px] place-items-center rounded-full border-2 border-dashed border-edge-bright bg-void/40">
+                  <GameIcon size={40} className="text-ash" />
+                </div>
+                <span className="text-center font-display text-lg font-bold uppercase tracking-[0.07em] text-spectre">
+                  {t("sections.upcoming_practice_label")}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* DESKTOP: split arena, side-by-side */}
+          <div className="relative hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch md:grid">
             <TeamSide logo="/logo.png" name="NIIGHTMARE" home />
 
             {/* the blade seam + forged VS — the matchup's centerpiece */}
@@ -293,21 +382,21 @@ export default function UpcomingMatch() {
 
           {/* ── tale of the tape: tournament · round · kickoff, cleanly divided ── */}
           <dl className="grid grid-cols-1 divide-y divide-edge border-t border-edge md:grid-cols-3 md:divide-x md:divide-y-0">
-            <div className="flex flex-col items-center gap-2 px-4 py-5 text-center md:py-6">
-              <dt className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Tournament</dt>
-              <dd className="font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-2xl">
+            <div className="flex items-baseline justify-between gap-4 px-5 py-4 text-left md:flex-col md:items-center md:gap-2 md:px-4 md:py-6 md:text-center">
+              <dt className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Tournament</dt>
+              <dd className="min-w-0 text-right font-display text-base font-bold uppercase tracking-[0.03em] text-soul md:text-center md:text-2xl">
                 {pick(match.tournament)}
               </dd>
             </div>
-            <div className="flex flex-col items-center gap-2 px-4 py-5 text-center md:py-6">
-              <dt className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Round</dt>
-              <dd className="font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-2xl">
+            <div className="flex items-baseline justify-between gap-4 px-5 py-4 text-left md:flex-col md:items-center md:gap-2 md:px-4 md:py-6 md:text-center">
+              <dt className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Round</dt>
+              <dd className="min-w-0 text-right font-display text-base font-bold uppercase tracking-[0.03em] text-soul md:text-center md:text-2xl">
                 {round ? pick(round) : "—"}
               </dd>
             </div>
-            <div className="flex flex-col items-center gap-2 px-4 py-5 text-center md:py-6">
-              <dt className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Kickoff</dt>
-              <dd className="font-display text-lg font-bold uppercase tracking-[0.04em] text-soul md:text-2xl">
+            <div className="flex items-baseline justify-between gap-4 px-5 py-4 text-left md:flex-col md:items-center md:gap-2 md:px-4 md:py-6 md:text-center">
+              <dt className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Kickoff</dt>
+              <dd className="min-w-0 text-right font-display text-base font-bold uppercase tracking-[0.03em] text-soul md:text-center md:text-2xl">
                 {cd ? formatDateTime(match.date, lang) : "—"}
               </dd>
             </div>
