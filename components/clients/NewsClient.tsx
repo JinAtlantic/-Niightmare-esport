@@ -133,7 +133,7 @@ function ArticleModal({
 
       <div
         className={`relative z-10 max-h-[88vh] w-full max-w-2xl overflow-hidden border border-amethyst/45 bg-gradient-to-b from-crypt to-void shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-all duration-200 ease-out motion-reduce:transition-none ${
-          show ? "scale-100 opacity-100" : "scale-90 opacity-0"
+          show ? "scale-100 opacity-100" : "scale-[0.8] opacity-0"
         }`}
       >
         <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
