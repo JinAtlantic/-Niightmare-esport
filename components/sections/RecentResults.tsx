@@ -21,11 +21,12 @@ const COPY = {
 };
 
 // Each result owns a colour identity (green win / rose loss) carried across the
-// card border, the top ribbon, and the score, so a glance reads W/L instantly.
+// card border, the ribbon/rail, and the score, so a glance reads W/L instantly.
 const RESULT_STYLE: Record<
   MatchResult,
   {
     label: Bilingual;
+    letter: string;
     text: string;
     border: string;
     glow: string;
@@ -34,6 +35,7 @@ const RESULT_STYLE: Record<
 > = {
   win: {
     label: { en: "WIN", lo: "ຊະນະ" },
+    letter: "W",
     text: "text-win",
     border: "border-win/55",
     glow: "hover:shadow-[0_0_32px_-4px_rgba(52,211,153,0.55)]",
@@ -41,6 +43,7 @@ const RESULT_STYLE: Record<
   },
   loss: {
     label: { en: "LOSS", lo: "ແພ້" },
+    letter: "L",
     text: "text-loss",
     border: "border-loss/55",
     glow: "hover:shadow-[0_0_32px_-4px_rgba(251,113,133,0.5)]",
@@ -48,6 +51,7 @@ const RESULT_STYLE: Record<
   },
   draw: {
     label: { en: "DRAW", lo: "ສະເໝີ" },
+    letter: "D",
     text: "text-ash",
     border: "border-edge-bright",
     glow: "hover:shadow-[0_0_26px_-6px_rgba(168,85,247,0.4)]",
@@ -66,47 +70,81 @@ function ResultCard({ match }: { match: Match }) {
   const s = RESULT_STYLE[match.result];
   const opponent = match.opponent.trim() || "TBD";
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
+  const date = formatDate(match.date, lang);
 
   return (
     <article
       className={`group relative overflow-hidden border ${s.border} bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void transition-all duration-300 ${s.glow}`}
     >
-      {/* result ribbon — colour-coded WIN / LOSS header */}
-      <div
-        className={`flex items-center justify-between gap-2 border-b ${s.border} bg-gradient-to-r ${s.ribbon} to-transparent px-3 py-2`}
-      >
-        <span
-          className={`font-display text-sm font-extrabold uppercase tracking-[0.16em] ${s.text}`}
+      {/* ── MOBILE: compact horizontal row — easy to scan in a single column ── */}
+      <div className="flex items-stretch sm:hidden">
+        <div
+          className={`flex w-[60px] shrink-0 flex-col items-center justify-center gap-0.5 border-r ${s.border} bg-gradient-to-b ${s.ribbon} to-transparent`}
         >
-          {pick(s.label)}
-        </span>
-        <time
-          dateTime={match.date}
-          className="font-mono text-[10px] tracking-wide text-ash"
-        >
-          {formatDate(match.date, lang)}
-        </time>
+          <span className={`font-display text-2xl font-black leading-none ${s.text}`}>
+            {s.letter}
+          </span>
+          <span
+            className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] ${s.text} opacity-80`}
+          >
+            {pick(s.label)}
+          </span>
+        </div>
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5">
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
+            <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={32} />
+            <span className={`font-display text-2xl font-extrabold leading-none ${s.text}`}>
+              {match.score}
+            </span>
+            <OpponentLogo src={match.opponentLogo} name={opponent} size={32} />
+          </div>
+          <div className="min-w-0 max-w-[40%] shrink-0 text-right">
+            <p className="keep-latin truncate font-display text-[13px] font-bold uppercase leading-tight text-soul">
+              {opponent}
+            </p>
+            <p className="truncate font-mono text-[9px] uppercase tracking-[0.06em] text-ash">
+              {date}
+              {round ? ` · ${round}` : ""}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="px-3 py-4">
-        <div className="flex items-center justify-center gap-3">
-          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={40} />
+      {/* ── sm+ : vertical card ── */}
+      <div className="hidden sm:block">
+        <div
+          className={`flex items-center justify-between gap-2 border-b ${s.border} bg-gradient-to-r ${s.ribbon} to-transparent px-3 py-2`}
+        >
           <span
-            className={`keep-latin font-display text-3xl font-extrabold leading-none tracking-[0.04em] ${s.text}`}
+            className={`font-display text-sm font-extrabold uppercase tracking-[0.16em] ${s.text}`}
           >
-            {match.score}
+            {pick(s.label)}
           </span>
-          <OpponentLogo src={match.opponentLogo} name={opponent} size={40} />
+          <time dateTime={match.date} className="font-mono text-[10px] tracking-wide text-ash">
+            {date}
+          </time>
         </div>
-        <p className="mt-3 truncate text-center font-display text-sm font-bold uppercase tracking-[0.03em] text-soul">
-          <span className="text-ash-dim">{pick(COPY.vs)} </span>
-          <span className="keep-latin">{opponent}</span>
-        </p>
-        {round && (
-          <p className="mt-1 truncate text-center font-mono text-[10px] uppercase tracking-[0.12em] text-ash-dim">
-            {round}
+
+        <div className="px-3 py-4">
+          <div className="flex items-center justify-center gap-3">
+            <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={40} />
+            <span
+              className={`keep-latin font-display text-3xl font-extrabold leading-none tracking-[0.04em] ${s.text}`}
+            >
+              {match.score}
+            </span>
+            <OpponentLogo src={match.opponentLogo} name={opponent} size={40} />
+          </div>
+          <p className="mt-3 truncate text-center font-display text-sm font-bold uppercase tracking-[0.03em] text-soul">
+            <span className="text-ash-dim">{pick(COPY.vs)} </span>
+            <span className="keep-latin">{opponent}</span>
           </p>
-        )}
+          {round && (
+            <p className="mt-1 truncate text-center font-mono text-[10px] uppercase tracking-[0.12em] text-ash-dim">
+              {round}
+            </p>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -128,8 +166,9 @@ function RecordPill({ value, label, tone }: { value: number; label: string; tone
 /**
  * Home-page results band — every result from the club's most recent tournament
  * (not a mixed feed), with a colour-coded W/L treatment and that tournament's
- * record. Routes into the full /matches archive. Hidden when there are no
- * matches so the band never renders empty.
+ * record. On phones each result is a single-column horizontal row for easy
+ * scanning; from sm up it becomes a card grid. Routes into the full /matches
+ * archive. Hidden when there are no matches so the band never renders empty.
  */
 export default function RecentResults() {
   const { pick } = useLanguage();
@@ -185,7 +224,7 @@ export default function RecentResults() {
           </div>
         </Reveal>
 
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {shown.map((match, i) => (
             <Reveal key={match.id} delay={i * 80} className="h-full">
               <ResultCard match={match} />
