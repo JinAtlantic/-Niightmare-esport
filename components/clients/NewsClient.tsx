@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import PageHeader from "@/components/layout/PageHeader";
 import Reveal from "@/components/ui/Reveal";
@@ -90,18 +90,28 @@ function ArticleModal({
   const tag = pick(article.tag).trim();
   const hasLink = Boolean(article.link && article.link.trim() && article.link !== "#");
 
+  const [show, setShow] = useState(false);
+
+  // Animate out before unmounting so closing scales back down smoothly.
+  const requestClose = useCallback(() => {
+    setShow(false);
+    window.setTimeout(onClose, 200);
+  }, [onClose]);
+
   useEffect(() => {
+    const raf = requestAnimationFrame(() => setShow(true)); // play the enter transition
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") requestClose();
     };
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
+      cancelAnimationFrame(raf);
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [onClose]);
+  }, [requestClose]);
 
   if (typeof document === "undefined") return null;
 
@@ -114,12 +124,18 @@ function ArticleModal({
     >
       {/* blurred backdrop — click to dismiss */}
       <div
-        className="absolute inset-0 bg-void/80 backdrop-blur-md"
-        onClick={onClose}
+        className={`absolute inset-0 bg-void/80 backdrop-blur-md transition-opacity duration-200 ${
+          show ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={requestClose}
         aria-hidden
       />
 
-      <div className="relative z-10 max-h-[88vh] w-full max-w-2xl overflow-hidden border border-amethyst/45 bg-gradient-to-b from-crypt to-void shadow-[0_0_60px_rgba(168,85,247,0.3)]">
+      <div
+        className={`relative z-10 max-h-[88vh] w-full max-w-2xl overflow-hidden border border-amethyst/45 bg-gradient-to-b from-crypt to-void shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-all duration-200 ease-out motion-reduce:transition-none ${
+          show ? "scale-100 opacity-100" : "scale-90 opacity-0"
+        }`}
+      >
         <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
 
         <div className="flex items-center justify-between gap-4 border-b border-edge px-5 py-4 md:px-7">
@@ -138,7 +154,7 @@ function ArticleModal({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label={t("common.close")}
             className="grid h-9 w-9 shrink-0 place-items-center border border-edge bg-void/60 text-soul transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst"
           >
@@ -196,11 +212,7 @@ export default function NewsClient() {
 
   return (
     <>
-      <PageHeader
-        kicker={pick(page.kicker)}
-        title={pick(page.title)}
-        subtitle={pick(page.intro)}
-      />
+      <PageHeader title={pick(page.title)} subtitle={pick(page.intro)} />
 
       <main className="mx-auto max-w-3xl px-4 py-14 md:px-6 md:py-16">
         {articles.length > 0 ? (
