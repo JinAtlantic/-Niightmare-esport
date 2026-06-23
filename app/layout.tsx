@@ -32,6 +32,10 @@ const barlow = localFont({
   ],
   variable: "--font-barlow",
   display: "swap",
+  // Body copy lives below the fold, so don't let four Barlow weights race the
+  // hero image for mobile bandwidth — load them on use (display:swap covers it).
+  preload: false,
+  fallback: ["system-ui", "sans-serif"],
 });
 // JetBrains Mono ships as a single variable woff2 covering the weight range.
 const mono = localFont({
