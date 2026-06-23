@@ -79,34 +79,28 @@ function ResultCard({ match }: { match: Match }) {
       {/* ── MOBILE: compact horizontal row — easy to scan in a single column ── */}
       <div className="flex items-stretch sm:hidden">
         <div
-          className={`flex w-[60px] shrink-0 flex-col items-center justify-center gap-0.5 border-r ${s.border} bg-gradient-to-b ${s.ribbon} to-transparent`}
+          className={`flex w-[52px] shrink-0 items-center justify-center border-r ${s.border} bg-gradient-to-b ${s.ribbon} to-transparent`}
         >
           <span className={`font-display text-2xl font-black leading-none ${s.text}`}>
             {s.letter}
           </span>
-          <span
-            className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] ${s.text} opacity-80`}
-          >
-            {pick(s.label)}
-          </span>
         </div>
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5">
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
-            <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={32} />
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3 py-2.5">
+          <div className="flex min-w-0 items-center gap-2">
+            <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={30} />
             <span className={`font-display text-2xl font-extrabold leading-none ${s.text}`}>
               {match.score}
             </span>
-            <OpponentLogo src={match.opponentLogo} name={opponent} size={32} />
-          </div>
-          <div className="min-w-0 max-w-[40%] shrink-0 text-right">
-            <p className="keep-latin truncate font-display text-[13px] font-bold uppercase leading-tight text-soul">
+            <OpponentLogo src={match.opponentLogo} name={opponent} size={30} />
+            <span className="keep-latin ml-1 min-w-0 flex-1 truncate font-display text-[13px] font-bold uppercase leading-tight text-soul">
               {opponent}
-            </p>
-            <p className="truncate font-mono text-[9px] uppercase tracking-[0.06em] text-ash">
-              {date}
-              {round ? ` · ${round}` : ""}
-            </p>
+            </span>
           </div>
+          {/* full-width meta line so the round never overflows */}
+          <p className="truncate font-mono text-[10px] uppercase tracking-[0.06em] text-ash">
+            {date}
+            {round ? ` · ${round}` : ""}
+          </p>
         </div>
       </div>
 
