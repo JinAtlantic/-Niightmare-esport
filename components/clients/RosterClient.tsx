@@ -109,7 +109,6 @@ export default function RosterClient() {
   return (
     <>
       <PageHeader
-        kicker={page.kicker ? pick(page.kicker) : undefined}
         title={pick(page.title)}
         subtitle={pick(page.intro)}
         subtitleClassName="text-lg font-medium text-spectre md:text-2xl"
