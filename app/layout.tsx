@@ -114,6 +114,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// Render the public site as ISR, not a per-request serverless function. The
+// HTML is built once and served from Vercel's CDN, so a cold first visit can't
+// stall on a function cold-start + Supabase round-trip (the symptom: first load
+// times out → refresh works). Content stays live: getSiteContent runs at build
+// and on this 10-min backstop, and admin saves call revalidateTag("content").
+// The /admin segment opts back into dynamic via its own `force-dynamic`.
+export const revalidate = 600;
+
 export default async function RootLayout({
   children,
 }: {
