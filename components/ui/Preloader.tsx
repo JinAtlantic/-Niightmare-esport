@@ -17,7 +17,7 @@ export default function Preloader() {
     // Kept short so the intro is a quick brand flash, not a wait — the page
     // behind it is already painted, so the overlay is the only thing delaying
     // the first interaction.
-    const hideTimer = window.setTimeout(() => setVisible(false), 550);
+    const hideTimer = window.setTimeout(() => setVisible(false), 250);
     return () => window.clearTimeout(hideTimer);
   }, []);
 
