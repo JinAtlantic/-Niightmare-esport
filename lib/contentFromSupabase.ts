@@ -1,7 +1,7 @@
 import "server-only";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { rowToStaff, type MemberRow } from "./members";
-import { readSection } from "./store";
+import { readAll } from "./store";
 import type { Player, Socials } from "./types";
 
 /**
@@ -86,13 +86,15 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     );
     if (firstError?.error) throw new Error(firstError.error.message);
 
-    const [storedRoster, storedMatches, storedNews, storedSponsors, storedSite] = await Promise.all([
-      readSection("roster") as Promise<Record<string, unknown>>,
-      readSection("matches") as Promise<Record<string, unknown>>,
-      readSection("news") as Promise<Record<string, unknown>>,
-      readSection("sponsors") as Promise<Record<string, unknown>>,
-      readSection("site") as Promise<Record<string, unknown>>,
-    ]);
+    // One readAll() (a single Blob `list`) instead of five readSection() calls —
+    // each readSection re-ran readAll → an extra `list` advanced operation for
+    // the very same content object. Cuts Blob advanced ops on this path by ~80%.
+    const stored = (await readAll()) as Record<string, Record<string, unknown>>;
+    const storedRoster = stored.roster ?? {};
+    const storedMatches = stored.matches ?? {};
+    const storedNews = stored.news ?? {};
+    const storedSponsors = stored.sponsors ?? {};
+    const storedSite = stored.site ?? {};
 
     const all = (players.data ?? []) as Record<string, unknown>[];
     const roster = {

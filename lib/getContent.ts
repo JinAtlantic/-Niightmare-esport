@@ -14,5 +14,8 @@ import { contentFromSupabase } from "@/lib/contentFromSupabase";
 export const getSiteContent = unstable_cache(
   async () => (await contentFromSupabase()) ?? (await readAll()),
   ["site-content"],
-  { tags: ["content"], revalidate: 120 }
+  // 10-min backstop. Admin saves call revalidateTag("content") so edits still
+  // appear immediately; a longer TTL just cuts background rebuilds (and the Blob
+  // `list` each one runs) to keep Blob advanced operations well under quota.
+  { tags: ["content"], revalidate: 600 }
 );
