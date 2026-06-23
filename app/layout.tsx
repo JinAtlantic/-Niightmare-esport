@@ -38,6 +38,9 @@ const barlow = localFont({
   fallback: ["system-ui", "sans-serif"],
 });
 // JetBrains Mono ships as a single variable woff2 covering the weight range.
+// Only used for small mono kickers / nav labels — on mobile those are all below
+// the fold or hidden in the closed menu, so don't let it race the hero (LCP)
+// image for the initial connection. Load on use; display:swap covers the swap.
 const mono = localFont({
   src: [
     {
@@ -48,6 +51,8 @@ const mono = localFont({
   ],
   variable: "--font-mono",
   display: "swap",
+  preload: false,
+  fallback: ["ui-monospace", "monospace"],
 });
 // Lao face (Phetsarath) — self-hosted. Only fetched by the browser when Lao is
 // active (the CSS references it under html.lang-lo), so EN visitors never
