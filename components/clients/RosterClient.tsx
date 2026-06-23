@@ -100,13 +100,6 @@ export default function RosterClient() {
     roster.staff.filter((m) => memberGame(m) === game);
   const backOffice = roster.staff.filter((m) => !memberGame(m));
 
-  const counts: Record<RosterStatId, number> = {
-    active: roster.mlbb.players.length + roster.efootball.players.length + roster.staff.length,
-    mlbb: roster.mlbb.players.length,
-    efootball: roster.efootball.players.length,
-    staff: roster.staff.length,
-  };
-
   const tabs: { id: RosterTab; label: Bilingual; count: number }[] = [
     { id: "mlbb", label: page.divisionLabels.mlbb, count: roster.mlbb.players.length },
     { id: "efootball", label: page.divisionLabels.efootball, count: roster.efootball.players.length },
@@ -123,47 +116,6 @@ export default function RosterClient() {
       />
 
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
-        <div className="mb-16 border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
-          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.4fr] lg:items-stretch">
-            <div className="relative flex min-h-[180px] flex-col justify-between overflow-hidden border border-edge bg-void/45 p-5">
-              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
-              <div aria-hidden className="absolute -right-10 -top-10 h-28 w-28 rotate-45 border border-amethyst/15 bg-amethyst/5" />
-              <div className="relative">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
-                  {pick(page.overviewLabel)}
-                </p>
-                <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-spectre md:text-base">
-                  {pick(page.overviewIntro)}
-                </p>
-              </div>
-              <div
-                aria-hidden
-                className="relative mt-8 h-[2px] w-28 -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_16px_rgba(168,85,247,0.55)]"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {page.stats.map((stat) => {
-                const value = counts[stat.id as RosterStatId] ?? 0;
-                return (
-                  <div key={stat.id} className="relative min-h-[180px] overflow-hidden border border-edge bg-void/55 p-4">
-                    <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
-                    <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5" />
-                    <p className="font-mono text-4xl font-bold leading-none text-soul md:text-5xl">
-                      {value}
-                    </p>
-                    <p className="mt-5 font-display text-sm font-bold uppercase tracking-[0.12em] text-spectre">
-                      {pick(stat.label)}
-                    </p>
-                    <p className="mt-3 text-xs leading-relaxed text-ash md:text-sm">
-                      {pick(stat.detail)}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
         {/* View tabs — MLBB / eFootball lineups, and the back-office team */}
         <div className="flex flex-wrap items-center justify-center gap-1 border-b border-edge">
           {tabs.map(({ id, label, count }) => {
