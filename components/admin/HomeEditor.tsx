@@ -219,13 +219,6 @@ export default function HomeEditor() {
   const about = resolveAbout(data.aboutUs);
   const patchAbout = (p: Partial<AboutUsContent>) =>
     setData({ ...data, aboutUs: { ...about, ...p } });
-  const patchAboutStat = (
-    index: number,
-    p: Partial<AboutUsContent["stats"][number]>
-  ) => {
-    const stats = about.stats.map((s, i) => (i === index ? { ...s, ...p } : s));
-    patchAbout({ stats });
-  };
 
   const isPractice = m.status === "practice";
 
@@ -249,21 +242,14 @@ export default function HomeEditor() {
 
       <Section
         title="About Us (หน้า Home)"
-        hint="ข้อความแถลงการณ์ + แฟ้มสถิติ (Club Dossier) ที่อยู่ใต้ผลการแข่งล่าสุด"
+        hint="หัวข้อหลัก WHO WE ARE + ข้อความแถลงการณ์ ที่อยู่ใต้ผลการแข่งล่าสุด"
       >
         <Card className="space-y-5">
-          <div className="grid gap-3 md:grid-cols-2">
-            <BilingualField
-              label="Kicker / Eyebrow"
-              value={about.kicker}
-              onChange={(kicker) => patchAbout({ kicker })}
-            />
-            <BilingualField
-              label="บรรทัดปี/ภูมิภาค (เช่น EST. 2020 · LAO PDR)"
-              value={about.est}
-              onChange={(est) => patchAbout({ est })}
-            />
-          </div>
+          <BilingualField
+            label="หัวข้อหลัก (เช่น WHO WE ARE)"
+            value={about.kicker}
+            onChange={(kicker) => patchAbout({ kicker })}
+          />
         </Card>
 
         <Card className="mt-4 space-y-3">
@@ -273,7 +259,7 @@ export default function HomeEditor() {
           <p className="font-mono text-[11px] leading-relaxed text-ash">
             หัวข้อมี 2 บรรทัด — บรรทัด 2 ประกอบจาก “ก่อนคำเด่น + คำเด่น + หลังคำเด่น”
             โดย “คำเด่น” จะแสดงเป็นตัวอักษรโครงร่างเรืองแสงสีม่วง อย่าลืมเว้นวรรค
-            (เช่น EN: ก่อน = “WE ”, คำเด่น = “HAUNT”, หลัง = “ IT.”)
+            (เช่น EN: ก่อน = “AND THE ”, คำเด่น = “NIGHTMARE”, หลัง = “ BEGINS.”)
           </p>
           <BilingualField
             label="บรรทัด 1"
@@ -357,58 +343,6 @@ export default function HomeEditor() {
           </div>
         </Card>
 
-        <Card className="mt-4 space-y-3">
-          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-            แฟ้มสถิติ — Club Dossier
-          </h3>
-          <div className="grid gap-3 md:grid-cols-3">
-            <BilingualField
-              label="ชื่อแฟ้ม (หัวมุมซ้าย)"
-              value={about.dossierLabel}
-              onChange={(dossierLabel) => patchAbout({ dossierLabel })}
-            />
-            <BilingualField
-              label="ภูมิภาค (หัวมุมขวา)"
-              value={about.region}
-              onChange={(region) => patchAbout({ region })}
-            />
-            <BilingualField
-              label="ที่มาข้อมูล (แถวล่างสุด)"
-              value={about.source}
-              onChange={(source) => patchAbout({ source })}
-            />
-          </div>
-        </Card>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {about.stats.slice(0, 4).map((stat, i) => (
-            <Card key={stat.id} className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                  สถิติ {i + 1}
-                </h3>
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim">
-                  {stat.id}
-                </span>
-              </div>
-              <TextField
-                label="ตัวเลข / Value"
-                value={stat.value}
-                onChange={(value) => patchAboutStat(i, { value })}
-              />
-              <BilingualField
-                label="Label"
-                value={stat.label}
-                onChange={(label) => patchAboutStat(i, { label })}
-              />
-              <BilingualField
-                label="Detail"
-                value={stat.detail}
-                onChange={(detail) => patchAboutStat(i, { detail })}
-              />
-            </Card>
-          ))}
-        </div>
       </Section>
 
       <Section

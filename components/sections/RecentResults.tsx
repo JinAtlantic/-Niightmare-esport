@@ -7,9 +7,9 @@ import { useContent } from "@/components/context/ContentContext";
 import SectionLabel from "@/components/ui/SectionLabel";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
-import { ArrowRightIcon, MlbbIcon, EfootballIcon } from "@/components/ui/Icons";
+import { ArrowRightIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
-import type { Bilingual, GameId, Match, MatchResult } from "@/lib/types";
+import type { Bilingual, Match, MatchResult } from "@/lib/types";
 
 const COPY = {
   title: { en: "RECENT RESULTS", lo: "ຜົນການແຂ່ງຫຼ້າສຸດ" } as Bilingual,
@@ -176,8 +176,6 @@ export default function RecentResults() {
   const group = sorted.filter((m) => groupKey(m) === latestKey);
 
   const tournamentName = sorted[0].tournament;
-  const game: GameId = sorted[0].game;
-  const GameIcon = game === "mlbb" ? MlbbIcon : EfootballIcon;
 
   const wins = group.filter((m) => m.result === "win").length;
   const losses = group.filter((m) => m.result === "loss").length;
@@ -199,10 +197,9 @@ export default function RecentResults() {
 
         {/* the tournament these results belong to */}
         <Reveal>
-          <div className="mt-5 flex justify-center">
-            <span className="inline-flex max-w-full items-center gap-2 border border-amethyst/40 bg-amethyst/10 px-4 py-1.5 font-display text-sm font-bold uppercase tracking-[0.08em] text-glow">
-              <GameIcon size={15} className="shrink-0 text-amethyst" />
-              <span className="keep-latin truncate">{pick(tournamentName)}</span>
+          <div className="mt-6 flex justify-center">
+            <span className="keep-latin inline-flex max-w-full items-center justify-center truncate border-y-2 border-amethyst/50 bg-amethyst/10 px-7 py-2.5 text-center font-display text-xl font-extrabold uppercase tracking-[0.1em] text-glow [text-shadow:0_0_24px_rgba(199,125,255,0.45)] sm:text-2xl md:text-[26px]">
+              {pick(tournamentName)}
             </span>
           </div>
         </Reveal>
