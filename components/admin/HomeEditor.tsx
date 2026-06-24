@@ -259,7 +259,7 @@ export default function HomeEditor() {
           <p className="font-mono text-[11px] leading-relaxed text-ash">
             หัวข้อมี 2 บรรทัด — บรรทัด 2 ประกอบจาก “ก่อนคำเด่น + คำเด่น + หลังคำเด่น”
             โดย “คำเด่น” จะแสดงเป็นตัวอักษรโครงร่างเรืองแสงสีม่วง อย่าลืมเว้นวรรค
-            (เช่น EN: ก่อน = “AND THE ”, คำเด่น = “NIGHTMARE”, หลัง = “ BEGINS.”)
+            (เช่น EN: ก่อน = “BUILT TO CARRY LAOS TO THE ”, คำเด่น = “SUMMIT”, หลัง = “.”)
           </p>
           <BilingualField
             label="บรรทัด 1"

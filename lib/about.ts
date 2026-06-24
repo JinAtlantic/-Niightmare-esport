@@ -24,17 +24,17 @@ export interface AboutUsContent {
  *  the admin. */
 export const DEFAULT_ABOUT: AboutUsContent = {
   kicker: { en: "WHO WE ARE", lo: "ພວກເຮົາແມ່ນໃຜ" },
-  headLine1: { en: "THE LIGHTS GO OUT WHEN WE DRAFT.", lo: "ໄຟມືດລົງ ເມື່ອພວກເຮົາລັອກໂຕ." },
-  headPre: { en: "AND THE ", lo: "ແລ້ວ " },
-  headAccent: { en: "NIGHTMARE", lo: "ຝັນຮ້າຍ" },
-  headPost: { en: " BEGINS.", lo: " ກໍເລີ່ມຂຶ້ນ." },
+  headLine1: { en: "FORGED IN VIENTIANE, 2020.", lo: "ຫຼໍ່ຫຼອມຂຶ້ນທີ່ວຽງຈັນ ປີ 2020." },
+  headPre: { en: "BUILT TO CARRY LAOS TO THE ", lo: "ສ້າງມາເພື່ອພາລາວສູ່ " },
+  headAccent: { en: "SUMMIT", lo: "ຈຸດສູງສຸດ" },
+  headPost: { en: ".", lo: "." },
   body1: {
-    en: "Born in the dark of Vientiane, NIIGHTMARE was never built to take part — we were built to be remembered. Twice we carried a nation onto the Mobile Legends world stage, and twice the world learned our name the hard way. We arrive in silence. We leave a legend.",
-    lo: "ເກີດໃນຄວາມມືດຂອງນະຄອນຫຼວງວຽງຈັນ — NIIGHTMARE ບໍ່ເຄີຍຖືກສ້າງມາເພື່ອພຽງເຂົ້າຮ່ວມ ແຕ່ສ້າງມາເພື່ອໃຫ້ໂລກຈົດຈໍາ. ສອງເທື່ອທີ່ພວກເຮົາແບກທັງຊາດຂຶ້ນສູ່ເວທີໂລກ Mobile Legends ແລະ ສອງເທື່ອທີ່ໂລກໄດ້ຮຽນຮູ້ຊື່ຂອງພວກເຮົາ. ພວກເຮົາມາຢ່າງງຽບ ແລະ ຈາກໄປຢ່າງເປັນຕໍານານ.",
+    en: "What began as a handful of players sharing one conviction — that Laos belongs on the Mobile Legends world stage — has grown into the team an entire nation now stands behind. NIIGHTMARE was founded to prove that talent forged far from the spotlight can rise to meet the very best.",
+    lo: "ສິ່ງທີ່ເລີ່ມຕົ້ນຈາກນັກກິລາບໍ່ເທົ່າໃດຄົນ ທີ່ມີຄວາມເຊື່ອດຽວກັນ — ວ່າລາວສົມຄວນຢືນຢູ່ເທິງເວທີໂລກຂອງ Mobile Legends — ໄດ້ເຕີບໃຫຍ່ກາຍເປັນທີມທີ່ທັງຊາດຢືນຢູ່ເບື້ອງຫຼັງ. NIIGHTMARE ກໍ່ຕັ້ງຂຶ້ນເພື່ອພິສູດວ່າ ພອນສະຫວັນທີ່ບົ່ມຂຶ້ນໄກຈາກແສງໄຟ ກໍສາມາດກ້າວຂຶ້ນທຽບເທົ່າສຸດຍອດໄດ້.",
   },
   body2: {
-    en: "Three national crowns. Five seasons of dread. The draft is where hope comes to die — and the moment our banner locks in, the only question left on the server is whose run ends tonight.",
-    lo: "ສາມມຸງກຸດລະດັບຊາດ. ຫ້າລະດູການແຫ່ງຄວາມຢ້ານກົວ. ບ່ອນເລືອກໂຕຄືບ່ອນທີ່ຄວາມຫວັງມາຕາຍ — ແລະ ໃນວິນາທີທີ່ປ້າຍຂອງພວກເຮົາລັອກລົງ ຄໍາຖາມດຽວທີ່ເຫຼືອໃນເຊີເວີ ກໍຄື ການເດີນທາງຂອງໃຜຈະຈົບໃນຄືນນີ້.",
+    en: "We are driven by more than winning. Every scrim, every late night, every draft serves a single vision: to lift Lao esports to the summit and earn the world's respect along the way. Twice we have reached the global stage — and we carry that responsibility with discipline, pride, and a standard we refuse to lower.",
+    lo: "ພວກເຮົາຖືກຂັບເຄື່ອນດ້ວຍສິ່ງທີ່ຫຼາຍກວ່າໄຊຊະນະ. ທຸກການຊ້ອມ, ທຸກຄືນທີ່ດຶກ, ທຸກການເລືອກໂຕ ລ້ວນຮັບໃຊ້ວິໄສທັດດຽວ: ຍົກວົງການ esports ລາວສູ່ຈຸດສູງສຸດ ແລະ ໄດ້ຮັບຄວາມເຄົາລົບຈາກໂລກໄປພ້ອມກັນ. ສອງເທື່ອແລ້ວທີ່ພວກເຮົາໄປເຖິງເວທີໂລກ — ແລະ ພວກເຮົາແບກຄວາມຮັບຜິດຊອບນັ້ນດ້ວຍລະບຽບວິໄນ, ຄວາມພູມໃຈ ແລະ ມາດຕະຖານທີ່ບໍ່ຍອມຫຼຸດລົງ.",
   },
   primaryCta: { label: { en: "THE FULL RECORD", lo: "ບັນທຶກທັງໝົດ" }, href: "/achievements" },
   secondaryCta: { label: { en: "MEET THE ROSTER", lo: "ຮູ້ຈັກລາຍຊື່ທີມ" }, href: "/roster" },
