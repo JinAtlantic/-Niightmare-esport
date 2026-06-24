@@ -9,7 +9,11 @@ overrides them.
 Dark, aggressive **esports website** for NIIGHTMARE Esports (Lao PDR), competing in
 **Mobile Legends: Bang Bang (MLBB)** and **eFootball**. Next.js 14 (App Router) ·
 TypeScript · Tailwind CSS · bilingual EN/Lao. Live at
-**https://niightmare-esport.vercel.app**.
+**https://niightmareesport.com** (custom domain, registered + DNS on Cloudflare,
+records DNS-only/grey so Vercel issues SSL). The old `niightmare-esport.vercel.app`
+still deploys but **some ISPs (Lao PDR) block `*.vercel.app`** — always use the
+custom domain. `SITE_URL` (lib/seo.ts) defaults to it; `NEXT_PUBLIC_SITE_URL`
+overrides if set.
 
 ## Repo layout — IMPORTANT
 The real project root is nested **one level deeper** than the folder you probably
@@ -49,7 +53,7 @@ then `chromium.launch({ channel: 'msedge', headless: true })`.
 **Primary: git push.** The repo now has a git remote and the production project is wired
 to auto-deploy on push to `main`:
 ```powershell
-git push origin main   # -> builds + ships to https://niightmare-esport.vercel.app
+git push origin main   # -> builds + ships to https://niightmareesport.com
 ```
 - Remote `origin` = `https://github.com/JinAtlantic/-Niightmare-esport.git` — **note the
   LEADING DASH** in the repo name. A second repo `JinAtlantic/Niightmare-Esport` (no dash)
@@ -73,9 +77,9 @@ npx --yes vercel@latest --prod --yes --token $tok --scope jinatlantics-projects
   `team_AszcleMwKqTx5nCPfaKp5yMj`.
 - Deployment protection (sso login wall) is already disabled; if a new project re-enables
   it, PATCH `ssoProtection: null` via the Vercel API.
-- This sandbox can't reach `*.vercel.app` directly — verify the live site through the
+- This sandbox can't reach the live host directly — verify the live site through the
   jina proxy, requesting raw HTML so meta/markers survive:
-  `Invoke-WebRequest "https://r.jina.ai/https://niightmare-esport.vercel.app" -Headers @{ "X-Return-Format"="html" }`.
+  `Invoke-WebRequest "https://r.jina.ai/https://niightmareesport.com" -Headers @{ "X-Return-Format"="html" }`.
 
 ## Gotchas (will burn time if ignored)
 - **`next/font/google` HANGS the build here** (silent, never returns). All fonts are
