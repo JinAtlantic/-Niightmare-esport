@@ -20,12 +20,14 @@ export default function HomePage() {
         as="image"
         href="/home-reaper.webp"
         media="(max-width: 1023px)"
+        fetchPriority="high"
       />
       <link
         rel="preload"
         as="image"
         href="/home-reaper-desktop.webp"
         media="(min-width: 1024px)"
+        fetchPriority="high"
       />
       <JsonLd data={upcomingEventSchema()} />
       <Hero />
