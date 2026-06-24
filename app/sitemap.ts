@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const SITE_URL = "https://niightmare-esport.vercel.app";
+import { SITE_URL } from "@/lib/seo";
 
 // Public, indexable routes. /admin is intentionally excluded.
 const ROUTES = ["", "/news", "/roster", "/matches", "/sponsors", "/contact"];

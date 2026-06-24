@@ -17,7 +17,7 @@ import type { Match, Player, StaffMember, Tournament, UpcomingMatch } from "@/li
  * URL. Always trimmed of a trailing slash so `${SITE_URL}/path` is clean.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://niightmare-esport.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://niightmareesport.com"
 ).replace(/\/$/, "");
 
 const abs = (path: string) =>

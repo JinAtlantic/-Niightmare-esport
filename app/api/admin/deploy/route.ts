@@ -49,5 +49,5 @@ export async function POST() {
     return NextResponse.json({ error: "Deploy ไม่สำเร็จ: " + (tail || "unknown") }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, url: "https://niightmare-esport.vercel.app" });
+  return NextResponse.json({ ok: true, url: "https://niightmareesport.com" });
 }
