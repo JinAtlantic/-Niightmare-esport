@@ -122,8 +122,29 @@ Shapes are documented in the README. The **admin editor at `/admin`** is cloud-b
 inline editor) — needs 3 env vars, see `.env.example`. Copy `.env.example` → `.env.local`
 and fill secrets; never commit `.env.local`.
 
+### Adding a field to a player / match / upcoming-match
+`players`, `matches`, and `upcoming_match` are **Supabase tables** (read via
+`lib/contentFromSupabase.ts`, written via `lib/migrate.ts` + `lib/supabaseWrite.ts`);
+the bundled `/data/*.json` is only a fallback seed. To add a field, either reuse a
+spare legacy column **or** add an idempotent `alter table … add column if not exists`
+to `supabase/schema.sql` (the "Backfill columns" block) **and run it in the Supabase
+SQL editor before deploying** — admin saves 500 on a missing column. Legacy-column
+reuse in `players`: `win_rate`→`fmvp`, `gear_device`→`tenures` (JSON),
+`gear_audio`→`liquipedia`. The 3-letter opponent short code lives in
+`matches.opponent_abbr` / `upcoming_match.opponent_abbr` (shown by `OpponentLogo`
+/ `UpcomingMatch` when no opponent logo is set; `opponentMonogram()` in
+`components/cards/OpponentLogo.tsx` resolves it).
+
 ## Recently redesigned
 `components/sections/UpcomingMatch.tsx` — the home "UPCOMING MATCH" fixture card was
 rebuilt as a split-arena broadcast card (mobile-first: stacked → side-by-side on `md`,
 glassmorphism team zones, forged diamond VS on a blade seam, divided tale-of-the-tape
 strip). Keep edits to Tailwind classes + JSX layout; the data hooks/props are stable.
+
+`components/sections/AboutUs.tsx` — home "About Us" band below `RecentResults`
+(reaper-voiced manifesto with an outlined violet accent word + a "Club Dossier" stat
+sheet). All copy is admin-editable via `site.aboutUs` (HomeEditor → "About Us"); the
+type + shipped defaults live in `lib/about.ts` (`AboutUsContent` / `DEFAULT_ABOUT` /
+`resolveAbout`). Players also carry an optional `liquipedia` URL shown in the profile
+modal. The old "Team Snapshot" HomeEditor block was removed — it edited `homeSnapshot`,
+which nothing rendered.
