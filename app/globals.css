@@ -625,6 +625,30 @@ html.lang-lo .home-hero-tagline {
     background-position: 50% 0;
   }
 }
+/* Mobile Speed Index: under Lighthouse's 4x CPU throttle the hero's perpetual
+   animations (the wordmark's filter-based "breath", the gradient sweep/shimmer,
+   the blurred fog drift, the embers) keep repainting the above-the-fold view so
+   it never settles — which pins Speed Index high even though FCP/LCP are fast.
+   Desktops have the headroom; phones don't. Freeze them to their resting state
+   on small screens; the finite entrance (fx-rise) still plays. */
+@media (max-width: 767px) {
+  .home-hero-wordmark {
+    animation: none;
+  }
+  .home-hero-main {
+    animation: none;
+    background-position: 50% 0;
+  }
+  .wordmark-shimmer {
+    animation: none;
+  }
+  .hero-fog {
+    animation: none;
+  }
+  .hero-ember {
+    display: none;
+  }
+}
 /* drifting fog */
 .hero-fog {
   position: absolute;
