@@ -433,6 +433,21 @@ html.lang-lo .keep-latin {
   object-position: 50% 36%;
   opacity: 1;
   filter: saturate(1.08) contrast(1.05);
+  /* Blur-up LQIP: a ~0.4KB inline frame of the reaper paints at first paint, so
+     the hero area reads as the scene immediately instead of a dark void until
+     the full webp arrives. CSS backgrounds aren't LCP candidates (the real <img>
+     still is), but filling the viewport early lifts Speed Index. The mobile crop
+     is the default; the desktop crop is swapped in below at >=1024px. */
+  background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAArABgDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAMEAQb/xAAfEAACAgIDAQEBAAAAAAAAAAABAgARAxIEITFBE3H/xAAYAQEBAQEBAAAAAAAAAAAAAAAAAgEDBP/EABsRAQEBAAIDAAAAAAAAAAAAAAEAAhEhAxJB/9oADAMBAAIRAxEAPwDkUQsehKhxH/PYjqbgpGHViOz8wuNRQUfJ685A7rA+0mRBrQhHZFU4wyn2Eaz3Epw5RaBhrsLv+zSgyC1+RerVUhGyexAUEeQiTYWjCPZJzbx2IMsZcYx7D0/JAke5IQdy/HrjMGVlazCAAPsJyRXmy//Z");
+  background-size: cover;
+  background-position: 50% 36%;
+  background-repeat: no-repeat;
+}
+@media (min-width: 1024px) {
+  .hero-bg--reaper {
+    background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAASACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAIBAwQG/8QAIBAAAgEDBAMAAAAAAAAAAAAAAAIBAxESEyExQiIyQf/EABgBAAIDAAAAAAAAAAAAAAAAAAACAQME/8QAGxEAAgIDAQAAAAAAAAAAAAAAAAECIRESQTH/2gAMAwEAAhEDEQA/AOTRL8mpXRKey7mem8Qu4upm3lwbNlFUMqLfaJmCmpTtI8OuMxHwHfJbwGYzV+hTK+goAVvhDIG6gAsegf/Z");
+    background-position: 50% 36%;
+  }
 }
 .hero-bg-veil {
   position: absolute;
@@ -556,6 +571,7 @@ html.lang-lo .home-hero-tagline {
   }
   .hero-bg--reaper {
     object-position: 56% 28%;
+    background-position: 56% 28%;
   }
   .hero-section--reaper .hero-bg-veil {
     background:
