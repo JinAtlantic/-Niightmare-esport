@@ -44,7 +44,7 @@ create table if not exists public.players (
   heroes          text[]  default '{}',
   win_rate        text,           -- holds the FMVP count (legacy column name)
   gear_device     text,           -- holds the roster tenure periods as JSON (legacy column name)
-  gear_audio      text,           -- unused (legacy column kept for compatibility)
+  gear_audio      text,           -- holds the Liquipedia profile URL (legacy column name)
   email           text,
   facebook        text,
   instagram       text,

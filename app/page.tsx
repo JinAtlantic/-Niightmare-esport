@@ -2,6 +2,7 @@ import React from "react";
 import Hero from "@/components/sections/Hero";
 import UpcomingMatch from "@/components/sections/UpcomingMatch";
 import RecentResults from "@/components/sections/RecentResults";
+import AboutUs from "@/components/sections/AboutUs";
 import VideoSection from "@/components/sections/VideoSection";
 // PartnerStrip is built and ready, but hidden until real partners exist —
 // showing placeholder sponsors as social proof would mislead visitors.
@@ -33,6 +34,7 @@ export default function HomePage() {
       <Hero />
       <UpcomingMatch />
       <RecentResults />
+      <AboutUs />
       <VideoSection />
     </>
   );

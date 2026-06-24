@@ -251,6 +251,15 @@ function PlayerList({
               </div>
 
               <div className="md:col-span-2">
+                <TextField
+                  label="ลิงก์ Liquipedia (ไม่บังคับ — เว้นว่าง = ไม่โชว์ปุ่มในโปรไฟล์)"
+                  value={p.liquipedia ?? ""}
+                  onChange={(v) => onPatch(i, { liquipedia: v.trim() || undefined })}
+                  placeholder="https://liquipedia.net/mobilelegends/PlayerName"
+                />
+              </div>
+
+              <div className="md:col-span-2">
                 <Label>โซเชียล — วางลิงก์เฉพาะที่นักแข่งคนนี้ใช้ (เว้นว่าง = ไม่โชว์ไอคอน)</Label>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {([

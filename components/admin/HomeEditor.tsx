@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/Icons";
 import type { UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
+import { resolveAbout, type AboutUsContent } from "@/lib/about";
 
 interface Contact {
   email?: string;
@@ -94,6 +95,7 @@ interface SiteFile {
   upcomingMatch: UpcomingMatch;
   contact?: Contact;
   homeSnapshot?: HomeSnapshot;
+  aboutUs?: AboutUsContent;
   contactPage?: ContactPageCopy;
   [key: string]: unknown;
 }
@@ -287,6 +289,17 @@ export default function HomeEditor() {
     patchSnapshot({ pillars });
   };
 
+  const about = resolveAbout(data.aboutUs);
+  const patchAbout = (p: Partial<AboutUsContent>) =>
+    setData({ ...data, aboutUs: { ...about, ...p } });
+  const patchAboutStat = (
+    index: number,
+    p: Partial<AboutUsContent["stats"][number]>
+  ) => {
+    const stats = about.stats.map((s, i) => (i === index ? { ...s, ...p } : s));
+    patchAbout({ stats });
+  };
+
   const isPractice = m.status === "practice";
 
   return (
@@ -430,6 +443,170 @@ export default function HomeEditor() {
             </div>
           </div>
         </Card>
+      </Section>
+
+      <Section
+        title="About Us (หน้า Home)"
+        hint="ข้อความแถลงการณ์ + แฟ้มสถิติ (Club Dossier) ที่อยู่ใต้ผลการแข่งล่าสุด"
+      >
+        <Card className="space-y-5">
+          <div className="grid gap-3 md:grid-cols-2">
+            <BilingualField
+              label="Kicker / Eyebrow"
+              value={about.kicker}
+              onChange={(kicker) => patchAbout({ kicker })}
+            />
+            <BilingualField
+              label="บรรทัดปี/ภูมิภาค (เช่น EST. 2020 · LAO PDR)"
+              value={about.est}
+              onChange={(est) => patchAbout({ est })}
+            />
+          </div>
+        </Card>
+
+        <Card className="mt-4 space-y-3">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+            หัวข้อใหญ่ (Manifesto)
+          </h3>
+          <p className="font-mono text-[11px] leading-relaxed text-ash">
+            หัวข้อมี 2 บรรทัด — บรรทัด 2 ประกอบจาก “ก่อนคำเด่น + คำเด่น + หลังคำเด่น”
+            โดย “คำเด่น” จะแสดงเป็นตัวอักษรโครงร่างเรืองแสงสีม่วง อย่าลืมเว้นวรรค
+            (เช่น EN: ก่อน = “WE ”, คำเด่น = “HAUNT”, หลัง = “ IT.”)
+          </p>
+          <BilingualField
+            label="บรรทัด 1"
+            value={about.headLine1}
+            onChange={(headLine1) => patchAbout({ headLine1 })}
+          />
+          <div className="grid gap-3 md:grid-cols-3">
+            <BilingualField
+              label="บรรทัด 2 — ก่อนคำเด่น"
+              value={about.headPre}
+              onChange={(headPre) => patchAbout({ headPre })}
+            />
+            <BilingualField
+              label="คำเด่น (เรืองแสง)"
+              value={about.headAccent}
+              onChange={(headAccent) => patchAbout({ headAccent })}
+            />
+            <BilingualField
+              label="บรรทัด 2 — หลังคำเด่น"
+              value={about.headPost}
+              onChange={(headPost) => patchAbout({ headPost })}
+            />
+          </div>
+        </Card>
+
+        <Card className="mt-4 space-y-3">
+          <BilingualTextArea
+            label="ย่อหน้า 1"
+            value={about.body1}
+            rows={3}
+            onChange={(body1) => patchAbout({ body1 })}
+          />
+          <BilingualTextArea
+            label="ย่อหน้า 2"
+            value={about.body2}
+            rows={3}
+            onChange={(body2) => patchAbout({ body2 })}
+          />
+        </Card>
+
+        <Card className="mt-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-3">
+              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                ปุ่มหลัก (Primary)
+              </h3>
+              <BilingualField
+                label="ข้อความปุ่ม"
+                value={about.primaryCta.label}
+                onChange={(label) =>
+                  patchAbout({ primaryCta: { ...about.primaryCta, label } })
+                }
+              />
+              <TextField
+                label="ลิงก์"
+                value={about.primaryCta.href}
+                onChange={(href) =>
+                  patchAbout({ primaryCta: { ...about.primaryCta, href } })
+                }
+              />
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                ปุ่มรอง (Secondary)
+              </h3>
+              <BilingualField
+                label="ข้อความปุ่ม"
+                value={about.secondaryCta.label}
+                onChange={(label) =>
+                  patchAbout({ secondaryCta: { ...about.secondaryCta, label } })
+                }
+              />
+              <TextField
+                label="ลิงก์"
+                value={about.secondaryCta.href}
+                onChange={(href) =>
+                  patchAbout({ secondaryCta: { ...about.secondaryCta, href } })
+                }
+              />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="mt-4 space-y-3">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+            แฟ้มสถิติ — Club Dossier
+          </h3>
+          <div className="grid gap-3 md:grid-cols-3">
+            <BilingualField
+              label="ชื่อแฟ้ม (หัวมุมซ้าย)"
+              value={about.dossierLabel}
+              onChange={(dossierLabel) => patchAbout({ dossierLabel })}
+            />
+            <BilingualField
+              label="ภูมิภาค (หัวมุมขวา)"
+              value={about.region}
+              onChange={(region) => patchAbout({ region })}
+            />
+            <BilingualField
+              label="ที่มาข้อมูล (แถวล่างสุด)"
+              value={about.source}
+              onChange={(source) => patchAbout({ source })}
+            />
+          </div>
+        </Card>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          {about.stats.slice(0, 4).map((stat, i) => (
+            <Card key={stat.id} className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                  สถิติ {i + 1}
+                </h3>
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim">
+                  {stat.id}
+                </span>
+              </div>
+              <TextField
+                label="ตัวเลข / Value"
+                value={stat.value}
+                onChange={(value) => patchAboutStat(i, { value })}
+              />
+              <BilingualField
+                label="Label"
+                value={stat.label}
+                onChange={(label) => patchAboutStat(i, { label })}
+              />
+              <BilingualField
+                label="Detail"
+                value={stat.detail}
+                onChange={(detail) => patchAboutStat(i, { detail })}
+              />
+            </Card>
+          ))}
+        </div>
       </Section>
 
       <Section

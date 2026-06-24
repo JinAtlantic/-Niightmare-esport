@@ -49,6 +49,10 @@ export interface Player {
   tenures?: { joined: string; left?: string }[];
   /** Optional contact email; when set, the profile modal shows a copy button. */
   email?: string;
+  /** Optional Liquipedia profile URL; when set, the profile modal shows a
+   *  "Liquipedia" link. Persisted in the legacy gear_audio column (no schema
+   *  migration). */
+  liquipedia?: string;
   socials: Socials;
 }
 

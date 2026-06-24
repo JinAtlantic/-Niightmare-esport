@@ -43,7 +43,7 @@ export function playerRows(players: Player[], game: string) {
     win_rate: s(p.fmvp), // legacy column name, now holds the FMVP count
     // legacy column — now holds the roster tenure periods as a JSON array
     gear_device: p.tenures?.length ? JSON.stringify(p.tenures) : null,
-    gear_audio: null,
+    gear_audio: s(p.liquipedia), // legacy column — now holds the Liquipedia URL
     email: s(p.email),
     facebook: s(p.socials?.facebook),
     instagram: s(p.socials?.instagram),

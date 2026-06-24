@@ -64,6 +64,7 @@ function toPlayer(r: Record<string, unknown>): Player {
     fmvp: val(r.win_rate), // legacy column name, now holds the FMVP count
     tenures: parseTenures(r.gear_device), // legacy column — JSON tenure periods
     email: val(r.email),
+    liquipedia: val(r.gear_audio), // legacy column — now holds the Liquipedia URL
     socials: socials(r),
   };
 }

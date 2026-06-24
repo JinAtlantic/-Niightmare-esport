@@ -9,6 +9,7 @@ import {
   ScrollText,
   Trophy,
   CalendarDays,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
@@ -212,6 +213,19 @@ export default function PlayerModal({
               <div className="flex flex-wrap items-center gap-2">
                 {player.email && <CopyEmailButton email={player.email} />}
                 <SocialLinks socials={player.socials} size={18} />
+                {player.liquipedia && (
+                  <a
+                    href={player.liquipedia}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${player.ign} — Liquipedia`}
+                    title="Liquipedia"
+                    className="hover-glow inline-flex h-11 items-center gap-2 border border-edge bg-crypt px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ash transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+                  >
+                    <Database size={16} strokeWidth={1.75} />
+                    Liquipedia
+                  </a>
+                )}
               </div>
             </div>
           </div>
