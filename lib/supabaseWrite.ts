@@ -109,6 +109,7 @@ export async function writeSectionToSupabase(
         community_url: s(site.communityUrl),
         formspree_endpoint: s(site.formspreeEndpoint),
         media_kit_url: s(site.mediaKitUrl),
+        about_us: site.aboutUs ?? null,
       });
       if (error) throw new Error(`site_settings: ${error.message}`);
     }

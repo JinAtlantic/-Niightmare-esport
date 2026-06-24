@@ -182,6 +182,9 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
       communityUrl: val(c.community_url) ?? "",
       formspreeEndpoint: val(c.formspree_endpoint) ?? "",
       mediaKitUrl: val(c.media_kit_url) ?? "",
+      // About Us band copy (jsonb). Null/absent → leave undefined so the
+      // component falls back to DEFAULT_ABOUT.
+      aboutUs: (c.about_us as Record<string, unknown> | null) ?? undefined,
       upcomingMatch: u
         ? {
             status: u.status,

@@ -13,6 +13,7 @@ import type {
   UpcomingMatch,
   Bilingual,
 } from "./types";
+import type { AboutUsContent } from "./about";
 
 /**
  * One-time (re-runnable) migration of the current Vercel-Blob content into the
@@ -149,6 +150,7 @@ export interface SiteShape {
   formspreeEndpoint?: string;
   mediaKitUrl?: string;
   upcomingMatch?: UpcomingMatch;
+  aboutUs?: AboutUsContent;
 }
 
 export interface MigrateResult {
@@ -241,6 +243,7 @@ export async function migrateAll(): Promise<MigrateResult> {
       community_url: s(site.communityUrl),
       formspree_endpoint: s(site.formspreeEndpoint),
       media_kit_url: s(site.mediaKitUrl),
+      about_us: site.aboutUs ?? null,
     });
     if (siteErr) throw new Error(`site_settings: ${siteErr.message}`);
 
