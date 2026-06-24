@@ -88,6 +88,7 @@ export async function writeSectionToSupabase(
           round_lo: lo(um.round),
           opponent: s(um.opponent),
           opponent_logo: s(um.opponentLogo),
+          opponent_abbr: s(um.opponentAbbr),
           stream_url: s(um.streamUrl),
         });
         if (error) throw new Error(`upcoming_match: ${error.message}`);

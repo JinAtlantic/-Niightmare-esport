@@ -10,22 +10,35 @@ interface OpponentLogoProps {
   src?: string | null;
   /** Opponent team name — used for the monogram fallback and the alt text. */
   name: string;
+  /** Optional explicit short code (e.g. "ONC"). When set it overrides the
+   *  name-derived initials. Trimmed and capped at 3 characters. */
+  abbr?: string;
   /** Box size in pixels. The fixed size keeps every row's logo the same
    *  height; object-contain lets any aspect ratio sit inside it cleanly. */
   size?: number;
   className?: string;
 }
 
-/** First letters of the first and last word (max 2 chars). */
+/** Up to 3 letters: a single word's first 3 chars, else each word's initial. */
 function initials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return "?";
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+  return words.map((w) => w[0]).join("").slice(0, 3).toUpperCase();
 }
 
-export default function OpponentLogo({ src, name, size = 28, className = "" }: OpponentLogoProps) {
+/** Resolve the monogram text: explicit abbr wins, else derived initials. */
+export function opponentMonogram(name: string, abbr?: string): string {
+  const code = abbr?.trim();
+  if (code) return code.slice(0, 3).toUpperCase();
+  return initials(name);
+}
+
+export default function OpponentLogo({ src, name, abbr, size = 28, className = "" }: OpponentLogoProps) {
   const dimension = { width: size, height: size, minWidth: size };
+  const mono = opponentMonogram(name, abbr);
+  // 3-char codes need a smaller glyph to sit inside the same fixed box.
+  const fontSize = size * (mono.length >= 3 ? 0.32 : 0.42);
 
   return (
     <span
@@ -45,10 +58,10 @@ export default function OpponentLogo({ src, name, size = 28, className = "" }: O
       ) : (
         <span
           aria-hidden
-          className="keep-latin font-display font-bold leading-none text-ash"
-          style={{ fontSize: size * 0.4 }}
+          className="keep-latin font-display font-bold leading-none tracking-tight text-ash"
+          style={{ fontSize }}
         >
-          {initials(name)}
+          {mono}
         </span>
       )}
     </span>

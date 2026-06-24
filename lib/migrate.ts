@@ -89,6 +89,7 @@ export function matchRows(matches: Match[]) {
     round_lo: lo(m.round),
     opponent: s(m.opponent),
     opponent_logo: s(m.opponentLogo),
+    opponent_abbr: s(m.opponentAbbr),
     score: s(m.score),
     result: s(m.result),
     vod: s(m.vod),
@@ -219,6 +220,7 @@ export async function migrateAll(): Promise<MigrateResult> {
         round_lo: lo(um.round),
         opponent: s(um.opponent),
         opponent_logo: s(um.opponentLogo),
+        opponent_abbr: s(um.opponentAbbr),
         stream_url: s(um.streamUrl),
       });
       if (error) throw new Error(`upcoming_match: ${error.message}`);

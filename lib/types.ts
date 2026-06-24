@@ -119,6 +119,9 @@ export interface UpcomingMatch {
   opponent: string;
   /** Optional opponent logo (e.g. "/teams/vipers.png"); falls back to a monogram. */
   opponentLogo?: string;
+  /** Optional 3-letter opponent short code, shown in the crest when no logo is
+   *  set. Empty falls back to initials derived from the opponent name. */
+  opponentAbbr?: string;
   /** Optional live-stream URL (YouTube/Facebook). When set + status "live",
    *  the home hero shows a WATCH LIVE button. */
   streamUrl?: string;
@@ -135,6 +138,9 @@ export interface Match {
   /** Optional path/URL to the opponent's logo (e.g. "/teams/dragon-force.png").
    *  When absent the row falls back to an initials monogram. */
   opponentLogo?: string;
+  /** Optional 3-letter opponent short code, shown in the crest when no logo is
+   *  set. Empty falls back to initials derived from the opponent name. */
+  opponentAbbr?: string;
   score: string;
   result: MatchResult;
   vod: string | null;

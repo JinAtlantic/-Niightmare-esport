@@ -120,6 +120,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
         round: optBi(r.round_en as string, r.round_lo as string),
         opponent: (r.opponent as string) ?? "",
         opponentLogo: val(r.opponent_logo),
+        opponentAbbr: val(r.opponent_abbr),
         score: (r.score as string) ?? "",
         result: r.result,
         vod: (r.vod as string) ?? null,
@@ -190,6 +191,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
             round: optBi(u.round_en as string, u.round_lo as string),
             opponent: (u.opponent as string) ?? "",
             opponentLogo: val(u.opponent_logo),
+            opponentAbbr: val(u.opponent_abbr),
             streamUrl: val(u.stream_url),
           }
         : undefined,

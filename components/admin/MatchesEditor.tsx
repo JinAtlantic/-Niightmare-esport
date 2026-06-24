@@ -316,7 +316,7 @@ export default function MatchesEditor() {
       <div key={m.id} className="border border-edge bg-void/45 p-2 md:p-3">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} size={24} />
+            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} abbr={m.opponentAbbr} size={24} />
             <span className="truncate font-mono text-xs text-ash">
               NM <span className="text-ash-dim">vs</span>{" "}
               <span className="text-spectre">{m.opponent || "No opponent yet"}</span> / {m.score}
@@ -408,6 +408,12 @@ export default function MatchesEditor() {
             onChange={(v) => patchMatch(i, { opponent: v })}
             placeholder="Dragon Force"
           />
+          <TextField
+            label="Opponent abbr (3 ตัว — โชว์เมื่อไม่มีโลโก้)"
+            value={m.opponentAbbr ?? ""}
+            onChange={(v) => patchMatch(i, { opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined })}
+            placeholder="DRG"
+          />
           <TextField label="Score" value={m.score} onChange={(v) => patchMatch(i, { score: v })} placeholder="3-1" />
           <SelectField
             label="Result"
@@ -454,7 +460,7 @@ export default function MatchesEditor() {
             placeholder="Round EN"
           />
           <div className="flex min-w-0 items-center gap-2">
-            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} size={24} />
+            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} abbr={m.opponentAbbr} size={24} />
             <input
               className={compactInputClass}
               value={m.opponent}

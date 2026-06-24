@@ -91,7 +91,7 @@ function ResultCard({ match }: { match: Match }) {
             <span className={`font-display text-2xl font-extrabold leading-none ${s.text}`}>
               {match.score}
             </span>
-            <OpponentLogo src={match.opponentLogo} name={opponent} size={30} />
+            <OpponentLogo src={match.opponentLogo} name={opponent} abbr={match.opponentAbbr} size={30} />
             <span className="keep-latin ml-1 min-w-0 flex-1 truncate font-display text-[13px] font-bold uppercase leading-tight text-soul">
               {opponent}
             </span>
@@ -127,7 +127,7 @@ function ResultCard({ match }: { match: Match }) {
             >
               {match.score}
             </span>
-            <OpponentLogo src={match.opponentLogo} name={opponent} size={40} />
+            <OpponentLogo src={match.opponentLogo} name={opponent} abbr={match.opponentAbbr} size={40} />
           </div>
           <p className="mt-3 truncate text-center font-display text-sm font-bold uppercase tracking-[0.03em] text-soul">
             <span className="text-ash-dim">{pick(COPY.vs)} </span>

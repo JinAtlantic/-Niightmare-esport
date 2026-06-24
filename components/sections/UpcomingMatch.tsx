@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
+import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import type { MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
@@ -23,13 +24,6 @@ function toCountdown(targetMs: number): Countdown {
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
-
-function initials(name: string): string {
-  const w = name.trim().split(/\s+/).filter(Boolean);
-  if (!w.length) return "?";
-  if (w.length === 1) return w[0].slice(0, 2).toUpperCase();
-  return (w[0][0] + w[w.length - 1][0]).toUpperCase();
-}
 
 const STATUS: Record<MatchStatus, { key: string; text: string; ring: string; glow: string }> = {
   next: {
@@ -58,12 +52,14 @@ const STATUS: Record<MatchStatus, { key: string; text: string; ring: string; glo
 function Crest({
   logo,
   name,
+  abbr,
   glow,
   boxClass,
   monoClass,
 }: {
   logo?: string | null;
   name: string;
+  abbr?: string;
   glow: string;
   boxClass: string;
   monoClass: string;
@@ -81,8 +77,8 @@ function Crest({
           className={`object-contain ${glow}`}
         />
       ) : (
-        <span className={`keep-latin font-display font-bold text-ash ${monoClass}`} aria-hidden>
-          {initials(name)}
+        <span className={`keep-latin font-display font-bold tracking-tight text-ash ${monoClass}`} aria-hidden>
+          {opponentMonogram(name, abbr)}
         </span>
       )}
     </div>
@@ -97,10 +93,12 @@ function Crest({
 function TeamSide({
   logo,
   name,
+  abbr,
   home = false,
 }: {
   logo?: string | null;
   name: string;
+  abbr?: string;
   home?: boolean;
 }) {
   return (
@@ -117,6 +115,7 @@ function TeamSide({
       <Crest
         logo={logo}
         name={name}
+        abbr={abbr}
         glow={
           home
             ? "drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
@@ -323,6 +322,7 @@ export default function UpcomingMatch() {
                 <Crest
                   logo={match.opponentLogo}
                   name={match.opponent}
+                  abbr={match.opponentAbbr}
                   glow="drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
                   boxClass="h-[104px] w-[104px]"
                   monoClass="text-4xl"
@@ -378,7 +378,7 @@ export default function UpcomingMatch() {
             </div>
 
             {hasOpponent ? (
-              <TeamSide logo={match.opponentLogo} name={match.opponent} />
+              <TeamSide logo={match.opponentLogo} name={match.opponent} abbr={match.opponentAbbr} />
             ) : (
               <div className="relative flex flex-1 flex-col items-center justify-center gap-3.5 overflow-hidden px-5 py-7 md:py-10">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-ash-dim">

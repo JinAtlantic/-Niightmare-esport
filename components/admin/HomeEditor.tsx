@@ -37,34 +37,6 @@ interface Contact {
   [key: string]: string | undefined;
 }
 
-interface SnapshotStat {
-  id: string;
-  value: string;
-  label: Bilingual;
-  detail: Bilingual;
-}
-
-interface SnapshotPillar {
-  id: string;
-  title: Bilingual;
-  body: Bilingual;
-}
-
-interface SnapshotCta {
-  label: Bilingual;
-  href: string;
-}
-
-interface HomeSnapshot {
-  kicker: Bilingual;
-  title: Bilingual;
-  intro: Bilingual;
-  stats: SnapshotStat[];
-  pillars: SnapshotPillar[];
-  primaryCta: SnapshotCta;
-  secondaryCta: SnapshotCta;
-}
-
 type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord";
 type ContactFieldKey = "name" | "email" | "company" | "type" | "message";
 type ContactTypeKey = "sponsorship" | "media" | "general" | "tryout";
@@ -94,33 +66,10 @@ interface ContactPageCopy {
 interface SiteFile {
   upcomingMatch: UpcomingMatch;
   contact?: Contact;
-  homeSnapshot?: HomeSnapshot;
   aboutUs?: AboutUsContent;
   contactPage?: ContactPageCopy;
   [key: string]: unknown;
 }
-
-const DEFAULT_HOME_SNAPSHOT: HomeSnapshot = {
-  kicker: { en: "PARTNER-READY CLUB PROFILE", lo: "ໂປຣໄຟລ໌ທີມສໍາລັບພາກສ່ວນ" },
-  title: { en: "TEAM SNAPSHOT", lo: "ພາບລວມຂອງທີມ" },
-  intro: {
-    en: "A fast read for fans, media, and brands: the competitions we play, the roster behind the tag, and the sponsor paths built into the club.",
-    lo: "ພາບລວມສໍາລັບແຟນ, ສື່ ແລະ ແບຣນ: ລາຍການທີ່ເຮົາແຂ່ງ, ນັກກິລາໃນທີມ ແລະ ເສັ້ນທາງສໍາລັບພາກສ່ວນທີ່ຢາກຮ່ວມງານ.",
-  },
-  stats: [
-    { id: "divisions", value: "2", label: { en: "DIVISIONS", lo: "ປະເພດເກມ" }, detail: { en: "MLBB / eFootball", lo: "MLBB / eFootball" } },
-    { id: "roster", value: "8", label: { en: "ROSTER", lo: "ນັກກິລາ" }, detail: { en: "Active players across the current lineup.", lo: "ນັກກິລາທີ່ຢູ່ໃນລາຍຊື່ປັດຈຸບັນ." } },
-    { id: "honours", value: "1", label: { en: "HONOURS", lo: "ລາງວັນ" }, detail: { en: "Tournament placements already in the cabinet.", lo: "ຜົນງານການແຂ່ງຂັນທີ່ຢູ່ໃນຕູ້ລາງວັນ." } },
-    { id: "partners", value: "3+", label: { en: "PARTNER TIERS", lo: "ລະດັບພາກສ່ວນ" }, detail: { en: "Structured options for brands and community partners.", lo: "ທາງເລືອກສໍາລັບແບຣນ ແລະ ພາກສ່ວນຊຸມຊົນ." } },
-  ],
-  pillars: [
-    { id: "matchday", title: { en: "MATCHDAY PRESENCE", lo: "ພ້ອມສໍາລັບວັນແຂ່ງ" }, body: { en: "The headline fixture gives visitors the next battle, opponent, tournament, and kickoff without digging through pages.", lo: "ຜູ້ເຂົ້າຊົມເຫັນນັດຕໍ່ໄປ, ຄູ່ແຂ່ງ, ລາຍການ ແລະ ເວລາເລີ່ມໄດ້ທັນທີ." } },
-    { id: "proof", title: { en: "PROOF OF LEVEL", lo: "ຫຼັກຖານຂອງລະດັບ" }, body: { en: "Honours, match history, and news make the team look active instead of like a static logo page.", lo: "ລາງວັນ, ປະຫວັດການແຂ່ງ ແລະ ຂ່າວ ຊ່ວຍໃຫ້ທີມເບິ່ງມີການເຄື່ອນໄຫວ." } },
-    { id: "partners", title: { en: "BUSINESS FLOW", lo: "ເສັ້ນທາງທຸລະກິດ" }, body: { en: "Sponsor and contact routes are visible from the home page, which helps with price discussions and partner trust.", lo: "ລິ້ງສໍາລັບສະປອນເຊີ ແລະ ການຕິດຕໍ່ຢູ່ໃນໜ້າຫຼັກ ຊ່ວຍໃນການຕໍ່ລອງ ແລະ ສ້າງຄວາມເຊື່ອໃຈ." } },
-  ],
-  primaryCta: { label: { en: "VIEW SPONSOR PATHS", lo: "ເບິ່ງທາງເລືອກສະປອນເຊີ" }, href: "/sponsors" },
-  secondaryCta: { label: { en: "START A DEAL", lo: "ເລີ່ມຕິດຕໍ່ທຸລະກິດ" }, href: "/contact" },
-};
 
 const DEFAULT_CONTACT_PAGE: ContactPageCopy = {
   kicker: { en: "Business Desk", lo: "ຝ່າຍຕິດຕໍ່ທຸລະກິດ" },
@@ -267,28 +216,6 @@ export default function HomeEditor() {
   const patchContactPage = (p: Partial<ContactPageCopy>) =>
     setData({ ...data, contactPage: { ...contactPage, ...p } });
 
-  const rawSnapshot = data.homeSnapshot;
-  const snapshot: HomeSnapshot = {
-    ...DEFAULT_HOME_SNAPSHOT,
-    ...(rawSnapshot ?? {}),
-    stats: rawSnapshot?.stats?.length ? rawSnapshot.stats : DEFAULT_HOME_SNAPSHOT.stats,
-    pillars: rawSnapshot?.pillars?.length ? rawSnapshot.pillars : DEFAULT_HOME_SNAPSHOT.pillars,
-    primaryCta: { ...DEFAULT_HOME_SNAPSHOT.primaryCta, ...(rawSnapshot?.primaryCta ?? {}) },
-    secondaryCta: { ...DEFAULT_HOME_SNAPSHOT.secondaryCta, ...(rawSnapshot?.secondaryCta ?? {}) },
-  };
-  const patchSnapshot = (p: Partial<HomeSnapshot>) =>
-    setData({ ...data, homeSnapshot: { ...snapshot, ...p } });
-  const patchStat = (index: number, p: Partial<SnapshotStat>) => {
-    const stats = snapshot.stats.map((stat, i) => (i === index ? { ...stat, ...p } : stat));
-    patchSnapshot({ stats });
-  };
-  const patchPillar = (index: number, p: Partial<SnapshotPillar>) => {
-    const pillars = snapshot.pillars.map((pillar, i) =>
-      i === index ? { ...pillar, ...p } : pillar
-    );
-    patchSnapshot({ pillars });
-  };
-
   const about = resolveAbout(data.aboutUs);
   const patchAbout = (p: Partial<AboutUsContent>) =>
     setData({ ...data, aboutUs: { ...about, ...p } });
@@ -319,131 +246,6 @@ export default function HomeEditor() {
           </Button>
         </div>
       </div>
-
-      <Section
-        title="Team Snapshot (หน้า Home)"
-        hint="ตัวเลข การ์ดจุดขาย และปุ่มของ section บนหน้าแรก"
-      >
-        <Card className="space-y-5">
-          <div className="grid gap-3 md:grid-cols-2">
-            <BilingualField
-              label="Kicker / Eyebrow"
-              value={snapshot.kicker}
-              onChange={(kicker) => patchSnapshot({ kicker })}
-            />
-            <BilingualField
-              label="หัวข้อหลัก"
-              value={snapshot.title}
-              onChange={(title) => patchSnapshot({ title })}
-            />
-          </div>
-          <BilingualTextArea
-            label="Intro copy"
-            value={snapshot.intro}
-            rows={3}
-            onChange={(intro) => patchSnapshot({ intro })}
-          />
-        </Card>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {snapshot.stats.slice(0, 4).map((stat, i) => (
-            <Card key={stat.id} className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                  Stat Tile {i + 1}
-                </h3>
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim">
-                  {stat.id}
-                </span>
-              </div>
-              <TextField
-                label="ตัวเลข / Value"
-                value={stat.value}
-                onChange={(value) => patchStat(i, { value })}
-              />
-              <BilingualField
-                label="Label"
-                value={stat.label}
-                onChange={(label) => patchStat(i, { label })}
-              />
-              <BilingualField
-                label="Detail"
-                value={stat.detail}
-                onChange={(detail) => patchStat(i, { detail })}
-              />
-            </Card>
-          ))}
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          {snapshot.pillars.slice(0, 3).map((pillar, i) => (
-            <Card key={pillar.id} className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                  Pillar {i + 1}
-                </h3>
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim">
-                  {pillar.id}
-                </span>
-              </div>
-              <BilingualField
-                label="Title"
-                value={pillar.title}
-                onChange={(title) => patchPillar(i, { title })}
-              />
-              <BilingualTextArea
-                label="Body"
-                value={pillar.body}
-                rows={4}
-                onChange={(body) => patchPillar(i, { body })}
-              />
-            </Card>
-          ))}
-        </div>
-
-        <Card className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                Primary CTA
-              </h3>
-              <BilingualField
-                label="Button label"
-                value={snapshot.primaryCta.label}
-                onChange={(label) =>
-                  patchSnapshot({ primaryCta: { ...snapshot.primaryCta, label } })
-                }
-              />
-              <TextField
-                label="Link"
-                value={snapshot.primaryCta.href}
-                onChange={(href) =>
-                  patchSnapshot({ primaryCta: { ...snapshot.primaryCta, href } })
-                }
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                Secondary CTA
-              </h3>
-              <BilingualField
-                label="Button label"
-                value={snapshot.secondaryCta.label}
-                onChange={(label) =>
-                  patchSnapshot({ secondaryCta: { ...snapshot.secondaryCta, label } })
-                }
-              />
-              <TextField
-                label="Link"
-                value={snapshot.secondaryCta.href}
-                onChange={(href) =>
-                  patchSnapshot({ secondaryCta: { ...snapshot.secondaryCta, href } })
-                }
-              />
-            </div>
-          </div>
-        </Card>
-      </Section>
 
       <Section
         title="About Us (หน้า Home)"
@@ -618,7 +420,7 @@ export default function HomeEditor() {
           <div className="mb-4 flex items-center gap-3 border-b border-edge pb-4">
             <OpponentLogo src="/logo.png" name="NM" size={32} />
             <span className="font-mono text-xs text-ash-dim">vs</span>
-            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} size={32} />
+            <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} abbr={m.opponentAbbr} size={32} />
             <span className="font-mono text-xs text-spectre">
               {m.opponent || (isPractice ? "ซ้อมทีม" : "—")}
             </span>
@@ -664,6 +466,14 @@ export default function HomeEditor() {
               value={m.opponent}
               onChange={(v) => patch({ opponent: v })}
               placeholder="เช่น Vientiane Vipers"
+            />
+            <TextField
+              label="ชื่อย่อคู่แข่ง (3 ตัว — โชว์เมื่อไม่มีโลโก้)"
+              value={m.opponentAbbr ?? ""}
+              onChange={(v) =>
+                patch({ opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined })
+              }
+              placeholder="VVP"
             />
             <div className="md:col-span-2">
               <ImageField

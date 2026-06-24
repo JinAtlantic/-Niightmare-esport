@@ -335,7 +335,7 @@ function MatchCard({
         </div>
 
         <div className="flex min-w-0 flex-col items-center gap-2 text-center">
-          <OpponentLogo src={match.opponentLogo} name={opponentName} size={MOBILE_MATCH_LOGO_SIZE} />
+          <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={MOBILE_MATCH_LOGO_SIZE} />
           <span className="keep-latin max-w-[104px] break-words font-display text-xs font-bold uppercase leading-tight text-soul">
             {opponentName}
           </span>
@@ -373,7 +373,7 @@ function MatchCard({
           <span className="keep-latin truncate text-center font-display text-base font-bold uppercase leading-tight text-soul md:text-right md:text-2xl">
             {opponentName}
           </span>
-          <OpponentLogo src={match.opponentLogo} name={opponentName} size={MATCH_LOGO_SIZE} />
+          <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={MATCH_LOGO_SIZE} />
         </div>
       </div>
 

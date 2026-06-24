@@ -11,7 +11,7 @@ import SponsorsEditor from "@/components/admin/SponsorsEditor";
 type Tab = "home" | "news" | "matches" | "roster" | "sponsors";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "home", label: "หน้า Home (นัดต่อไป)" },
+  { id: "home", label: "หน้า Home" },
   { id: "news", label: "ข่าวสาร" },
   { id: "matches", label: "แมตช์ & ทัวร์นาเมนต์" },
   { id: "roster", label: "นักแข่ง (Roster)" },

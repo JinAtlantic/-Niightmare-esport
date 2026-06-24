@@ -193,6 +193,9 @@ create table if not exists public.site_settings (
 -- (Stage 0) run, so the updated_at trigger below has a column to write to.
 alter table public.members add column if not exists updated_at timestamptz default now();
 alter table public.upcoming_match add column if not exists stream_url text;
+-- Optional 3-letter opponent short code shown when no opponent logo is set.
+alter table public.matches add column if not exists opponent_abbr text;
+alter table public.upcoming_match add column if not exists opponent_abbr text;
 drop policy if exists "members are publicly readable" on public.members;
 
 -- ============================================================================
