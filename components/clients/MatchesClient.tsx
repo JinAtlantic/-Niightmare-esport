@@ -650,7 +650,6 @@ export default function MatchesClient() {
   return (
     <>
       <PageHeader
-        kicker={pick(page.kicker)}
         title={pick(page.title)}
         subtitle={pick(page.intro)}
       />
