@@ -16,11 +16,11 @@
     },
     "tagline": {
       "en": "WE HAUNT THE",
-      "lo": "ພວກເຮົາ"
+      "lo": "ພວກເຮົາຕາມຫຼອກຫຼອນ"
     },
     "tagline_accent": {
       "en": "META",
-      "lo": "ຄອງເກມ"
+      "lo": "ເມຕ້າ"
     },
     "subtitle": {
       "en": "Competing in Mobile Legends: Bang Bang & eFootball",
@@ -173,7 +173,7 @@
     }
   },
   "footer": {
-    "tagline": { "en": "WE HAUNT THE META", "lo": "ພວກເຮົາຄອງເກມ" },
+    "tagline": { "en": "WE HAUNT THE META", "lo": "ພວກເຮົາຕາມຫຼອກຫຼອນເມຕ້າ" },
     "quick_links": { "en": "QUICK LINKS", "lo": "ລິ້ງດ່ວນ" },
     "follow_us": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" },
     "copyright": {

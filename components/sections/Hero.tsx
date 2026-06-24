@@ -7,7 +7,7 @@ import { useContent } from "@/components/context/ContentContext";
 import { ArrowRightIcon, DiscordIcon } from "@/components/ui/Icons";
 
 export default function Hero() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { site } = useContent();
   const communityUrl =
     (site as { communityUrl?: string }).communityUrl || "/contact";
@@ -49,7 +49,9 @@ export default function Hero() {
           className="home-hero-tagline fx-rise keep-latin font-display"
           style={{ animationDelay: "0.34s" }}
         >
-          {t("hero.tagline")}{" "}
+          {t("hero.tagline")}
+          {/* Lao reads as one phrase (no inter-word space); EN keeps the gap. */}
+          {lang === "lo" ? "" : " "}
           <span className="tagline-accent text-glow">
             {t("hero.tagline_accent")}
           </span>
