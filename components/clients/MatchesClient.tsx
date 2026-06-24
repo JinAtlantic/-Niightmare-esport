@@ -498,7 +498,7 @@ function TournamentRecordGroup({
             className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
           />
           {group.matches.map((match, i) => (
-            <Reveal key={match.id} delay={i * 55}>
+            <Reveal key={match.id} delay={Math.min(i, 6) * 45}>
               <div className="grid gap-3 md:grid-cols-[44px_1fr] md:items-stretch">
                 <div className="hidden md:grid md:place-items-center">
                   <span className="relative z-[1] grid h-9 w-9 place-items-center border border-amethyst/60 bg-void font-mono text-[11px] font-bold text-glow shadow-[0_0_16px_rgba(168,85,247,0.35)]">
@@ -555,7 +555,9 @@ function GameTournamentSection({
       </div>
       <div className="grid gap-4">
         {groups.map((group, i) => (
-          <Reveal key={group.key} delay={i * 70}>
+          // Cap the stagger so deep groups never wait on a long index-based
+          // delay (All Years can have 20+ groups).
+          <Reveal key={group.key} delay={Math.min(i, 4) * 55}>
             <TournamentRecordGroup group={group} page={page} />
           </Reveal>
         ))}
@@ -602,10 +604,10 @@ export default function MatchesClient() {
     return [...years].sort((a, b) => b.localeCompare(a));
   }, [gameMatches, tournamentYearByKey]);
 
-  // Empty = default to the most recent year so the page opens with one short
-  // year's worth of tournaments instead of all 21 groups at once.
+  // Default to "All Years" so the full history is visible on open. The Reveal
+  // stagger below is capped so the long list still appears quickly.
   const [selectedYear, setSelectedYear] = useState<string>("");
-  const activeYear = selectedYear || yearOptions[0] || "all";
+  const activeYear = selectedYear || "all";
 
   const gameYearMatches = useMemo(() => {
     if (activeYear === "all") return gameMatches;
