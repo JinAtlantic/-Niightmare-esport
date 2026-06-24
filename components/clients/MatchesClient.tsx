@@ -401,7 +401,10 @@ function TournamentRecordGroup({
   const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
 
   return (
-    <section className="clip-esports overflow-hidden border border-edge bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void shadow-[0_0_28px_rgba(168,85,247,0.1)]">
+    <section
+      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 360px" }}
+      className="clip-esports overflow-hidden border border-edge bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void shadow-[0_0_28px_rgba(168,85,247,0.1)]"
+    >
       <div className="group relative overflow-hidden border-b border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-5 py-5 transition-colors hover:bg-amethyst/[0.04] md:px-6 md:py-6">
         <button
           type="button"
@@ -744,10 +747,12 @@ export default function MatchesClient() {
 
         <div key={`${selectedGame}-${activeYear}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
           {groupsByGame.some((section) => section.groups.length > 0) ? (
-            groupsByGame.map(({ game, groups }, i) => (
-              <Reveal key={game} delay={i * 90}>
-                <GameTournamentSection game={game} groups={groups} page={page} />
-              </Reveal>
+            // No outer Reveal here: it would wrap the whole (very tall) All-Years
+            // section, and the IntersectionObserver's 0.15 threshold can never be
+            // met on a section taller than ~6× the viewport — so nothing showed on
+            // mobile. Each tournament group reveals itself instead.
+            groupsByGame.map(({ game, groups }) => (
+              <GameTournamentSection key={game} game={game} groups={groups} page={page} />
             ))
           ) : (
             <p className="border border-edge bg-crypt p-8 text-center font-mono text-sm text-ash">
