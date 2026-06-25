@@ -23,9 +23,11 @@ import {
   TiktokIcon,
   DiscordIcon,
 } from "@/components/ui/Icons";
+import RoadmapEditor from "@/components/admin/RoadmapEditor";
 import type { UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
+import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
 
 interface Contact {
   email?: string;
@@ -67,6 +69,7 @@ interface SiteFile {
   upcomingMatch: UpcomingMatch;
   contact?: Contact;
   aboutUs?: AboutUsContent;
+  roadmap?: RoadmapContent;
   contactPage?: ContactPageCopy;
   [key: string]: unknown;
 }
@@ -219,6 +222,8 @@ export default function HomeEditor() {
   const about = resolveAbout(data.aboutUs);
   const patchAbout = (p: Partial<AboutUsContent>) =>
     setData({ ...data, aboutUs: { ...about, ...p } });
+  const roadmap = resolveRoadmap(data.roadmap);
+  const patchRoadmap = (rm: RoadmapContent) => setData({ ...data, roadmap: rm });
 
   const isPractice = m.status === "practice";
 
@@ -343,6 +348,13 @@ export default function HomeEditor() {
           </div>
         </Card>
 
+      </Section>
+
+      <Section
+        title="Niightmare Roadmap (หน้า Match)"
+        hint="Popup Annual Esports Roadmap พร้อม H1/H2 tabs และ Current Status Tracker"
+      >
+        <RoadmapEditor value={roadmap} onChange={patchRoadmap} />
       </Section>
 
       <Section

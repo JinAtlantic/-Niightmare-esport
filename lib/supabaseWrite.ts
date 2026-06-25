@@ -110,6 +110,7 @@ export async function writeSectionToSupabase(
         formspree_endpoint: s(site.formspreeEndpoint),
         media_kit_url: s(site.mediaKitUrl),
         about_us: site.aboutUs ?? null,
+        roadmap: site.roadmap ?? null,
       };
       const { error } = await db.from("site_settings").upsert(siteSettingsRow);
       if (error) throw new Error(`site_settings: ${error.message}`);

@@ -185,6 +185,8 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
       // About Us band copy (jsonb). Null/absent → leave undefined so the
       // component falls back to DEFAULT_ABOUT.
       aboutUs: (c.about_us as Record<string, unknown> | null) ?? undefined,
+      // Matches-page Niightmare Roadmap popup (jsonb). Null/absent → defaults.
+      roadmap: (c.roadmap as Record<string, unknown> | null) ?? undefined,
       upcomingMatch: u
         ? {
             status: u.status,

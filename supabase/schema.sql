@@ -198,6 +198,8 @@ alter table public.matches add column if not exists opponent_abbr text;
 alter table public.upcoming_match add column if not exists opponent_abbr text;
 -- Home "About Us" band copy (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists about_us jsonb;
+-- Matches-page "Niightmare Roadmap" popup (admin-editable), stored as one JSON blob.
+alter table public.site_settings add column if not exists roadmap jsonb;
 drop policy if exists "members are publicly readable" on public.members;
 
 -- ============================================================================

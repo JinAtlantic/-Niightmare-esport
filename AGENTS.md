@@ -135,8 +135,8 @@ reuse in `players`: `win_rate`→`fmvp`, `gear_device`→`tenures` (JSON),
 / `UpcomingMatch` when no opponent logo is set; `opponentMonogram()` in
 `components/cards/OpponentLogo.tsx` resolves it).
 
-**Editable JSON blocks on the "site" section** (currently About Us) live in
-single `jsonb` columns on `site_settings`: `about_us`. Pattern for any
+**Editable JSON blocks on the "site" section** (About Us, Niightmare Roadmap) live in
+single `jsonb` columns on `site_settings`: `about_us` and `roadmap`. Pattern for any
 new editable-content block: (1) `alter table site_settings add column if not exists
 <col> jsonb;` in `schema.sql` **and run it in Supabase before the admin can save it**;
 (2) persist it in BOTH `lib/supabaseWrite.ts` and `lib/migrate.ts` (the `site_settings`
@@ -171,6 +171,11 @@ and "Team Snapshot" blocks were removed.
   coloured by `tournamentTier(name)` in `lib/tiers.ts` (bronze C / cyan B / silver A /
   gold S; non-main events fall back to brand violet). `tournamentTier` is the single
   source of truth for tier classification — extend its regex to tier a new event.
-- The former **Esports Roadmap** and **MLBB Esport System** popups were removed
-  from `/matches` and from the admin editor. Do not re-add them unless the user
-  explicitly asks for those features again.
+- **Niightmare Roadmap** = a button above the W/L/win-rate scoreboard opening
+  `RoadmapModal`. It shows H1/H2 tabs, a bilingual language toggle, and a
+  current-status tracker. Content is admin-editable via `site.roadmap`
+  (HomeEditor → "Niightmare Roadmap") with defaults/types in `lib/roadmap.ts`.
+  The active card is controlled by `activeStageId` (default `h1-destination`).
+  Current flow: MCCM Season 1 rank 1 goes to MSC x EWC Wild Card, then Wild
+  Card rank 1 enters Group Stage; MCCM Season 2 rank 1 goes direct to M-Series,
+  rank 2 goes to Wild Card for the final M-Series slot.
