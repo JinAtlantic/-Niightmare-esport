@@ -84,7 +84,7 @@ npx --yes vercel@latest --prod --yes --token $tok --scope jinatlantics-projects
 ## Gotchas (will burn time if ignored)
 - **`next/font/google` HANGS the build here** (silent, never returns). All fonts are
   therefore **self-hosted** via `next/font/local` (woff2 in `app/fonts/`, vars
-  `--font-rajdhani/-barlow/-mono/-noto-lao`). Do NOT switch any font back to
+  `--font-rajdhani/-barlow/-mono/-phetsarath`). Do NOT switch any font back to
   `next/font/google`.
 - **Don't run `npm run build` while the dev server is up** — the production output
   clobbers the dev `.next` and the running server starts throwing `Cannot find module

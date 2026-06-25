@@ -62,10 +62,10 @@ const lao = localFont({
     { path: "./fonts/Phetsarath-400.woff2", weight: "400", style: "normal" },
     { path: "./fonts/Phetsarath-700.woff2", weight: "700", style: "normal" },
   ],
-  variable: "--font-noto-lao",
+  variable: "--font-phetsarath",
   display: "swap",
   preload: false,
-  fallback: ["Noto Sans Lao", "sans-serif"],
+  fallback: ["Phetsarath", "sans-serif"],
 });
 
 const fontVars = `${display.variable} ${barlow.variable} ${mono.variable} ${lao.variable}`;

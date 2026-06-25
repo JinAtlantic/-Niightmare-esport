@@ -53,7 +53,7 @@ const config: Config = {
         rajdhani: ["var(--font-rajdhani)", "sans-serif"],
         barlow: ["var(--font-barlow)", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
-        lao: ["var(--font-noto-lao)", "sans-serif"],
+        lao: ["var(--font-phetsarath)", "sans-serif"],
       },
       borderRadius: {
         // Sharp, aggressive aesthetic — rectangular corners never exceed 4px.

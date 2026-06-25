@@ -4,9 +4,8 @@
 
 :root {
   /* Font CSS variables (--font-rajdhani, --font-barlow, --font-mono,
-     --font-noto-lao) are injected by next/font in app/layout.tsx, which
-     self-hosts the fonts. The var names are kept for backward compatibility
-     with the existing class names. */
+     --font-phetsarath) are injected by next/font in app/layout.tsx, which
+     self-hosts the fonts. */
 
   --void: #0b0710;
   --amethyst: #a855f7;
@@ -41,7 +40,7 @@ h6,
 }
 
 /* ----------------------------------------------------------------
-   BILINGUAL: when Lao is active, use Noto Sans Lao for everything
+   BILINGUAL: when Lao is active, use Phetsarath for everything
    and bump the base size slightly so Lao script stays readable.
    .keep-latin opts an element back into the Latin display font
    (used for the brand wordmark / in-game names).
@@ -61,7 +60,7 @@ html.lang-lo .font-display,
 html.lang-lo .font-rajdhani,
 html.lang-lo .font-mono,
 html.lang-lo .font-barlow {
-  font-family: var(--font-noto-lao) !important;
+  font-family: var(--font-phetsarath) !important;
   letter-spacing: 0;
   line-height: 1.65;
 }
