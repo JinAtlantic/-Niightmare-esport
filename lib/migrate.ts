@@ -14,6 +14,7 @@ import type {
   Bilingual,
 } from "./types";
 import type { AboutUsContent } from "./about";
+import type { RoadmapContent } from "./roadmap";
 
 /**
  * One-time (re-runnable) migration of the current Vercel-Blob content into the
@@ -151,6 +152,7 @@ export interface SiteShape {
   mediaKitUrl?: string;
   upcomingMatch?: UpcomingMatch;
   aboutUs?: AboutUsContent;
+  roadmap?: RoadmapContent;
 }
 
 export interface MigrateResult {
@@ -244,6 +246,7 @@ export async function migrateAll(): Promise<MigrateResult> {
       formspree_endpoint: s(site.formspreeEndpoint),
       media_kit_url: s(site.mediaKitUrl),
       about_us: site.aboutUs ?? null,
+      roadmap: site.roadmap ?? null,
     });
     if (siteErr) throw new Error(`site_settings: ${siteErr.message}`);
 

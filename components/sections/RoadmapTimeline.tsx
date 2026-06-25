@@ -14,10 +14,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { useContent } from "@/components/context/ContentContext";
 import Reveal from "@/components/ui/Reveal";
 import {
-  ROADMAP_NOW,
-  ROADMAP_STEPS,
+  resolveRoadmap,
+  type RoadmapContent,
   type RoadmapStatus,
   type RoadmapTier,
 } from "@/lib/roadmap";
@@ -86,12 +87,6 @@ const L = {
   prize: { en: "Prize Pool", lo: "ເງິນລາງວັນ" } as Bilingual,
 };
 
-/** The stop to spotlight — the live one, else the next one up. */
-const CURRENT_PHASE =
-  ROADMAP_STEPS.find((s) => s.status === "active")?.phase ??
-  ROADMAP_STEPS.find((s) => s.status === "upcoming")?.phase ??
-  null;
-
 /** One clearly-bordered fact cell in the info grid. */
 function InfoCell({
   icon: Icon,
@@ -119,8 +114,25 @@ function InfoCell({
   );
 }
 
+/**
+ * Inline "Esports Roadmap" — a straight vertical status line under the Matches
+ * filters. Tier colours show each stop's weight; the spine + status chips show
+ * where NIIGHTMARE stands. Content comes from site.roadmap (admin-editable),
+ * falling back to DEFAULT_ROADMAP.
+ */
 export default function RoadmapTimeline() {
   const { pick } = useLanguage();
+  const { site } = useContent();
+  const { now, steps } = resolveRoadmap(
+    (site as { roadmap?: Partial<RoadmapContent> }).roadmap
+  );
+
+  // The stop to spotlight — the live one, else the next one up.
+  const currentIndex = (() => {
+    const a = steps.findIndex((s) => s.status === "active");
+    if (a !== -1) return a;
+    return steps.findIndex((s) => s.status === "upcoming");
+  })();
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -129,38 +141,35 @@ export default function RoadmapTimeline() {
         <div className="relative overflow-hidden border border-amethyst/35 bg-gradient-to-br from-crypt2/75 via-crypt/60 to-void p-5 shadow-glow-soft md:p-6">
           <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent" />
           <p className="flex items-center gap-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-spectre/80">
-            <span className="relative flex h-[7px] w-[7px]">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-amethyst opacity-60 motion-safe:animate-ping" />
-              <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
-            </span>
-            {pick(ROADMAP_NOW.kicker)}
+            <span className="h-[6px] w-[6px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
+            {pick(now.kicker)}
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="keep-latin font-display text-xl font-extrabold uppercase leading-tight tracking-tight text-soul [text-shadow:0_2px_24px_rgba(168,85,247,0.3)] md:text-2xl">
-              {pick(ROADMAP_NOW.headline)}
+              {pick(now.headline)}
             </h3>
             <span className="inline-flex w-fit shrink-0 items-center gap-2 border border-amethyst/50 bg-amethyst/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-glow">
               <ChevronRight size={13} strokeWidth={2.5} />
-              {pick(ROADMAP_NOW.state)}
+              {pick(now.state)}
             </span>
           </div>
-          <p className="mt-3 text-[15px] leading-relaxed text-spectre/90">{pick(ROADMAP_NOW.blurb)}</p>
+          <p className="mt-3 text-[15px] leading-relaxed text-spectre/90">{pick(now.blurb)}</p>
         </div>
       </Reveal>
 
       {/* ── THE LINE — one straight vertical status spine ────────────────── */}
       <div className="mt-8">
-        {ROADMAP_STEPS.map((step, i) => {
-          const t = TIER[step.tier];
-          const s = STATUS[step.status];
+        {steps.map((step, i) => {
+          const t = TIER[step.tier] ?? TIER.C;
+          const s = STATUS[step.status] ?? STATUS.locked;
           const Icon = s.icon;
-          const isLast = i === ROADMAP_STEPS.length - 1;
-          const isCurrent = step.phase === CURRENT_PHASE;
+          const isLast = i === steps.length - 1;
+          const isCurrent = i === currentIndex;
           const cleared = step.status === "done";
           const muted = step.status === "locked";
 
           return (
-            <Reveal key={step.phase} delay={i * 70}>
+            <Reveal key={i} delay={i * 70}>
               <div className={`relative flex gap-3.5 sm:gap-4 ${isLast ? "pb-0" : "pb-7"}`}>
                 {/* connector — tier-coloured when cleared, quiet otherwise */}
                 {!isLast && (
@@ -187,7 +196,7 @@ export default function RoadmapTimeline() {
                     <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
                   )}
 
-                  {/* header: tier badge ↔ status chip (clearly separated) */}
+                  {/* header: tier badge ↔ status chip */}
                   <div className="flex items-center justify-between gap-2">
                     <span className={`inline-flex items-center border px-2.5 py-1 font-display text-xs font-bold uppercase tracking-[0.16em] ${t.badge}`}>
                       {t.label}
@@ -198,12 +207,9 @@ export default function RoadmapTimeline() {
                     </span>
                   </div>
 
-                  {/* phase + tournament name (the hero line) */}
-                  <p className="mt-3.5 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ash-dim">
-                    Phase {step.phase}
-                  </p>
+                  {/* tournament name (the hero line) + stage */}
                   <h4
-                    className={`keep-latin mt-1 flex items-start gap-2 font-display text-xl font-extrabold uppercase leading-[1.1] tracking-tight md:text-[26px] ${
+                    className={`keep-latin mt-3 flex items-start gap-2 font-display text-xl font-extrabold uppercase leading-[1.1] tracking-tight md:text-[26px] ${
                       step.apex ? "text-gold [text-shadow:0_0_24px_rgba(245,196,81,0.4)]" : isCurrent ? "text-glow" : "text-soul"
                     }`}
                   >
@@ -213,9 +219,6 @@ export default function RoadmapTimeline() {
                   <p className={`mt-1.5 font-display text-sm font-bold uppercase tracking-[0.08em] ${t.stageText}`}>
                     {pick(step.stage)}
                   </p>
-
-                  {/* detail — larger, high-contrast body for easy reading */}
-                  <p className="mt-3 text-[15px] leading-7 text-spectre/90">{pick(step.detail)}</p>
 
                   {/* info grid — each fact in its own bordered cell */}
                   <div className="mt-4 grid grid-cols-2 border border-edge bg-void/30">
@@ -232,17 +235,10 @@ export default function RoadmapTimeline() {
                       className={step.prize ? "border-b border-edge" : ""}
                     />
                     {step.prize && (
-                      <InfoCell
-                        icon={Coins}
-                        label={pick(L.prize)}
-                        value={step.prize}
-                        valueClass="text-gold"
-                        className="col-span-2"
-                      />
+                      <InfoCell icon={Coins} label={pick(L.prize)} value={step.prize} valueClass="text-gold" className="col-span-2" />
                     )}
                   </div>
 
-                  {/* note */}
                   {step.note && (
                     <p
                       className={`mt-3.5 border-l-2 bg-void/40 py-2 pl-3 pr-3 font-mono text-[12px] leading-relaxed ${

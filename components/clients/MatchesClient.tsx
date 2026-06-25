@@ -3,9 +3,11 @@
 import React, { useMemo, useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
+import SectionLabel from "@/components/ui/SectionLabel";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
+import RoadmapTimeline from "@/components/sections/RoadmapTimeline";
 import { PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
@@ -213,21 +215,27 @@ function StatsStrip({
   page: MatchesPageCopy;
 }) {
   const { pick } = useLanguage();
+  // Scoreboard tiles — each carries a colour identity (green win / rose loss /
+  // violet rate) on a top accent bar so the record reads at a glance.
   const tiles = [
-    { value: wins, suffix: "", label: pick(page.stats.wins), tone: "text-win" },
-    { value: losses, suffix: "", label: pick(page.stats.losses), tone: "text-loss" },
-    { value: winrate, suffix: "%", label: pick(page.stats.winrate), tone: "text-glow" },
+    { value: wins, suffix: "", label: pick(page.stats.wins), tone: "text-win", bar: "bg-win", border: "border-win/40" },
+    { value: losses, suffix: "", label: pick(page.stats.losses), tone: "text-loss", bar: "bg-loss", border: "border-loss/40" },
+    { value: winrate, suffix: "%", label: pick(page.stats.winrate), tone: "text-glow", bar: "bg-amethyst", border: "border-amethyst/40" },
   ];
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
       {tiles.map((s, i) => (
-        <div key={i} className="clip-diagonal border border-edge bg-crypt px-5 py-4">
+        <div
+          key={i}
+          className={`relative overflow-hidden border ${s.border} bg-void/50 px-2 py-4 text-center sm:px-5`}
+        >
+          <span aria-hidden className={`absolute inset-x-0 top-0 h-[3px] ${s.bar}`} />
           <CountUp
             value={s.value}
             suffix={s.suffix}
-            className={`block font-display text-3xl font-bold tabular-nums ${s.tone}`}
+            className={`block font-display text-[28px] font-bold leading-none tabular-nums ${s.tone} sm:text-4xl`}
           />
-          <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+          <p className="mt-2 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-ash sm:text-[11px] sm:tracking-[0.18em]">
             {s.label}
           </p>
         </div>
@@ -572,6 +580,9 @@ function GameTournamentSection({
 const selectClass =
   "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
 
+const filterLabelClass =
+  "mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash-dim";
+
 export default function MatchesClient() {
   const { pick } = useLanguage();
   const data = useContent().matches as {
@@ -663,9 +674,10 @@ export default function MatchesClient() {
             <div>
               <StatsStrip {...stats} page={page} />
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <label className="block border border-edge bg-crypt/55 p-2">
-                <span className="sr-only">Game</span>
+            {/* filters — each with a visible label so the control is obvious */}
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <label className="block">
+                <span className={filterLabelClass}>{pick({ en: "Game", lo: "ເກມ" })}</span>
                 <select
                   value={selectedGame}
                   onChange={(event) => {
@@ -683,8 +695,8 @@ export default function MatchesClient() {
                 </select>
               </label>
 
-              <label className="block border border-edge bg-crypt/55 p-2">
-                <span className="sr-only">Result</span>
+              <label className="block">
+                <span className={filterLabelClass}>{pick({ en: "Result", lo: "ຜົນ" })}</span>
                 <select
                   value={resultFilter}
                   onChange={(event) => setResultFilter(event.target.value as ResultFilter)}
@@ -698,8 +710,8 @@ export default function MatchesClient() {
                 </select>
               </label>
 
-              <label className="block border border-edge bg-crypt/55 p-2">
-                <span className="sr-only">{pick(page.sortLabel)}</span>
+              <label className="block">
+                <span className={filterLabelClass}>{pick(page.sortLabel)}</span>
                 <select
                   value={sortOrder}
                   onChange={(event) => setSortOrder(event.target.value as SortOrder)}
@@ -720,6 +732,16 @@ export default function MatchesClient() {
             </div>
           </div>
         </Reveal>
+
+        {/* ESPORTS ROADMAP — current-season status, right under the filters */}
+        <div className="mt-12">
+          <Reveal>
+            <SectionLabel centered>ESPORTS ROADMAP</SectionLabel>
+          </Reveal>
+          <div className="mt-8">
+            <RoadmapTimeline />
+          </div>
+        </div>
 
         {/* YEAR TABS — one season at a time keeps the list short and scannable */}
         {yearOptions.length > 0 && (

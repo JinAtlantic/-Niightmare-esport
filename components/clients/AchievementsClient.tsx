@@ -6,7 +6,6 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
-import RoadmapTimeline from "@/components/sections/RoadmapTimeline";
 import achievements from "@/data/achievements.json";
 import type {
   AchievementsData,
@@ -172,7 +171,6 @@ const TABS = [
   { id: "overview", label: { en: "Overview", lo: "ພາບລວມ" } },
   { id: "campaign", label: { en: "Campaign", lo: "ໄທມ໌ໄລນ໌" } },
   { id: "legacy", label: { en: "Legacy", lo: "ອະດີດ" } },
-  { id: "roadmap", label: { en: "Roadmap", lo: "ເສັ້ນທາງ" } },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -300,8 +298,6 @@ export default function AchievementsClient() {
             </div>
           )}
 
-          {/* ── ROADMAP — live status timeline of the competitive ascent ── */}
-          {tab === "roadmap" && <RoadmapTimeline />}
         </div>
 
         <p className="mt-14 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-ash-dim">
