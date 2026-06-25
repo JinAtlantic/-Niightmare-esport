@@ -125,6 +125,23 @@ function matchTournamentKey(match: Pick<Match, "game" | "tournament">) {
   return `${match.game}:${name || "unknown"}`;
 }
 
+/** Strip season / year tokens so the same event across seasons collapses to one
+ *  family (e.g. "… Season 7" / "… 2026" → the bare name). Used by the Tournament
+ *  filter so it lists each event once, not once per season. */
+function baseName(value: string) {
+  return value
+    .replace(/\bseason\s*\d+\b/gi, "")
+    .replace(/\bs\d+\b/gi, "")
+    .replace(/\b(19|20)\d{2}\b/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function baseTournamentKey(game: string, name: Bilingual) {
+  const n = normalizeValue(baseName(name.en || name.lo));
+  return `${game}:${n || "unknown"}`;
+}
+
 function parsePrizeValue(value?: string) {
   const text = (value ?? "").trim().toLowerCase();
   if (!text || text === "-") return 0;
@@ -658,16 +675,21 @@ export default function MatchesClient() {
   // options for the Tournament filter. Reflects game/year so the list stays
   // relevant; the result filter doesn't narrow it.
   const tournamentOptions = useMemo(() => {
-    const name = new Map<string, Bilingual>();
+    const label = new Map<string, Bilingual>();
     const latest = new Map<string, string>();
     for (const m of gameYearMatches) {
-      const key = matchTournamentKey(m);
-      if (!name.has(key)) name.set(key, m.tournament);
+      const key = baseTournamentKey(m.game, m.tournament);
+      if (!label.has(key)) {
+        label.set(key, {
+          en: baseName(m.tournament.en),
+          lo: baseName(m.tournament.lo) || baseName(m.tournament.en),
+        });
+      }
       const d = m.date ?? "";
       if (d > (latest.get(key) ?? "")) latest.set(key, d);
     }
-    return [...name.entries()]
-      .map(([key, label]) => ({ key, label, latest: latest.get(key) ?? "" }))
+    return [...label.entries()]
+      .map(([key, l]) => ({ key, label: l, latest: latest.get(key) ?? "" }))
       .sort((a, b) => b.latest.localeCompare(a.latest));
   }, [gameYearMatches]);
 
@@ -700,7 +722,8 @@ export default function MatchesClient() {
     const groups = tournamentGroups.filter(
       (group) =>
         group.game === selectedGame &&
-        (selectedTournament === "all" || group.key === selectedTournament)
+        (selectedTournament === "all" ||
+          baseTournamentKey(group.game, group.name) === selectedTournament)
     );
     return [{ game: selectedGame, groups }];
   }, [selectedGame, selectedTournament, tournamentGroups]);
