@@ -63,9 +63,8 @@ export default function RoadmapEditor({
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <h3 className={subhead}>Popup + Active Mission</h3>
+        <h3 className={subhead}>Popup + Active Card</h3>
         <BilingualField label="Button label" value={value.buttonLabel} onChange={(buttonLabel) => onChange({ ...value, buttonLabel })} />
-        <BilingualField label="Hero kicker" value={value.hero.kicker} onChange={(kicker) => patchHero({ kicker })} />
         <BilingualField label="Hero title" value={value.hero.title} onChange={(title) => patchHero({ title })} />
         <BilingualTextArea label="Hero intro" value={value.hero.intro} onChange={(intro) => patchHero({ intro })} rows={3} />
         <TextField
@@ -74,8 +73,6 @@ export default function RoadmapEditor({
           onChange={(activeStageId) => onChange({ ...value, activeStageId })}
         />
         <BilingualField label="Active label" value={value.activeLabel} onChange={(activeLabel) => onChange({ ...value, activeLabel })} />
-        <BilingualTextArea label="Active badge" value={value.activeBadge} onChange={(activeBadge) => onChange({ ...value, activeBadge })} rows={2} />
-        <BilingualTextArea label="Active detail" value={value.activeDetail} onChange={(activeDetail) => onChange({ ...value, activeDetail })} rows={4} />
       </Card>
 
       {value.halves.map((half, halfIndex) => (
@@ -98,10 +95,8 @@ export default function RoadmapEditor({
                   options={STATUS_OPTS}
                 />
               </div>
-              <BilingualField label="Step label" value={stage.label} onChange={(label) => patchStage(halfIndex, stageIndex, { label })} />
               <BilingualField label="Title" value={stage.title} onChange={(title) => patchStage(halfIndex, stageIndex, { title })} />
               <BilingualField label="Window" value={stage.window} onChange={(window) => patchStage(halfIndex, stageIndex, { window })} />
-              <BilingualTextArea label="Body" value={stage.body} onChange={(body) => patchStage(halfIndex, stageIndex, { body })} rows={4} />
               <label className="flex items-center gap-2 font-mono text-[11px] text-ash">
                 <input
                   type="checkbox"

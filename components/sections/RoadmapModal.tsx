@@ -9,7 +9,6 @@ import {
   Languages,
   Lock,
   Radar,
-  Route,
   X,
 } from "lucide-react";
 import { useContent } from "@/components/context/ContentContext";
@@ -65,7 +64,6 @@ function StageCard({
   const status = isActiveStage ? "active" : stage.status;
   const style = statusClass[status];
   const Icon = style.icon;
-  const stageLabel = pick(stage.label).trim();
   const tagLabel = stage.tag.replace(/\s*\/\s*/g, " ").replace(/\s+/g, " ").trim();
 
   return (
@@ -89,11 +87,6 @@ function StageCard({
             </span>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {stageLabel && (
-              <span className="border border-amethyst/45 bg-amethyst/10 px-2 py-1 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-amethyst md:text-[9px]">
-                {stageLabel}
-              </span>
-            )}
             <span className="border border-glow/45 bg-glow/10 px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.16em] text-glow shadow-[0_0_16px_rgba(199,125,255,0.16)] md:text-xs">
               {pick(stage.window)}
             </span>
@@ -159,11 +152,7 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
             <div className="pointer-events-none absolute right-0 top-0 h-44 w-44 border-l border-loss/15 bg-loss/[0.05] [clip-path:polygon(34%_0,100%_0,100%_100%,0_100%)]" />
             <div className="relative flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
-                <p className="flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-spectre md:text-[10px]">
-                  <Route size={14} className="text-amethyst" />
-                  {pick(roadmap.hero.kicker)}
-                </p>
-                <h2 className="keep-latin mt-1.5 font-display text-[1.65rem] font-extrabold uppercase leading-none tracking-tight text-soul md:text-4xl">
+                <h2 className="keep-latin font-display text-[1.65rem] font-extrabold uppercase leading-none tracking-tight text-soul md:text-4xl">
                   {pick(roadmap.hero.title)}
                 </h2>
                 <p className="mt-3 hidden max-w-2xl text-xs leading-relaxed text-spectre sm:block md:text-sm">
@@ -179,14 +168,6 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
                   <LangButton value="en" active={lang === "en"} onClick={() => setLang("en")} />
                 </div>
               </div>
-            </div>
-
-            <div className="relative mt-3 border border-loss/45 bg-loss/10 p-2.5 shadow-[0_0_26px_rgba(251,113,133,0.16)] md:p-4">
-              <p className="flex items-center gap-2 font-mono text-[8px] font-bold uppercase leading-relaxed tracking-[0.1em] text-loss md:text-[10px]">
-                <Radar size={14} />
-                {pick(roadmap.activeBadge)}
-              </p>
-              <p className="mt-1.5 hidden text-xs leading-relaxed text-spectre sm:line-clamp-2 sm:block md:line-clamp-none md:text-sm">{pick(roadmap.activeDetail)}</p>
             </div>
           </header>
 

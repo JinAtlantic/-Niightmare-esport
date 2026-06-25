@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ChevronRight, Route } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import OpponentLogo from "@/components/cards/OpponentLogo";
@@ -754,20 +753,11 @@ export default function MatchesClient() {
             <button
               type="button"
               onClick={() => setRoadmapOpen(true)}
-              className="group mb-4 flex w-full min-w-0 items-center gap-3 overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-left transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:gap-4 md:px-5 md:py-4"
+              className="group mb-4 flex w-full min-w-0 items-center justify-center overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-center transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:px-5 md:py-4"
             >
-              <span className="grid h-10 w-10 shrink-0 place-items-center border border-amethyst/50 bg-void/70 text-glow transition-colors group-hover:border-amethyst md:h-11 md:w-11">
-                <Route size={18} strokeWidth={2} />
+              <span className="block min-w-0 break-words font-display text-base font-extrabold uppercase tracking-tight text-soul md:text-xl">
+                {pick(roadmap.buttonLabel)}
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="block break-words font-display text-base font-extrabold uppercase tracking-tight text-soul md:text-xl">
-                  {pick(roadmap.buttonLabel)}
-                </span>
-                <span className="block break-words font-mono text-[9px] font-semibold uppercase leading-relaxed tracking-[0.1em] text-spectre/80 [overflow-wrap:anywhere] md:text-[10px] md:tracking-[0.16em]">
-                  {pick(roadmap.activeBadge)}
-                </span>
-              </span>
-              <ChevronRight size={20} className="shrink-0 text-amethyst transition-transform duration-300 group-hover:translate-x-1" />
             </button>
 
             <div>

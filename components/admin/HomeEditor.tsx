@@ -352,7 +352,7 @@ export default function HomeEditor() {
 
       <Section
         title="Niightmare Roadmap (หน้า Match)"
-        hint="Popup Annual Esports Roadmap พร้อม H1/H2 tabs และ Current Status Tracker"
+        hint="Popup Annual Esports Roadmap แบบกระชับ พร้อม H1/H2 tabs"
       >
         <RoadmapEditor value={roadmap} onChange={patchRoadmap} />
       </Section>
