@@ -14,6 +14,7 @@ import {
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { resolveRoadmap, type RoadmapContent, type RoadmapHalfId, type RoadmapStage } from "@/lib/roadmap";
+import { tierFromText, type Tier } from "@/lib/tiers";
 import type { Lang } from "@/lib/types";
 
 const statusClass = {
@@ -36,6 +37,39 @@ const statusClass = {
     label: "border-edge bg-void/50 text-ash-dim",
   },
 } as const;
+
+const tierClass: Record<Tier | "default", { left: string; tag: string; month: string; halo: string }> = {
+  C: {
+    left: "border-l-win",
+    tag: "border-win/50 bg-win/10 text-win",
+    month: "border-win/45 bg-win/10 text-win shadow-[0_0_14px_rgba(52,211,153,0.16)]",
+    halo: "bg-win/10",
+  },
+  B: {
+    left: "border-l-[#38BDF8]",
+    tag: "border-[#38BDF8]/50 bg-[#38BDF8]/10 text-[#7DD3FC]",
+    month: "border-[#38BDF8]/45 bg-[#38BDF8]/10 text-[#7DD3FC] shadow-[0_0_14px_rgba(56,189,248,0.18)]",
+    halo: "bg-[#38BDF8]/10",
+  },
+  A: {
+    left: "border-l-amethyst",
+    tag: "border-amethyst/55 bg-amethyst/12 text-glow",
+    month: "border-amethyst/50 bg-amethyst/12 text-glow shadow-[0_0_14px_rgba(168,85,247,0.2)]",
+    halo: "bg-amethyst/10",
+  },
+  S: {
+    left: "border-l-gold",
+    tag: "border-gold/55 bg-gold/10 text-gold",
+    month: "border-gold/55 bg-gold/10 text-gold shadow-[0_0_14px_rgba(245,196,81,0.2)]",
+    halo: "bg-gold/10",
+  },
+  default: {
+    left: "border-l-amethyst",
+    tag: "border-edge bg-void/45 text-spectre",
+    month: "border-glow/45 bg-glow/10 text-glow shadow-[0_0_16px_rgba(199,125,255,0.16)]",
+    halo: "bg-amethyst/10",
+  },
+};
 
 function LangButton({ value, active, onClick }: { value: Lang; active: boolean; onClick: () => void }) {
   return (
@@ -65,9 +99,11 @@ function StageCard({
   const style = statusClass[status];
   const Icon = style.icon;
   const tagLabel = stage.tag.replace(/\s*\/\s*/g, " ").replace(/\s+/g, " ").trim();
+  const tierStyle = tierClass[tierFromText(stage.tag) ?? "default"];
 
   return (
-    <article className={`relative overflow-hidden border border-l-4 border-l-amethyst p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card}`}>
+    <article className={`relative overflow-hidden border border-l-4 p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card} ${tierStyle.left}`}>
+      <span aria-hidden className={`pointer-events-none absolute -right-10 -top-16 h-32 w-32 blur-3xl ${tierStyle.halo}`} />
       <div className="flex items-start gap-2 md:gap-3">
         <div className="relative shrink-0">
           {status === "active" && (
@@ -82,12 +118,12 @@ function StageCard({
             <span className={`border px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:px-2 md:py-1 md:text-[9px] ${style.label}`}>
               {status === "active" ? activeLabel : status === "past" ? "CLEARED" : "LOCKED"}
             </span>
-            <span className="keep-latin border border-edge bg-void/45 px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-spectre md:px-2 md:py-1 md:text-[9px]">
+            <span className={`keep-latin border px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:px-2 md:py-1 md:text-[9px] ${tierStyle.tag}`}>
               {tagLabel}
             </span>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className="border border-glow/45 bg-glow/10 px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.16em] text-glow shadow-[0_0_16px_rgba(199,125,255,0.16)] md:text-xs">
+            <span className={`border px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.16em] md:text-xs ${tierStyle.month}`}>
               {pick(stage.window)}
             </span>
           </div>

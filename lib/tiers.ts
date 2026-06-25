@@ -6,7 +6,7 @@ export type Tier = "C" | "B" | "A" | "S";
  * returns null and is rendered in the default brand violet.
  *
  *   S — M-series World Championship, MLBB Mid-Season Cup
- *   A — Games of the Future
+ *   A — Games of the Future / Wild Card routes
  *   B — M Challenge Cup Mekong (and its qualifiers), other MCC
  *   C — national championships / qualifiers
  */
@@ -21,4 +21,9 @@ export function tournamentTier(name: string): Tier | null {
   if (/mekong/.test(n) || /m challenge cup/.test(n) || /\bmcc\b/.test(n)) return "B";
   if (/national championship/.test(n) || /\bnational\b/.test(n)) return "C";
   return null;
+}
+
+export function tierFromText(value: string): Tier | null {
+  const match = value.toUpperCase().match(/\b([CBAS])-?\s*TIER\b/);
+  return match ? (match[1] as Tier) : null;
 }

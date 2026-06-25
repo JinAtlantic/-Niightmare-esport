@@ -70,22 +70,22 @@ const RESULT_ACCENT: Record<MatchResult, { score: string; badge: string }> = {
   draw: { score: "text-ash", badge: "border-edge bg-crypt2 text-ash" },
 };
 
-// Left accent blade colored by the tournament's Liquipedia tier (bronze C →
-// cyan B → silver A → gold S). Tournaments outside the main families fall back
+// Left accent blade colored by the tournament's Liquipedia tier (green C →
+// cyan B → violet A → gold S). Tournaments outside the main families fall back
 // to the brand violet. The result is still conveyed by the score color + badge.
 const TIER_BLADE: Record<Tier | "default", string> = {
-  C: "bg-bronze shadow-[0_0_10px_rgba(206,138,87,0.8)]",
+  C: "bg-win shadow-[0_0_10px_rgba(52,211,153,0.8)]",
   B: "bg-[#38BDF8] shadow-[0_0_10px_rgba(56,189,248,0.8)]",
-  A: "bg-spectre shadow-[0_0_10px_rgba(201,180,246,0.8)]",
+  A: "bg-amethyst shadow-[0_0_10px_rgba(168,85,247,0.85)]",
   S: "bg-gold shadow-[0_0_10px_rgba(245,196,81,0.85)]",
   default: "bg-amethyst shadow-[0_0_10px_rgba(168,85,247,0.85)]",
 };
 
 // Tier pill on each tournament group header — the legend for the blade colours.
 const TIER_TAG: Record<Tier, string> = {
-  C: "border-bronze/50 bg-bronze/10 text-bronze",
+  C: "border-win/50 bg-win/10 text-win",
   B: "border-[#38BDF8]/50 bg-[#38BDF8]/10 text-[#7DD3FC]",
-  A: "border-spectre/50 bg-spectre/10 text-spectre",
+  A: "border-amethyst/55 bg-amethyst/12 text-glow",
   S: "border-gold/55 bg-gold/10 text-gold",
 };
 
@@ -753,8 +753,12 @@ export default function MatchesClient() {
             <button
               type="button"
               onClick={() => setRoadmapOpen(true)}
-              className="group mb-4 flex w-full min-w-0 items-center justify-center overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-center transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:px-5 md:py-4"
+              className="group relative mb-4 flex w-full min-w-0 items-center justify-center overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-center transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:px-5 md:py-4"
             >
+              <span
+                aria-hidden
+                className="absolute inset-x-0 top-0 h-[3px] bg-[linear-gradient(90deg,#34D399_0_25%,#38BDF8_25%_50%,#A855F7_50%_75%,#F5C451_75%_100%)] shadow-[0_0_16px_rgba(168,85,247,0.42)]"
+              />
               <span className="block min-w-0 break-words font-display text-base font-extrabold uppercase tracking-tight text-soul md:text-xl">
                 {pick(roadmap.buttonLabel)}
               </span>
