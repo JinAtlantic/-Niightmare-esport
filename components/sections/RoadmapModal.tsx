@@ -65,6 +65,8 @@ function StageCard({
   const status = isActiveStage ? "active" : stage.status;
   const style = statusClass[status];
   const Icon = style.icon;
+  const stageLabel = pick(stage.label).trim();
+  const tagLabel = stage.tag.replace(/\s*\/\s*/g, " ").replace(/\s+/g, " ").trim();
 
   return (
     <article className={`relative overflow-hidden border border-l-4 border-l-amethyst p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card}`}>
@@ -83,17 +85,23 @@ function StageCard({
               {status === "active" ? activeLabel : status === "past" ? "CLEARED" : "LOCKED"}
             </span>
             <span className="keep-latin border border-edge bg-void/45 px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-spectre md:px-2 md:py-1 md:text-[9px]">
-              {stage.tag}
+              {tagLabel}
             </span>
           </div>
-          <p className="mt-1.5 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-amethyst md:text-[10px]">
-            {pick(stage.label)} / {pick(stage.window)}
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {stageLabel && (
+              <span className="border border-amethyst/45 bg-amethyst/10 px-2 py-1 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-amethyst md:text-[9px]">
+                {stageLabel}
+              </span>
+            )}
+            <span className="border border-glow/45 bg-glow/10 px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.16em] text-glow shadow-[0_0_16px_rgba(199,125,255,0.16)] md:text-xs">
+              {pick(stage.window)}
+            </span>
+          </div>
           <h3 className="keep-latin mt-1 font-display text-base font-extrabold uppercase leading-tight text-soul sm:text-lg md:text-xl">
             {stage.destination && <Crown size={18} className="mr-2 inline text-gold" />}
             {pick(stage.title)}
           </h3>
-          <p className="mt-1.5 line-clamp-1 text-[11px] leading-relaxed text-spectre sm:line-clamp-2 md:line-clamp-none md:text-sm">{pick(stage.body)}</p>
         </div>
       </div>
     </article>
