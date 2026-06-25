@@ -78,30 +78,30 @@ export const DEFAULT_MLBB_ESPORT_SYSTEM: MlbbEsportSystemContent = {
     {
       eyebrow: { en: "Step 02", lo: "ຂັ້ນທີ 02" },
       title: { en: "MCC Mekong", lo: "MCC Mekong" },
-      subtitle: { en: "Laos, Thailand, Vietnam. One direct slot.", lo: "ລາວ, ໄທ, ຫວຽດນາມ. ມີບ່ອນບິນກົງບໍ່ຫຼາຍ." },
+      subtitle: { en: "Laos, Thailand, Vietnam. Rank 1 reaches Wild Card.", lo: "ລາວ, ໄທ, ຫວຽດນາມ. ອັນດັບ 1 ເທົ່ານັ້ນໄດ້ໄປ Wild Card." },
       body: {
-        en: "MCC Mekong is the regional pressure test. Top teams from Laos, Thailand, and Vietnam fight for global qualification. Rank 1 takes the direct slot; rank 2 must survive Wild Card.",
-        lo: "MCC Mekong ແມ່ນດ່ານພາກພື້ນທີ່ກົດດັນທີ່ສຸດ. ທີມຊັ້ນນໍາຈາກລາວ, ໄທ, ແລະ ຫວຽດນາມ ຕ້ອງແຍ່ງຕົ໋ວໄປເວທີໂລກ. ອັນດັບ 1 ໄດ້ slot ບິນກົງ, ອັນດັບ 2 ຕ້ອງຜ່ານ Wild Card.",
+        en: "MCC Mekong is the regional pressure test. Top teams from Laos, Thailand, and Vietnam fight for the next gate. Only rank 1 advances to the MSC x EWC Wild Card.",
+        lo: "MCC Mekong ແມ່ນດ່ານພາກພື້ນທີ່ກົດດັນທີ່ສຸດ. ທີມຊັ້ນນໍາຈາກລາວ, ໄທ, ແລະ ຫວຽດນາມ ຕ້ອງແຍ່ງປະຕູຂັ້ນຕໍ່ໄປ. ມີພຽງອັນດັບ 1 ເທົ່ານັ້ນທີ່ໄດ້ໄປ Wild Card ຂອງ MSC x EWC.",
       },
       details: [
         { en: "Regional Pro Circuit", lo: "ວົງຈອນ Pro Circuit ພາກພື້ນ" },
-        { en: "Direct slot for rank 1", lo: "ອັນດັບ 1 ໄດ້ slot ບິນກົງ" },
-        { en: "Wild Card route for rank 2", lo: "ອັນດັບ 2 ໄປສູ້ Wild Card" },
+        { en: "Only rank 1 advances from MCCM", lo: "ອັນດັບ 1 ຈາກ MCCM ເທົ່ານັ້ນໄດ້ໄປຕໍ່" },
+        { en: "Next stop: MSC x EWC Wild Card", lo: "ດ່ານຕໍ່ໄປ: Wild Card ຂອງ MSC x EWC" },
       ],
       accent: "mekong",
     },
     {
       eyebrow: { en: "Step 03", lo: "ຂັ້ນທີ 03" },
       title: { en: "S-Tier Global Stage", lo: "ເວທີໂລກ S-Tier" },
-      subtitle: { en: "MSC mid-year. M-Series at year-end.", lo: "ກາງປີມີ MSC. ທ້າຍປີມີ M-Series." },
+      subtitle: { en: "Wild Card first. Group Stage must be earned.", lo: "ຕ້ອງຜ່ານ Wild Card ກ່ອນ ແລ້ວຈຶ່ງເຂົ້າ Group Stage." },
       body: {
-        en: "The final layer is the world stage: MSC at the Esports World Cup in Saudi Arabia during mid-year, then the M-Series World Championship at the end of the season.",
-        lo: "ດ່ານສຸດທ້າຍແມ່ນເວທີໂລກ: MSC ໃນ Esports World Cup ທີ່ຊາອຸດີອາຣາເບຍຊ່ວງກາງປີ, ແລະ M-Series World Championship ຊ່ວງທ້າຍລະດູການ.",
+        en: "The global layer starts with the MSC x EWC Wild Card. The Wild Card winner earns the slot into the MSC x EWC Group Stage, where the main world-stage campaign begins.",
+        lo: "ດ່ານລະດັບໂລກເລີ່ມຈາກ Wild Card ຂອງ MSC x EWC. ຜູ້ຊະນະ Wild Card ຈຶ່ງໄດ້ slot ເຂົ້າ Group Stage ຂອງ MSC x EWC ເຊິ່ງເປັນຈຸດເລີ່ມຂອງແຄມເປນເວທີໂລກຕົວຈິງ.",
       },
       details: [
-        { en: "MSC / Esports World Cup", lo: "MSC / Esports World Cup" },
-        { en: "Group Stage, Knockout, Grand Final", lo: "Group Stage, Knockout, Grand Final" },
-        { en: "M-Series World Championship", lo: "M-Series World Championship" },
+        { en: "MSC x EWC Wild Card", lo: "Wild Card ຂອງ MSC x EWC" },
+        { en: "Wild Card rank 1 enters Group Stage", lo: "ອັນດັບ 1 Wild Card ເຂົ້າ Group Stage" },
+        { en: "Then Group Stage, Knockout, Grand Final", lo: "ຈາກນັ້ນແມ່ນ Group Stage, Knockout, Grand Final" },
       ],
       accent: "global",
     },
@@ -125,25 +125,25 @@ export const DEFAULT_MLBB_ESPORT_SYSTEM: MlbbEsportSystemContent = {
       window: { en: "Apr - Jun", lo: "ເມ.ສ. - ມິ.ຖ." },
       title: { en: "MCC Mekong Season 1", lo: "MCC Mekong Season 1" },
       body: {
-        en: "The first regional run decides who reaches the mid-year world tournament path.",
-        lo: "ການແຂ່ງພາກພື້ນຮອບທໍາອິດເປັນຕົວຕັດສິນເສັ້ນທາງໄປທົວໂລກກາງປີ.",
+        en: "The first regional run decides one thing: which Mekong team takes rank 1 and advances to the MSC x EWC Wild Card.",
+        lo: "ການແຂ່ງພາກພື້ນຮອບທໍາອິດຕັດສິນສິ່ງດຽວ: ທີມໃດໃນແມ່ຂອງຈະໄດ້ອັນດັບ 1 ແລະ ໄປ Wild Card ຂອງ MSC x EWC.",
       },
       tags: [
-        { en: "Mekong Slot", lo: "slot ແມ່ຂອງ" },
-        { en: "MSC Path", lo: "ເສັ້ນທາງ MSC" },
+        { en: "MCCM Rank 1", lo: "MCCM ອັນດັບ 1" },
+        { en: "Wild Card Slot", lo: "slot Wild Card" },
       ],
     },
     {
       quarter: "Q3",
       window: { en: "Jul - Sep", lo: "ກ.ລ. - ກ.ຍ." },
-      title: { en: "MSC World Stage + Season 2 reset", lo: "MSC ເວທີໂລກ + ເລີ່ມ Season 2" },
+      title: { en: "MSC x EWC Wild Card + Group Stage chase", lo: "MSC x EWC Wild Card + ລ່າ Group Stage" },
       body: {
-        en: "Qualified teams fly to MSC at the Esports World Cup, then return to restart the regional race for the year-end championship.",
-        lo: "ທີມທີ່ຜ່ານໄດ້ຈະໄປ MSC ໃນ Esports World Cup, ແລ້ວກັບມາເລີ່ມວົງຈອນພາກພື້ນອີກຄັ້ງເພື່ອລ່າແຊ້ມໂລກທ້າຍປີ.",
+        en: "The MCCM winner enters Wild Card first. Only the Wild Card rank 1 moves into the MSC x EWC Group Stage; after that, the region resets for the year-end race.",
+        lo: "ແຊ້ມ MCCM ຕ້ອງເຂົ້າ Wild Card ກ່ອນ. ມີພຽງອັນດັບ 1 ຂອງ Wild Card ເທົ່ານັ້ນທີ່ໄດ້ເຂົ້າ Group Stage ຂອງ MSC x EWC; ຫຼັງຈາກນັ້ນພາກພື້ນຈະ reset ເພື່ອລ່າແຊ້ມທ້າຍປີ.",
       },
       tags: [
-        { en: "MSC", lo: "MSC" },
-        { en: "Season 2", lo: "Season 2" },
+        { en: "Wild Card", lo: "Wild Card" },
+        { en: "Group Stage Slot", lo: "slot Group Stage" },
       ],
     },
     {
@@ -161,8 +161,8 @@ export const DEFAULT_MLBB_ESPORT_SYSTEM: MlbbEsportSystemContent = {
     },
   ],
   sponsorNote: {
-    en: "For sponsors, this calendar explains when visibility spikes: national qualification, Mekong playoffs, MSC, and the M-Series race.",
-    lo: "ສໍາລັບສະປອນເຊີ, ປະຕິທິນນີ້ຊ່ວຍເຫັນຊ່ວງທີ່ visibility ສູງ: ຄັດເລືອກໃນປະເທດ, playoff ແມ່ຂອງ, MSC, ແລະ ເສັ້ນທາງ M-Series.",
+    en: "For sponsors, this calendar explains when visibility spikes: national qualification, MCCM playoffs, MSC x EWC Wild Card, Group Stage qualification, and the M-Series race.",
+    lo: "ສໍາລັບສະປອນເຊີ, ປະຕິທິນນີ້ຊ່ວຍເຫັນຊ່ວງທີ່ visibility ສູງ: ຄັດເລືອກໃນປະເທດ, playoff MCCM, Wild Card ຂອງ MSC x EWC, ການລ່າ Group Stage, ແລະ ເສັ້ນທາງ M-Series.",
   },
 };
 
