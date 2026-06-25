@@ -10,6 +10,7 @@ import {
   Crown,
   MapPin,
   CalendarDays,
+  Coins,
   type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
@@ -23,21 +24,13 @@ import {
 import type { Bilingual } from "@/lib/types";
 
 /**
- * Per-TIER colour language (the event's weight). Each tier owns a distinct hue —
- * bronze C → cyan B → silver A → gold S — carried across the card's left blade,
- * the tier badge, the spine node, and the cleared connector. Full class strings
- * so Tailwind's JIT keeps them.
+ * Per-TIER colour language (the event's weight) — bronze C → cyan B → silver A →
+ * gold S — carried across the card's left blade, the tier badge, the spine node
+ * and the cleared connector. Full class strings so Tailwind's JIT keeps them.
  */
 const TIER: Record<
   RoadmapTier,
-  {
-    label: string;
-    badge: string; // prominent tier pill
-    blade: string; // card left border colour
-    node: string; // node ring + text
-    line: string; // bright connector when the stage is cleared
-    glow: string; // node glow shadow
-  }
+  { label: string; badge: string; blade: string; node: string; line: string; glow: string; stageText: string }
 > = {
   C: {
     label: "C-Tier",
@@ -46,6 +39,7 @@ const TIER: Record<
     node: "border-bronze text-bronze",
     line: "bg-bronze/55",
     glow: "shadow-[0_0_14px_rgba(206,138,87,0.55)]",
+    stageText: "text-bronze",
   },
   B: {
     label: "B-Tier",
@@ -54,6 +48,7 @@ const TIER: Record<
     node: "border-[#38BDF8] text-[#7DD3FC]",
     line: "bg-[#38BDF8]/55",
     glow: "shadow-[0_0_14px_rgba(56,189,248,0.6)]",
+    stageText: "text-[#7DD3FC]",
   },
   A: {
     label: "A-Tier",
@@ -62,6 +57,7 @@ const TIER: Record<
     node: "border-spectre text-spectre",
     line: "bg-spectre/55",
     glow: "shadow-[0_0_14px_rgba(201,180,246,0.6)]",
+    stageText: "text-spectre",
   },
   S: {
     label: "S-Tier",
@@ -70,39 +66,24 @@ const TIER: Record<
     node: "border-gold text-gold",
     line: "bg-gold/55",
     glow: "shadow-[0_0_18px_rgba(245,196,81,0.75)]",
+    stageText: "text-gold/90",
   },
 };
 
 /** Per-STATUS language (where the team is) — the status chip + node icon. */
-const STATUS: Record<
-  RoadmapStatus,
-  { label: Bilingual; chip: string; icon: LucideIcon }
-> = {
-  done: {
-    label: { en: "Cleared", lo: "ຜ່ານແລ້ວ" },
-    chip: "border-win/50 bg-win/10 text-win",
-    icon: Check,
-  },
-  active: {
-    label: { en: "Live Now", lo: "ກຳລັງແຂ່ງ" },
-    chip: "border-loss/55 bg-loss/10 text-loss",
-    icon: Swords,
-  },
-  eliminated: {
-    label: { en: "Eliminated", lo: "ຕົກຮອບ" },
-    chip: "border-loss/40 bg-void/50 text-loss/80",
-    icon: X,
-  },
-  upcoming: {
-    label: { en: "Up Next", lo: "ຮອບຕໍ່ໄປ" },
-    chip: "border-amethyst/55 bg-amethyst/10 text-glow",
-    icon: ChevronRight,
-  },
-  locked: {
-    label: { en: "Locked", lo: "ຍັງບໍ່ເຖິງ" },
-    chip: "border-edge bg-void/50 text-ash-dim",
-    icon: Lock,
-  },
+const STATUS: Record<RoadmapStatus, { label: Bilingual; chip: string; icon: LucideIcon }> = {
+  done: { label: { en: "Cleared", lo: "ຜ່ານແລ້ວ" }, chip: "border-win/50 bg-win/10 text-win", icon: Check },
+  active: { label: { en: "Live Now", lo: "ກຳລັງແຂ່ງ" }, chip: "border-loss/55 bg-loss/10 text-loss", icon: Swords },
+  eliminated: { label: { en: "Eliminated", lo: "ຕົກຮອບ" }, chip: "border-loss/40 bg-void/50 text-loss/80", icon: X },
+  upcoming: { label: { en: "Up Next", lo: "ຮອບຕໍ່ໄປ" }, chip: "border-amethyst/55 bg-amethyst/10 text-glow", icon: ChevronRight },
+  locked: { label: { en: "Locked", lo: "ຍັງບໍ່ເຖິງ" }, chip: "border-edge bg-void/50 text-ash-dim", icon: Lock },
+};
+
+/** Field labels for the info grid. */
+const L = {
+  date: { en: "Date", lo: "ວັນທີ" } as Bilingual,
+  location: { en: "Location", lo: "ສະຖານທີ່" } as Bilingual,
+  prize: { en: "Prize Pool", lo: "ເງິນລາງວັນ" } as Bilingual,
 };
 
 /** The stop to spotlight — the live one, else the next one up. */
@@ -110,6 +91,33 @@ const CURRENT_PHASE =
   ROADMAP_STEPS.find((s) => s.status === "active")?.phase ??
   ROADMAP_STEPS.find((s) => s.status === "upcoming")?.phase ??
   null;
+
+/** One clearly-bordered fact cell in the info grid. */
+function InfoCell({
+  icon: Icon,
+  label,
+  value,
+  valueClass = "text-soul",
+  className = "",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  valueClass?: string;
+  className?: string;
+}) {
+  return (
+    <div className={`p-3 md:p-3.5 ${className}`}>
+      <p className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash-dim">
+        <Icon size={12} strokeWidth={2} className="text-amethyst/75" />
+        {label}
+      </p>
+      <p className={`keep-latin mt-1.5 font-display text-[15px] font-bold uppercase leading-tight tracking-[0.02em] ${valueClass}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
 
 export default function RoadmapTimeline() {
   const { pick } = useLanguage();
@@ -119,10 +127,7 @@ export default function RoadmapTimeline() {
       {/* ── NOW — headline status banner ─────────────────────────────────── */}
       <Reveal>
         <div className="relative overflow-hidden border border-amethyst/35 bg-gradient-to-br from-crypt2/75 via-crypt/60 to-void p-5 shadow-glow-soft md:p-6">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
-          />
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent" />
           <p className="flex items-center gap-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-spectre/80">
             <span className="relative flex h-[7px] w-[7px]">
               <span className="absolute inline-flex h-full w-full rounded-full bg-amethyst opacity-60 motion-safe:animate-ping" />
@@ -139,9 +144,7 @@ export default function RoadmapTimeline() {
               {pick(ROADMAP_NOW.state)}
             </span>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-spectre/80">
-            {pick(ROADMAP_NOW.blurb)}
-          </p>
+          <p className="mt-3 text-[15px] leading-relaxed text-spectre/90">{pick(ROADMAP_NOW.blurb)}</p>
         </div>
       </Reveal>
 
@@ -158,109 +161,95 @@ export default function RoadmapTimeline() {
 
           return (
             <Reveal key={step.phase} delay={i * 70}>
-              <div className={`relative flex gap-4 ${isLast ? "pb-0" : "pb-7"}`}>
+              <div className={`relative flex gap-3.5 sm:gap-4 ${isLast ? "pb-0" : "pb-7"}`}>
                 {/* connector — tier-coloured when cleared, quiet otherwise */}
                 {!isLast && (
                   <span
                     aria-hidden
-                    className={`absolute left-[19px] top-11 h-full w-[2px] ${
-                      cleared ? t.line : "bg-edge"
-                    }`}
+                    className={`absolute left-[19px] top-11 h-full w-[2px] ${cleared ? t.line : "bg-edge"}`}
                   />
                 )}
 
                 {/* node — tier ring + status icon */}
                 <span className="relative z-[1] shrink-0">
                   {isCurrent && (
-                    <span
-                      aria-hidden
-                      className="absolute inset-0 rounded-full border-2 border-amethyst/60 motion-safe:animate-ping"
-                    />
+                    <span aria-hidden className="absolute inset-0 rounded-full border-2 border-amethyst/60 motion-safe:animate-ping" />
                   )}
-                  <span
-                    className={`grid h-10 w-10 place-items-center rounded-full border-2 bg-void ${t.node} ${t.glow} ${
-                      muted ? "opacity-60" : ""
-                    }`}
-                  >
+                  <span className={`grid h-10 w-10 place-items-center rounded-full border-2 bg-void ${t.node} ${t.glow} ${muted ? "opacity-60" : ""}`}>
                     <Icon size={17} strokeWidth={2.5} />
                   </span>
                 </span>
 
-                {/* card — tier blade + prominent tournament & tier ─────────── */}
+                {/* card */}
                 <div
-                  className={`relative flex-1 overflow-hidden border border-edge border-l-4 ${t.blade} bg-gradient-to-br from-crypt2/65 via-crypt/55 to-void p-4 md:p-5 ${
+                  className={`relative min-w-0 flex-1 overflow-hidden border border-edge border-l-4 ${t.blade} bg-gradient-to-br from-crypt2/65 via-crypt/55 to-void p-4 md:p-5 ${
                     step.apex ? "shadow-[0_0_36px_-10px_rgba(245,196,81,0.45)]" : ""
-                  } ${muted ? "opacity-80" : ""}`}
+                  } ${muted ? "opacity-85" : ""}`}
                 >
                   {step.apex && (
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"
-                    />
+                    <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
                   )}
 
-                  {/* top row: tier badge + status chip + phase */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-flex items-center border px-2.5 py-1 font-display text-xs font-bold uppercase tracking-[0.14em] ${t.badge}`}
-                    >
+                  {/* header: tier badge ↔ status chip (clearly separated) */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`inline-flex items-center border px-2.5 py-1 font-display text-xs font-bold uppercase tracking-[0.16em] ${t.badge}`}>
                       {t.label}
                     </span>
-                    <span
-                      className={`inline-flex items-center gap-1 border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] ${s.chip}`}
-                    >
-                      <Icon size={11} strokeWidth={2.5} />
+                    <span className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] ${s.chip}`}>
+                      <Icon size={12} strokeWidth={2.5} />
                       {pick(s.label)}
-                    </span>
-                    <span className="ml-auto font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-ash-dim">
-                      {step.phase}
                     </span>
                   </div>
 
-                  {/* tournament name — the hero line */}
+                  {/* phase + tournament name (the hero line) */}
+                  <p className="mt-3.5 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ash-dim">
+                    Phase {step.phase}
+                  </p>
                   <h4
-                    className={`keep-latin mt-2.5 flex items-center gap-2 font-display text-xl font-extrabold uppercase leading-tight tracking-tight md:text-2xl ${
-                      step.apex
-                        ? "text-gold [text-shadow:0_0_24px_rgba(245,196,81,0.4)]"
-                        : isCurrent
-                          ? "text-glow"
-                          : "text-soul"
+                    className={`keep-latin mt-1 flex items-start gap-2 font-display text-xl font-extrabold uppercase leading-[1.1] tracking-tight md:text-[26px] ${
+                      step.apex ? "text-gold [text-shadow:0_0_24px_rgba(245,196,81,0.4)]" : isCurrent ? "text-glow" : "text-soul"
                     }`}
                   >
-                    {step.apex && <Crown size={20} strokeWidth={2} className="shrink-0 text-gold" />}
+                    {step.apex && <Crown size={22} strokeWidth={2} className="mt-0.5 shrink-0 text-gold" />}
                     {pick(step.tournament)}
                   </h4>
+                  <p className={`mt-1.5 font-display text-sm font-bold uppercase tracking-[0.08em] ${t.stageText}`}>
+                    {pick(step.stage)}
+                  </p>
 
-                  {/* meta: stage · location · window · prize */}
-                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-ash">
-                    <span className={`font-semibold uppercase tracking-[0.12em] ${t.node.includes("gold") ? "text-gold/90" : ""}`}>
-                      {pick(step.stage)}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-ash-dim">
-                      <MapPin size={11} strokeWidth={2} />
-                      <span className="keep-latin">{pick(step.location)}</span>
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-ash-dim">
-                      <CalendarDays size={11} strokeWidth={2} />
-                      <span className="keep-latin">{step.window}</span>
-                    </span>
+                  {/* detail — larger, high-contrast body for easy reading */}
+                  <p className="mt-3 text-[15px] leading-7 text-spectre/90">{pick(step.detail)}</p>
+
+                  {/* info grid — each fact in its own bordered cell */}
+                  <div className="mt-4 grid grid-cols-2 border border-edge bg-void/30">
+                    <InfoCell
+                      icon={CalendarDays}
+                      label={pick(L.date)}
+                      value={step.window}
+                      className={`border-r border-edge ${step.prize ? "border-b" : ""}`}
+                    />
+                    <InfoCell
+                      icon={MapPin}
+                      label={pick(L.location)}
+                      value={pick(step.location)}
+                      className={step.prize ? "border-b border-edge" : ""}
+                    />
                     {step.prize && (
-                      <span className="keep-latin font-bold tabular-nums text-gold/90">
-                        {step.prize}
-                      </span>
+                      <InfoCell
+                        icon={Coins}
+                        label={pick(L.prize)}
+                        value={step.prize}
+                        valueClass="text-gold"
+                        className="col-span-2"
+                      />
                     )}
                   </div>
 
-                  <p className="mt-2.5 text-sm leading-relaxed text-spectre/80">
-                    {pick(step.detail)}
-                  </p>
-
+                  {/* note */}
                   {step.note && (
                     <p
-                      className={`mt-3 inline-flex border-l-2 bg-void/40 py-1 pl-2.5 pr-3 font-mono text-[11px] leading-relaxed ${
-                        step.status === "done"
-                          ? "border-win/60 text-win/90"
-                          : "border-amethyst/60 text-spectre"
+                      className={`mt-3.5 border-l-2 bg-void/40 py-2 pl-3 pr-3 font-mono text-[12px] leading-relaxed ${
+                        step.status === "done" ? "border-win/60 text-win/90" : "border-amethyst/60 text-spectre"
                       }`}
                     >
                       {pick(step.note)}
