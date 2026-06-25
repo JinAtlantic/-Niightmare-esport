@@ -81,12 +81,12 @@ const TIER_BLADE: Record<Tier | "default", string> = {
   default: "bg-amethyst shadow-[0_0_10px_rgba(168,85,247,0.85)]",
 };
 
-// Tier pill on each tournament group header — the legend for the blade colours.
+// Tier text on each tournament group header — colour only, no boxed badge.
 const TIER_TAG: Record<Tier, string> = {
-  C: "border-win/50 bg-win/10 text-win",
-  B: "border-[#38BDF8]/50 bg-[#38BDF8]/10 text-[#7DD3FC]",
-  A: "border-amethyst/55 bg-amethyst/12 text-glow",
-  S: "border-gold/55 bg-gold/10 text-gold",
+  C: "text-win",
+  B: "text-[#7DD3FC]",
+  A: "text-glow",
+  S: "text-gold",
 };
 
 const MATCH_LOGO_SIZE = 64;
@@ -471,7 +471,7 @@ function TournamentRecordGroup({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               {tier && (
-                <span className={`inline-flex border px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:px-3 md:py-1.5 md:text-[10px] ${TIER_TAG[tier]}`}>
+                <span className={`inline-flex font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:text-[10px] ${TIER_TAG[tier]}`}>
                   {tier}-Tier
                 </span>
               )}

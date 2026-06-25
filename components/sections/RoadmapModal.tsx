@@ -22,51 +22,46 @@ const statusClass = {
     card: "border-edge bg-void/35 opacity-65",
     node: "border-ash-dim bg-void text-ash",
     icon: Check,
-    label: "border-win/40 bg-win/10 text-win",
+    label: "text-win",
   },
   active: {
     card: "border-amethyst/75 bg-gradient-to-br from-amethyst/[0.18] via-crypt to-void shadow-[0_0_34px_rgba(168,85,247,0.35)]",
     node: "border-amethyst bg-amethyst/15 text-glow shadow-[0_0_22px_rgba(168,85,247,0.75)]",
     icon: Radar,
-    label: "border-loss/55 bg-loss/12 text-loss",
+    label: "text-loss",
   },
   future: {
     card: "border-edge bg-crypt/55",
     node: "border-edge-bright bg-void text-ash-dim",
     icon: Lock,
-    label: "border-edge bg-void/50 text-ash-dim",
+    label: "text-ash-dim",
   },
 } as const;
 
-const tierClass: Record<Tier | "default", { left: string; tag: string; month: string; halo: string }> = {
+const tierClass: Record<Tier | "default", { left: string; tag: string; halo: string }> = {
   C: {
     left: "border-l-win",
-    tag: "border-win/50 bg-win/10 text-win",
-    month: "border-win/45 bg-win/10 text-win shadow-[0_0_14px_rgba(52,211,153,0.16)]",
+    tag: "text-win",
     halo: "bg-win/10",
   },
   B: {
     left: "border-l-[#38BDF8]",
-    tag: "border-[#38BDF8]/50 bg-[#38BDF8]/10 text-[#7DD3FC]",
-    month: "border-[#38BDF8]/45 bg-[#38BDF8]/10 text-[#7DD3FC] shadow-[0_0_14px_rgba(56,189,248,0.18)]",
+    tag: "text-[#7DD3FC]",
     halo: "bg-[#38BDF8]/10",
   },
   A: {
     left: "border-l-amethyst",
-    tag: "border-amethyst/55 bg-amethyst/12 text-glow",
-    month: "border-amethyst/50 bg-amethyst/12 text-glow shadow-[0_0_14px_rgba(168,85,247,0.2)]",
+    tag: "text-glow",
     halo: "bg-amethyst/10",
   },
   S: {
     left: "border-l-gold",
-    tag: "border-gold/55 bg-gold/10 text-gold",
-    month: "border-gold/55 bg-gold/10 text-gold shadow-[0_0_14px_rgba(245,196,81,0.2)]",
+    tag: "text-gold",
     halo: "bg-gold/10",
   },
   default: {
     left: "border-l-amethyst",
-    tag: "border-edge bg-void/45 text-spectre",
-    month: "border-glow/45 bg-glow/10 text-glow shadow-[0_0_16px_rgba(199,125,255,0.16)]",
+    tag: "text-spectre",
     halo: "bg-amethyst/10",
   },
 };
@@ -115,15 +110,15 @@ function StageCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`border px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:px-2 md:py-1 md:text-[9px] ${style.label}`}>
+            <span className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${style.label}`}>
               {status === "active" ? activeLabel : status === "past" ? "CLEARED" : "LOCKED"}
             </span>
-            <span className={`keep-latin border px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:px-2 md:py-1 md:text-[9px] ${tierStyle.tag}`}>
+            <span className={`keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${tierStyle.tag}`}>
               {tagLabel}
             </span>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className={`border px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.16em] md:text-xs ${tierStyle.month}`}>
+            <span className="font-mono text-[10px] font-extrabold uppercase tracking-[0.16em] text-soul md:text-xs">
               {pick(stage.window)}
             </span>
           </div>
