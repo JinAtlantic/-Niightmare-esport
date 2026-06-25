@@ -53,7 +53,7 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
       lo: "ແຜນທາງລະດູການທີ່ເບິ່ງງ່າຍສຳລັບແຟນຄັບ ແລະ ສະປອນເຊີ: ຄຶ່ງປີທຳອິດສູ່ MSC x EWC, ຄຶ່ງປີຫຼັງສູ່ M-Series.",
     },
   },
-  activeStageId: "h1-destination",
+  activeStageId: "h1-wild-card",
   activeBadge: {
     en: "CURRENT STATUS: INVASION PREPARATION (ROAD TO RIYADH, SAUDI ARABIA)",
     lo: "ສະຖານະປັດຈຸບັນ: ຕຽມບຸກທະລຸສູ່ ຣິຍາດ, ຊາອຸດີ ອາຣາເບຍ (MSC 2026)",
@@ -95,11 +95,23 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
           title: { en: "MCC Mekong Season 1", lo: "MCC Mekong Season 1" },
           window: { en: "April - June", lo: "ເມສາ - ມິຖຸນາ" },
           body: {
-            en: "Battle top teams from Thailand and Vietnam. Only the MCCM rank 1 team advances to MSC x EWC, but must clear Wild Card first.",
+            en: "Battle top teams from Thailand and Vietnam. Only the MCCM rank 1 team earns the Wild Card route toward MSC x EWC.",
             lo: "ປະທະທີມແກ່ງຈາກໄທ ແລະ ຫວຽດນາມ. ມີພຽງອັນດັບ 1 ຂອງ MCCM ເທົ່ານັ້ນທີ່ໄດ້ໄປ MSC x EWC ແຕ່ຕ້ອງຜ່ານ Wild Card ກ່ອນ.",
           },
           tag: "B-Tier / Regional",
           status: "past",
+        },
+        {
+          id: "h1-wild-card",
+          label: { en: "Wild Card", lo: "Wild Card" },
+          title: { en: "MSC x EWC Wild Card", lo: "MSC x EWC Wild Card" },
+          window: { en: "June - July", lo: "ມິຖຸນາ - ກໍລະກົດ" },
+          body: {
+            en: "The MCCM Season 1 champion must survive the Wild Card bracket. Only Wild Card rank 1 unlocks the MSC x EWC Group Stage.",
+            lo: "ແຊ້ມ MCCM Season 1 ຕ້ອງຜ່ານຮອບ Wild Card ກ່ອນ. ມີພຽງອັນດັບ 1 ຂອງ Wild Card ເທົ່ານັ້ນທີ່ຈະປົດລັອກຕົ໋ວເຂົ້າ Group Stage ຂອງ MSC x EWC.",
+          },
+          tag: "A-Tier / Wild Card",
+          status: "future",
         },
         {
           id: "h1-destination",
@@ -111,7 +123,7 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
             lo: "ອັນດັບ 1 ຂອງ Wild Card ຈຶ່ງໄດ້ slot ເຂົ້າ Group Stage ໃນສະໜາມຈິງ MSC x EWC ເພື່ອລ່າເງິນລາງວັນກວ່າ 3,000,000 USD.",
           },
           tag: "S-Tier / Global Ultimate",
-          status: "active",
+          status: "future",
           destination: true,
         },
       ],
@@ -151,12 +163,24 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
           status: "future",
         },
         {
+          id: "h2-wild-card",
+          label: { en: "Wild Card", lo: "Wild Card" },
+          title: { en: "M-Series Wild Card", lo: "M-Series Wild Card" },
+          window: { en: "November - December", lo: "ພະຈິກ - ທັນວາ" },
+          body: {
+            en: "MCCM Season 2 rank 2 enters the Wild Card war. Only Wild Card rank 1 claims the final route into the M-Series World Championship.",
+            lo: "ອັນດັບ 2 ຂອງ MCCM Season 2 ຈະເຂົ້າສູ່ຮອບ Wild Card. ມີພຽງອັນດັບ 1 ຂອງ Wild Card ເທົ່ານັ້ນທີ່ຈະຄວ້າເສັ້ນທາງສຸດທ້າຍໄປ M-Series World Championship.",
+          },
+          tag: "A-Tier / Wild Card",
+          status: "future",
+        },
+        {
           id: "h2-destination",
           label: { en: "Destination", lo: "ຈຸດໝາຍ" },
           title: { en: "M-Series World Championship", lo: "M-Series World Championship" },
           window: { en: "December - January", lo: "ທັນວາ - ມັງກອນ" },
           body: {
-            en: "The highest stage in MLBB history: fight to write NIIGHTMARE into the world record and earn a Champion Skin legacy.",
+            en: "The highest stage in MLBB history: MCCM Season 2 rank 1 flies direct, while Wild Card rank 1 joins the world race for a Champion Skin legacy.",
             lo: "ເວທີສູງສຸດໃນປະຫວັດສາດ MLBB: ສູ້ເພື່ອຈາລຶກຊື່ NIIGHTMARE ໃຫ້ເປັນທີມທີ່ແກ່ງທີ່ສຸດໃນໂລກ ແລະ ສ້າງມໍລະດົກ Champion Skin.",
           },
           tag: "S-Tier / World Championship",
@@ -186,6 +210,8 @@ function mergeStage(fallback: RoadmapStage, raw?: Partial<RoadmapStage>): Roadma
 }
 
 function mergeHalf(fallback: RoadmapHalf, raw?: Partial<RoadmapHalf>): RoadmapHalf {
+  const rawStageById = new Map((raw?.stages ?? []).map((stage) => [stage.id, stage]));
+
   return {
     ...fallback,
     ...raw,
@@ -194,11 +220,26 @@ function mergeHalf(fallback: RoadmapHalf, raw?: Partial<RoadmapHalf>): RoadmapHa
     kicker: mergeBi(fallback.kicker, raw?.kicker),
     title: mergeBi(fallback.title, raw?.title),
     goal: mergeBi(fallback.goal, raw?.goal),
-    stages: fallback.stages.map((stage, index) => mergeStage(stage, raw?.stages?.[index])),
+    stages: fallback.stages.map((stage) => mergeStage(stage, rawStageById.get(stage.id))),
   };
 }
 
 export function resolveRoadmap(raw?: Partial<RoadmapContent> | null): RoadmapContent {
+  const hasSavedWildCard = raw?.halves?.some((half) =>
+    half.stages?.some((stage) => stage.id === "h1-wild-card")
+  );
+  const activeStageId =
+    !hasSavedWildCard && raw?.activeStageId === "h1-destination"
+      ? DEFAULT_ROADMAP.activeStageId
+      : raw?.activeStageId ?? DEFAULT_ROADMAP.activeStageId;
+  const halves = DEFAULT_ROADMAP.halves.map((half, index) => mergeHalf(half, raw?.halves?.[index])).map((half) => ({
+    ...half,
+    stages: half.stages.map((stage) => ({
+      ...stage,
+      status: (stage.id === activeStageId ? "active" : stage.status === "active" ? "future" : stage.status) as RoadmapStageStatus,
+    })),
+  }));
+
   return {
     buttonLabel: mergeBi(DEFAULT_ROADMAP.buttonLabel, raw?.buttonLabel),
     hero: {
@@ -206,10 +247,10 @@ export function resolveRoadmap(raw?: Partial<RoadmapContent> | null): RoadmapCon
       title: mergeBi(DEFAULT_ROADMAP.hero.title, raw?.hero?.title),
       intro: mergeBi(DEFAULT_ROADMAP.hero.intro, raw?.hero?.intro),
     },
-    activeStageId: raw?.activeStageId ?? DEFAULT_ROADMAP.activeStageId,
+    activeStageId,
     activeBadge: mergeBi(DEFAULT_ROADMAP.activeBadge, raw?.activeBadge),
     activeDetail: mergeBi(DEFAULT_ROADMAP.activeDetail, raw?.activeDetail),
     activeLabel: mergeBi(DEFAULT_ROADMAP.activeLabel, raw?.activeLabel),
-    halves: DEFAULT_ROADMAP.halves.map((half, index) => mergeHalf(half, raw?.halves?.[index])),
+    halves,
   };
 }

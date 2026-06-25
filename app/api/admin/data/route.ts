@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 import { readSection, writeSection, type ContentKey } from "@/lib/store";
 import { supabaseAdminEnabled } from "@/lib/supabaseAdmin";
@@ -65,6 +65,8 @@ export async function PUT(request: Request) {
       await writeSection(key, data);
     }
     revalidateTag("content"); // surface the edit on the public site immediately
+    revalidatePath("/", "layout");
+    revalidatePath("/matches");
     return NextResponse.json({ ok: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Could not save content";

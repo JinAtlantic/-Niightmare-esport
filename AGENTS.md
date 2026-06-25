@@ -175,7 +175,7 @@ and "Team Snapshot" blocks were removed.
   `RoadmapModal`. It shows H1/H2 tabs, a bilingual language toggle, and a
   current-status tracker. Content is admin-editable via `site.roadmap`
   (HomeEditor → "Niightmare Roadmap") with defaults/types in `lib/roadmap.ts`.
-  The active card is controlled by `activeStageId` (default `h1-destination`).
+  The active card is controlled by `activeStageId` (default `h1-wild-card`).
   Current flow: MCCM Season 1 rank 1 goes to MSC x EWC Wild Card, then Wild
   Card rank 1 enters Group Stage; MCCM Season 2 rank 1 goes direct to M-Series,
   rank 2 goes to Wild Card for the final M-Series slot.
