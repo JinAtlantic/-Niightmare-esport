@@ -445,10 +445,10 @@ function TournamentRecordGroup({
 
   return (
     <section
-      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 360px" }}
-      className="clip-esports overflow-hidden border border-edge bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void shadow-[0_0_28px_rgba(168,85,247,0.1)]"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 320px" }}
+      className="clip-esports max-w-full overflow-hidden border border-edge bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void shadow-[0_0_28px_rgba(168,85,247,0.1)]"
     >
-      <div className="group relative overflow-hidden border-b border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-5 py-5 transition-colors hover:bg-amethyst/[0.04] md:px-6 md:py-6">
+      <div className="group relative overflow-hidden border-b border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-3 py-4 transition-colors hover:bg-amethyst/[0.04] sm:px-4 md:px-6 md:py-5">
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
@@ -466,43 +466,43 @@ function TournamentRecordGroup({
         />
         <span
           aria-hidden
-          className="absolute -right-16 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl"
+          className="absolute -right-6 -top-20 h-36 w-36 bg-amethyst/10 blur-3xl md:-right-16 md:h-44 md:w-44"
         />
-        <div className="pointer-events-none relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div>
+        <div className="pointer-events-none relative grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               {tier && (
-                <span className={`inline-flex border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${TIER_TAG[tier]}`}>
+                <span className={`inline-flex border px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:px-3 md:py-1.5 md:text-[10px] ${TIER_TAG[tier]}`}>
                   {tier}-Tier
                 </span>
               )}
-              <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-glow">
+              <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-glow md:px-3 md:py-1.5 md:text-[10px]">
                 {matchCount} {matchCount === 1 ? "match" : "matches"}
               </span>
-              <span className="inline-flex border border-edge-bright bg-void/55 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-spectre">
+              <span className="inline-flex border border-edge-bright bg-void/55 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-spectre md:px-3 md:py-1.5 md:text-[10px]">
                 {open ? "hide matches" : "view matches"}
               </span>
               {latestDate && (
-                <span className="inline-flex border border-edge bg-void/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                <span className="inline-flex border border-edge bg-void/45 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-ash md:px-3 md:py-1.5 md:text-[10px]">
                   {latestDate}
                 </span>
               )}
             </div>
-            <h2 className="mt-4 max-w-4xl font-display text-2xl font-bold uppercase leading-tight tracking-[0.04em] text-soul [text-shadow:0_0_28px_rgba(199,125,255,0.22)] md:text-4xl">
+            <h2 className="mt-3 max-w-full break-words font-display text-xl font-bold uppercase leading-tight tracking-[0.03em] text-soul [text-shadow:0_0_28px_rgba(199,125,255,0.22)] md:text-3xl">
               {pick(group.name)}
             </h2>
-            <div className="mt-4 grid max-w-lg grid-cols-3 border border-edge bg-void/35">
-              <div className="border-r border-edge px-3 py-2">
+            <div className="mt-3 grid max-w-md grid-cols-3 border border-edge bg-void/35">
+              <div className="border-r border-edge px-2 py-1.5 md:px-3 md:py-2">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.wins)}</p>
-                <p className="mt-1 font-display text-lg font-bold text-win">{wins}</p>
+                <p className="mt-0.5 font-display text-base font-bold text-win md:text-lg">{wins}</p>
               </div>
-              <div className="border-r border-edge px-3 py-2">
+              <div className="border-r border-edge px-2 py-1.5 md:px-3 md:py-2">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.losses)}</p>
-                <p className="mt-1 font-display text-lg font-bold text-loss">{losses}</p>
+                <p className="mt-0.5 font-display text-base font-bold text-loss md:text-lg">{losses}</p>
               </div>
-              <div className="px-3 py-2">
+              <div className="px-2 py-1.5 md:px-3 md:py-2">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.winrate)}</p>
-                <p className="mt-1 font-display text-lg font-bold text-glow">
+                <p className="mt-0.5 font-display text-base font-bold text-glow md:text-lg">
                   {Math.round((wins / Math.max(1, wins + losses)) * 100)}%
                 </p>
               </div>
@@ -510,29 +510,21 @@ function TournamentRecordGroup({
           </div>
 
           {tournament && (
-            <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[520px]">
-              <div className="border border-edge bg-void/55 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+            <div className="grid min-w-0 gap-2 sm:grid-cols-2 lg:min-w-[360px]">
+              <div className="border border-edge bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ash-dim">
                   {pick(page.tournamentLabels.placement)}
                 </p>
-                <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-glow">
+                <p className="mt-0.5 break-words font-display text-sm font-bold uppercase tracking-[0.06em] text-glow">
                   {pick(tournament.placement)}
                 </p>
               </div>
-              <div className="border border-edge bg-void/55 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
-                  {pick(page.tournamentLabels.season)}
-                </p>
-                <p className="keep-latin mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre">
-                  {tournament.season}
-                </p>
-              </div>
               {tournament.prize && tournament.prize.trim() && (
-                <div className="border border-edge bg-void/55 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash-dim">
+                <div className="border border-edge bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ash-dim">
                     {pick(page.tournamentLabels.prize)}
                   </p>
-                  <p className="keep-latin mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-spectre">
+                  <p className="keep-latin mt-0.5 break-words font-display text-sm font-bold uppercase tracking-[0.06em] text-spectre">
                     {tournament.prize}
                   </p>
                 </div>
@@ -543,7 +535,7 @@ function TournamentRecordGroup({
       </div>
 
       {open && (
-        <div className="relative flex flex-col gap-3 bg-void/35 p-3 md:p-4">
+        <div className="relative flex flex-col gap-2 bg-void/35 p-2 md:gap-3 md:p-4">
           <span
             aria-hidden
             className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
@@ -756,22 +748,22 @@ export default function MatchesClient() {
         subtitle={pick(page.intro)}
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
+      <section className="mx-auto max-w-7xl overflow-hidden px-3 py-12 sm:px-4 md:px-6 md:py-16">
         <Reveal>
-          <div className="border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
+          <div className="max-w-full overflow-hidden border border-edge bg-crypt/35 p-3 shadow-glow-soft sm:p-4 md:p-6">
             <button
               type="button"
               onClick={() => setRoadmapOpen(true)}
-              className="group mb-5 flex w-full items-center gap-4 border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-4 py-4 text-left transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:px-5"
+              className="group mb-4 flex w-full min-w-0 items-center gap-3 overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-left transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:gap-4 md:px-5 md:py-4"
             >
-              <span className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/50 bg-void/70 text-glow transition-colors group-hover:border-amethyst">
-                <Route size={20} strokeWidth={2} />
+              <span className="grid h-10 w-10 shrink-0 place-items-center border border-amethyst/50 bg-void/70 text-glow transition-colors group-hover:border-amethyst md:h-11 md:w-11">
+                <Route size={18} strokeWidth={2} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-display text-lg font-extrabold uppercase tracking-tight text-soul md:text-xl">
+                <span className="block break-words font-display text-base font-extrabold uppercase tracking-tight text-soul md:text-xl">
                   {pick(roadmap.buttonLabel)}
                 </span>
-                <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre/80">
+                <span className="block break-words font-mono text-[9px] font-semibold uppercase leading-relaxed tracking-[0.1em] text-spectre/80 [overflow-wrap:anywhere] md:text-[10px] md:tracking-[0.16em]">
                   {pick(roadmap.activeBadge)}
                 </span>
               </span>
