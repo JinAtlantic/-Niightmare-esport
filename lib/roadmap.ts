@@ -1,16 +1,19 @@
 import type { Bilingual } from "@/lib/types";
 
 /**
- * NIIGHTMARE's competitive "Esports Roadmap" — the four stages a Lao MLBB team
- * climbs each season, shown as a live status timeline on the Achievements page.
+ * NIIGHTMARE's competitive "Esports Roadmap" — the real MLBB 2026 season path a
+ * Lao team climbs, with each stop's Liquipedia tier and the club's live status.
  * Static content (not admin-editable): update `status`/`note` here + redeploy as
- * the season progresses. Rendered by components/sections/RoadmapTimeline.tsx.
+ * the season moves. Rendered by components/sections/RoadmapTimeline.tsx.
+ *
+ * Sources: Liquipedia (MSC 2026 = S-Tier, Paris, $3,000,000; Niightmare listed
+ * as a wildcard team via M Challenge Cup Mekong S7), Esports Charts 2026 calendar.
  */
 
-/** Visual tier of a stage — drives the small tier tag colour. */
-export type RoadmapTier = "qualifier" | "regional" | "global" | "worlds";
+/** Liquipedia tournament tier. */
+export type RoadmapTier = "C" | "B" | "A" | "S";
 
-/** Where the team currently stands on each stage. */
+/** Where the team currently stands on each stop. */
 export type RoadmapStatus =
   | "done" // cleared / passed
   | "active" // competing right now
@@ -19,33 +22,37 @@ export type RoadmapStatus =
   | "locked"; // not reached yet
 
 export interface RoadmapStep {
-  /** Two-digit phase index. */
   phase: string;
-  /** Punchy stage title. */
-  title: Bilingual;
-  /** Formal competition / system name. */
-  system: Bilingual;
-  /** One- or two-sentence description. */
-  detail: Bilingual;
-  /** Liquipedia-style tier tag (e.g. "C-Tier · Qualifiers"). */
-  tierTag: Bilingual;
+  /** Real tournament name — the prominent line. */
+  tournament: Bilingual;
+  /** Its role in the season path (e.g. "Regional League"). */
+  stage: Bilingual;
+  /** Liquipedia tier. */
   tier: RoadmapTier;
-  /** Live progress state for this stage. */
+  /** When it runs (kept latin). */
+  window: string;
+  /** Host / region. */
+  location: Bilingual;
+  /** Prize pool, if notable (kept latin). */
+  prize?: string;
+  detail: Bilingual;
   status: RoadmapStatus;
-  /** Optional context line shown under the active/upcoming stage. */
+  /** Context line under the cleared/next stop. */
   note?: Bilingual;
+  /** The pinnacle — gets the apex (crown) treatment. */
+  apex?: boolean;
 }
 
 /** Headline summary of where the club stands right now (top banner). */
 export const ROADMAP_NOW = {
   kicker: { en: "WHERE WE STAND", lo: "ສະຖານະປະຈຸບັນ" } as Bilingual,
   headline: {
-    en: "MEKONG CHAMPIONS · EYES ON RIYADH",
-    lo: "ແຊมป์ແມ່ໂຂງ · ມຸ່ງສູ່ຣິຢາด",
+    en: "MEKONG CHAMPIONS · BOUND FOR PARIS",
+    lo: "ແຊมป์ແມ່ໂຂງ · ມຸ່ງສູ່ປາຣີ",
   } as Bilingual,
   blurb: {
-    en: "NIIGHTMARE cleared the regional gauntlet. Next stop: the global stage.",
-    lo: "NIIGHTMARE ຜ່ານດ່ານພາກພື້ນແລ້ວ. ປ້າຍຕໍ່ໄປ: ເວທີລະດັບໂລກ.",
+    en: "NIIGHTMARE cleared the regional path. Next: the $3,000,000 Mid-Season Cup world stage.",
+    lo: "NIIGHTMARE ຜ່ານເສັ້ນທາງພາກພື້ນແລ້ວ. ຕໍ່ໄປ: ເວທີໂລກ Mid-Season Cup ເງິນລາງວັນ 3 ລ້ານໂດລາ.",
   } as Bilingual,
   state: { en: "UP NEXT · MSC 2026", lo: "ຮອບຕໍ່ໄປ · MSC 2026" } as Bilingual,
 };
@@ -53,58 +60,64 @@ export const ROADMAP_NOW = {
 export const ROADMAP_STEPS: RoadmapStep[] = [
   {
     phase: "01",
-    title: { en: "Claim the Homeland", lo: "ຄອງບັນລັງລະດັບຊາດ" },
-    system: { en: "National Selection — Laos", lo: "ຄັດເລືອກລະດັບຊາດ — ລາວ" },
+    tournament: { en: "Lao National Championship", lo: "ການແຂ່ງຂັນລະດັບຊາດ ລາວ" },
+    stage: { en: "National Qualifier", lo: "ຄັດເລືອກລະດັບຊາດ" },
+    tier: "C",
+    window: "Domestic Season",
+    location: { en: "Laos", lo: "ລາວ" },
     detail: {
-      en: "Battle through Laos' domestic qualifiers to seize the nation's official representative slot.",
-      lo: "ຟັນຝ່າຮອບຄັດເລືອກພາຍໃນປະເທດລາວ ເພື່ອຄວ້າສິດເປັນຕົວແທນຢ່າງເປັນທາງການ.",
+      en: "Battle through Laos' domestic season to be crowned the nation's official MLBB representative.",
+      lo: "ຟັນຝ່າລະດູການພາຍໃນ ເພື່ອຄອງຕຳແໜ່ງຕົວແທນ MLBB ຂອງຊາດ.",
     },
-    tierTag: { en: "C-Tier · Qualifiers", lo: "C-Tier · ຮອບຄັດເລືອກ" },
-    tier: "qualifier",
     status: "done",
   },
   {
     phase: "02",
-    title: { en: "Storm the Mekong", lo: "ບຸກລະດັບແມ່ໂຂງ" },
-    system: { en: "MCC Mekong — Regional League", lo: "MCC Mekong — ລີກພາກພື້ນ" },
+    tournament: { en: "M Challenge Cup Mekong", lo: "M Challenge Cup Mekong" },
+    stage: { en: "Regional League · Mekong", lo: "ລີກພາກພື້ນ · ແມ່ໂຂງ" },
+    tier: "B",
+    window: "Feb – Jun 2026",
+    location: { en: "Mekong · LA / TH / VN", lo: "ແມ່ໂຂງ · ລາວ / ໄທ / ຫວຽດນາມ" },
     detail: {
-      en: "Cross the border into the M Challenge Cup Mekong and clash with the best of Laos, Thailand and Vietnam for a ticket to the world stage.",
-      lo: "ຂ້າມຊາຍແດນສູ່ສຶກ M Challenge Cup Mekong ປະທະກັບທີມຊັ້ນນຳຈາກ ລາວ, ໄທ ແລະ ຫວຽດນາມ ເພື່ອຄວ້າປີ້ສູ່ເວທີໂລກ.",
+      en: "A cross-border regional league against the best of Laos, Thailand and Vietnam — the gateway to the world stage.",
+      lo: "ລີກພາກພື້ນຂ້າມຊາຍແດນ ປະທະທີມຊັ້ນນຳ ລາວ ໄທ ຫວຽດນາມ — ປະຕູສູ່ເວທີໂລກ.",
     },
-    tierTag: { en: "B-Tier", lo: "B-Tier" },
-    tier: "regional",
     status: "done",
     note: {
-      en: "Champions — M Challenge Cup Mekong Season 7 (beat Wonderer Panda 4:1).",
-      lo: "ແຊมป์ — M Challenge Cup Mekong Season 7 (ຊະນະ Wonderer Panda 4:1).",
+      en: "Season 7 Champions — beat Wonderer Panda 4:1 to seize the MSC wildcard.",
+      lo: "ແຊมป์ Season 7 — ຊະນະ Wonderer Panda 4:1 ຄວ້າສິດ wildcard MSC.",
     },
   },
   {
     phase: "03",
-    title: { en: "Siege of Riyadh", lo: "ບຸກສຶກກາງປີ ຣິຢາດ" },
-    system: { en: "Mid-Season Cup · Esports World Cup", lo: "Mid-Season Cup · Esports World Cup" },
+    tournament: { en: "MLBB Mid-Season Cup 2026", lo: "MLBB Mid-Season Cup 2026" },
+    stage: { en: "World Stage · MSC", lo: "ເວທີໂລກ · MSC" },
+    tier: "S",
+    window: "Jul 1 – Aug 1, 2026",
+    location: { en: "Paris, France", lo: "ປາຣີ, ປະເທດຝຣັ່ງ" },
+    prize: "$3,000,000",
     detail: {
-      en: "Fly to Riyadh, Saudi Arabia for the Mid-Season Cup — a multi-million-dollar global battleground among the world's elite.",
-      lo: "ບິນສູ່ນະຄອນຣິຢາດ ປະເທດຊາອຸດິອາຣະເບຍ ລົງຊິງໄຊໃນ Mid-Season Cup — ເວທີລະດັບໂລກ ຊິງເງິນລາງວັນຫຼາຍລ້ານໂດລາ.",
+      en: "The $3M Mid-Season Cup — a global S-Tier battlefield flown under the Esports World Cup banner.",
+      lo: "Mid-Season Cup ເງິນລາງວັນ 3 ລ້ານໂດລາ — ສະໜາມ S-Tier ລະດັບໂລກ ພາຍໃຕ້ Esports World Cup.",
     },
-    tierTag: { en: "S-Tier · Global", lo: "S-Tier · ລະດັບໂລກ" },
-    tier: "global",
     status: "upcoming",
     note: {
-      en: "Qualified via Mekong S7 — awaiting the MSC 2026 bracket.",
-      lo: "ຜ່ານເຂົ້າຮອບຈາກ Mekong S7 — ກຳລັງລໍຖ້າ MSC 2026.",
+      en: "Qualified as Mekong S7 champions — wildcard opens July 1 in Paris.",
+      lo: "ຜ່ານເຂົ້າຮອບໃນຖານະແຊมป์ Mekong S7 — wildcard ເລີ່ມ 1 ກໍລະກົດ ທີ່ປາຣີ.",
     },
   },
   {
     phase: "04",
-    title: { en: "Throne of the World", lo: "ບັນລັງສູງສຸດຂອງໂລກ" },
-    system: { en: "M-Series World Championship", lo: "M-Series ຊິງແຊมป์ໂລກ" },
+    tournament: { en: "M8 World Championship", lo: "M8 ຊິງແຊมป์ໂລກ" },
+    stage: { en: "World Championship", lo: "ຊິງແຊมป์ໂລກ" },
+    tier: "S",
+    window: "Dec 2026 – Jan 2027",
+    location: { en: "To be announced", lo: "ລໍຖ້າປະກາດ" },
     detail: {
-      en: "The year-end world championship — the highest throne in Mobile Legends, where a club carves its name into history and earns a world-championship skin.",
-      lo: "ສຶກຊິງແຊมป์ໂລກ ທ້າຍປີ — ບັນລັງສູງສຸດຂອງ Mobile Legends ບ່ອນທີ່ສະໂມສອນຈະຈາລຶກຊື່ລົງປະຫວັດສາດ ແລະ ສ້າງສະກິນແຊมป์ໂລກປະຈຳສະໂມສອນ.",
+      en: "The year-end world championship — the highest throne in Mobile Legends, and the name NIIGHTMARE is chasing.",
+      lo: "ສຶກຊິງແຊมป์ໂລກທ້າຍປີ — ບັນລັງສູງສຸດຂອງ Mobile Legends ແລະ ເປົ້າໝາຍສູງສຸດຂອງ NIIGHTMARE.",
     },
-    tierTag: { en: "S-Tier · World Championship", lo: "S-Tier · ຊິງແຊมป์ໂລກ" },
-    tier: "worlds",
     status: "locked",
+    apex: true,
   },
 ];
