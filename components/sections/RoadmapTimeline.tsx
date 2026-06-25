@@ -172,9 +172,6 @@ export default function RoadmapTimeline() {
 
                 {/* node — tier ring + status icon */}
                 <span className="relative z-[1] shrink-0">
-                  {isCurrent && (
-                    <span aria-hidden className="absolute inset-0 rounded-full border-2 border-amethyst/60 motion-safe:animate-ping" />
-                  )}
                   <span className={`grid h-10 w-10 place-items-center rounded-full border-2 bg-void ${t.node} ${t.glow} ${muted ? "opacity-60" : ""}`}>
                     <Icon size={17} strokeWidth={2.5} />
                   </span>
