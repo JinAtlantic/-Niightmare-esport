@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { Route, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
-import SectionLabel from "@/components/ui/SectionLabel";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
-import RoadmapTimeline from "@/components/sections/RoadmapTimeline";
+import RoadmapModal from "@/components/sections/RoadmapModal";
 import { PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
+import { tournamentTier, type Tier } from "@/lib/tiers";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/types";
@@ -68,12 +70,23 @@ const RESULT_ACCENT: Record<MatchResult, { score: string; badge: string }> = {
   draw: { score: "text-ash", badge: "border-edge bg-crypt2 text-ash" },
 };
 
-// Left accent blade colored by game type — neon violet for MLBB (MOBA),
-// neon cyan for eFootball (sporty contrast). The result is still conveyed by
-// the score color and the result badge.
-const GAME_BLADE: Record<GameId, string> = {
-  mlbb: "bg-amethyst shadow-[0_0_10px_rgba(168,85,247,0.85)]",
-  efootball: "bg-[#22D3EE] shadow-[0_0_10px_rgba(34,211,238,0.85)]",
+// Left accent blade colored by the tournament's Liquipedia tier (bronze C →
+// cyan B → silver A → gold S). Tournaments outside the main families fall back
+// to the brand violet. The result is still conveyed by the score color + badge.
+const TIER_BLADE: Record<Tier | "default", string> = {
+  C: "bg-bronze shadow-[0_0_10px_rgba(206,138,87,0.8)]",
+  B: "bg-[#38BDF8] shadow-[0_0_10px_rgba(56,189,248,0.8)]",
+  A: "bg-spectre shadow-[0_0_10px_rgba(201,180,246,0.8)]",
+  S: "bg-gold shadow-[0_0_10px_rgba(245,196,81,0.85)]",
+  default: "bg-amethyst shadow-[0_0_10px_rgba(168,85,247,0.85)]",
+};
+
+// Tier pill on each tournament group header — the legend for the blade colours.
+const TIER_TAG: Record<Tier, string> = {
+  C: "border-bronze/50 bg-bronze/10 text-bronze",
+  B: "border-[#38BDF8]/50 bg-[#38BDF8]/10 text-[#7DD3FC]",
+  A: "border-spectre/50 bg-spectre/10 text-spectre",
+  S: "border-gold/55 bg-gold/10 text-gold",
 };
 
 const MATCH_LOGO_SIZE = 64;
@@ -290,11 +303,13 @@ function MatchCard({
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
   const tournamentName = pick(match.tournament).trim() || pick(page.unknownTournament);
   const opponentName = match.opponent.trim() || pick(page.unknownOpponent);
+  // Blade colour by the tournament's tier (violet when it isn't a main family).
+  const blade = TIER_BLADE[tournamentTier(match.tournament.en || match.tournament.lo) ?? "default"];
 
   return (
     <article className="hover-glow group relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))] p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7">
-      {/* left accent blade — colored by game type (MLBB = violet, eFootball = cyan) */}
-      <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${GAME_BLADE[match.game]}`} />
+      {/* left accent blade — colored by the tournament's tier */}
+      <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${blade}`} />
       <span
         aria-hidden
         className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-spectre/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
@@ -404,6 +419,7 @@ function TournamentRecordGroup({
   const [open, setOpen] = useState(false);
   const tournament = group.tournament;
   const matchCount = group.matches.length;
+  const tier = tournamentTier(group.name.en || group.name.lo);
   const wins = group.matches.filter((match) => match.result === "win").length;
   const losses = group.matches.filter((match) => match.result === "loss").length;
   const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
@@ -436,6 +452,11 @@ function TournamentRecordGroup({
         <div className="pointer-events-none relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-2">
+              {tier && (
+                <span className={`inline-flex border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${TIER_TAG[tier]}`}>
+                  {tier}-Tier
+                </span>
+              )}
               <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-glow">
                 {matchCount} {matchCount === 1 ? "match" : "matches"}
               </span>
@@ -592,6 +613,7 @@ export default function MatchesClient() {
   };
   const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [roadmapOpen, setRoadmapOpen] = useState(false);
   const page = mergePageCopy(data.page);
   const [selectedGame, setSelectedGame] = useState<GameId>(page.defaultGame);
 
@@ -733,15 +755,31 @@ export default function MatchesClient() {
           </div>
         </Reveal>
 
-        {/* ESPORTS ROADMAP — current-season status, right under the filters */}
-        <div className="mt-12">
-          <Reveal>
-            <SectionLabel centered>ESPORTS ROADMAP</SectionLabel>
-          </Reveal>
-          <div className="mt-8">
-            <RoadmapTimeline />
-          </div>
-        </div>
+        {/* ESPORTS ROADMAP — opens the status timeline in a dialog */}
+        <Reveal>
+          <button
+            type="button"
+            onClick={() => setRoadmapOpen(true)}
+            className="group mt-6 flex w-full items-center gap-4 border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.12] via-crypt/40 to-void px-5 py-4 text-left transition-all duration-300 hover:border-amethyst/70 hover:from-amethyst/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:px-6 md:py-5"
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/50 bg-void/60 text-glow transition-colors group-hover:border-amethyst">
+              <Route size={20} strokeWidth={2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-lg font-extrabold uppercase tracking-tight text-soul md:text-xl">
+                Esports Roadmap
+              </span>
+              <span className="block font-mono text-[11px] uppercase tracking-[0.16em] text-spectre/80">
+                {pick({ en: "Where NIIGHTMARE stands this season", lo: "ສະຖານະຂອງ NIIGHTMARE ໃນລະດູການນີ້" })}
+              </span>
+            </span>
+            <ChevronRight size={20} className="shrink-0 text-amethyst transition-transform duration-300 group-hover:translate-x-1" />
+          </button>
+        </Reveal>
+
+        <AnimatePresence>
+          {roadmapOpen && <RoadmapModal key="roadmap-modal" onClose={() => setRoadmapOpen(false)} />}
+        </AnimatePresence>
 
         {/* YEAR TABS — one season at a time keeps the list short and scannable */}
         {yearOptions.length > 0 && (
