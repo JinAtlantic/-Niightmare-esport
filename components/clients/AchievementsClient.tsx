@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Trophy, Globe2, Users, Route } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { Trophy, Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
-import RoadmapModal from "@/components/sections/RoadmapModal";
-import { ROADMAP_INTRO, ROADMAP_STEPS } from "@/lib/roadmap";
+import RoadmapTimeline from "@/components/sections/RoadmapTimeline";
 import achievements from "@/data/achievements.json";
 import type {
   AchievementsData,
@@ -181,7 +179,6 @@ type TabId = (typeof TABS)[number]["id"];
 export default function AchievementsClient() {
   const { pick } = useLanguage();
   const [tab, setTab] = useState<TabId>("overview");
-  const [roadmapOpen, setRoadmapOpen] = useState(false);
 
   return (
     <>
@@ -303,54 +300,9 @@ export default function AchievementsClient() {
             </div>
           )}
 
-          {/* ── ROADMAP — the competitive ascent (opens a modal timeline) ── */}
-          {tab === "roadmap" && (
-            <div className="mx-auto max-w-3xl text-center">
-              <SectionLabel centered kicker={pick(ROADMAP_INTRO.kicker)}>
-                {pick(ROADMAP_INTRO.title)}
-              </SectionLabel>
-              <p className="mx-auto mt-5 max-w-xl text-[15px] leading-relaxed text-spectre/85 md:text-base">
-                {pick(ROADMAP_INTRO.blurb)}
-              </p>
-
-              {/* teaser ladder — the colour-coded detail lives in the modal */}
-              <ol className="mx-auto mt-9 grid max-w-2xl gap-2.5 sm:grid-cols-2">
-                {ROADMAP_STEPS.map((s) => (
-                  <li
-                    key={s.phase}
-                    className="flex items-center gap-3 border border-edge bg-crypt/40 p-3 text-left transition-colors hover:border-edge-bright"
-                  >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center border border-amethyst/40 bg-void/60 font-display text-sm font-bold tabular-nums text-glow">
-                      {s.phase}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-ash">
-                        {pick(s.tierTag)}
-                      </p>
-                      <p className="keep-latin truncate font-display text-sm font-bold uppercase tracking-[0.04em] text-soul">
-                        {pick(s.title)}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-
-              <button
-                type="button"
-                onClick={() => setRoadmapOpen(true)}
-                className="group mx-auto mt-9 inline-flex items-center justify-center gap-2.5 rounded-md border border-amethyst/70 bg-gradient-to-b from-amethyst to-amethyst-deep px-8 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.45)] transition-all duration-300 hover:from-glow hover:to-amethyst hover:shadow-[0_0_48px_rgba(168,85,247,0.75)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
-              >
-                <Route size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-                {pick(ROADMAP_INTRO.cta)}
-              </button>
-            </div>
-          )}
+          {/* ── ROADMAP — live status timeline of the competitive ascent ── */}
+          {tab === "roadmap" && <RoadmapTimeline />}
         </div>
-
-        {/* Roadmap dialog — AnimatePresence lets the exit animation play */}
-        <AnimatePresence>
-          {roadmapOpen && <RoadmapModal key="roadmap-modal" onClose={() => setRoadmapOpen(false)} />}
-        </AnimatePresence>
 
         <p className="mt-14 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-ash-dim">
           Competitive record sourced from Liquipedia

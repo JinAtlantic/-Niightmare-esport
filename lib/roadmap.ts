@@ -2,16 +2,24 @@ import type { Bilingual } from "@/lib/types";
 
 /**
  * NIIGHTMARE's competitive "Esports Roadmap" — the four stages a Lao MLBB team
- * climbs each season, from the national qualifier to the world throne. Static,
- * aspirational content (not admin-editable); edit here + redeploy to change it.
- * Rendered by components/sections/RoadmapModal.tsx on the Achievements page.
+ * climbs each season, shown as a live status timeline on the Achievements page.
+ * Static content (not admin-editable): update `status`/`note` here + redeploy as
+ * the season progresses. Rendered by components/sections/RoadmapTimeline.tsx.
  */
 
-/** Visual tier of a stage — drives the badge / node colour in the modal. */
+/** Visual tier of a stage — drives the small tier tag colour. */
 export type RoadmapTier = "qualifier" | "regional" | "global" | "worlds";
 
+/** Where the team currently stands on each stage. */
+export type RoadmapStatus =
+  | "done" // cleared / passed
+  | "active" // competing right now
+  | "eliminated" // knocked out here
+  | "upcoming" // qualified / waiting — the next stop
+  | "locked"; // not reached yet
+
 export interface RoadmapStep {
-  /** Two-digit phase index shown on the spine. */
+  /** Two-digit phase index. */
   phase: string;
   /** Punchy stage title. */
   title: Bilingual;
@@ -21,18 +29,25 @@ export interface RoadmapStep {
   detail: Bilingual;
   /** Liquipedia-style tier tag (e.g. "C-Tier · Qualifiers"). */
   tierTag: Bilingual;
-  /** Drives the colour treatment. */
   tier: RoadmapTier;
+  /** Live progress state for this stage. */
+  status: RoadmapStatus;
+  /** Optional context line shown under the active/upcoming stage. */
+  note?: Bilingual;
 }
 
-export const ROADMAP_INTRO = {
-  kicker: { en: "THE ASCENT", lo: "ເສັ້ນທາງໄຕ່ເຕົ້າ" } as Bilingual,
-  title: { en: "ESPORTS ROADMAP", lo: "ແຜນເສັ້ນທາງ Esports" } as Bilingual,
-  blurb: {
-    en: "Four stages stand between a Lao qualifier and the world throne — the road NIIGHTMARE walks every season.",
-    lo: "ສີ່ດ່ານ ກັ້ນລະຫວ່າງຮອບຄັດເລືອກລາວ ກັບບັນລັງໂລກ — ເສັ້ນທາງທີ່ NIIGHTMARE ກ້າວທຸກລະດູການ.",
+/** Headline summary of where the club stands right now (top banner). */
+export const ROADMAP_NOW = {
+  kicker: { en: "WHERE WE STAND", lo: "ສະຖານະປະຈຸບັນ" } as Bilingual,
+  headline: {
+    en: "MEKONG CHAMPIONS · EYES ON RIYADH",
+    lo: "ແຊมป์ແມ່ໂຂງ · ມຸ່ງສູ່ຣິຢາด",
   } as Bilingual,
-  cta: { en: "VIEW THE ROADMAP", lo: "ເບິ່ງແຜນເສັ້ນທາງ" } as Bilingual,
+  blurb: {
+    en: "NIIGHTMARE cleared the regional gauntlet. Next stop: the global stage.",
+    lo: "NIIGHTMARE ຜ່ານດ່ານພາກພື້ນແລ້ວ. ປ້າຍຕໍ່ໄປ: ເວທີລະດັບໂລກ.",
+  } as Bilingual,
+  state: { en: "UP NEXT · MSC 2026", lo: "ຮອບຕໍ່ໄປ · MSC 2026" } as Bilingual,
 };
 
 export const ROADMAP_STEPS: RoadmapStep[] = [
@@ -46,6 +61,7 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     },
     tierTag: { en: "C-Tier · Qualifiers", lo: "C-Tier · ຮອບຄັດເລືອກ" },
     tier: "qualifier",
+    status: "done",
   },
   {
     phase: "02",
@@ -57,6 +73,11 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     },
     tierTag: { en: "B-Tier", lo: "B-Tier" },
     tier: "regional",
+    status: "done",
+    note: {
+      en: "Champions — M Challenge Cup Mekong Season 7 (beat Wonderer Panda 4:1).",
+      lo: "ແຊมป์ — M Challenge Cup Mekong Season 7 (ຊະນະ Wonderer Panda 4:1).",
+    },
   },
   {
     phase: "03",
@@ -68,6 +89,11 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     },
     tierTag: { en: "S-Tier · Global", lo: "S-Tier · ລະດັບໂລກ" },
     tier: "global",
+    status: "upcoming",
+    note: {
+      en: "Qualified via Mekong S7 — awaiting the MSC 2026 bracket.",
+      lo: "ຜ່ານເຂົ້າຮອບຈາກ Mekong S7 — ກຳລັງລໍຖ້າ MSC 2026.",
+    },
   },
   {
     phase: "04",
@@ -79,5 +105,6 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     },
     tierTag: { en: "S-Tier · World Championship", lo: "S-Tier · ຊິງແຊมป์ໂລກ" },
     tier: "worlds",
+    status: "locked",
   },
 ];
