@@ -135,16 +135,48 @@ reuse in `players`: `win_rate`→`fmvp`, `gear_device`→`tenures` (JSON),
 / `UpcomingMatch` when no opponent logo is set; `opponentMonogram()` in
 `components/cards/OpponentLogo.tsx` resolves it).
 
+**Editable JSON blocks on the "site" section** (About Us, Esports Roadmap) live in
+single `jsonb` columns on `site_settings`: `about_us` and `roadmap`. Pattern for any
+new editable-content block: (1) `alter table site_settings add column if not exists
+<col> jsonb;` in `schema.sql` **and run it in Supabase before the admin can save it**;
+(2) persist it in BOTH `lib/supabaseWrite.ts` and `lib/migrate.ts` (the `site_settings`
+upsert); (3) read it back in `lib/contentFromSupabase.ts` (`<key>: (c.<col> as …) ??
+undefined`); (4) define `DEFAULT_*` + a `resolve*()` merge in a `lib/*.ts`, edit it via
+a sub-editor in `HomeEditor`. The component reads `useContent().site.<key>` and falls
+back to the default — so the block renders before anything is ever saved.
+
 ## Recently redesigned
 `components/sections/UpcomingMatch.tsx` — the home "UPCOMING MATCH" fixture card was
 rebuilt as a split-arena broadcast card (mobile-first: stacked → side-by-side on `md`,
 glassmorphism team zones, forged diamond VS on a blade seam, divided tale-of-the-tape
 strip). Keep edits to Tailwind classes + JSX layout; the data hooks/props are stable.
 
-`components/sections/AboutUs.tsx` — home "About Us" band below `RecentResults`
-(reaper-voiced manifesto with an outlined violet accent word + a "Club Dossier" stat
-sheet). All copy is admin-editable via `site.aboutUs` (HomeEditor → "About Us"); the
-type + shipped defaults live in `lib/about.ts` (`AboutUsContent` / `DEFAULT_ABOUT` /
-`resolveAbout`). Players also carry an optional `liquipedia` URL shown in the profile
-modal. The old "Team Snapshot" HomeEditor block was removed — it edited `homeSnapshot`,
-which nothing rendered.
+`components/sections/AboutUs.tsx` — home "About Us" band below `RecentResults`: a
+single centred manifesto led by a large scythe-tick "WHO WE ARE" heading + an outlined
+violet accent word. All copy is admin-editable via `site.aboutUs` (HomeEditor → "About
+Us") with defaults in `lib/about.ts` (`DEFAULT_ABOUT` / `resolveAbout`). Players also
+carry an optional `liquipedia` URL shown in the profile modal. The Club Dossier / stats
+and "Team Snapshot" blocks were removed.
+
+## Esports Roadmap + Matches page (2026-06)
+`/matches` (`components/clients/MatchesClient.tsx`):
+- **Scoreboard** = W / L / win-rate tiles (colour-accented); stats are for the selected
+  game + year, independent of the result/tournament filters.
+- **Filters** (all dropdowns, visible labels): Game · Year · Result · Sort, then a
+  full-width **Tournament** dropdown. Tournament options are collapsed to one entry per
+  event family — `baseName()` strips `Season N` / `S7` / `M5–M8` / year tokens — and
+  grouped into `<optgroup>`s by tier (S→A→B→C, untiered "Other" last). The match list
+  still cards each season separately.
+- **Tier colours**: each match's left blade + each tournament group's tier badge are
+  coloured by `tournamentTier(name)` in `lib/tiers.ts` (bronze C / cyan B / silver A /
+  gold S; non-main events fall back to brand violet). `tournamentTier` is the single
+  source of truth for tier classification — extend its regex to tier a new event.
+- **Esports Roadmap** = a button under the filters opening `RoadmapModal` →
+  `RoadmapTimeline` (a vertical status spine of the season path). Content is
+  admin-editable via `site.roadmap` (HomeEditor → "Esports Roadmap", `RoadmapEditor`),
+  defaults + types in `lib/roadmap.ts` (`DEFAULT_ROADMAP` / `resolveRoadmap`). Each stop
+  has a tier, status (`done`/`active`/`eliminated`/`upcoming`/`locked`), optional
+  prize/note, and optional **sub-stages** (Wildcard / Groups / Knockout — each with its
+  own label/window/status). Stored in `site_settings.roadmap` jsonb. **Update each
+  season** by editing statuses (e.g. when MSC starts, set that stop `active` and its
+  Wildcard sub-stage `done`), in the admin or in `lib/roadmap.ts`.
