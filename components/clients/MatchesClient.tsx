@@ -132,6 +132,7 @@ function baseName(value: string) {
   return value
     .replace(/\bseason\s*\d+\b/gi, "")
     .replace(/\bs\d+\b/gi, "")
+    .replace(/\bm\d+\b/gi, "") // M-series worlds: M5 / M6 / M7 / M8 → one family
     .replace(/\b(19|20)\d{2}\b/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
