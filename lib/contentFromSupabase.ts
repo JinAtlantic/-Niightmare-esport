@@ -185,10 +185,6 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
       // About Us band copy (jsonb). Null/absent → leave undefined so the
       // component falls back to DEFAULT_ABOUT.
       aboutUs: (c.about_us as Record<string, unknown> | null) ?? undefined,
-      // Esports Roadmap (jsonb). Null/absent → undefined → DEFAULT_ROADMAP.
-      roadmap: (c.roadmap as Record<string, unknown> | null) ?? undefined,
-      // MLBB Esport System explainer popup (jsonb). Null/absent → default content.
-      mlbbEsportSystem: (c.mlbb_esport_system as Record<string, unknown> | null) ?? undefined,
       upcomingMatch: u
         ? {
             status: u.status,

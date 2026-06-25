@@ -1,6 +1,4 @@
-import type { RoadmapTier } from "@/lib/roadmap";
-
-export type Tier = RoadmapTier; // "C" | "B" | "A" | "S"
+export type Tier = "C" | "B" | "A" | "S";
 
 /**
  * Classify a tournament name into its Liquipedia tier so the match list can be

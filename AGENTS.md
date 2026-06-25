@@ -135,8 +135,8 @@ reuse in `players`: `win_rate`→`fmvp`, `gear_device`→`tenures` (JSON),
 / `UpcomingMatch` when no opponent logo is set; `opponentMonogram()` in
 `components/cards/OpponentLogo.tsx` resolves it).
 
-**Editable JSON blocks on the "site" section** (About Us, Esports Roadmap) live in
-single `jsonb` columns on `site_settings`: `about_us` and `roadmap`. Pattern for any
+**Editable JSON blocks on the "site" section** (currently About Us) live in
+single `jsonb` columns on `site_settings`: `about_us`. Pattern for any
 new editable-content block: (1) `alter table site_settings add column if not exists
 <col> jsonb;` in `schema.sql` **and run it in Supabase before the admin can save it**;
 (2) persist it in BOTH `lib/supabaseWrite.ts` and `lib/migrate.ts` (the `site_settings`
@@ -158,7 +158,7 @@ Us") with defaults in `lib/about.ts` (`DEFAULT_ABOUT` / `resolveAbout`). Players
 carry an optional `liquipedia` URL shown in the profile modal. The Club Dossier / stats
 and "Team Snapshot" blocks were removed.
 
-## Esports Roadmap + Matches page (2026-06)
+## Matches page (2026-06)
 `/matches` (`components/clients/MatchesClient.tsx`):
 - **Scoreboard** = W / L / win-rate tiles (colour-accented); stats are for the selected
   game + year, independent of the result/tournament filters.
@@ -171,12 +171,6 @@ and "Team Snapshot" blocks were removed.
   coloured by `tournamentTier(name)` in `lib/tiers.ts` (bronze C / cyan B / silver A /
   gold S; non-main events fall back to brand violet). `tournamentTier` is the single
   source of truth for tier classification — extend its regex to tier a new event.
-- **Esports Roadmap** = a button under the filters opening `RoadmapModal` →
-  `RoadmapTimeline` (a vertical status spine of the season path). Content is
-  admin-editable via `site.roadmap` (HomeEditor → "Esports Roadmap", `RoadmapEditor`),
-  defaults + types in `lib/roadmap.ts` (`DEFAULT_ROADMAP` / `resolveRoadmap`). Each stop
-  has a tier, status (`done`/`active`/`eliminated`/`upcoming`/`locked`), optional
-  prize/note, and optional **sub-stages** (Wildcard / Groups / Knockout — each with its
-  own label/window/status). Stored in `site_settings.roadmap` jsonb. **Update each
-  season** by editing statuses (e.g. when MSC starts, set that stop `active` and its
-  Wildcard sub-stage `done`), in the admin or in `lib/roadmap.ts`.
+- The former **Esports Roadmap** and **MLBB Esport System** popups were removed
+  from `/matches` and from the admin editor. Do not re-add them unless the user
+  explicitly asks for those features again.

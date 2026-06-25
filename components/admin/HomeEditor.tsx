@@ -23,16 +23,9 @@ import {
   TiktokIcon,
   DiscordIcon,
 } from "@/components/ui/Icons";
-import RoadmapEditor from "@/components/admin/RoadmapEditor";
-import MlbbEsportSystemEditor from "@/components/admin/MlbbEsportSystemEditor";
 import type { UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
-import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
-import {
-  resolveMlbbEsportSystem,
-  type MlbbEsportSystemContent,
-} from "@/lib/mlbbEsportSystem";
 
 interface Contact {
   email?: string;
@@ -74,8 +67,6 @@ interface SiteFile {
   upcomingMatch: UpcomingMatch;
   contact?: Contact;
   aboutUs?: AboutUsContent;
-  roadmap?: RoadmapContent;
-  mlbbEsportSystem?: MlbbEsportSystemContent;
   contactPage?: ContactPageCopy;
   [key: string]: unknown;
 }
@@ -229,12 +220,6 @@ export default function HomeEditor() {
   const patchAbout = (p: Partial<AboutUsContent>) =>
     setData({ ...data, aboutUs: { ...about, ...p } });
 
-  const roadmap = resolveRoadmap(data.roadmap);
-  const patchRoadmap = (rm: RoadmapContent) => setData({ ...data, roadmap: rm });
-  const mlbbEsportSystem = resolveMlbbEsportSystem(data.mlbbEsportSystem);
-  const patchMlbbEsportSystem = (sys: MlbbEsportSystemContent) =>
-    setData({ ...data, mlbbEsportSystem: sys });
-
   const isPractice = m.status === "practice";
 
   return (
@@ -358,20 +343,6 @@ export default function HomeEditor() {
           </div>
         </Card>
 
-      </Section>
-
-      <Section
-        title="Esports Roadmap (หน้า Match)"
-        hint="ไทม์ไลน์สถานะการแข่งใต้ช่อง filter ในหน้า Match — แก้ได้ทุกขั้น (ชื่อทัวร์/tier/วันที่/สถานที่/เงินรางวัล/สถานะ/โน้ต)"
-      >
-        <RoadmapEditor value={roadmap} onChange={patchRoadmap} />
-      </Section>
-
-      <Section
-        title="MLBB Esport System (หน้า Match)"
-        hint="Popup ให้ความรู้เรื่องโครงสร้างการแข่งขัน MLBB ทั้งปี สำหรับแฟนคลับและสปอนเซอร์"
-      >
-        <MlbbEsportSystemEditor value={mlbbEsportSystem} onChange={patchMlbbEsportSystem} />
       </Section>
 
       <Section

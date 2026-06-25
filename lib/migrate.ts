@@ -14,8 +14,6 @@ import type {
   Bilingual,
 } from "./types";
 import type { AboutUsContent } from "./about";
-import type { RoadmapContent } from "./roadmap";
-import type { MlbbEsportSystemContent } from "./mlbbEsportSystem";
 
 /**
  * One-time (re-runnable) migration of the current Vercel-Blob content into the
@@ -153,8 +151,6 @@ export interface SiteShape {
   mediaKitUrl?: string;
   upcomingMatch?: UpcomingMatch;
   aboutUs?: AboutUsContent;
-  roadmap?: RoadmapContent;
-  mlbbEsportSystem?: MlbbEsportSystemContent;
 }
 
 export interface MigrateResult {
@@ -248,11 +244,7 @@ export async function migrateAll(): Promise<MigrateResult> {
       formspree_endpoint: s(site.formspreeEndpoint),
       media_kit_url: s(site.mediaKitUrl),
       about_us: site.aboutUs ?? null,
-      roadmap: site.roadmap ?? null,
     };
-    if (site.mlbbEsportSystem !== undefined) {
-      siteSettingsRow.mlbb_esport_system = site.mlbbEsportSystem;
-    }
     const { error: siteErr } = await db.from("site_settings").upsert(siteSettingsRow);
     if (siteErr) throw new Error(`site_settings: ${siteErr.message}`);
 

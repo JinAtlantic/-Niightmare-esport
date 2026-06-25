@@ -198,10 +198,6 @@ alter table public.matches add column if not exists opponent_abbr text;
 alter table public.upcoming_match add column if not exists opponent_abbr text;
 -- Home "About Us" band copy (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists about_us jsonb;
--- Matches-page "Esports Roadmap" (admin-editable), stored as one JSON blob.
-alter table public.site_settings add column if not exists roadmap jsonb;
--- Matches-page "MLBB Esport System" explainer popup (admin-editable).
-alter table public.site_settings add column if not exists mlbb_esport_system jsonb;
 drop policy if exists "members are publicly readable" on public.members;
 
 -- ============================================================================
