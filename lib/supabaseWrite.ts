@@ -94,7 +94,7 @@ export async function writeSectionToSupabase(
         if (error) throw new Error(`upcoming_match: ${error.message}`);
       }
       const c = site.contact ?? {};
-      const { error } = await db.from("site_settings").upsert({
+      const siteSettingsRow: Record<string, unknown> = {
         id: 1,
         team_name: s(site.team?.name),
         team_full_name: s(site.team?.fullName),
@@ -111,7 +111,11 @@ export async function writeSectionToSupabase(
         media_kit_url: s(site.mediaKitUrl),
         about_us: site.aboutUs ?? null,
         roadmap: site.roadmap ?? null,
-      });
+      };
+      if (site.mlbbEsportSystem !== undefined) {
+        siteSettingsRow.mlbb_esport_system = site.mlbbEsportSystem;
+      }
+      const { error } = await db.from("site_settings").upsert(siteSettingsRow);
       if (error) throw new Error(`site_settings: ${error.message}`);
     }
     try {

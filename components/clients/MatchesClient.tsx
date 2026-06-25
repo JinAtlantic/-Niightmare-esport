@@ -2,16 +2,21 @@
 
 import React, { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { Route, ChevronRight } from "lucide-react";
+import { BookOpen, Route, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
 import RoadmapModal from "@/components/sections/RoadmapModal";
+import MlbbEsportSystemModal from "@/components/sections/MlbbEsportSystemModal";
 import { PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { tournamentTier, type Tier } from "@/lib/tiers";
+import {
+  resolveMlbbEsportSystem,
+  type MlbbEsportSystemContent,
+} from "@/lib/mlbbEsportSystem";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/types";
@@ -624,7 +629,8 @@ const filterLabelClass =
 
 export default function MatchesClient() {
   const { pick } = useLanguage();
-  const data = useContent().matches as {
+  const content = useContent();
+  const data = content.matches as {
     page?: Partial<MatchesPageCopy>;
     matches: Match[];
     tournaments: Tournament[];
@@ -632,7 +638,11 @@ export default function MatchesClient() {
   const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [roadmapOpen, setRoadmapOpen] = useState(false);
+  const [mlbbSystemOpen, setMlbbSystemOpen] = useState(false);
   const page = mergePageCopy(data.page);
+  const mlbbSystem = resolveMlbbEsportSystem(
+    (content.site as { mlbbEsportSystem?: Partial<MlbbEsportSystemContent> }).mlbbEsportSystem
+  );
   const [selectedGame, setSelectedGame] = useState<GameId>(page.defaultGame);
 
   const tournamentYearByKey = useMemo(() => {
@@ -756,6 +766,25 @@ export default function MatchesClient() {
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
         <Reveal>
           <div className="border border-edge bg-crypt/35 p-4 shadow-glow-soft md:p-6">
+            <button
+              type="button"
+              onClick={() => setMlbbSystemOpen(true)}
+              className="group mb-5 flex w-full items-center gap-4 border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-4 py-4 text-left transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:px-5"
+            >
+              <span className="grid h-11 w-11 shrink-0 place-items-center border border-amethyst/50 bg-void/70 text-glow transition-colors group-hover:border-amethyst">
+                <BookOpen size={20} strokeWidth={2} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-lg font-extrabold uppercase tracking-tight text-soul md:text-xl">
+                  {pick(mlbbSystem.buttonLabel)}
+                </span>
+                <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre/80">
+                  {pick({ en: "How Laos reaches MCC, MSC, and M-Series", lo: "ເສັ້ນທາງຈາກລາວ ສູ່ MCC, MSC ແລະ M-Series" })}
+                </span>
+              </span>
+              <ChevronRight size={20} className="shrink-0 text-amethyst transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+
             <div>
               <StatsStrip {...stats} page={page} />
             </div>
@@ -891,6 +920,12 @@ export default function MatchesClient() {
         </Reveal>
 
         <AnimatePresence>
+          {mlbbSystemOpen && (
+            <MlbbEsportSystemModal
+              key="mlbb-esport-system-modal"
+              onClose={() => setMlbbSystemOpen(false)}
+            />
+          )}
           {roadmapOpen && <RoadmapModal key="roadmap-modal" onClose={() => setRoadmapOpen(false)} />}
         </AnimatePresence>
 
