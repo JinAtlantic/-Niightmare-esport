@@ -643,6 +643,7 @@ export default function MatchesClient() {
   // Default to "All Years" so the full history is visible on open. The Reveal
   // stagger below is capped so the long list still appears quickly.
   const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedTournament, setSelectedTournament] = useState<string>("all");
   const activeYear = selectedYear || "all";
 
   const gameYearMatches = useMemo(() => {
@@ -652,6 +653,23 @@ export default function MatchesClient() {
       return year === activeYear;
     });
   }, [gameMatches, activeYear, tournamentYearByKey]);
+
+  // Tournaments available for the current game + year (most recent first) — the
+  // options for the Tournament filter. Reflects game/year so the list stays
+  // relevant; the result filter doesn't narrow it.
+  const tournamentOptions = useMemo(() => {
+    const name = new Map<string, Bilingual>();
+    const latest = new Map<string, string>();
+    for (const m of gameYearMatches) {
+      const key = matchTournamentKey(m);
+      if (!name.has(key)) name.set(key, m.tournament);
+      const d = m.date ?? "";
+      if (d > (latest.get(key) ?? "")) latest.set(key, d);
+    }
+    return [...name.entries()]
+      .map(([key, label]) => ({ key, label, latest: latest.get(key) ?? "" }))
+      .sort((a, b) => b.latest.localeCompare(a.latest));
+  }, [gameYearMatches]);
 
   const stats = useMemo(() => {
     const count = (r: MatchResult) => gameYearMatches.filter((m) => m.result === r).length;
@@ -678,10 +696,14 @@ export default function MatchesClient() {
     () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder),
     [filtered, data.tournaments, page.unknownTournament, sortOrder]
   );
-  const groupsByGame = useMemo(
-    () => [{ game: selectedGame, groups: tournamentGroups.filter((group) => group.game === selectedGame) }],
-    [selectedGame, tournamentGroups]
-  );
+  const groupsByGame = useMemo(() => {
+    const groups = tournamentGroups.filter(
+      (group) =>
+        group.game === selectedGame &&
+        (selectedTournament === "all" || group.key === selectedTournament)
+    );
+    return [{ game: selectedGame, groups }];
+  }, [selectedGame, selectedTournament, tournamentGroups]);
 
   return (
     <>
@@ -696,8 +718,10 @@ export default function MatchesClient() {
             <div>
               <StatsStrip {...stats} page={page} />
             </div>
-            {/* filters — each with a visible label so the control is obvious */}
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {/* filters — each with a visible label so the control is obvious.
+                Row 1: scope (Game / Year / Result / Sort); Tournament gets its
+                own full-width row so long names stay readable. */}
+            <div className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
               <label className="block">
                 <span className={filterLabelClass}>{pick({ en: "Game", lo: "ເກມ" })}</span>
                 <select
@@ -705,6 +729,7 @@ export default function MatchesClient() {
                   onChange={(event) => {
                     setSelectedGame(event.target.value as GameId);
                     setSelectedYear("");
+                    setSelectedTournament("all");
                     setResultFilter("all");
                   }}
                   className={selectClass}
@@ -712,6 +737,25 @@ export default function MatchesClient() {
                   {GAME_FILTERS.map((id) => (
                     <option key={id} value={id}>
                       {pick(page.filters[id])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className={filterLabelClass}>{pick({ en: "Year", lo: "ປີ" })}</span>
+                <select
+                  value={activeYear}
+                  onChange={(event) => {
+                    setSelectedYear(event.target.value);
+                    setSelectedTournament("all");
+                  }}
+                  className={selectClass}
+                >
+                  <option value="all">{pick(page.allYears)}</option>
+                  {yearOptions.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
                     </option>
                   ))}
                 </select>
@@ -752,6 +796,27 @@ export default function MatchesClient() {
                 </select>
               </label>
             </div>
+
+            {/* Tournament — full width; lists every tournament in the current
+                game + year so you can jump straight to one. */}
+            <label className="mt-3 block">
+              <span className={filterLabelClass}>
+                {pick({ en: "Tournament", lo: "ລາຍການແຂ່ງ" })}
+                <span className="ml-1.5 text-ash-dim">({tournamentOptions.length})</span>
+              </span>
+              <select
+                value={selectedTournament}
+                onChange={(event) => setSelectedTournament(event.target.value)}
+                className={selectClass}
+              >
+                <option value="all">{pick({ en: "All Tournaments", lo: "ທຸກລາຍການ" })}</option>
+                {tournamentOptions.map((t) => (
+                  <option key={t.key} value={t.key}>
+                    {pick(t.label)}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </Reveal>
 
@@ -781,31 +846,10 @@ export default function MatchesClient() {
           {roadmapOpen && <RoadmapModal key="roadmap-modal" onClose={() => setRoadmapOpen(false)} />}
         </AnimatePresence>
 
-        {/* YEAR TABS — one season at a time keeps the list short and scannable */}
-        {yearOptions.length > 0 && (
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-1.5">
-            {["all", ...yearOptions].map((y) => {
-              const active = activeYear === y;
-              return (
-                <button
-                  key={y}
-                  type="button"
-                  onClick={() => setSelectedYear(y)}
-                  aria-pressed={active}
-                  className={`min-w-[44px] border px-4 py-2 text-center font-mono text-xs font-bold uppercase tracking-[0.14em] tabular-nums transition-colors ${
-                    active
-                      ? "border-amethyst bg-amethyst/15 text-glow shadow-[0_0_14px_rgba(168,85,247,0.3)]"
-                      : "border-edge bg-void/40 text-ash hover:border-edge-bright hover:text-soul"
-                  }`}
-                >
-                  {y === "all" ? pick(page.allYears) : y}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        <div key={`${selectedGame}-${activeYear}-${resultFilter}-${sortOrder}`} className="mt-8 grid gap-6">
+        <div
+          key={`${selectedGame}-${activeYear}-${resultFilter}-${sortOrder}-${selectedTournament}`}
+          className="mt-8 grid gap-6"
+        >
           {groupsByGame.some((section) => section.groups.length > 0) ? (
             // No outer Reveal here: it would wrap the whole (very tall) All-Years
             // section, and the IntersectionObserver's 0.15 threshold can never be
