@@ -18,6 +18,14 @@ export type RoadmapStatus =
   | "upcoming" // qualified / waiting — the next stop
   | "locked"; // not reached yet
 
+/** A sub-event within a stop (e.g. Wildcard → Group Stage → Knockout). */
+export interface RoadmapSubStage {
+  label: Bilingual;
+  /** When it runs (kept latin), optional. */
+  window?: string;
+  status: RoadmapStatus;
+}
+
 export interface RoadmapStep {
   /** Real tournament name — the prominent line. */
   tournament: Bilingual;
@@ -33,6 +41,8 @@ export interface RoadmapStep {
   status: RoadmapStatus;
   /** Context line under the cleared/next stop. */
   note?: Bilingual;
+  /** Sub-events to clear before the next stop (Wildcard, Groups, etc.). */
+  subStages?: RoadmapSubStage[];
   /** The pinnacle — gets the apex (crown) treatment. */
   apex?: boolean;
 }
@@ -79,6 +89,10 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
         en: "Season 7 Champions — beat Wonderer Panda 4:1 to seize the MSC wildcard.",
         lo: "ແຊมป์ Season 7 — ຊະນະ Wonderer Panda 4:1 ຄວ້າສິດ wildcard MSC.",
       },
+      subStages: [
+        { label: { en: "Laos Qualifier", lo: "ຮອບຄັດເລືອກ ລາວ" }, window: "May 2026", status: "done" },
+        { label: { en: "Playoffs", lo: "ຮອບ Playoff" }, window: "Jun 2026", status: "done" },
+      ],
     },
     {
       tournament: { en: "MLBB Mid-Season Cup 2026", lo: "MLBB Mid-Season Cup 2026" },
@@ -92,6 +106,11 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
         en: "Qualified as Mekong S7 champions — wildcard opens July 1 in Paris.",
         lo: "ຜ່ານເຂົ້າຮອບໃນຖານະແຊมป์ Mekong S7 — wildcard ເລີ່ມ 1 ກໍລະກົດ ທີ່ປາຣີ.",
       },
+      subStages: [
+        { label: { en: "Wildcard", lo: "ຮອບ Wildcard" }, window: "Jul 1 – 4", status: "upcoming" },
+        { label: { en: "Group Stage", lo: "ຮອບແບ່ງກຸ່ມ" }, window: "Jul 22 – 26", status: "locked" },
+        { label: { en: "Knockout Stage", lo: "ຮອບ Knockout" }, window: "Jul 29 – Aug 1", status: "locked" },
+      ],
     },
     {
       tournament: { en: "M8 World Championship", lo: "M8 ຊິງແຊมป์ໂລກ" },

@@ -71,13 +71,14 @@ const TIER: Record<
   },
 };
 
-/** Per-STATUS language (where the team is) — the status chip + node icon. */
-const STATUS: Record<RoadmapStatus, { label: Bilingual; chip: string; icon: LucideIcon }> = {
-  done: { label: { en: "Cleared", lo: "ຜ່ານແລ້ວ" }, chip: "border-win/50 bg-win/10 text-win", icon: Check },
-  active: { label: { en: "Live Now", lo: "ກຳລັງແຂ່ງ" }, chip: "border-loss/55 bg-loss/10 text-loss", icon: Swords },
-  eliminated: { label: { en: "Eliminated", lo: "ຕົກຮອບ" }, chip: "border-loss/40 bg-void/50 text-loss/80", icon: X },
-  upcoming: { label: { en: "Up Next", lo: "ຮອບຕໍ່ໄປ" }, chip: "border-amethyst/55 bg-amethyst/10 text-glow", icon: ChevronRight },
-  locked: { label: { en: "Locked", lo: "ຍັງບໍ່ເຖິງ" }, chip: "border-edge bg-void/50 text-ash-dim", icon: Lock },
+/** Per-STATUS language (where the team is) — the status chip + node icon + a
+ *  small dot used in the sub-stage list. */
+const STATUS: Record<RoadmapStatus, { label: Bilingual; chip: string; icon: LucideIcon; dot: string }> = {
+  done: { label: { en: "Cleared", lo: "ຜ່ານແລ້ວ" }, chip: "border-win/50 bg-win/10 text-win", icon: Check, dot: "bg-win" },
+  active: { label: { en: "Live Now", lo: "ກຳລັງແຂ່ງ" }, chip: "border-loss/55 bg-loss/10 text-loss", icon: Swords, dot: "bg-loss" },
+  eliminated: { label: { en: "Eliminated", lo: "ຕົກຮອບ" }, chip: "border-loss/40 bg-void/50 text-loss/80", icon: X, dot: "bg-loss/70" },
+  upcoming: { label: { en: "Up Next", lo: "ຮອບຕໍ່ໄປ" }, chip: "border-amethyst/55 bg-amethyst/10 text-glow", icon: ChevronRight, dot: "bg-amethyst" },
+  locked: { label: { en: "Locked", lo: "ຍັງບໍ່ເຖິງ" }, chip: "border-edge bg-void/50 text-ash-dim", icon: Lock, dot: "bg-edge-bright" },
 };
 
 /** Field labels for the info grid. */
@@ -247,6 +248,34 @@ export default function RoadmapTimeline() {
                     >
                       {pick(step.note)}
                     </p>
+                  )}
+
+                  {/* sub-stages — Wildcard / Groups / Knockout etc. */}
+                  {step.subStages && step.subStages.length > 0 && (
+                    <div className="mt-4 border-t border-edge/70 pt-3.5">
+                      <p className="mb-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-ash-dim">
+                        {pick({ en: "Stages", lo: "ຮອບຍ່ອຍ" })}
+                      </p>
+                      <ul className="space-y-2">
+                        {step.subStages.map((sub, k) => {
+                          const ss = STATUS[sub.status] ?? STATUS.locked;
+                          return (
+                            <li key={k} className="flex items-center gap-2.5">
+                              <span aria-hidden className={`h-2 w-2 shrink-0 rounded-full ${ss.dot}`} />
+                              <span className="keep-latin min-w-0 flex-1 truncate font-display text-[13px] font-bold uppercase tracking-[0.02em] text-soul">
+                                {pick(sub.label)}
+                              </span>
+                              {sub.window && (
+                                <span className="keep-latin shrink-0 font-mono text-[10px] text-ash-dim">{sub.window}</span>
+                              )}
+                              <span className={`shrink-0 border px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.12em] ${ss.chip}`}>
+                                {pick(ss.label)}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   )}
                 </div>
               </div>

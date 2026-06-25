@@ -6,6 +6,7 @@ import type {
   RoadmapContent,
   RoadmapStatus,
   RoadmapStep,
+  RoadmapSubStage,
   RoadmapTier,
 } from "@/lib/roadmap";
 
@@ -56,6 +57,20 @@ export default function RoadmapEditor({
   const addStep = () => onChange({ ...value, steps: [...value.steps, { ...EMPTY_STEP }] });
   const removeStep = (i: number) =>
     onChange({ ...value, steps: value.steps.filter((_, idx) => idx !== i) });
+
+  // sub-stages (Wildcard / Groups / …) within a step
+  const patchSub = (i: number, k: number, p: Partial<RoadmapSubStage>) =>
+    patchStep(i, {
+      subStages: (value.steps[i].subStages ?? []).map((s, idx) => (idx === k ? { ...s, ...p } : s)),
+    });
+  const addSub = (i: number) =>
+    patchStep(i, {
+      subStages: [...(value.steps[i].subStages ?? []), { label: { en: "", lo: "" }, status: "upcoming" }],
+    });
+  const removeSub = (i: number, k: number) => {
+    const next = (value.steps[i].subStages ?? []).filter((_, idx) => idx !== k);
+    patchStep(i, { subStages: next.length ? next : undefined });
+  };
   const moveStep = (i: number, dir: -1 | 1) => {
     const j = i + dir;
     if (j < 0 || j >= value.steps.length) return;
@@ -118,6 +133,39 @@ export default function RoadmapEditor({
             />
             ขั้นสูงสุด — แสดงมงกุฎทอง (Apex)
           </label>
+
+          {/* sub-stages */}
+          <div className="border-t border-edge pt-3">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="font-mono text-[11px] font-bold uppercase tracking-wide text-spectre">
+                งานย่อย (เช่น Wildcard, Group, Knockout)
+              </h4>
+              <Button onClick={() => addSub(i)}>+ เพิ่ม</Button>
+            </div>
+            {(step.subStages ?? []).map((sub, k) => (
+              <div key={k} className="mt-2 space-y-2 border border-edge bg-void/40 p-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] text-ash">งานย่อย {k + 1}</span>
+                  <Button variant="danger" onClick={() => removeSub(i, k)}>ลบ</Button>
+                </div>
+                <BilingualField label="ชื่องานย่อย" value={sub.label} onChange={(label) => patchSub(i, k, { label })} />
+                <div className="grid gap-2 md:grid-cols-2">
+                  <TextField
+                    label="ช่วงเวลา (เว้นว่างได้)"
+                    value={sub.window ?? ""}
+                    onChange={(v) => patchSub(i, k, { window: v.trim() ? v : undefined })}
+                    placeholder="Jul 1 – 4"
+                  />
+                  <SelectField
+                    label="สถานะ"
+                    value={sub.status}
+                    onChange={(v) => patchSub(i, k, { status: v as RoadmapStatus })}
+                    options={STATUS_OPTS}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       ))}
 
