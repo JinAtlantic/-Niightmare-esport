@@ -675,7 +675,10 @@ export default function MatchesClient() {
   // Tournaments available for the current game + year (most recent first) — the
   // options for the Tournament filter. Reflects game/year so the list stays
   // relevant; the result filter doesn't narrow it.
-  const tournamentOptions = useMemo(() => {
+  // Grouped by Liquipedia tier (S → A → B → C, then untiered last). Within a
+  // tier, most recent first. Rendered as <optgroup>s so the dropdown shows
+  // which tier each tournament sits in.
+  const tournamentOptionGroups = useMemo(() => {
     const label = new Map<string, Bilingual>();
     const latest = new Map<string, string>();
     for (const m of gameYearMatches) {
@@ -689,10 +692,24 @@ export default function MatchesClient() {
       const d = m.date ?? "";
       if (d > (latest.get(key) ?? "")) latest.set(key, d);
     }
-    return [...label.entries()]
-      .map(([key, l]) => ({ key, label: l, latest: latest.get(key) ?? "" }))
-      .sort((a, b) => b.latest.localeCompare(a.latest));
+    const opts = [...label.entries()].map(([key, l]) => ({
+      key,
+      label: l,
+      latest: latest.get(key) ?? "",
+      tier: tournamentTier(l.en),
+    }));
+    const order: (Tier | null)[] = ["S", "A", "B", "C", null];
+    return order
+      .map((tier) => ({
+        tier,
+        options: opts
+          .filter((o) => o.tier === tier)
+          .sort((a, b) => b.latest.localeCompare(a.latest)),
+      }))
+      .filter((g) => g.options.length > 0);
   }, [gameYearMatches]);
+
+  const tournamentCount = tournamentOptionGroups.reduce((n, g) => n + g.options.length, 0);
 
   const stats = useMemo(() => {
     const count = (r: MatchResult) => gameYearMatches.filter((m) => m.result === r).length;
@@ -826,7 +843,7 @@ export default function MatchesClient() {
             <label className="mt-3 block">
               <span className={filterLabelClass}>
                 {pick({ en: "Tournament", lo: "ລາຍການແຂ່ງ" })}
-                <span className="ml-1.5 text-ash-dim">({tournamentOptions.length})</span>
+                <span className="ml-1.5 text-ash-dim">({tournamentCount})</span>
               </span>
               <select
                 value={selectedTournament}
@@ -834,10 +851,17 @@ export default function MatchesClient() {
                 className={selectClass}
               >
                 <option value="all">{pick({ en: "All Tournaments", lo: "ທຸກລາຍການ" })}</option>
-                {tournamentOptions.map((t) => (
-                  <option key={t.key} value={t.key}>
-                    {pick(t.label)}
-                  </option>
+                {tournamentOptionGroups.map((g) => (
+                  <optgroup
+                    key={g.tier ?? "other"}
+                    label={g.tier ? `${g.tier}-Tier` : pick({ en: "Other", lo: "ອື່ນໆ" })}
+                  >
+                    {g.options.map((t) => (
+                      <option key={t.key} value={t.key}>
+                        {pick(t.label)}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </label>
