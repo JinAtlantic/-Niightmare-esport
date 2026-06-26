@@ -5,15 +5,13 @@ import { Button } from "@/components/admin/ui";
 import AchievementsEditor from "@/components/admin/AchievementsEditor";
 import HomeEditor from "@/components/admin/HomeEditor";
 import MatchesEditor from "@/components/admin/MatchesEditor";
-import NewsEditor from "@/components/admin/NewsEditor";
 import RosterEditor from "@/components/admin/RosterEditor";
 import SponsorsEditor from "@/components/admin/SponsorsEditor";
 
-type Tab = "home" | "news" | "matches" | "achievements" | "roster" | "sponsors";
+type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Home" },
-  { id: "news", label: "News" },
   { id: "matches", label: "Matches" },
   { id: "achievements", label: "Achievements" },
   { id: "roster", label: "Roster" },
@@ -81,7 +79,6 @@ export default function AdminApp() {
 
       <main className="mx-auto max-w-5xl px-4 py-8 md:px-6">
         {tab === "home" && <HomeEditor />}
-        {tab === "news" && <NewsEditor />}
         {tab === "matches" && <MatchesEditor />}
         {tab === "achievements" && <AchievementsEditor />}
         {tab === "roster" && <RosterEditor />}
