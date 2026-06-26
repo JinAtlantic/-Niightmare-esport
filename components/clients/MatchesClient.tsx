@@ -89,6 +89,27 @@ const TIER_TAG: Record<Tier, string> = {
   S: "text-gold",
 };
 
+const TIER_BORDER: Record<Tier, string> = {
+  C: "border-win/55",
+  B: "border-cyan-300/55",
+  A: "border-amethyst/60",
+  S: "border-gold/65",
+};
+
+const TIER_BORDER_SOFT: Record<Tier, string> = {
+  C: "border-win/35",
+  B: "border-cyan-300/35",
+  A: "border-amethyst/40",
+  S: "border-gold/45",
+};
+
+const TIER_SHADOW: Record<Tier, string> = {
+  C: "shadow-[0_0_26px_rgba(52,211,153,0.16)]",
+  B: "shadow-[0_0_26px_rgba(103,232,249,0.16)]",
+  A: "shadow-[0_0_28px_rgba(168,85,247,0.2)]",
+  S: "shadow-[0_0_30px_rgba(245,196,81,0.18)]",
+};
+
 const MATCH_LOGO_SIZE = 64;
 const MOBILE_MATCH_LOGO_SIZE = 72;
 const GAME_LABEL: Record<GameId, string> = {
@@ -322,10 +343,12 @@ function MatchCard({
   const tournamentName = pick(match.tournament).trim() || pick(page.unknownTournament);
   const opponentName = match.opponent.trim() || pick(page.unknownOpponent);
   // Blade colour by the tournament's tier (violet when it isn't a main family).
-  const blade = TIER_BLADE[tournamentTier(match.tournament.en || match.tournament.lo) ?? "default"];
+  const tier = tournamentTier(match.tournament.en || match.tournament.lo);
+  const blade = TIER_BLADE[tier ?? "default"];
+  const border = tier ? `${TIER_BORDER_SOFT[tier]} ${TIER_SHADOW[tier]}` : "border-edge";
 
   return (
-    <article className="hover-glow group relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))] p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7">
+    <article className={`hover-glow group relative overflow-hidden border bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))] p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7 ${border}`}>
       {/* left accent blade — colored by the tournament's tier */}
       <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${blade}`} />
       <span
@@ -438,6 +461,8 @@ function TournamentRecordGroup({
   const tournament = group.tournament;
   const matchCount = group.matches.length;
   const tier = tournamentTier(group.name.en || group.name.lo);
+  const border = tier ? `${TIER_BORDER[tier]} ${TIER_SHADOW[tier]}` : "border-edge shadow-[0_0_28px_rgba(168,85,247,0.1)]";
+  const softBorder = tier ? TIER_BORDER_SOFT[tier] : "border-edge";
   const wins = group.matches.filter((match) => match.result === "win").length;
   const losses = group.matches.filter((match) => match.result === "loss").length;
   const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
@@ -445,9 +470,9 @@ function TournamentRecordGroup({
   return (
     <section
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 320px" }}
-      className="clip-esports max-w-full overflow-hidden border border-edge bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void shadow-[0_0_28px_rgba(168,85,247,0.1)]"
+      className={`clip-esports max-w-full overflow-hidden border bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void ${border}`}
     >
-      <div className="group relative overflow-hidden border-b border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-3 py-4 transition-colors hover:bg-amethyst/[0.04] sm:px-4 md:px-6 md:py-5">
+      <div className={`group relative overflow-hidden border-b bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-3 py-4 transition-colors hover:bg-amethyst/[0.04] sm:px-4 md:px-6 md:py-5 ${softBorder}`}>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
@@ -490,12 +515,12 @@ function TournamentRecordGroup({
             <h2 className="mt-3 max-w-full break-words font-display text-xl font-bold uppercase leading-tight tracking-[0.03em] text-soul [text-shadow:0_0_28px_rgba(199,125,255,0.22)] md:text-3xl">
               {pick(group.name)}
             </h2>
-            <div className="mt-3 grid max-w-md grid-cols-3 border border-edge bg-void/35">
-              <div className="border-r border-edge px-2 py-1.5 md:px-3 md:py-2">
+            <div className={`mt-3 grid max-w-md grid-cols-3 border bg-void/35 ${softBorder}`}>
+              <div className={`border-r px-2 py-1.5 md:px-3 md:py-2 ${softBorder}`}>
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.wins)}</p>
                 <p className="mt-0.5 font-display text-base font-bold text-win md:text-lg">{wins}</p>
               </div>
-              <div className="border-r border-edge px-2 py-1.5 md:px-3 md:py-2">
+              <div className={`border-r px-2 py-1.5 md:px-3 md:py-2 ${softBorder}`}>
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.losses)}</p>
                 <p className="mt-0.5 font-display text-base font-bold text-loss md:text-lg">{losses}</p>
               </div>
@@ -510,7 +535,7 @@ function TournamentRecordGroup({
 
           {tournament && (
             <div className="grid min-w-0 gap-2 sm:grid-cols-2 lg:min-w-[360px]">
-              <div className="border border-edge bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5">
+              <div className={`border bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5 ${softBorder}`}>
                 <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ash-dim">
                   {pick(page.tournamentLabels.placement)}
                 </p>
@@ -519,7 +544,7 @@ function TournamentRecordGroup({
                 </p>
               </div>
               {tournament.prize && tournament.prize.trim() && (
-                <div className="border border-edge bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5">
+                <div className={`border bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5 ${softBorder}`}>
                   <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ash-dim">
                     {pick(page.tournamentLabels.prize)}
                   </p>

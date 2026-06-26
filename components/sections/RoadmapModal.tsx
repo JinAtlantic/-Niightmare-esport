@@ -14,6 +14,7 @@ import {
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { resolveRoadmap, type RoadmapContent, type RoadmapHalfId, type RoadmapStage } from "@/lib/roadmap";
+import type { Tier } from "@/lib/tiers";
 import type { Lang } from "@/lib/types";
 
 const statusClass = {
@@ -36,6 +37,32 @@ const statusClass = {
     label: "text-ash-dim",
   },
 } as const;
+
+const TIER_BORDER: Record<Tier, string> = {
+  C: "border-win/55 border-l-win",
+  B: "border-cyan-300/55 border-l-cyan-300",
+  A: "border-amethyst/65 border-l-amethyst",
+  S: "border-gold/70 border-l-gold",
+};
+
+const TIER_GLOW: Record<Tier, string> = {
+  C: "shadow-[0_0_22px_rgba(52,211,153,0.14)]",
+  B: "shadow-[0_0_22px_rgba(103,232,249,0.15)]",
+  A: "shadow-[0_0_26px_rgba(168,85,247,0.2)]",
+  S: "shadow-[0_0_26px_rgba(245,196,81,0.18)]",
+};
+
+const TIER_TEXT: Record<Tier, string> = {
+  C: "text-win",
+  B: "text-cyan-300",
+  A: "text-glow",
+  S: "text-gold",
+};
+
+function tagTier(tag: string): Tier | null {
+  const value = tag.match(/\b([CBAS])-Tier\b/i)?.[1]?.toUpperCase();
+  return value === "C" || value === "B" || value === "A" || value === "S" ? value : null;
+}
 
 function LangButton({ value, active, onClick }: { value: Lang; active: boolean; onClick: () => void }) {
   return (
@@ -65,9 +92,12 @@ function StageCard({
   const style = statusClass[status];
   const Icon = style.icon;
   const tagLabel = stage.tag.replace(/\s*\/\s*/g, " ").replace(/\s+/g, " ").trim();
+  const tier = tagTier(stage.tag);
+  const tierBorder = tier ? `${TIER_BORDER[tier]} ${TIER_GLOW[tier]}` : "border-edge border-l-amethyst";
+  const tierText = tier ? TIER_TEXT[tier] : "text-spectre";
 
   return (
-    <article className={`relative overflow-hidden border border-l-4 border-l-amethyst p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card}`}>
+    <article className={`relative overflow-hidden border border-l-4 p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card} ${tierBorder}`}>
       <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 h-32 w-32 bg-amethyst/10 blur-3xl" />
       <div className="flex items-start gap-2 md:gap-3">
         <div className="relative shrink-0">
@@ -83,7 +113,7 @@ function StageCard({
             <span className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${style.label}`}>
               {status === "active" ? activeLabel : status === "past" ? "CLEARED" : "LOCKED"}
             </span>
-            <span className="keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-spectre md:text-[9px]">
+            <span className={`keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${tierText}`}>
               {tagLabel}
             </span>
           </div>
