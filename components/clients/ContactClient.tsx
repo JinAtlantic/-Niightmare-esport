@@ -8,6 +8,7 @@ import {
   DiscordIcon,
   FacebookIcon,
   InstagramIcon,
+  LiquipediaIcon,
   MailIcon,
   TiktokIcon,
   YoutubeIcon,
@@ -17,8 +18,8 @@ import siteSeed from "@/data/site.json";
 import type { Bilingual } from "@/lib/types";
 
 type Status = "idle" | "submitting" | "success" | "error";
-type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord";
-type FieldKey = "name" | "email" | "company" | "type" | "message";
+type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord" | "liquipedia";
+type FieldKey = "name" | "email" | "company" | "type" | "message" | "attachments";
 type TypeKey = "sponsorship" | "media" | "general" | "tryout";
 
 interface ContactPageCopy {
@@ -46,14 +47,29 @@ const pageSeed = siteSeed.contactPage as ContactPageCopy;
 
 const inputClass =
   "min-h-[48px] w-full border border-edge bg-void/70 px-4 py-3 text-base text-soul placeholder:text-ash/70 outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-glow-soft";
+const LIQUIPEDIA_URL = "https://liquipedia.net/mobilelegends/Niightmare_Esports";
+
+const fileInputClass =
+  "w-full border border-edge bg-void/70 px-4 py-3 text-sm text-ash outline-none transition-colors file:mr-4 file:border-0 file:bg-amethyst file:px-4 file:py-2 file:font-display file:text-xs file:font-semibold file:uppercase file:tracking-[0.12em] file:text-white hover:border-edge-bright focus:border-amethyst focus:shadow-glow-soft";
+
+function isOldMediaKitCopy(value?: Bilingual) {
+  const en = value?.en?.toLowerCase() ?? "";
+  return en.includes("media kit") || en.includes("download media") || en.includes("logos, brand usage");
+}
 
 function mergeContactPage(page?: Partial<ContactPageCopy>): ContactPageCopy {
-  return {
+  const merged = {
     ...pageSeed,
     ...page,
     fieldLabels: { ...pageSeed.fieldLabels, ...(page?.fieldLabels ?? {}) },
     typeLabels: { ...pageSeed.typeLabels, ...(page?.typeLabels ?? {}) },
     channelLabels: { ...pageSeed.channelLabels, ...(page?.channelLabels ?? {}) },
+  };
+  return {
+    ...merged,
+    mediaKitLabel: isOldMediaKitCopy(merged.mediaKitLabel) ? pageSeed.mediaKitLabel : merged.mediaKitLabel,
+    mediaKitDesc: isOldMediaKitCopy(merged.mediaKitDesc) ? pageSeed.mediaKitDesc : merged.mediaKitDesc,
+    mediaKitButton: isOldMediaKitCopy(merged.mediaKitButton) ? pageSeed.mediaKitButton : merged.mediaKitButton,
   };
 }
 
@@ -107,6 +123,13 @@ export default function ContactClient() {
       Icon: DiscordIcon,
       external: true,
     },
+    {
+      key: "liquipedia" as const,
+      value: LIQUIPEDIA_URL,
+      href: LIQUIPEDIA_URL,
+      Icon: LiquipediaIcon,
+      external: true,
+    },
   ].filter((row) => row.href);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -132,52 +155,24 @@ export default function ContactClient() {
 
   return (
     <>
-      <PageHeader kicker={pick(page.kicker)} title={pick(page.title)} subtitle={pick(page.intro)} />
+      <PageHeader title={pick(page.title)} subtitle={pick(page.intro)} />
 
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
-        <div className="relative mb-10 overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.16),transparent_34%),linear-gradient(135deg,rgba(28,20,40,0.74),rgba(11,7,16,0.94))] p-4 shadow-glow-soft md:p-6">
+        <div className="relative mb-10 overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.14),transparent_34%),linear-gradient(135deg,rgba(28,20,40,0.7),rgba(11,7,16,0.94))] p-4 shadow-glow-soft md:p-6">
           <span
             aria-hidden
             className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-glow/70 to-transparent"
           />
           <span aria-hidden className="absolute -right-24 -top-24 h-56 w-56 bg-amethyst/10 blur-3xl" />
-          <div className="relative grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
-            <div className="flex min-h-[230px] flex-col justify-between border border-edge bg-void/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6">
-              <div>
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.34em] text-amethyst">
-                  {pick(page.deskLabel)}
-                </p>
-                <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-spectre md:text-lg">
-                  {pick(page.deskIntro)}
-                </p>
-              </div>
-              <div className="mt-8 grid grid-cols-2 border border-edge bg-crypt/45">
-                <div className="border-r border-edge px-4 py-3">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
-                    {pick(page.formLabel)}
-                  </p>
-                  <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">
-                    {pick(page.typeLabels.sponsorship)}
-                  </p>
-                </div>
-                <div className="px-4 py-3">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
-                    {pick(page.mediaKitLabel)}
-                  </p>
-                  <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-glow">
-                    {pick(page.mediaKitButton)}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+          <div className="relative">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {contactRows.map(({ key, value, href, Icon, external }) => (
                 <a
                   key={key}
                   href={href}
                   target={external ? "_blank" : undefined}
                   rel={external ? "noopener noreferrer" : undefined}
-                  className="hover-glow group relative min-h-[152px] overflow-hidden border border-edge bg-void/60 p-4 text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
+                  className="hover-glow group relative min-h-[132px] overflow-hidden border border-edge bg-void/60 p-4 text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
                 >
                   <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
                   <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/20 bg-amethyst/5 transition-transform duration-300 group-hover:scale-110" />
@@ -234,9 +229,7 @@ export default function ContactClient() {
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.mediaKitDesc)}</p>
               <a
-                href={site.mediaKitUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#contact-form"
                 className="hover-glow mt-4 inline-flex min-h-[44px] items-center gap-2 border border-amethyst px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-soul hover:bg-amethyst/15"
               >
                 {pick(page.mediaKitButton)}
@@ -245,18 +238,15 @@ export default function ContactClient() {
             </div>
           </div>
 
-          <div className="border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.74),rgba(11,7,16,0.92))] p-5 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-6">
+          <div id="contact-form" className="scroll-mt-24 border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.74),rgba(11,7,16,0.92))] p-5 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-6">
             <div className="border-b border-edge pb-5">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-amethyst">
-                {pick(page.deskLabel)}
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-soul">
+              <h2 className="font-display text-2xl font-semibold uppercase tracking-[0.08em] text-soul">
                 {pick(page.formLabel)}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.formIntro)}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <form onSubmit={handleSubmit} encType="multipart/form-data" className="mt-6 flex flex-col gap-4">
               <div>
                 <label htmlFor="name" className="mb-1.5 block text-sm text-ash">
                   {pick(page.fieldLabels.name)}
@@ -298,6 +288,16 @@ export default function ContactClient() {
                   {pick(page.fieldLabels.message)}
                 </label>
                 <textarea id="message" name="message" rows={5} required className={`${inputClass} resize-y`} />
+              </div>
+
+              <div>
+                <label htmlFor="attachments" className="mb-1.5 block text-sm text-ash">
+                  {pick(page.fieldLabels.attachments)}
+                </label>
+                <input id="attachments" name="attachments" type="file" multiple className={fileInputClass} />
+                <p className="mt-2 text-xs leading-relaxed text-ash-dim">
+                  {pick(page.mediaKitDesc)}
+                </p>
               </div>
 
               <button

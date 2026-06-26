@@ -33,7 +33,7 @@ export const getSiteContent = unstable_cache(
     // refresh works because the cache is warm. The seed is in-bundle JSON, so
     // this path is instant and the page always renders.
     (await withTimeout(contentFromSupabase(), SUPABASE_TIMEOUT_MS)) ?? bundled(),
-  ["site-content"],
+  ["site-content-v2"],
   // 10-min backstop. Admin saves call revalidateTag("content") so edits still
   // appear immediately; a longer TTL just cuts background rebuilds (and the Blob
   // `list` each one runs) to keep Blob advanced operations well under quota.

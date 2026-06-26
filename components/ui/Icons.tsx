@@ -84,6 +84,16 @@ export function MailIcon(props: IconProps) {
   );
 }
 
+export function LiquipediaIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 5.5h5.2c1.7 0 2.8 1 2.8 2.6s-1.1 2.7-2.8 2.7H7.8v5.7H5V5.5z" />
+      <path d="M15.2 5.5H18v11h-2.8z" />
+      <path d="M14 16.5h5" />
+    </svg>
+  );
+}
+
 export function MenuIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

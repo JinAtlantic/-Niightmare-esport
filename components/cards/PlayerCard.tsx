@@ -103,14 +103,14 @@ export default function PlayerCard({ player }: { player: Player }) {
 
           {flagUrl && (
             <span
-              className="pointer-events-none absolute right-3 top-3 z-10 grid h-8 w-11 place-items-center overflow-hidden border border-edge-bright bg-void/75 p-1 shadow-[0_0_12px_rgba(168,85,247,0.28)] backdrop-blur-sm"
+              className="pointer-events-none absolute right-2.5 top-2.5 z-10 block h-5 w-7 overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.55)]"
               aria-label={`${flagCode.toUpperCase()} flag`}
             >
               <Image
                 src={flagUrl}
                 alt=""
-                width={40}
-                height={28}
+                width={28}
+                height={20}
                 unoptimized
                 loading="lazy"
                 className="h-full w-full object-cover"

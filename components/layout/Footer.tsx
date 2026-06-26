@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { DiscordIcon, FacebookIcon, InstagramIcon, MailIcon, YoutubeIcon } from "@/components/ui/Icons";
+import { DiscordIcon, FacebookIcon, InstagramIcon, LiquipediaIcon, MailIcon, YoutubeIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
 
 const NAV_ITEMS = [
@@ -13,6 +13,8 @@ const NAV_ITEMS = [
   { href: "/sponsors", key: "nav.sponsors" },
   { href: "/contact", key: "nav.contact" },
 ];
+
+const LIQUIPEDIA_URL = "https://liquipedia.net/mobilelegends/Niightmare_Esports";
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -27,6 +29,7 @@ export default function Footer() {
     { href: c.instagram, label: "Instagram", Icon: InstagramIcon },
     { href: c.youtube, label: "YouTube", Icon: YoutubeIcon },
     { href: c.discord, label: "Discord", Icon: DiscordIcon },
+    { href: LIQUIPEDIA_URL, label: "Liquipedia", Icon: LiquipediaIcon },
   ].filter((s): s is { href: string; label: string; Icon: typeof MailIcon } => !!s.href);
 
   return (

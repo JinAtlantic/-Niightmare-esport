@@ -39,8 +39,8 @@ interface Contact {
   [key: string]: string | undefined;
 }
 
-type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord";
-type ContactFieldKey = "name" | "email" | "company" | "type" | "message";
+type ContactKey = "email" | "facebook" | "instagram" | "youtube" | "tiktok" | "discord" | "liquipedia";
+type ContactFieldKey = "name" | "email" | "company" | "type" | "message" | "attachments";
 type ContactTypeKey = "sponsorship" | "media" | "general" | "tryout";
 
 interface ContactPageCopy {
@@ -75,24 +75,24 @@ interface SiteFile {
 }
 
 const DEFAULT_CONTACT_PAGE: ContactPageCopy = {
-  kicker: { en: "Business Desk", lo: "ຝ່າຍຕິດຕໍ່ທຸລະກິດ" },
+  kicker: { en: "Contact", lo: "ຕິດຕໍ່" },
   title: { en: "Contact NIIGHTMARE", lo: "ຕິດຕໍ່ NIIGHTMARE" },
   intro: {
     en: "Open the right conversation for sponsorship, media, recruitment, or community collaborations.",
     lo: "ເລີ່ມຕົ້ນການຕິດຕໍ່ທີ່ຖືກທາງ ສໍາລັບສະປອນເຊີ, ສື່, ການຮັບສະໝັກ ຫຼື ການຮ່ວມມືກັບຊຸມຊົນ.",
   },
-  deskLabel: { en: "Partnership Desk", lo: "ສູນຕິດຕໍ່ພາກສ່ວນ" },
+  deskLabel: { en: "Team Contact", lo: "ຊ່ອງທາງຕິດຕໍ່ທີມ" },
   deskIntro: {
-    en: "For sponsor pricing, media access, events, scrims, and official team enquiries.",
-    lo: "ສໍາລັບລາຄາສະປອນເຊີ, ການເຂົ້າເຖິງສື່, ອີເວັນ, scrim ແລະ ການສອບຖາມຢ່າງເປັນທາງການ.",
+    en: "Send sponsorship, media, event, scrim, recruitment, or official team enquiries.",
+    lo: "ສົ່ງຂໍ້ຄວາມເລື່ອງ sponsor, media, event, scrim, recruitment ຫຼື ການຕິດຕໍ່ທີມແບບທາງການ.",
   },
   infoLabel: { en: "Direct Channels", lo: "ຊ່ອງທາງໂດຍກົງ" },
-  mediaKitLabel: { en: "Media Kit", lo: "ຊຸດສື່" },
+  mediaKitLabel: { en: "Send Files to NIIGHTMARE", lo: "ສົ່ງໄຟລ໌ໃຫ້ NIIGHTMARE" },
   mediaKitDesc: {
-    en: "Logos, brand usage, player profiles, and partner-ready club assets.",
-    lo: "ໂລໂກ້, ຄູ່ມືການໃຊ້ແບຣນ, ໂປຣໄຟລ໌ນັກກິລາ ແລະ ຊຸດຂໍ້ມູນສໍາລັບພາກສ່ວນ.",
+    en: "Attach documents, images, videos, proposals, or any files NIIGHTMARE should review.",
+    lo: "ແນບເອກະສານ, ຮູບ, ວິດີໂອ, proposal ຫຼື ໄຟລ໌ໃດໆ ທີ່ຕ້ອງການໃຫ້ NIIGHTMARE ກວດເບິ່ງ.",
   },
-  mediaKitButton: { en: "Download Media Kit", lo: "ດາວໂຫຼດຊຸດສື່" },
+  mediaKitButton: { en: "Attach / Send Files", lo: "ແນບ / ສົ່ງໄຟລ໌" },
   formLabel: { en: "Start the Conversation", lo: "ເລີ່ມການຕິດຕໍ່" },
   formIntro: {
     en: "Send the team your brief. We will route it to the right person.",
@@ -104,6 +104,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageCopy = {
     company: { en: "Company / Organization", lo: "ບໍລິສັດ / ອົງກອນ" },
     type: { en: "Enquiry Type", lo: "ປະເພດການຕິດຕໍ່" },
     message: { en: "Message", lo: "ຂໍ້ຄວາມ" },
+    attachments: { en: "Attachments", lo: "ໄຟລ໌ແນບ" },
   },
   typeLabels: {
     sponsorship: { en: "Sponsorship", lo: "ສະປອນເຊີ" },
@@ -118,12 +119,41 @@ const DEFAULT_CONTACT_PAGE: ContactPageCopy = {
     youtube: { en: "YouTube", lo: "YouTube" },
     tiktok: { en: "TikTok", lo: "TikTok" },
     discord: { en: "Discord", lo: "Discord" },
+    liquipedia: { en: "Liquipedia", lo: "Liquipedia" },
   },
   submit: { en: "Send Message", lo: "ສົ່ງຂໍ້ຄວາມ" },
   submitting: { en: "Sending...", lo: "ກໍາລັງສົ່ງ..." },
   success: { en: "Message sent. We will get back to you soon.", lo: "ສົ່ງຂໍ້ຄວາມແລ້ວ. ພວກເຮົາຈະຕອບກັບໄວໆນີ້." },
   error: { en: "Something went wrong. Please email us directly at", lo: "ມີບາງຢ່າງຜິດພາດ. ກະລຸນາສົ່ງອີເມວໂດຍກົງຫາ" },
 };
+
+function isOldMediaKitCopy(value?: Bilingual) {
+  const en = value?.en?.toLowerCase() ?? "";
+  return en.includes("media kit") || en.includes("download media") || en.includes("logos, brand usage");
+}
+
+function normalizeContactPage(rawContactPage?: Partial<ContactPageCopy>): ContactPageCopy {
+  const merged: ContactPageCopy = {
+    ...DEFAULT_CONTACT_PAGE,
+    ...(rawContactPage ?? {}),
+    fieldLabels: { ...DEFAULT_CONTACT_PAGE.fieldLabels, ...(rawContactPage?.fieldLabels ?? {}) },
+    typeLabels: { ...DEFAULT_CONTACT_PAGE.typeLabels, ...(rawContactPage?.typeLabels ?? {}) },
+    channelLabels: { ...DEFAULT_CONTACT_PAGE.channelLabels, ...(rawContactPage?.channelLabels ?? {}) },
+  };
+
+  return {
+    ...merged,
+    mediaKitLabel: isOldMediaKitCopy(merged.mediaKitLabel)
+      ? DEFAULT_CONTACT_PAGE.mediaKitLabel
+      : merged.mediaKitLabel,
+    mediaKitDesc: isOldMediaKitCopy(merged.mediaKitDesc)
+      ? DEFAULT_CONTACT_PAGE.mediaKitDesc
+      : merged.mediaKitDesc,
+    mediaKitButton: isOldMediaKitCopy(merged.mediaKitButton)
+      ? DEFAULT_CONTACT_PAGE.mediaKitButton
+      : merged.mediaKitButton,
+  };
+}
 
 /** The footer/contact channels, in footer order, each with its icon + hint. */
 const CONTACT_FIELDS: {
@@ -209,13 +239,7 @@ export default function HomeEditor() {
     setData({ ...data, contact: next });
   };
   const rawContactPage = data.contactPage;
-  const contactPage: ContactPageCopy = {
-    ...DEFAULT_CONTACT_PAGE,
-    ...(rawContactPage ?? {}),
-    fieldLabels: { ...DEFAULT_CONTACT_PAGE.fieldLabels, ...(rawContactPage?.fieldLabels ?? {}) },
-    typeLabels: { ...DEFAULT_CONTACT_PAGE.typeLabels, ...(rawContactPage?.typeLabels ?? {}) },
-    channelLabels: { ...DEFAULT_CONTACT_PAGE.channelLabels, ...(rawContactPage?.channelLabels ?? {}) },
-  };
+  const contactPage = normalizeContactPage(rawContactPage);
   const patchContactPage = (p: Partial<ContactPageCopy>) =>
     setData({ ...data, contactPage: { ...contactPage, ...p } });
 
@@ -467,11 +491,6 @@ export default function HomeEditor() {
         <Card>
           <div className="grid gap-3">
             <BilingualField
-              label="Hero kicker"
-              value={contactPage.kicker}
-              onChange={(kicker) => patchContactPage({ kicker })}
-            />
-            <BilingualField
               label="Hero title"
               value={contactPage.title}
               onChange={(title) => patchContactPage({ title })}
@@ -482,32 +501,22 @@ export default function HomeEditor() {
               onChange={(intro) => patchContactPage({ intro })}
             />
             <BilingualField
-              label="Partnership desk label"
-              value={contactPage.deskLabel}
-              onChange={(deskLabel) => patchContactPage({ deskLabel })}
-            />
-            <BilingualTextArea
-              label="Partnership desk intro"
-              value={contactPage.deskIntro}
-              onChange={(deskIntro) => patchContactPage({ deskIntro })}
-            />
-            <BilingualField
               label="Direct channels heading"
               value={contactPage.infoLabel}
               onChange={(infoLabel) => patchContactPage({ infoLabel })}
             />
             <BilingualField
-              label="Media kit heading"
+              label="File submission heading"
               value={contactPage.mediaKitLabel}
               onChange={(mediaKitLabel) => patchContactPage({ mediaKitLabel })}
             />
             <BilingualTextArea
-              label="Media kit description"
+              label="File submission description"
               value={contactPage.mediaKitDesc}
               onChange={(mediaKitDesc) => patchContactPage({ mediaKitDesc })}
             />
             <BilingualField
-              label="Media kit button"
+              label="File submission button"
               value={contactPage.mediaKitButton}
               onChange={(mediaKitButton) => patchContactPage({ mediaKitButton })}
             />
@@ -530,7 +539,7 @@ export default function HomeEditor() {
               Form labels
             </h3>
             <div className="grid gap-3">
-              {(["name", "email", "company", "type", "message"] as ContactFieldKey[]).map((key) => (
+              {(["name", "email", "company", "type", "message", "attachments"] as ContactFieldKey[]).map((key) => (
                 <BilingualField
                   key={key}
                   label={key}
@@ -566,7 +575,7 @@ export default function HomeEditor() {
               Channel labels
             </h3>
             <div className="grid gap-3">
-              {(["email", "facebook", "instagram", "youtube", "tiktok", "discord"] as ContactKey[]).map((key) => (
+              {(["email", "facebook", "instagram", "youtube", "tiktok", "discord", "liquipedia"] as ContactKey[]).map((key) => (
                 <BilingualField
                   key={key}
                   label={key}

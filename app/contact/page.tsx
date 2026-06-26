@@ -4,13 +4,13 @@ import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo";
 
 const contactDescription =
-  "Get in touch with NIIGHTMARE Esports for sponsorships, media, tryouts, or general enquiries. Download our media kit.";
+  "Get in touch with NIIGHTMARE Esports for sponsorships, media, tryouts, general enquiries, or file submissions.";
 
 export const metadata: Metadata = {
-  title: "Contact & Media Kit",
+  title: "Contact & File Submission",
   description: contactDescription,
-  openGraph: { title: "Contact & Media Kit — NIIGHTMARE Esports", description: contactDescription },
-  twitter: { title: "Contact & Media Kit — NIIGHTMARE Esports", description: contactDescription },
+  openGraph: { title: "Contact & File Submission - NIIGHTMARE Esports", description: contactDescription },
+  twitter: { title: "Contact & File Submission - NIIGHTMARE Esports", description: contactDescription },
 };
 
 export default function ContactPage() {

@@ -17,8 +17,8 @@
   },
   "contactPage": {
     "kicker": {
-      "en": "Business Desk",
-      "lo": "ຝ່າຍຕິດຕໍ່ທຸລະກິດ"
+      "en": "Contact",
+      "lo": "ຕິດຕໍ່"
     },
     "title": {
       "en": "Contact NIIGHTMARE",
@@ -29,28 +29,28 @@
       "lo": "ເລີ່ມຕົ້ນການຕິດຕໍ່ທີ່ຖືກທາງ ສໍາລັບສະປອນເຊີ, ສື່, ການຮັບສະໝັກ ຫຼື ການຮ່ວມມືກັບຊຸມຊົນ."
     },
     "deskLabel": {
-      "en": "Partnership Desk",
-      "lo": "ສູນຕິດຕໍ່ພາກສ່ວນ"
+      "en": "Team Contact",
+      "lo": "ຊ່ອງທາງຕິດຕໍ່ທີມ"
     },
     "deskIntro": {
-      "en": "For sponsor pricing, media access, events, scrims, and official team enquiries.",
-      "lo": "ສໍາລັບລາຄາສະປອນເຊີ, ການເຂົ້າເຖິງສື່, ອີເວັນ, scrim ແລະ ການສອບຖາມຢ່າງເປັນທາງການ."
+      "en": "Send sponsorship, media, event, scrim, recruitment, or official team enquiries.",
+      "lo": "ສົ່ງຂໍ້ຄວາມເລື່ອງ sponsor, media, event, scrim, recruitment ຫຼື ການຕິດຕໍ່ທີມແບບທາງການ."
     },
     "infoLabel": {
       "en": "Direct Channels",
       "lo": "ຊ່ອງທາງໂດຍກົງ"
     },
     "mediaKitLabel": {
-      "en": "Media Kit",
-      "lo": "ຊຸດສື່"
+      "en": "Send Files to NIIGHTMARE",
+      "lo": "ສົ່ງໄຟລ໌ໃຫ້ NIIGHTMARE"
     },
     "mediaKitDesc": {
-      "en": "Logos, brand usage, player profiles, and partner-ready club assets.",
-      "lo": "ໂລໂກ້, ຄູ່ມືການໃຊ້ແບຣນ, ໂປຣໄຟລ໌ນັກກິລາ ແລະ ຊຸດຂໍ້ມູນສໍາລັບພາກສ່ວນ."
+      "en": "Attach documents, images, videos, proposals, or any files NIIGHTMARE should review.",
+      "lo": "ແນບເອກະສານ, ຮູບ, ວິດີໂອ, proposal ຫຼື ໄຟລ໌ໃດໆ ທີ່ຕ້ອງການໃຫ້ NIIGHTMARE ກວດເບິ່ງ."
     },
     "mediaKitButton": {
-      "en": "Download Media Kit",
-      "lo": "ດາວໂຫຼດຊຸດສື່"
+      "en": "Attach / Send Files",
+      "lo": "ແນບ / ສົ່ງໄຟລ໌"
     },
     "formLabel": {
       "en": "Start the Conversation",
@@ -80,6 +80,10 @@
       "message": {
         "en": "Message",
         "lo": "ຂໍ້ຄວາມ"
+      },
+      "attachments": {
+        "en": "Attachments",
+        "lo": "ໄຟລ໌ແນບ"
       }
     },
     "typeLabels": {
@@ -124,6 +128,10 @@
       "discord": {
         "en": "Discord",
         "lo": "Discord"
+      },
+      "liquipedia": {
+        "en": "Liquipedia",
+        "lo": "Liquipedia"
       }
     },
     "submit": {
