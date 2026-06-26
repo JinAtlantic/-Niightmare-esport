@@ -38,6 +38,19 @@ async function replaceTable(db: SupabaseClient, table: string, rows: Record<stri
   }
 }
 
+async function hasColumns(db: SupabaseClient, table: string, columns: string): Promise<boolean> {
+  const { error } = await db.from(table).select(columns).limit(1);
+  return !error;
+}
+
+function omitKeys(rows: Record<string, unknown>[], keys: string[]) {
+  return rows.map((row) => {
+    const next = { ...row };
+    for (const key of keys) delete next[key];
+    return next;
+  });
+}
+
 /**
  * Write one content section straight to Supabase — the admin save path once the
  * site reads from Supabase. Each section maps to its table(s); list-backed
@@ -57,11 +70,27 @@ export async function writeSectionToSupabase(
         efootball?: { players?: Player[] };
         staff?: StaffMember[];
       };
-      await replaceTable(db, "players", [
+      const players = [
         ...playerRows(r.mlbb?.players ?? [], "mlbb"),
         ...playerRows(r.efootball?.players ?? [], "efootball"),
-      ]);
-      await replaceTable(db, "members", memberRows(r.staff ?? []));
+      ];
+      const members = memberRows(r.staff ?? []);
+      const playerProfileColumns = ["birth_date", "country_code", "country_en", "country_lo"];
+      const memberProfileColumns = ["country_code", "country_en", "country_lo"];
+      await replaceTable(
+        db,
+        "players",
+        (await hasColumns(db, "players", playerProfileColumns.join(",")))
+          ? players
+          : omitKeys(players, playerProfileColumns)
+      );
+      await replaceTable(
+        db,
+        "members",
+        (await hasColumns(db, "members", memberProfileColumns.join(",")))
+          ? members
+          : omitKeys(members, memberProfileColumns)
+      );
     } else if (key === "matches") {
       const m = value as { matches?: Match[]; tournaments?: Tournament[] };
       await replaceTable(db, "matches", matchRows(m.matches ?? []));

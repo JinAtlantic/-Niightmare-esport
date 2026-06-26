@@ -19,6 +19,9 @@ export interface MemberRow {
   role_lo: string | null;
   bio_en: string | null;
   bio_lo: string | null;
+  country_code: string | null;
+  country_en: string | null;
+  country_lo: string | null;
   email: string | null;
   photo: string | null;
   facebook: string | null;
@@ -52,6 +55,8 @@ export function rowToStaff(row: MemberRow): StaffMember {
     tier: row.tier === 1 || row.tier === 2 || row.tier === 3 ? row.tier : undefined,
     role: { en: row.role_en ?? "", lo: row.role_lo ?? "" },
     bio: row.bio_en || row.bio_lo ? { en: row.bio_en ?? "", lo: row.bio_lo ?? "" } : undefined,
+    countryCode: clean(row.country_code),
+    country: row.country_en || row.country_lo ? { en: row.country_en ?? "", lo: row.country_lo ?? "" } : undefined,
     email: clean(row.email),
     photo: clean(row.photo),
     socials,
@@ -71,6 +76,9 @@ export function staffToRow(member: StaffMember, sortOrder?: number): MemberRow {
     role_lo: member.role?.lo ?? null,
     bio_en: member.bio?.en ?? null,
     bio_lo: member.bio?.lo ?? null,
+    country_code: member.countryCode?.trim().toUpperCase() || null,
+    country_en: member.country?.en ?? null,
+    country_lo: member.country?.lo ?? null,
     email: member.email ?? null,
     photo: member.photo ?? null,
     facebook: s.facebook ?? null,

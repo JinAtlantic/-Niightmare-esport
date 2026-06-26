@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { ArrowRightIcon } from "@/components/ui/Icons";
+import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile";
 import type { Player } from "@/lib/types";
 
 // Framer-Motion + the modal load on first profile open only, keeping the
@@ -12,13 +12,17 @@ import type { Player } from "@/lib/types";
 const PlayerModalHost = dynamic(() => import("@/components/cards/PlayerModalHost"), { ssr: false });
 
 export default function PlayerCard({ player }: { player: Player }) {
-  const { pick, t } = useLanguage();
+  const { pick, t, lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const [armed, setArmed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const isSub = !!player.sub;
+  const flag = countryFlag(player.countryCode);
+  const countryName = player.country ? pick(player.country) : player.countryCode?.toUpperCase();
+  const birthDate = formatBirthDate(player.birthDate, lang);
+  const age = calculateAge(player.birthDate);
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const photoStyle = {
     objectPosition: `${crop.x}% ${crop.y}%`,
@@ -37,13 +41,11 @@ export default function PlayerCard({ player }: { player: Player }) {
 
   return (
     <>
-      {/* Outer wrapper carries the neon-violet aura on hover (kept off the clipped
-          element so the glow isn't trimmed by the bevel). */}
-      <article className="group relative transition-shadow duration-300 hover:shadow-[0_0_26px_rgba(168,85,247,0.5)]">
+      <article className="group relative transition-shadow duration-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.42)]">
         <div
           ref={cardRef}
           onPointerMove={onMove}
-          className="card-spotlight clip-esports relative aspect-[3/4] overflow-hidden border border-edge bg-crypt transition-colors duration-300 group-hover:border-amethyst/70"
+          className="card-spotlight clip-esports relative aspect-[3/4] overflow-hidden border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.9),rgba(11,7,16,1))] transition-colors duration-300 group-hover:border-amethyst/70"
         >
           {/* photo, or a monogram placeholder when no photo is set */}
           {player.photo ? (
@@ -83,34 +85,64 @@ export default function PlayerCard({ player }: { player: Player }) {
             className="absolute inset-0 z-[4] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
           />
 
-          {/* status badge — top-left, faint neon-violet glow for starters */}
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
+
           <span
-            className={`pointer-events-none absolute left-3 top-3 z-10 border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] backdrop-blur-sm ${
+            className={`pointer-events-none absolute left-3 top-3 z-10 bg-void/70 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] backdrop-blur-sm ${
               isSub
-                ? "border-edge-bright bg-void/60 text-ash"
-                : "border-amethyst/60 bg-amethyst/10 text-spectre shadow-[0_0_12px_rgba(168,85,247,0.55)]"
+                ? "border border-edge-bright text-ash"
+                : "border border-amethyst/55 text-spectre shadow-[0_0_12px_rgba(168,85,247,0.45)]"
             }`}
           >
             {isSub ? t("roster.badge_sub") : t("roster.badge_main")}
           </span>
 
-          {/* view-profile cue — top-right, fades in on hover */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center border border-amethyst/50 bg-void/60 text-glow opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
-          >
-            <ArrowRightIcon size={15} className="-rotate-45" />
-          </span>
+          {(flag || countryName) && (
+            <span className="pointer-events-none absolute right-3 top-3 z-10 inline-flex max-w-[52%] items-center gap-1.5 bg-void/75 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-soul backdrop-blur-sm">
+              {flag && <span className="text-sm leading-none">{flag}</span>}
+              {countryName && <span className="truncate">{countryName}</span>}
+            </span>
+          )}
 
-          {/* bottom text overlay — only the name + role; full details and
-              contact links live in the modal (click the card). */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#1A0A2E]/85 to-transparent px-4 pb-4 pt-14">
-            <h3 className="keep-latin font-display text-xl font-bold uppercase leading-none tracking-wide text-soul transition-colors duration-300 group-hover:text-glow md:text-2xl">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#12091d]/96 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4">
+            <p className="mb-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-amethyst">
+              {pick(player.role)}
+            </p>
+            <h3 className="keep-latin break-words font-display text-xl font-bold uppercase leading-none tracking-wide text-soul transition-colors duration-300 group-hover:text-glow md:text-2xl">
               {player.ign}
             </h3>
-            <span className="mt-2 inline-flex items-center border-l-2 border-amethyst pl-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-glow md:text-sm">
-              {pick(player.role)}
-            </span>
+            {player.name && (
+              <p className="keep-latin mt-1 truncate font-mono text-[10px] text-spectre/85">
+                {player.name}
+              </p>
+            )}
+            {(birthDate || age !== null) && (
+              <div className="mt-3 grid grid-cols-2 border border-edge/80 bg-void/55">
+                {birthDate && (
+                  <div className="border-r border-edge/80 px-2 py-1.5">
+                    <p className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-ash-dim">
+                      {t("roster.birth_date")}
+                    </p>
+                    <p className="mt-0.5 keep-latin font-mono text-[10px] font-semibold text-soul">
+                      {birthDate}
+                    </p>
+                  </div>
+                )}
+                {age !== null && (
+                  <div className="px-2 py-1.5">
+                    <p className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-ash-dim">
+                      {t("roster.age_label")}
+                    </p>
+                    <p className="mt-0.5 keep-latin font-mono text-[10px] font-semibold text-soul">
+                      {age} {t("roster.years_old")}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+            <p className="mt-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash transition-colors duration-300 group-hover:text-spectre">
+              {t("roster.view_profile")}
+            </p>
           </div>
         </div>
       </article>

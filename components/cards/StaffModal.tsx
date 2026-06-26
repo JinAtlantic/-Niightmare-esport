@@ -4,11 +4,12 @@ import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { X, Briefcase } from "lucide-react";
+import { X } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
+import { countryFlag } from "@/lib/personProfile";
 import type { StaffMember } from "@/lib/types";
 
 /**
@@ -33,6 +34,8 @@ export default function StaffModal({
   const nickname = member.ign && member.name && member.ign !== member.name ? member.ign : null;
   const bio = member.bio ? pick(member.bio) : t("roster.responsibility_fallback");
   const email = member.email || site.contact.email;
+  const flag = countryFlag(member.countryCode);
+  const countryName = member.country ? pick(member.country) : member.countryCode?.toUpperCase();
   const monogram = title
     .split(/\s+/)
     .map((w) => w[0])
@@ -136,10 +139,21 @@ export default function StaffModal({
               </p>
             </div>
 
+            {(flag || countryName) && (
+              <div className="mt-5 border border-edge bg-void/45 px-3 py-2">
+                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
+                  {t("roster.country_label")}
+                </p>
+                <p className="mt-1 flex items-center gap-2 font-mono text-xs font-semibold uppercase text-soul">
+                  {flag && <span className="text-base leading-none">{flag}</span>}
+                  {countryName && <span className="truncate">{countryName}</span>}
+                </p>
+              </div>
+            )}
+
             {/* Responsibility / bio */}
             <div className="mt-6">
-              <p className="mb-2 flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-spectre/80">
-                <Briefcase size={14} strokeWidth={2} className="text-amethyst" />
+              <p className="mb-2 border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-spectre/85">
                 {t("roster.responsibility")}
               </p>
               <p className="text-sm leading-relaxed text-ash">{bio}</p>

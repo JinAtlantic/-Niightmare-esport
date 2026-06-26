@@ -13,7 +13,19 @@ function authed(): boolean {
   return !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PROFILE_COLUMNS = ["country_code", "country_en", "country_lo"];
+
+async function membersHaveProfileColumns(db: NonNullable<ReturnType<typeof getSupabaseAdmin>>) {
+  const { error } = await db.from("members").select(PROFILE_COLUMNS.join(",")).limit(1);
+  return !error;
+}
+
+function omitProfileColumns<T extends object>(row: T): T {
+  const next = { ...(row as Record<string, unknown>) };
+  for (const key of PROFILE_COLUMNS) delete next[key];
+  return next as T;
+}
 
 /**
  * Upsert one Behind-the-Team member. Admin cookie required; the write itself
@@ -35,16 +47,14 @@ export async function POST(request: Request) {
   }
 
   if (!supabaseAdminEnabled) {
-    // Not wired up yet — let the UI fall back to a local-only update.
     return NextResponse.json({ ok: true, persisted: false });
   }
 
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ ok: true, persisted: false });
 
-  const row = staffToRow(member);
-  // Existing Supabase rows have a UUID id → upsert. Fallback rows (e.g.
-  // "staff-1") aren't UUIDs, so drop the id and let Postgres generate one.
+  const baseRow = staffToRow(member);
+  const row = (await membersHaveProfileColumns(db)) ? baseRow : omitProfileColumns(baseRow);
   let error;
   if (UUID.test(member.id)) {
     ({ error } = await db.from("members").upsert(row));

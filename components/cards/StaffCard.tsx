@@ -5,7 +5,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
 import FitText from "@/components/ui/FitText";
-import { ArrowRightIcon } from "@/components/ui/Icons";
+import { countryFlag } from "@/lib/personProfile";
 import type { StaffMember } from "@/lib/types";
 
 // Framer-Motion + the modal load on first profile open only, keeping the
@@ -19,6 +19,8 @@ export default function StaffCard({ member }: { member: StaffMember }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = member.name || member.ign || "";
+  const flag = countryFlag(member.countryCode);
+  const countryName = member.country ? pick(member.country) : member.countryCode?.toUpperCase();
   const monogram = title
     .split(/\s+/)
     .map((w) => w[0])
@@ -37,11 +39,11 @@ export default function StaffCard({ member }: { member: StaffMember }) {
 
   return (
     <>
-      <article className="group relative transition-shadow duration-300 hover:shadow-[0_0_26px_rgba(168,85,247,0.5)]">
+      <article className="group relative transition-shadow duration-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.42)]">
         <div
           ref={cardRef}
           onPointerMove={onMove}
-          className="card-spotlight clip-esports relative aspect-[3/4] overflow-hidden border border-edge bg-crypt transition-colors duration-300 group-hover:border-amethyst/70"
+          className="card-spotlight clip-esports relative aspect-[3/4] overflow-hidden border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.9),rgba(11,7,16,1))] transition-colors duration-300 group-hover:border-amethyst/70"
         >
           {/* photo, or a monogram placeholder when no photo is set */}
           {member.photo ? (
@@ -78,17 +80,21 @@ export default function StaffCard({ member }: { member: StaffMember }) {
             className="absolute inset-0 z-[4] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
           />
 
-          {/* view-profile cue — top-right, fades in on hover */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center border border-amethyst/50 bg-void/60 text-glow opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
-          >
-            <ArrowRightIcon size={15} className="-rotate-45" />
-          </span>
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
+
+          {(flag || countryName) && (
+            <span className="pointer-events-none absolute right-3 top-3 z-10 inline-flex max-w-[62%] items-center gap-1.5 bg-void/75 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-soul backdrop-blur-sm">
+              {flag && <span className="text-sm leading-none">{flag}</span>}
+              {countryName && <span className="truncate">{countryName}</span>}
+            </span>
+          )}
 
           {/* bottom text overlay — only the name + role; contact links live in
               the modal (click the card). */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#1A0A2E]/85 to-transparent px-4 pb-4 pt-14">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#12091d]/96 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4">
+            <p className="mb-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-amethyst">
+              {pick(member.role)}
+            </p>
             <h3 className="leading-[1.1]">
               <FitText
                 max={20}
@@ -98,9 +104,14 @@ export default function StaffCard({ member }: { member: StaffMember }) {
                 {title}
               </FitText>
             </h3>
-            <span className="mt-2 flex max-w-full items-center gap-1.5 border-l-2 border-amethyst pl-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-spectre md:text-sm">
-              <span className="truncate">{pick(member.role)}</span>
-            </span>
+            {member.ign && member.ign !== member.name && (
+              <p className="keep-latin mt-1 truncate font-mono text-[10px] text-spectre/85">
+                {member.ign}
+              </p>
+            )}
+            <p className="mt-3 border-t border-edge/80 pt-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash transition-colors duration-300 group-hover:text-spectre">
+              {t("roster.view_profile")}
+            </p>
           </div>
         </div>
       </article>

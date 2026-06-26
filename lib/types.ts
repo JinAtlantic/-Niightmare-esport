@@ -31,6 +31,12 @@ export interface Player {
   role: Bilingual;
   /** Optional short career bio shown in the profile modal's ABOUT section. */
   description?: Bilingual;
+  /** Optional ISO date (YYYY-MM-DD). Used to show birth date and calculated age. */
+  birthDate?: string;
+  /** Optional ISO-3166 alpha-2 country code (LA, PH, TH...) rendered as a flag. */
+  countryCode?: string;
+  /** Optional country label shown beside the flag. */
+  country?: Bilingual;
   /** Marks a substitute player (shows a SUB badge). */
   sub?: boolean;
   /** Optional player photo (e.g. "/players/phantom.png"). Falls back to a monogram. */
@@ -38,9 +44,8 @@ export interface Player {
   /** Admin-controlled crop for the photo: zoom (scale, 1 = fit) and focal
    *  point x/y as percentages (0–100). */
   photoCrop?: { zoom: number; x: number; y: number };
-  /** Optional FMVP / finals-MVP count shown in the profile modal (free text,
-   *  e.g. "3×"). Empty falls back to a "no titles yet" placeholder.
-   *  Persisted in the legacy `win_rate` DB column (no schema migration). */
+  /** Legacy FMVP value kept only so older saved roster JSON/DB rows are not
+   *  destroyed during admin saves. No longer shown on the public roster UI. */
   fmvp?: string;
   /** Roster tenure periods shown in the profile modal — a list of { joined,
    *  left? } spans, since some players leave and return. An empty `left` reads
@@ -93,6 +98,10 @@ export interface StaffMember {
   tier?: 1 | 2 | 3;
   /** Optional direct business email. Falls back to the club's contact email. */
   email?: string;
+  /** Optional ISO-3166 alpha-2 country code (LA, PH, TH...) rendered as a flag. */
+  countryCode?: string;
+  /** Optional country label shown beside the flag. */
+  country?: Bilingual;
   /** Optional short responsibility / bio shown in the staff modal. */
   bio?: Bilingual;
   /** Optional staff photo (e.g. "/staff/coach.png"). Falls back to a monogram. */

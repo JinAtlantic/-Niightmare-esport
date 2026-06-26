@@ -6,22 +6,18 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   X,
-  ScrollText,
-  Trophy,
-  CalendarDays,
   Database,
-  type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
 import { formatDate } from "@/lib/format";
+import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile";
 import type { Player } from "@/lib/types";
 
-function SectionHead({ Icon, label }: { Icon: LucideIcon; label: string }) {
+function SectionHead({ label }: { label: string }) {
   return (
-    <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-spectre/80">
-      <Icon size={14} strokeWidth={2} className="text-amethyst" />
+    <p className="mb-3 border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-spectre/85">
       {label}
     </p>
   );
@@ -48,6 +44,10 @@ export default function PlayerModal({
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const tba = t("roster.tba");
   const bio = player.description ? pick(player.description) : "";
+  const flag = countryFlag(player.countryCode);
+  const countryName = player.country ? pick(player.country) : player.countryCode?.toUpperCase();
+  const birthDate = formatBirthDate(player.birthDate, lang);
+  const age = calculateAge(player.birthDate);
 
   // Roster tenure periods — some players leave and return, so this can be
   // several "<joined> – <left|Present>" spans. Empty when none are set.
@@ -162,23 +162,43 @@ export default function PlayerModal({
               <p className="mt-2 font-mono text-sm text-spectre">{player.name}</p>
             )}
 
-            {/* TIME ON ROSTER — one or more joined → left/present spans */}
-            {tenures.length > 0 && (
-              <div className="mt-3 inline-flex flex-col gap-1.5 border border-edge bg-void/40 px-3 py-2">
-                {tenures.map((tn, idx) => (
-                  <p key={idx} className="inline-flex items-center gap-2">
-                    <CalendarDays size={14} strokeWidth={2} className="shrink-0 text-amethyst" />
-                    <span className="keep-latin font-mono text-xs font-medium tracking-wide text-spectre">
-                      {formatDate(tn.joined, lang)} – {tn.left ? formatDate(tn.left, lang) : t("roster.present")}
-                    </span>
-                  </p>
-                ))}
+            {(flag || countryName || birthDate || age !== null) && (
+              <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                {(flag || countryName) && (
+                  <div className="border border-edge bg-void/45 px-3 py-2">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
+                      {t("roster.country_label")}
+                    </p>
+                    <p className="mt-1 flex items-center gap-2 font-mono text-xs font-semibold uppercase text-soul">
+                      {flag && <span className="text-base leading-none">{flag}</span>}
+                      {countryName && <span className="truncate">{countryName}</span>}
+                    </p>
+                  </div>
+                )}
+                {birthDate && (
+                  <div className="border border-edge bg-void/45 px-3 py-2">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
+                      {t("roster.birth_date")}
+                    </p>
+                    <p className="mt-1 keep-latin font-mono text-xs font-semibold text-soul">{birthDate}</p>
+                  </div>
+                )}
+                {age !== null && (
+                  <div className="border border-edge bg-void/45 px-3 py-2">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
+                      {t("roster.age_label")}
+                    </p>
+                    <p className="mt-1 keep-latin font-mono text-xs font-semibold text-soul">
+                      {age} {t("roster.years_old")}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* ABOUT — short career bio */}
             <div className="mt-7">
-              <SectionHead Icon={ScrollText} label={t("roster.about_label")} />
+              <SectionHead label={t("roster.about_label")} />
               {bio ? (
                 <p className="keep-latin text-sm leading-relaxed text-spectre">{bio}</p>
               ) : (
@@ -186,27 +206,20 @@ export default function PlayerModal({
               )}
             </div>
 
-            {/* HONORS — FMVP count (champion gold, made prominent) */}
-            <div className="mt-6">
-              <SectionHead Icon={Trophy} label={t("roster.honors_label")} />
-              {player.fmvp ? (
-                <div className="overflow-hidden border border-gold/35 bg-gradient-to-r from-gold/[0.1] via-gold/[0.04] to-transparent p-4 shadow-glow-gold">
-                  <p className="font-display text-2xl font-bold uppercase tracking-[0.22em] text-gold/85">
-                    FMVP
-                  </p>
-                  <p className="keep-latin mt-1 font-display text-5xl font-bold uppercase leading-none tracking-[0.02em] text-gold [text-shadow:0_2px_18px_rgba(245,196,81,0.45)]">
-                    {player.fmvp}
-                  </p>
+            {tenures.length > 0 && (
+              <div className="mt-6">
+                <SectionHead label={t("roster.team_period")} />
+                <div className="grid gap-2">
+                  {tenures.map((tn, idx) => (
+                    <p key={idx} className="border border-edge bg-void/40 px-3 py-2">
+                      <span className="keep-latin font-mono text-xs font-medium tracking-wide text-spectre">
+                        {formatDate(tn.joined, lang)} – {tn.left ? formatDate(tn.left, lang) : t("roster.present")}
+                      </span>
+                    </p>
+                  ))}
                 </div>
-              ) : (
-                <div>
-                  <p className="font-display text-2xl font-bold uppercase tracking-[0.22em] text-ash-dim">
-                    FMVP
-                  </p>
-                  <p className="mt-1 font-mono text-sm text-ash-dim">{t("roster.honors_none")}</p>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* SOCIAL — pinned to the bottom on desktop so the column fills evenly */}
             <div className="mt-7 border-t border-edge pt-6 md:mt-auto">

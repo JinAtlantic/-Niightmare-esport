@@ -56,6 +56,9 @@ function toPlayer(r: Record<string, unknown>): Player {
     jersey: val(r.jersey),
     role: bi(r.role_en as string, r.role_lo as string),
     description: optBi(r.description_en as string, r.description_lo as string),
+    birthDate: val(r.birth_date),
+    countryCode: val(r.country_code),
+    country: optBi(r.country_en as string, r.country_lo as string),
     sub: r.is_sub ? true : undefined,
     photo: val(r.photo),
     photoCrop:

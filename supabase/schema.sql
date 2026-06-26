@@ -36,6 +36,10 @@ create table if not exists public.players (
   role_lo         text,
   description_en  text,
   description_lo  text,
+  birth_date      date,
+  country_code    text,
+  country_en      text,
+  country_lo      text,
   is_sub          boolean default false,
   photo           text,
   photo_zoom      real    default 1,
@@ -68,6 +72,9 @@ create table if not exists public.members (
   role_lo         text,
   bio_en          text,
   bio_lo          text,
+  country_code    text,
+  country_en      text,
+  country_lo      text,
   email           text,
   photo           text,
   facebook        text,
@@ -192,6 +199,13 @@ create table if not exists public.site_settings (
 -- Backfill columns that may be missing on a members table created by an earlier
 -- (Stage 0) run, so the updated_at trigger below has a column to write to.
 alter table public.members add column if not exists updated_at timestamptz default now();
+alter table public.players add column if not exists birth_date date;
+alter table public.players add column if not exists country_code text;
+alter table public.players add column if not exists country_en text;
+alter table public.players add column if not exists country_lo text;
+alter table public.members add column if not exists country_code text;
+alter table public.members add column if not exists country_en text;
+alter table public.members add column if not exists country_lo text;
 alter table public.upcoming_match add column if not exists stream_url text;
 -- Optional 3-letter opponent short code shown when no opponent logo is set.
 alter table public.matches add column if not exists opponent_abbr text;

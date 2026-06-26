@@ -196,14 +196,29 @@ function PlayerList({
                   />
                 </div>
               )}
-              {/* Profile extras shown in the player modal */}
               <TextField
-                label="FMVP (จำนวนครั้งที่ได้ เช่น 3×)"
-                value={p.fmvp ?? ""}
-                onChange={(v) => onPatch(i, { fmvp: v.trim() || undefined })}
-                placeholder="เช่น 3×"
+                label="วันเกิด / Birth date"
+                type="date"
+                value={p.birthDate ?? ""}
+                onChange={(v) => onPatch(i, { birthDate: v || undefined })}
               />
-              <div className="hidden md:block" />
+              <TextField
+                label="รหัสธง / Country code (LA, PH, TH...)"
+                value={p.countryCode ?? ""}
+                onChange={(v) => onPatch(i, { countryCode: v.trim().toUpperCase() || undefined })}
+                placeholder="LA"
+              />
+              <div className="md:col-span-2">
+                <BilingualField
+                  label="ชื่อประเทศ / Country name"
+                  value={p.country ?? { en: "", lo: "" }}
+                  onChange={(v) =>
+                    onPatch(i, {
+                      country: v.en?.trim() || v.lo?.trim() ? v : undefined,
+                    })
+                  }
+                />
+              </div>
               <div className="md:col-span-2">
                 <Label>ระยะเวลาในทีม — เพิ่มได้หลายช่วง (ออกแล้วกลับมาก็กด “เพิ่มช่วงเวลา”)</Label>
                 <div className="mt-2 space-y-2">
@@ -368,6 +383,24 @@ function StaffList({
                   label={variant === "office" ? "Role (ตำแหน่งที่แสดงบนการ์ด) — EN + ລາວ" : "ตำแหน่งที่แสดงบนการ์ด (Display)"}
                   value={s.role}
                   onChange={(v) => onPatch(s.id, { role: v })}
+                />
+              </div>
+              <TextField
+                label="รหัสธง / Country code (LA, PH, TH...)"
+                value={s.countryCode ?? ""}
+                onChange={(v) => onPatch(s.id, { countryCode: v.trim().toUpperCase() || undefined })}
+                placeholder="LA"
+                className="md:col-span-2"
+              />
+              <div className="md:col-span-2">
+                <BilingualField
+                  label="ชื่อประเทศ / Country name"
+                  value={s.country ?? { en: "", lo: "" }}
+                  onChange={(v) =>
+                    onPatch(s.id, {
+                      country: v.en?.trim() || v.lo?.trim() ? v : undefined,
+                    })
+                  }
                 />
               </div>
               <div className="md:col-span-2">
