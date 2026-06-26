@@ -131,6 +131,13 @@ const TIER_LINE: Record<Tier, string> = {
   S: "via-gold/90",
 };
 
+const TIER_VALUE: Record<Tier, string> = {
+  C: "text-win",
+  B: "text-cyan-200",
+  A: "text-glow",
+  S: "text-gold",
+};
+
 const MATCH_LOGO_SIZE = 64;
 const MOBILE_MATCH_LOGO_SIZE = 72;
 const GAME_LABEL: Record<GameId, string> = {
@@ -493,6 +500,7 @@ function TournamentRecordGroup({
     ? TIER_SURFACE_SOFT[tier]
     : "bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))]";
   const line = tier ? TIER_LINE[tier] : "via-amethyst/80";
+  const valueTone = tier ? TIER_VALUE[tier] : "text-glow";
   const wins = group.matches.filter((match) => match.result === "win").length;
   const losses = group.matches.filter((match) => match.result === "loss").length;
   const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
@@ -502,13 +510,18 @@ function TournamentRecordGroup({
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 320px" }}
       className={`clip-esports max-w-full overflow-hidden border ${border} ${surface}`}
     >
-      <div className={`group relative overflow-hidden border-b px-3 py-4 transition-colors sm:px-4 md:px-6 md:py-5 ${softBorder} ${headerSurface}`}>
+      <div className={`group relative overflow-hidden border-b px-4 py-5 transition-colors sm:px-5 md:px-7 md:py-6 ${softBorder} ${headerSurface}`}>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-label={`${open ? "Hide" : "View"} matches for ${pick(group.name)}`}
           className="absolute inset-0 z-10 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+        />
+        <span aria-hidden className={`absolute left-0 top-0 h-full w-1.5 ${tier ? TIER_BLADE[tier] : TIER_BLADE.default}`} />
+        <span
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(90deg,rgba(11,7,16,0.9),rgba(11,7,16,0.66)_48%,rgba(11,7,16,0.82))]"
         />
         <span
           aria-hidden
@@ -522,74 +535,85 @@ function TournamentRecordGroup({
           aria-hidden
           className="absolute -right-6 -top-20 h-36 w-36 bg-amethyst/10 blur-3xl md:-right-16 md:h-44 md:w-44"
         />
-        <div className="pointer-events-none relative grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        {tier && (
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 font-display text-8xl font-black uppercase leading-none tracking-normal opacity-[0.09] lg:block ${TIER_TAG[tier]}`}
+          >
+            {tier}
+          </span>
+        )}
+        <div className="pointer-events-none relative z-[1] grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               {tier && (
-                <span className={`inline-flex font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:text-[10px] ${TIER_TAG[tier]}`}>
-                  {tier}-Tier
+                <span className={`inline-flex items-center gap-2 font-mono text-[10px] font-extrabold uppercase tracking-[0.2em] md:text-[11px] ${TIER_TAG[tier]}`}>
+                  <span className={`h-1.5 w-8 ${TIER_BLADE[tier]}`} aria-hidden />
+                  {tier}-Tier Tournament
                 </span>
               )}
-              <span className="inline-flex border border-amethyst/45 bg-amethyst/10 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-glow md:px-3 md:py-1.5 md:text-[10px]">
+              <span className="inline-flex font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre md:text-[11px]">
                 {matchCount} {matchCount === 1 ? "match" : "matches"}
               </span>
-              <span className="inline-flex border border-edge-bright bg-void/55 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-spectre md:px-3 md:py-1.5 md:text-[10px]">
-                {open ? "hide matches" : "view matches"}
-              </span>
               {latestDate && (
-                <span className="inline-flex border border-edge bg-void/45 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-ash md:px-3 md:py-1.5 md:text-[10px]">
+                <span className="inline-flex font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash md:text-[11px]">
                   {latestDate}
                 </span>
               )}
             </div>
-            <h2 className="mt-3 max-w-full break-words font-display text-xl font-bold uppercase leading-tight tracking-[0.03em] text-soul [text-shadow:0_0_28px_rgba(199,125,255,0.22)] md:text-3xl">
+            <h2 className="mt-3 max-w-4xl break-words font-display text-2xl font-extrabold uppercase leading-[0.98] tracking-[0.02em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-4xl">
               {pick(group.name)}
             </h2>
-            <div className={`mt-3 grid max-w-md grid-cols-3 border bg-void/35 ${softBorder}`}>
-              <div className={`border-r px-2 py-1.5 md:px-3 md:py-2 ${softBorder}`}>
-                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.wins)}</p>
-                <p className="mt-0.5 font-display text-base font-bold text-win md:text-lg">{wins}</p>
+            <div className={`mt-4 grid max-w-lg grid-cols-3 border bg-void/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${softBorder}`}>
+              <div className={`border-r px-3 py-2 md:px-4 md:py-2.5 ${softBorder}`}>
+                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.wins)}</p>
+                <p className="mt-1 font-display text-xl font-bold leading-none text-win md:text-2xl">{wins}</p>
               </div>
-              <div className={`border-r px-2 py-1.5 md:px-3 md:py-2 ${softBorder}`}>
-                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.losses)}</p>
-                <p className="mt-0.5 font-display text-base font-bold text-loss md:text-lg">{losses}</p>
+              <div className={`border-r px-3 py-2 md:px-4 md:py-2.5 ${softBorder}`}>
+                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.losses)}</p>
+                <p className="mt-1 font-display text-xl font-bold leading-none text-loss md:text-2xl">{losses}</p>
               </div>
-              <div className="px-2 py-1.5 md:px-3 md:py-2">
-                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">{pick(page.stats.winrate)}</p>
-                <p className="mt-0.5 font-display text-base font-bold text-glow md:text-lg">
+              <div className="px-3 py-2 md:px-4 md:py-2.5">
+                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.winrate)}</p>
+                <p className={`mt-1 font-display text-xl font-bold leading-none md:text-2xl ${valueTone}`}>
                   {Math.round((wins / Math.max(1, wins + losses)) * 100)}%
                 </p>
               </div>
             </div>
           </div>
 
-          {tournament && (
-            <div className="grid min-w-0 gap-2 sm:grid-cols-2 lg:min-w-[360px]">
-              <div className={`border bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5 ${softBorder}`}>
-                <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ash-dim">
-                  {pick(page.tournamentLabels.placement)}
-                </p>
-                <p className="mt-0.5 break-words font-display text-sm font-bold uppercase tracking-[0.06em] text-glow">
-                  {pick(tournament.placement)}
-                </p>
-              </div>
-              {tournament.prize && tournament.prize.trim() && (
-                <div className={`border bg-void/55 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3 md:py-2.5 ${softBorder}`}>
-                  <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ash-dim">
-                    {pick(page.tournamentLabels.prize)}
+          <div className="flex min-w-0 flex-col gap-2 lg:items-end">
+            {tournament && (
+              <div className="grid w-full min-w-0 gap-2 sm:grid-cols-2 lg:min-w-[390px]">
+                <div className={`border bg-void/75 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-4 ${softBorder}`}>
+                  <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash">
+                    {pick(page.tournamentLabels.placement)}
                   </p>
-                  <p className="keep-latin mt-0.5 break-words font-display text-sm font-bold uppercase tracking-[0.06em] text-spectre">
-                    {tournament.prize}
+                  <p className={`mt-1 break-words font-display text-base font-extrabold uppercase leading-tight tracking-[0.04em] md:text-lg ${valueTone}`}>
+                    {pick(tournament.placement)}
                   </p>
                 </div>
-              )}
-            </div>
-          )}
+                {tournament.prize && tournament.prize.trim() && (
+                  <div className={`border bg-void/75 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-4 ${softBorder}`}>
+                    <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash">
+                      {pick(page.tournamentLabels.prize)}
+                    </p>
+                    <p className={`keep-latin mt-1 break-words font-display text-base font-extrabold uppercase leading-tight tracking-[0.04em] md:text-lg ${valueTone}`}>
+                      {tournament.prize}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+            <span className="w-full border border-edge-bright bg-void/70 px-3 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-soul lg:w-auto lg:min-w-[150px]">
+              {open ? "Hide Matches" : "View Matches"}
+            </span>
+          </div>
         </div>
       </div>
 
       {open && (
-        <div className="relative flex flex-col gap-2 bg-void/35 p-2 md:gap-3 md:p-4">
+        <div className="relative flex flex-col gap-2 bg-void/55 p-2 md:gap-3 md:p-4">
           <span
             aria-hidden
             className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"

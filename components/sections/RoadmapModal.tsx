@@ -19,7 +19,7 @@ import type { Lang } from "@/lib/types";
 
 const statusClass = {
   past: {
-    card: "border-edge bg-void/35 opacity-65",
+    card: "border-edge bg-void/45 opacity-85",
     node: "border-ash-dim bg-void text-ash",
     icon: Check,
     label: "text-ash",
@@ -115,8 +115,20 @@ function StageCard({
   return (
     <article className={`relative overflow-hidden border border-l-4 p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card} ${tierBorder}`}>
       <span aria-hidden className={`pointer-events-none absolute inset-0 opacity-95 ${tierWash}`} />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(11,7,16,0.88),rgba(22,16,31,0.68)_48%,rgba(11,7,16,0.78))]"
+      />
       <span aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent ${tierLine}`} />
       <span aria-hidden className={`pointer-events-none absolute -right-10 -top-16 h-32 w-32 blur-3xl ${tierWash}`} />
+      {tier && (
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 font-display text-6xl font-black uppercase leading-none opacity-[0.08] sm:block ${tierText}`}
+        >
+          {tier}
+        </span>
+      )}
       <div className="relative z-[1] flex items-start gap-2 md:gap-3">
         <div className="relative shrink-0">
           {status === "active" && (
