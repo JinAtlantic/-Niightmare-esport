@@ -11,7 +11,6 @@ import { useContent } from "@/components/context/ContentContext";
 
 const NAV_ITEMS = [
   { href: "/", key: "nav.home" },
-  { href: "/news", key: "nav.news" },
   { href: "/roster", key: "nav.roster" },
   { href: "/matches", key: "nav.matches" },
   { href: "/achievements", key: "nav.achievements" },
