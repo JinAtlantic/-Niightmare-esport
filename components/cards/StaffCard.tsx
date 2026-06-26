@@ -5,7 +5,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
 import FitText from "@/components/ui/FitText";
-import { countryFlag } from "@/lib/personProfile";
+import { countryFlagImageUrl } from "@/lib/personProfile";
 import type { StaffMember } from "@/lib/types";
 
 // Framer-Motion + the modal load on first profile open only, keeping the
@@ -19,14 +19,8 @@ export default function StaffCard({ member }: { member: StaffMember }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = member.name || member.ign || "";
-  const flag = countryFlag(member.countryCode);
-  const countryName = member.country ? pick(member.country) : member.countryCode?.toUpperCase();
-  const monogram = title
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const flagCode = (member.countryCode || "LA").trim().toUpperCase();
+  const flagUrl = countryFlagImageUrl(flagCode);
 
   // Feed the cursor position to the spotlight (--mx/--my, see globals.css).
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -61,11 +55,7 @@ export default function StaffCard({ member }: { member: StaffMember }) {
               <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(168,85,247,0.2),transparent_62%)]" />
               <div aria-hidden className="absolute left-1/2 top-1/2 h-[2px] w-[150%] -translate-x-1/2 -translate-y-1/2 -rotate-[18deg] bg-gradient-to-r from-transparent via-amethyst/25 to-transparent" />
               <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/40 to-transparent" />
-              <div className="absolute inset-0 grid place-items-center">
-                <span className="keep-latin select-none font-display text-7xl font-bold tracking-tight text-spectre/25 transition-colors duration-500 group-hover:text-spectre/40">
-                  {monogram}
-                </span>
-              </div>
+              <div aria-hidden className="absolute inset-x-8 top-1/3 h-px bg-gradient-to-r from-transparent via-spectre/20 to-transparent" />
             </div>
           )}
 
@@ -82,17 +72,27 @@ export default function StaffCard({ member }: { member: StaffMember }) {
 
           <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
 
-          {(flag || countryName) && (
-            <span className="pointer-events-none absolute right-3 top-3 z-10 inline-flex max-w-[62%] items-center gap-1.5 bg-void/75 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-soul backdrop-blur-sm">
-              {flag && <span className="text-sm leading-none">{flag}</span>}
-              {countryName && <span className="truncate">{countryName}</span>}
+          {flagUrl && (
+            <span
+              className="pointer-events-none absolute right-2.5 top-2.5 z-10 block h-5 w-7 overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.55)]"
+              aria-label={`${flagCode} flag`}
+            >
+              <Image
+                src={flagUrl}
+                alt=""
+                width={28}
+                height={20}
+                unoptimized
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
             </span>
           )}
 
           {/* bottom text overlay — only the name + role; contact links live in
               the modal (click the card). */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#12091d]/96 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4">
-            <p className="mb-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-amethyst">
+            <p className="mb-2 inline-flex max-w-full border-l-2 border-amethyst bg-amethyst/15 px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.18em] text-glow shadow-[0_0_14px_rgba(168,85,247,0.28)] md:text-[11px]">
               {pick(member.role)}
             </p>
             <h3 className="leading-[1.1]">
@@ -104,11 +104,6 @@ export default function StaffCard({ member }: { member: StaffMember }) {
                 {title}
               </FitText>
             </h3>
-            {member.ign && member.ign !== member.name && (
-              <p className="keep-latin mt-1 truncate font-mono text-[10px] text-spectre/85">
-                {member.ign}
-              </p>
-            )}
             <p className="mt-3 border-t border-edge/80 pt-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash transition-colors duration-300 group-hover:text-spectre">
               {t("roster.view_profile")}
             </p>
