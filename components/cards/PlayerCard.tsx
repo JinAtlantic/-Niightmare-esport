@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile";
+import { countryFlag } from "@/lib/personProfile";
 import type { Player } from "@/lib/types";
 
 // Framer-Motion + the modal load on first profile open only, keeping the
@@ -12,7 +12,7 @@ import type { Player } from "@/lib/types";
 const PlayerModalHost = dynamic(() => import("@/components/cards/PlayerModalHost"), { ssr: false });
 
 export default function PlayerCard({ player }: { player: Player }) {
-  const { pick, t, lang } = useLanguage();
+  const { pick, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [armed, setArmed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -20,9 +20,6 @@ export default function PlayerCard({ player }: { player: Player }) {
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const isSub = !!player.sub;
   const flag = countryFlag(player.countryCode);
-  const countryName = player.country ? pick(player.country) : player.countryCode?.toUpperCase();
-  const birthDate = formatBirthDate(player.birthDate, lang);
-  const age = calculateAge(player.birthDate);
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const photoStyle = {
     objectPosition: `${crop.x}% ${crop.y}%`,
@@ -97,10 +94,12 @@ export default function PlayerCard({ player }: { player: Player }) {
             {isSub ? t("roster.badge_sub") : t("roster.badge_main")}
           </span>
 
-          {(flag || countryName) && (
-            <span className="pointer-events-none absolute right-3 top-3 z-10 inline-flex max-w-[52%] items-center gap-1.5 bg-void/75 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-soul backdrop-blur-sm">
-              {flag && <span className="text-sm leading-none">{flag}</span>}
-              {countryName && <span className="truncate">{countryName}</span>}
+          {flag && (
+            <span
+              className="pointer-events-none absolute right-3 top-3 z-10 grid h-8 min-w-9 place-items-center border border-edge-bright bg-void/75 px-2 text-lg leading-none shadow-[0_0_12px_rgba(168,85,247,0.28)] backdrop-blur-sm"
+              aria-label={player.countryCode ? `${player.countryCode.toUpperCase()} flag` : "country flag"}
+            >
+              <span aria-hidden>{flag}</span>
             </span>
           )}
 
@@ -111,35 +110,6 @@ export default function PlayerCard({ player }: { player: Player }) {
             <h3 className="keep-latin break-words font-display text-xl font-bold uppercase leading-none tracking-wide text-soul transition-colors duration-300 group-hover:text-glow md:text-2xl">
               {player.ign}
             </h3>
-            {player.name && (
-              <p className="keep-latin mt-1 truncate font-mono text-[10px] text-spectre/85">
-                {player.name}
-              </p>
-            )}
-            {(birthDate || age !== null) && (
-              <div className="mt-3 grid grid-cols-2 border border-edge/80 bg-void/55">
-                {birthDate && (
-                  <div className="border-r border-edge/80 px-2 py-1.5">
-                    <p className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-ash-dim">
-                      {t("roster.birth_date")}
-                    </p>
-                    <p className="mt-0.5 keep-latin font-mono text-[10px] font-semibold text-soul">
-                      {birthDate}
-                    </p>
-                  </div>
-                )}
-                {age !== null && (
-                  <div className="px-2 py-1.5">
-                    <p className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-ash-dim">
-                      {t("roster.age_label")}
-                    </p>
-                    <p className="mt-0.5 keep-latin font-mono text-[10px] font-semibold text-soul">
-                      {age} {t("roster.years_old")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
             <p className="mt-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash transition-colors duration-300 group-hover:text-spectre">
               {t("roster.view_profile")}
             </p>

@@ -16,6 +16,7 @@ import {
 import rosterSeed from "@/data/roster.json";
 import type { Bilingual, Player, StaffMember, GameId } from "@/lib/types";
 import { STAFF_ROLES, memberGame, staffRoleKey } from "@/lib/staff";
+import { countryFlag } from "@/lib/personProfile";
 
 const TIER_LABEL: Record<1 | 2 | 3, string> = {
   1: "แถว 1 · บริหาร",
@@ -34,6 +35,24 @@ const TIER_OPTIONS = [
   { value: "1", label: TIER_LABEL[1] },
   { value: "2", label: TIER_LABEL[2] },
   { value: "3", label: TIER_LABEL[3] },
+];
+
+const FLAG_OPTIONS = [
+  { value: "", label: "ไม่แสดงธง" },
+  { value: "LA", label: `${countryFlag("LA")} Laos / ລາວ` },
+  { value: "PH", label: `${countryFlag("PH")} Philippines` },
+  { value: "TH", label: `${countryFlag("TH")} Thailand` },
+  { value: "VN", label: `${countryFlag("VN")} Vietnam` },
+  { value: "KH", label: `${countryFlag("KH")} Cambodia` },
+  { value: "MM", label: `${countryFlag("MM")} Myanmar` },
+  { value: "ID", label: `${countryFlag("ID")} Indonesia` },
+  { value: "MY", label: `${countryFlag("MY")} Malaysia` },
+  { value: "SG", label: `${countryFlag("SG")} Singapore` },
+  { value: "BN", label: `${countryFlag("BN")} Brunei` },
+  { value: "JP", label: `${countryFlag("JP")} Japan` },
+  { value: "KR", label: `${countryFlag("KR")} Korea` },
+  { value: "CN", label: `${countryFlag("CN")} China` },
+  { value: "US", label: `${countryFlag("US")} United States` },
 ];
 
 type RosterStatId = "active" | "mlbb" | "efootball" | "staff";
@@ -202,11 +221,11 @@ function PlayerList({
                 value={p.birthDate ?? ""}
                 onChange={(v) => onPatch(i, { birthDate: v || undefined })}
               />
-              <TextField
-                label="รหัสธง / Country code (LA, PH, TH...)"
+              <SelectField
+                label="เลือกธง / Flag"
                 value={p.countryCode ?? ""}
                 onChange={(v) => onPatch(i, { countryCode: v.trim().toUpperCase() || undefined })}
-                placeholder="LA"
+                options={FLAG_OPTIONS}
               />
               <div className="md:col-span-2">
                 <BilingualField
@@ -385,11 +404,11 @@ function StaffList({
                   onChange={(v) => onPatch(s.id, { role: v })}
                 />
               </div>
-              <TextField
-                label="รหัสธง / Country code (LA, PH, TH...)"
+              <SelectField
+                label="เลือกธง / Flag"
                 value={s.countryCode ?? ""}
                 onChange={(v) => onPatch(s.id, { countryCode: v.trim().toUpperCase() || undefined })}
-                placeholder="LA"
+                options={FLAG_OPTIONS}
                 className="md:col-span-2"
               />
               <div className="md:col-span-2">
