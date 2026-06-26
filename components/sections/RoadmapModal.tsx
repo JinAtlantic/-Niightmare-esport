@@ -59,6 +59,20 @@ const TIER_TEXT: Record<Tier, string> = {
   S: "text-gold",
 };
 
+const TIER_WASH: Record<Tier, string> = {
+  C: "bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.24),transparent_42%),linear-gradient(135deg,rgba(6,78,59,0.28),transparent_58%)]",
+  B: "bg-[radial-gradient(circle_at_top_left,rgba(103,232,249,0.26),transparent_42%),linear-gradient(135deg,rgba(8,47,73,0.32),transparent_58%)]",
+  A: "bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.28),transparent_42%),linear-gradient(135deg,rgba(88,28,135,0.32),transparent_58%)]",
+  S: "bg-[radial-gradient(circle_at_top_left,rgba(245,196,81,0.28),transparent_42%),linear-gradient(135deg,rgba(113,63,18,0.34),transparent_58%)]",
+};
+
+const TIER_LINE: Record<Tier, string> = {
+  C: "via-win/85",
+  B: "via-cyan-300/85",
+  A: "via-amethyst/90",
+  S: "via-gold/90",
+};
+
 function tagTier(tag: string): Tier | null {
   const value = tag.match(/\b([CBAS])-Tier\b/i)?.[1]?.toUpperCase();
   return value === "C" || value === "B" || value === "A" || value === "S" ? value : null;
@@ -95,11 +109,15 @@ function StageCard({
   const tier = tagTier(stage.tag);
   const tierBorder = tier ? `${TIER_BORDER[tier]} ${TIER_GLOW[tier]}` : "border-edge border-l-amethyst";
   const tierText = tier ? TIER_TEXT[tier] : "text-spectre";
+  const tierWash = tier ? TIER_WASH[tier] : "bg-amethyst/10";
+  const tierLine = tier ? TIER_LINE[tier] : "via-amethyst/65";
 
   return (
     <article className={`relative overflow-hidden border border-l-4 p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card} ${tierBorder}`}>
-      <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 h-32 w-32 bg-amethyst/10 blur-3xl" />
-      <div className="flex items-start gap-2 md:gap-3">
+      <span aria-hidden className={`pointer-events-none absolute inset-0 opacity-95 ${tierWash}`} />
+      <span aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent ${tierLine}`} />
+      <span aria-hidden className={`pointer-events-none absolute -right-10 -top-16 h-32 w-32 blur-3xl ${tierWash}`} />
+      <div className="relative z-[1] flex items-start gap-2 md:gap-3">
         <div className="relative shrink-0">
           {status === "active" && (
             <span className="absolute inset-0 rounded-full bg-amethyst/35 motion-safe:animate-ping" aria-hidden />

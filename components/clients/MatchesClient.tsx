@@ -110,6 +110,27 @@ const TIER_SHADOW: Record<Tier, string> = {
   S: "shadow-[0_0_30px_rgba(245,196,81,0.18)]",
 };
 
+const TIER_SURFACE: Record<Tier, string> = {
+  C: "bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.22),transparent_35%),linear-gradient(135deg,rgba(6,78,59,0.28),rgba(22,16,31,0.78)_40%,rgba(11,7,16,0.98))]",
+  B: "bg-[radial-gradient(circle_at_top_left,rgba(103,232,249,0.24),transparent_35%),linear-gradient(135deg,rgba(8,47,73,0.32),rgba(22,16,31,0.78)_40%,rgba(11,7,16,0.98))]",
+  A: "bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.25),transparent_35%),linear-gradient(135deg,rgba(88,28,135,0.32),rgba(22,16,31,0.78)_40%,rgba(11,7,16,0.98))]",
+  S: "bg-[radial-gradient(circle_at_top_left,rgba(245,196,81,0.25),transparent_35%),linear-gradient(135deg,rgba(113,63,18,0.34),rgba(22,16,31,0.78)_40%,rgba(11,7,16,0.98))]",
+};
+
+const TIER_SURFACE_SOFT: Record<Tier, string> = {
+  C: "bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.16),transparent_34%),linear-gradient(135deg,rgba(6,78,59,0.18),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))]",
+  B: "bg-[radial-gradient(circle_at_top_left,rgba(103,232,249,0.18),transparent_34%),linear-gradient(135deg,rgba(8,47,73,0.22),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))]",
+  A: "bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.2),transparent_34%),linear-gradient(135deg,rgba(88,28,135,0.22),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))]",
+  S: "bg-[radial-gradient(circle_at_top_left,rgba(245,196,81,0.19),transparent_34%),linear-gradient(135deg,rgba(113,63,18,0.24),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))]",
+};
+
+const TIER_LINE: Record<Tier, string> = {
+  C: "via-win/85",
+  B: "via-cyan-300/85",
+  A: "via-amethyst/90",
+  S: "via-gold/90",
+};
+
 const MATCH_LOGO_SIZE = 64;
 const MOBILE_MATCH_LOGO_SIZE = 72;
 const GAME_LABEL: Record<GameId, string> = {
@@ -346,14 +367,18 @@ function MatchCard({
   const tier = tournamentTier(match.tournament.en || match.tournament.lo);
   const blade = TIER_BLADE[tier ?? "default"];
   const border = tier ? `${TIER_BORDER_SOFT[tier]} ${TIER_SHADOW[tier]}` : "border-edge";
+  const surface = tier
+    ? TIER_SURFACE_SOFT[tier]
+    : "bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))]";
+  const line = tier ? TIER_LINE[tier] : "via-spectre/45";
 
   return (
-    <article className={`hover-glow group relative overflow-hidden border bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))] p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7 ${border}`}>
+    <article className={`hover-glow group relative overflow-hidden border p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7 ${border} ${surface}`}>
       {/* left accent blade — colored by the tournament's tier */}
       <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${blade}`} />
       <span
         aria-hidden
-        className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-spectre/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+        className={`absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-70 transition-opacity group-hover:opacity-100 ${line}`}
       />
       <span aria-hidden className="absolute -right-20 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl" />
 
@@ -463,6 +488,11 @@ function TournamentRecordGroup({
   const tier = tournamentTier(group.name.en || group.name.lo);
   const border = tier ? `${TIER_BORDER[tier]} ${TIER_SHADOW[tier]}` : "border-edge shadow-[0_0_28px_rgba(168,85,247,0.1)]";
   const softBorder = tier ? TIER_BORDER_SOFT[tier] : "border-edge";
+  const surface = tier ? TIER_SURFACE[tier] : "bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void";
+  const headerSurface = tier
+    ? TIER_SURFACE_SOFT[tier]
+    : "bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))]";
+  const line = tier ? TIER_LINE[tier] : "via-amethyst/80";
   const wins = group.matches.filter((match) => match.result === "win").length;
   const losses = group.matches.filter((match) => match.result === "loss").length;
   const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
@@ -470,9 +500,9 @@ function TournamentRecordGroup({
   return (
     <section
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 320px" }}
-      className={`clip-esports max-w-full overflow-hidden border bg-gradient-to-br from-crypt2/80 via-crypt/55 to-void ${border}`}
+      className={`clip-esports max-w-full overflow-hidden border ${border} ${surface}`}
     >
-      <div className={`group relative overflow-hidden border-b bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(22,16,31,0.78)_34%,rgba(11,7,16,0.98))] px-3 py-4 transition-colors hover:bg-amethyst/[0.04] sm:px-4 md:px-6 md:py-5 ${softBorder}`}>
+      <div className={`group relative overflow-hidden border-b px-3 py-4 transition-colors sm:px-4 md:px-6 md:py-5 ${softBorder} ${headerSurface}`}>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
@@ -482,11 +512,11 @@ function TournamentRecordGroup({
         />
         <span
           aria-hidden
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/80 to-transparent"
+          className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent ${line}`}
         />
         <span
           aria-hidden
-          className="absolute bottom-0 left-0 h-px w-2/3 bg-gradient-to-r from-amethyst/70 via-glow/30 to-transparent"
+          className={`absolute bottom-0 left-0 h-px w-2/3 bg-gradient-to-r from-transparent to-transparent ${line}`}
         />
         <span
           aria-hidden
