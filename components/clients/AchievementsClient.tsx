@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Trophy, Globe2, Users } from "lucide-react";
+import { Award, Crown, Globe2, Trophy, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -14,13 +14,50 @@ import type {
   Trophy as TrophyType,
 } from "@/lib/types";
 
-/** Tier badge styling — S-Tier wears the brand violet (biggest stage), the
- *  rest step down in prominence. Full class strings so Tailwind keeps them. */
-const TIER_BADGE: Record<CampaignEntry["tier"], string> = {
-  S: "border-amethyst/50 bg-amethyst/10 text-glow",
-  A: "border-spectre/40 bg-spectre/10 text-spectre",
-  B: "border-edge-bright bg-void/50 text-ash",
-  C: "border-edge bg-void/50 text-ash-dim",
+/** Tournament tier colour system: C green, B cyan, A violet, S gold. */
+const TIER_TONE: Record<
+  CampaignEntry["tier"],
+  {
+    text: string;
+    border: string;
+    glow: string;
+    wash: string;
+    node: string;
+    line: string;
+  }
+> = {
+  S: {
+    text: "text-gold",
+    border: "border-gold/40",
+    glow: "shadow-[0_0_26px_rgba(245,196,81,0.22)]",
+    wash: "from-gold/[0.14] via-gold/[0.035]",
+    node: "border-gold bg-gold shadow-[0_0_18px_rgba(245,196,81,0.75)]",
+    line: "via-gold/70",
+  },
+  A: {
+    text: "text-glow",
+    border: "border-amethyst/45",
+    glow: "shadow-[0_0_24px_rgba(168,85,247,0.24)]",
+    wash: "from-amethyst/[0.14] via-amethyst/[0.035]",
+    node: "border-amethyst bg-amethyst shadow-[0_0_18px_rgba(168,85,247,0.75)]",
+    line: "via-amethyst/70",
+  },
+  B: {
+    text: "text-cyan-300",
+    border: "border-cyan-300/35",
+    glow: "shadow-[0_0_24px_rgba(103,232,249,0.18)]",
+    wash: "from-cyan-300/[0.11] via-cyan-300/[0.025]",
+    node: "border-cyan-300 bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,0.65)]",
+    line: "via-cyan-300/60",
+  },
+  C: {
+    text: "text-win",
+    border: "border-win/35",
+    glow: "shadow-[0_0_22px_rgba(52,211,153,0.17)]",
+    wash: "from-win/[0.11] via-win/[0.025]",
+    node: "border-win bg-win shadow-[0_0_16px_rgba(52,211,153,0.6)]",
+    line: "via-win/60",
+  },
 };
 
 /** Medal text color for a podium finish. */
@@ -30,18 +67,36 @@ const MEDAL_TEXT: Record<NonNullable<CampaignEntry["medal"]>, string> = {
   bronze: "text-bronze",
 };
 
-/** Timeline node fill — Worlds appearances glow violet, podiums take their
- *  medal color, everything else is a quiet edge dot. */
-const NODE_STYLE: Record<string, string> = {
-  worlds: "border-amethyst bg-amethyst shadow-[0_0_12px_rgba(168,85,247,0.9)]",
-  gold: "border-gold bg-gold",
-  silver: "border-silver bg-silver",
-  bronze: "border-bronze bg-bronze",
-  none: "border-edge-bright bg-void",
+const MEDAL_BORDER: Record<NonNullable<CampaignEntry["medal"]>, string> = {
+  gold: "border-gold/45",
+  silver: "border-silver/35",
+  bronze: "border-bronze/40",
 };
 
 const yr = (iso: string) => iso.slice(0, 4);
 const monogram = (s: string) => s.replace(/\s+/g, "").slice(0, 2).toUpperCase();
+const labels = {
+  date: { en: "Date", lo: "ວັນທີ" },
+  rank: { en: "Rank", lo: "ອັນດັບ" },
+  prize: { en: "Prize", lo: "ລາງວັນ" },
+  totalRecord: { en: "Total Record", lo: "ບັນທຶກລວມ" },
+  championshipCore: { en: "Championship Core", lo: "ແກນແຊມປ໌" },
+  globalProof: { en: "Global Proof", lo: "ຜົນງານລະດັບໂລກ" },
+};
+
+function formatDate(iso: string, lang: "en" | "lo"): string {
+  const date = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(date.valueOf())) return iso;
+  return new Intl.DateTimeFormat(lang === "lo" ? "lo-LA" : "en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date).replace(",", "");
+}
+
+function placementTone(e: CampaignEntry): string {
+  return e.medal ? MEDAL_TEXT[e.medal] : TIER_TONE[e.tier].text;
+}
 
 function tenure(p: FormerPlayer): string {
   const a = yr(p.joined);
@@ -85,57 +140,73 @@ function TrophyCard({ t }: { t: TrophyType }) {
 
 /** One result on the vertical campaign timeline. */
 function TimelineEntry({ e, delay }: { e: CampaignEntry; delay: number }) {
-  const node = e.worlds ? "worlds" : e.medal ?? "none";
+  const { lang, pick } = useLanguage();
+  const tier = TIER_TONE[e.tier];
+  const rankTone = placementTone(e);
+  const medalBorder = e.medal ? MEDAL_BORDER[e.medal] : tier.border;
   return (
     <Reveal delay={delay} className="relative pl-8 md:pl-12">
       {/* spine node */}
       <span
         aria-hidden
-        className={`absolute left-0 top-5 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-2 ${NODE_STYLE[node]}`}
+        className={`absolute left-0 top-6 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-2 ${tier.node}`}
       />
       <div
-        className={`overflow-hidden border bg-crypt/40 p-4 md:p-5 ${
-          e.worlds ? "border-amethyst/40 shadow-glow-soft" : "border-edge"
-        }`}
+        className={`group relative overflow-hidden border bg-crypt/70 p-4 transition-colors duration-300 hover:border-edge-bright md:p-5 ${tier.border} ${tier.glow}`}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] ${TIER_BADGE[e.tier]}`}
-              >
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tier.wash} to-transparent opacity-70`}
+        />
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${tier.line} to-transparent opacity-80`}
+        />
+
+        <div className="relative flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className={`font-mono text-xs font-bold uppercase tracking-[0.22em] ${tier.text} [text-shadow:0_0_16px_rgba(199,125,255,0.36)]`}>
                 {e.tier}-Tier
-              </span>
-              {e.worlds && (
-                <span className="inline-flex items-center gap-1 border border-amethyst/40 bg-amethyst/10 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-glow">
-                  <Globe2 size={10} strokeWidth={2.25} />
-                  Worlds
-                </span>
-              )}
-              <span className="font-mono text-[10px] tabular-nums text-ash-dim">{yr(e.date)}</span>
+              </p>
+              <h3 className="keep-latin mt-2 font-display text-lg font-bold uppercase leading-tight text-soul [text-shadow:0_0_18px_rgba(236,231,242,0.16)] md:text-xl">
+                {e.tournament}
+              </h3>
             </div>
-            <h3 className="keep-latin mt-2 font-display text-base font-bold uppercase leading-tight text-soul md:text-lg">
-              {e.tournament}
-            </h3>
-            <p className="mt-1.5 font-mono text-xs text-ash">
-              <span className="font-bold tabular-nums text-spectre">{e.result}</span>
-              {e.opponent && (
-                <>
-                  {" "}
-                  vs <span className="keep-latin text-spectre">{e.opponent}</span>
-                </>
-              )}
-            </p>
+
+            {e.worlds && (
+              <span className="inline-flex shrink-0 items-center gap-1.5 border border-amethyst/35 bg-amethyst/10 px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-glow">
+                <Globe2 size={11} strokeWidth={2.25} />
+                Worlds
+              </span>
+            )}
           </div>
-          <div className="shrink-0 text-right">
-            <p
-              className={`font-display text-lg font-bold uppercase leading-none ${
-                e.medal ? MEDAL_TEXT[e.medal] : "text-soul"
-              }`}
-            >
-              {e.place}
-            </p>
-            <p className="mt-1.5 font-mono text-xs font-semibold tabular-nums text-ash">{e.prize}</p>
+
+          <div className="grid grid-cols-3 border-t border-edge/80 pt-4">
+            <div className="min-w-0 pr-3">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash">
+                {pick(labels.date)}
+              </p>
+              <p className="mt-1.5 font-mono text-xs font-semibold uppercase tabular-nums text-soul">
+                {formatDate(e.date, lang)}
+              </p>
+            </div>
+            <div className={`min-w-0 border-x border-edge/80 px-3 ${medalBorder}`}>
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash">
+                {pick(labels.rank)}
+              </p>
+              <p className={`mt-1.5 font-display text-base font-bold uppercase leading-none ${rankTone} md:text-lg`}>
+                {e.place}
+              </p>
+            </div>
+            <div className="min-w-0 pl-3 text-right">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash">
+                {pick(labels.prize)}
+              </p>
+              <p className={`mt-1.5 font-mono text-xs font-bold tabular-nums ${rankTone} md:text-sm`}>
+                {e.prize}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -177,6 +248,7 @@ export default function AchievementsClient() {
   const { achievements } = useContent();
   const ACH = achievements as unknown as AchievementsData;
   const [tab, setTab] = useState<TabId>("overview");
+  const featuredTrophy = ACH.trophies[0];
 
   return (
     <>
@@ -218,43 +290,110 @@ export default function AchievementsClient() {
         <div key={tab} className="animate-fadeIn">
           {/* ── OVERVIEW — tale of the tape + trophies + staff ──────────── */}
           {tab === "overview" && (
-            <div className="space-y-14">
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-                {ACH.stats.map((s) => (
-                  <div key={s.id} className="relative h-full overflow-hidden border border-edge bg-void/55 p-5">
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent"
-                    />
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5"
-                    />
-                    <p className="font-mono text-4xl font-bold leading-none tabular-nums text-soul md:text-5xl">
-                      {s.value}
-                    </p>
-                    <p className="mt-5 font-display text-sm font-bold uppercase tracking-[0.12em] text-spectre">
-                      {pick(s.label)}
-                    </p>
-                    <p className="mt-2 text-xs leading-relaxed text-ash">{pick(s.detail)}</p>
+            <div className="space-y-10">
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+                <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/85 via-crypt/60 to-void p-5 shadow-glow-soft md:p-7">
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
+                  />
+                  <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-glow">
+                        {pick(labels.totalRecord)}
+                      </p>
+                      <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-none text-soul md:text-5xl">
+                        {pick(ACH.page.title)}
+                      </h2>
+                      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ash md:text-base">
+                        {pick(ACH.page.intro)}
+                      </p>
+                    </div>
+                    <div className="grid h-16 w-16 shrink-0 place-items-center border border-amethyst/35 bg-amethyst/10 text-glow shadow-glow">
+                      <Crown size={30} strokeWidth={1.65} />
+                    </div>
                   </div>
-                ))}
+
+                  <div className="relative mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {ACH.stats.map((s) => (
+                      <div key={s.id} className="border border-edge bg-void/45 p-4 transition-colors hover:border-edge-bright">
+                        <p className="font-mono text-3xl font-bold leading-none tabular-nums text-soul md:text-4xl">
+                          {s.value}
+                        </p>
+                        <p className="mt-3 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre">
+                          {pick(s.label)}
+                        </p>
+                        <p className="mt-1.5 text-[11px] leading-relaxed text-ash">{pick(s.detail)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {featuredTrophy && (
+                  <div className="clip-esports relative overflow-hidden border border-gold/35 bg-gradient-to-b from-gold/[0.11] via-crypt/70 to-void p-5 shadow-glow-gold md:p-7">
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"
+                    />
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-gold/80">
+                          {pick(labels.championshipCore)}
+                        </p>
+                        <h3 className="keep-latin mt-3 font-display text-2xl font-bold uppercase leading-tight text-soul">
+                          {featuredTrophy.tournament}
+                        </h3>
+                      </div>
+                      <Award size={34} strokeWidth={1.65} className="shrink-0 text-gold" />
+                    </div>
+                    <div className="mt-8 grid grid-cols-2 gap-3 border-t border-gold/20 pt-5">
+                      <div>
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-ash-dim">
+                          {pick(labels.date)}
+                        </p>
+                        <p className="mt-2 font-mono text-sm font-bold tabular-nums text-soul">
+                          {yr(featuredTrophy.date)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-ash-dim">
+                          {pick(labels.prize)}
+                        </p>
+                        <p className="mt-2 font-mono text-sm font-bold tabular-nums text-gold">
+                          {featuredTrophy.prize}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
                 <SectionLabel centered kicker="HALL OF CHAMPIONS">TROPHY CABINET</SectionLabel>
-                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {ACH.trophies.map((t) => (
                     <TrophyCard key={t.tournament} t={t} />
                   ))}
                 </div>
               </div>
 
-              <div>
-                <SectionLabel centered kicker="BEHIND THE WINS">COACHING STAFF</SectionLabel>
-                <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="border border-edge bg-crypt/25 p-5 md:p-6">
+                <div className="flex flex-col gap-2 text-center md:flex-row md:items-end md:justify-between md:text-left">
+                  <div>
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.3em] text-amethyst">
+                      {pick(labels.globalProof)}
+                    </p>
+                    <h3 className="mt-2 font-display text-xl font-bold uppercase tracking-[0.08em] text-soul">
+                      COACHING STAFF
+                    </h3>
+                  </div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-ash">
+                    BEHIND THE WINS
+                  </p>
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {ACH.staff.map((s) => (
-                    <div key={s.ign} className="flex items-center gap-3 border border-edge bg-crypt/30 px-4 py-3">
+                    <div key={s.ign} className="flex items-center gap-3 border border-edge bg-void/40 px-4 py-3">
                       <span className="grid h-9 w-9 shrink-0 place-items-center border border-edge bg-void/50 text-amethyst">
                         <Users size={16} strokeWidth={1.75} />
                       </span>
