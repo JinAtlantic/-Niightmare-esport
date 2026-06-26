@@ -77,16 +77,6 @@ export default function AboutUs() {
                 className="transition-transform duration-300 group-hover:translate-x-1"
               />
             </Link>
-            <Link
-              href={about.secondaryCta.href}
-              className="group inline-flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.16em] text-ash transition-colors duration-300 hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
-            >
-              {pick(about.secondaryCta.label)}
-              <ArrowRightIcon
-                size={15}
-                className="text-amethyst transition-transform duration-300 group-hover:translate-x-1"
-              />
-            </Link>
           </div>
         </Reveal>
       </div>

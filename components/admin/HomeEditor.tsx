@@ -306,7 +306,7 @@ export default function HomeEditor() {
         </Card>
 
         <Card className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4">
             <div className="space-y-3">
               <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
                 ปุ่มหลัก (Primary)
@@ -323,25 +323,6 @@ export default function HomeEditor() {
                 value={about.primaryCta.href}
                 onChange={(href) =>
                   patchAbout({ primaryCta: { ...about.primaryCta, href } })
-                }
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                ปุ่มรอง (Secondary)
-              </h3>
-              <BilingualField
-                label="ข้อความปุ่ม"
-                value={about.secondaryCta.label}
-                onChange={(label) =>
-                  patchAbout({ secondaryCta: { ...about.secondaryCta, label } })
-                }
-              />
-              <TextField
-                label="ลิงก์"
-                value={about.secondaryCta.href}
-                onChange={(href) =>
-                  patchAbout({ secondaryCta: { ...about.secondaryCta, href } })
                 }
               />
             </div>

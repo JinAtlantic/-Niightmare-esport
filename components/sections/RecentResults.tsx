@@ -74,10 +74,10 @@ function ResultCard({ match }: { match: Match }) {
 
   return (
     <article
-      className={`group relative overflow-hidden border ${s.border} bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void transition-all duration-300 ${s.glow}`}
+      className={`group relative h-[78px] overflow-hidden border ${s.border} bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void transition-all duration-300 sm:h-full ${s.glow}`}
     >
       {/* ── MOBILE: compact horizontal row — easy to scan in a single column ── */}
-      <div className="flex items-stretch sm:hidden">
+      <div className="flex h-full items-stretch sm:hidden">
         <div
           className={`flex w-[52px] shrink-0 items-center justify-center border-r ${s.border} bg-gradient-to-b ${s.ribbon} to-transparent`}
         >
@@ -215,7 +215,7 @@ export default function RecentResults() {
           </div>
         </Reveal>
 
-        <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div className="mt-10 grid max-h-[258px] grid-cols-1 gap-3 overflow-y-auto overscroll-contain pr-1 sm:max-h-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:pr-0 lg:grid-cols-4">
           {shown.map((match, i) => (
             <Reveal key={match.id} delay={i * 80} className="h-full">
               <ResultCard match={match} />

@@ -17,7 +17,6 @@ export interface AboutUsContent {
   body1: Bilingual;
   body2: Bilingual;
   primaryCta: AboutCta;
-  secondaryCta: AboutCta;
 }
 
 /** Shipped defaults — the band renders fully even before anything is saved in
@@ -37,7 +36,6 @@ export const DEFAULT_ABOUT: AboutUsContent = {
     lo: "ພວກເຮົາຖືກຂັບເຄື່ອນດ້ວຍສິ່ງທີ່ຫຼາຍກວ່າໄຊຊະນະ. ທຸກການຊ້ອມ, ທຸກຄືນທີ່ດຶກ, ທຸກການເລືອກໂຕ ລ້ວນຮັບໃຊ້ວິໄສທັດດຽວ: ຍົກວົງການ esports ລາວສູ່ຈຸດສູງສຸດ ແລະ ໄດ້ຮັບຄວາມເຄົາລົບຈາກໂລກໄປພ້ອມກັນ. ສອງເທື່ອແລ້ວທີ່ພວກເຮົາໄປເຖິງເວທີໂລກ — ແລະ ພວກເຮົາແບກຄວາມຮັບຜິດຊອບນັ້ນດ້ວຍລະບຽບວິໄນ, ຄວາມພູມໃຈ ແລະ ມາດຕະຖານທີ່ບໍ່ຍອມຫຼຸດລົງ.",
   },
   primaryCta: { label: { en: "THE FULL RECORD", lo: "ບັນທຶກທັງໝົດ" }, href: "/achievements" },
-  secondaryCta: { label: { en: "MEET THE ROSTER", lo: "ຮູ້ຈັກລາຍຊື່ທີມ" }, href: "/roster" },
 };
 
 /** Merge saved (partial) About Us copy over the defaults so a missing or
@@ -47,6 +45,5 @@ export function resolveAbout(raw?: Partial<AboutUsContent> | null): AboutUsConte
     ...DEFAULT_ABOUT,
     ...(raw ?? {}),
     primaryCta: { ...DEFAULT_ABOUT.primaryCta, ...(raw?.primaryCta ?? {}) },
-    secondaryCta: { ...DEFAULT_ABOUT.secondaryCta, ...(raw?.secondaryCta ?? {}) },
   };
 }
