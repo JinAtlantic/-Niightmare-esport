@@ -28,6 +28,7 @@ export default function Hero() {
         <span className="hero-bg-veil" />
         <span className="hero-fog hero-fog--1" />
         <span className="hero-fog hero-fog--2" />
+        <span className="hero-dust hero-dust--mist" />
         <span className="hero-dust hero-dust--far" />
         <span className="hero-dust hero-dust--near" />
         {Array.from({ length: 7 }).map((_, i) => (
