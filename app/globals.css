@@ -670,6 +670,39 @@ html.lang-lo .home-hero-tagline {
   background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.13), transparent 70%);
   animation: fog-drift-2 34s ease-in-out infinite;
 }
+/* premium violet dust: tiny suspended particles over the first viewport. */
+.hero-dust {
+  position: absolute;
+  inset: -12% -10%;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+.hero-dust--far {
+  opacity: 0.26;
+  background-image:
+    radial-gradient(circle at 11% 72%, rgba(199, 125, 255, 0.34) 0 1px, transparent 2px),
+    radial-gradient(circle at 23% 31%, rgba(168, 85, 247, 0.24) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 39% 58%, rgba(236, 231, 242, 0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 53% 22%, rgba(199, 125, 255, 0.28) 0 1.2px, transparent 3px),
+    radial-gradient(circle at 68% 66%, rgba(168, 85, 247, 0.2) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 40%, rgba(236, 231, 242, 0.13) 0 1px, transparent 2px),
+    radial-gradient(circle at 91% 78%, rgba(199, 125, 255, 0.22) 0 1px, transparent 2.4px);
+  background-size: 360px 300px;
+  animation: hero-dust-drift-far 38s linear infinite;
+}
+.hero-dust--near {
+  opacity: 0.18;
+  background-image:
+    radial-gradient(circle at 15% 28%, rgba(199, 125, 255, 0.55) 0 1.2px, transparent 3px),
+    radial-gradient(circle at 32% 76%, rgba(168, 85, 247, 0.42) 0 1.4px, transparent 3.2px),
+    radial-gradient(circle at 49% 36%, rgba(236, 231, 242, 0.18) 0 1px, transparent 2.4px),
+    radial-gradient(circle at 72% 18%, rgba(199, 125, 255, 0.4) 0 1.2px, transparent 3px),
+    radial-gradient(circle at 86% 68%, rgba(168, 85, 247, 0.44) 0 1.3px, transparent 3px);
+  background-size: 520px 420px;
+  animation: hero-dust-drift-near 26s ease-in-out infinite;
+}
 /* floating embers */
 .hero-ember {
   position: absolute;
@@ -698,6 +731,18 @@ html.lang-lo .home-hero-tagline {
   0%, 100% { transform: translate(0, 0); }
   50% { transform: translate(-8%, 4%); }
 }
+@keyframes hero-dust-drift-far {
+  0% { transform: translate3d(-1.5%, 2%, 0); opacity: 0.16; }
+  22% { opacity: 0.3; }
+  50% { transform: translate3d(1.5%, -2.5%, 0); opacity: 0.24; }
+  78% { opacity: 0.32; }
+  100% { transform: translate3d(-1.5%, 2%, 0); opacity: 0.16; }
+}
+@keyframes hero-dust-drift-near {
+  0%, 100% { transform: translate3d(1%, 0, 0); opacity: 0.12; }
+  45% { transform: translate3d(-2%, -3%, 0); opacity: 0.22; }
+  70% { opacity: 0.16; }
+}
 @keyframes ember-rise {
   0% { transform: translateY(0) translateX(0); opacity: 0; }
   12% { opacity: 0.9; }
@@ -706,10 +751,12 @@ html.lang-lo .home-hero-tagline {
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-fog,
-  .hero-ember {
+  .hero-ember,
+  .hero-dust {
     animation: none;
   }
   .hero-ember { display: none; }
+  .hero-dust { opacity: 0.14; }
 }
 
 .logo-stage {
