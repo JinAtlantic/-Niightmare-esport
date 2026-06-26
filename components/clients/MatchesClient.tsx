@@ -327,10 +327,12 @@ function StatsStrip({
 /** VOD control rendered on every row. Active link when a VOD exists,
  *  otherwise a disabled "VOD SOON" placeholder of the same footprint so
  *  the score/badge/VOD columns stay aligned across all rows. */
-function VodButton({ href, page }: { href: string | null; page: MatchesPageCopy }) {
+function VodButton({ href, page, compact = false }: { href: string | null; page: MatchesPageCopy; compact?: boolean }) {
   const { pick } = useLanguage();
   const base =
-    "inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 border px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors";
+    `inline-flex w-full items-center justify-center gap-1.5 border font-mono font-semibold uppercase tracking-[0.1em] transition-colors ${
+      compact ? "min-h-[32px] px-2.5 py-1 text-[9px]" : "min-h-[44px] px-3 py-1.5 text-[11px]"
+    }`;
 
   if (href) {
     return (
@@ -340,7 +342,7 @@ function VodButton({ href, page }: { href: string | null; page: MatchesPageCopy 
         rel="noopener noreferrer"
         className={`${base} border-edge bg-void/40 text-ash hover:border-amethyst hover:text-glow`}
       >
-        <PlayIcon size={13} />
+        <PlayIcon size={compact ? 11 : 13} />
         {pick(page.watchVod)}
       </a>
     );
@@ -366,6 +368,7 @@ function MatchCard({
   showTournament?: boolean;
 }) {
   const { pick, lang } = useLanguage();
+  const compact = !showTournament;
   const accent = RESULT_ACCENT[match.result];
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
   const tournamentName = pick(match.tournament).trim() || pick(page.unknownTournament);
@@ -378,24 +381,46 @@ function MatchCard({
     ? TIER_SURFACE_SOFT[tier]
     : "bg-[linear-gradient(135deg,rgba(28,20,40,0.92),rgba(22,16,31,0.76)_46%,rgba(11,7,16,0.96))]";
   const line = tier ? TIER_LINE[tier] : "via-spectre/45";
+  const mobileLogoSize = compact ? 42 : MOBILE_MATCH_LOGO_SIZE;
+  const desktopLogoSize = compact ? 44 : MATCH_LOGO_SIZE;
 
   return (
-    <article className={`hover-glow group relative overflow-hidden border p-5 pl-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6 md:pl-7 ${border} ${surface}`}>
+    <article
+      className={`hover-glow group relative overflow-hidden border shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${
+        compact ? "p-3 pl-4 md:p-3 md:pl-4" : "p-5 pl-6 md:p-6 md:pl-7"
+      } ${border} ${surface}`}
+    >
       {/* left accent blade — colored by the tournament's tier */}
       <span aria-hidden className={`absolute left-0 top-0 h-full w-1 ${blade}`} />
       <span
         aria-hidden
-        className={`absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-70 transition-opacity group-hover:opacity-100 ${line}`}
+        className={`absolute top-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-70 transition-opacity group-hover:opacity-100 ${
+          compact ? "inset-x-3" : "inset-x-6"
+        } ${line}`}
       />
-      <span aria-hidden className="absolute -right-20 -top-20 h-44 w-44 bg-amethyst/10 blur-3xl" />
+      <span
+        aria-hidden
+        className={`absolute bg-amethyst/10 blur-3xl ${
+          compact ? "-right-14 -top-16 h-28 w-28" : "-right-20 -top-20 h-44 w-44"
+        }`}
+      />
 
       {/* header: date | round */}
       <div className="relative flex items-center justify-between gap-3">
-        <time className="whitespace-nowrap border border-edge bg-void/35 px-2.5 py-1 font-mono text-xs tracking-wide text-ash" dateTime={match.date}>
+        <time
+          className={`whitespace-nowrap border border-edge bg-void/35 font-mono tracking-wide text-ash ${
+            compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
+          }`}
+          dateTime={match.date}
+        >
           {formatDate(match.date, lang)}
         </time>
         {round && (
-          <span className="shrink-0 border border-edge-bright bg-void/40 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre">
+          <span
+            className={`shrink-0 border border-edge-bright bg-void/40 font-mono font-semibold uppercase tracking-[0.16em] text-spectre ${
+              compact ? "px-2 py-0.5 text-[9px]" : "px-2.5 py-1 text-[10px]"
+            }`}
+          >
             {round}
           </span>
         )}
@@ -407,58 +432,82 @@ function MatchCard({
         </p>
       )}
 
-      <div className="relative mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/35 py-4 md:hidden">
+      <div
+        className={`relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-y border-edge/70 bg-void/35 md:hidden ${
+          compact ? "mt-2 py-2" : "mt-4 py-4"
+        }`}
+      >
         <span
           aria-hidden
           className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/50 to-transparent"
         />
-        <div className="flex min-w-0 flex-col items-center gap-2 text-center">
-          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={MOBILE_MATCH_LOGO_SIZE} />
-          <span className="keep-latin max-w-[104px] break-words font-display text-xs font-bold uppercase leading-tight text-soul">
+        <div className={`flex min-w-0 flex-col items-center text-center ${compact ? "gap-1" : "gap-2"}`}>
+          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={mobileLogoSize} />
+          <span
+            className={`keep-latin break-words font-display font-bold uppercase leading-tight text-soul ${
+              compact ? "max-w-[88px] text-[10px]" : "max-w-[104px] text-xs"
+            }`}
+          >
             NIIGHTMARE
           </span>
         </div>
 
-        <div className="flex min-w-[74px] flex-col items-center border-x border-edge/70 px-2">
-          <span className={`keep-latin font-display text-4xl font-bold leading-none tracking-[0.08em] ${accent.score}`}>
+        <div className={`flex flex-col items-center border-x border-edge/70 px-2 ${compact ? "min-w-[62px]" : "min-w-[74px]"}`}>
+          <span className={`keep-latin font-display font-bold leading-none tracking-[0.08em] ${compact ? "text-2xl" : "text-4xl"} ${accent.score}`}>
             {match.score}
           </span>
           <span
-            className={`mt-2 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] ${accent.badge}`}
+            className={`border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] ${
+              compact ? "mt-1" : "mt-2"
+            } ${accent.badge}`}
           >
             {pick(page.results[match.result])}
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-col items-center gap-2 text-center">
-          <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={MOBILE_MATCH_LOGO_SIZE} />
-          <span className="keep-latin max-w-[104px] break-words font-display text-xs font-bold uppercase leading-tight text-soul">
+        <div className={`flex min-w-0 flex-col items-center text-center ${compact ? "gap-1" : "gap-2"}`}>
+          <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={mobileLogoSize} />
+          <span
+            className={`keep-latin break-words font-display font-bold uppercase leading-tight text-soul ${
+              compact ? "max-w-[88px] text-[10px]" : "max-w-[104px] text-xs"
+            }`}
+          >
             {opponentName}
           </span>
         </div>
       </div>
 
       {/* desktop head-to-head: names stay horizontal with logos on the outer edges. */}
-      <div className="relative mt-4 hidden border-y border-edge/70 bg-void/30 px-4 py-4 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-5">
+      <div
+        className={`relative hidden border-y border-edge/70 bg-void/30 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center ${
+          compact ? "mt-2 px-3 py-2 md:gap-3" : "mt-4 px-4 py-4 md:gap-5"
+        }`}
+      >
         <span
           aria-hidden
           className="absolute inset-y-0 left-1/2 w-px bg-gradient-to-b from-transparent via-edge-bright to-transparent"
         />
         {/* NIIGHTMARE side */}
         <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-start md:gap-3">
-          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={MATCH_LOGO_SIZE} />
-          <span className="keep-latin truncate font-display text-base font-bold uppercase leading-tight text-soul md:text-2xl">
+          <OpponentLogo src="/logo.png" name="NIIGHTMARE" size={desktopLogoSize} />
+          <span className={`keep-latin truncate font-display font-bold uppercase leading-tight text-soul ${compact ? "text-base md:text-lg" : "text-base md:text-2xl"}`}>
             NIIGHTMARE
           </span>
         </div>
 
         {/* score + result */}
-        <div className="relative z-[1] flex min-w-[132px] flex-col items-center border border-edge-bright bg-crypt/80 px-4 py-3 shadow-[0_0_24px_rgba(168,85,247,0.12)]">
-          <span className={`keep-latin font-display text-3xl font-bold tracking-[0.1em] md:text-4xl ${accent.score}`}>
+        <div
+          className={`relative z-[1] flex flex-col items-center border border-edge-bright bg-crypt/80 shadow-[0_0_24px_rgba(168,85,247,0.12)] ${
+            compact ? "min-w-[104px] px-3 py-1.5" : "min-w-[132px] px-4 py-3"
+          }`}
+        >
+          <span className={`keep-latin font-display font-bold tracking-[0.1em] ${compact ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"} ${accent.score}`}>
             {match.score}
           </span>
           <span
-            className={`mt-1 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] md:text-[10px] ${accent.badge}`}
+            className={`mt-1 border px-2 py-0.5 text-center font-mono text-[9px] font-bold uppercase tracking-[0.14em] ${
+              compact ? "" : "md:text-[10px]"
+            } ${accent.badge}`}
           >
             {pick(page.results[match.result])}
           </span>
@@ -466,16 +515,16 @@ function MatchCard({
 
         {/* opponent side */}
         <div className="flex min-w-0 items-center justify-center gap-2.5 md:justify-end md:gap-3">
-          <span className="keep-latin truncate text-center font-display text-base font-bold uppercase leading-tight text-soul md:text-right md:text-2xl">
+          <span className={`keep-latin truncate text-center font-display font-bold uppercase leading-tight text-soul md:text-right ${compact ? "text-base md:text-lg" : "text-base md:text-2xl"}`}>
             {opponentName}
           </span>
-          <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={MATCH_LOGO_SIZE} />
+          <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={desktopLogoSize} />
         </div>
       </div>
 
       {/* VOD — always present */}
-      <div className="mx-auto mt-4 max-w-xs">
-        <VodButton href={match.vod} page={page} />
+      <div className={`mx-auto ${compact ? "mt-2 max-w-[190px]" : "mt-4 max-w-xs"}`}>
+      <VodButton href={match.vod} page={page} compact={compact} />
       </div>
     </article>
   );
@@ -613,16 +662,16 @@ function TournamentRecordGroup({
       </div>
 
       {open && (
-        <div className="relative flex flex-col gap-2 bg-void/55 p-2 md:gap-3 md:p-4">
+        <div className="relative flex flex-col gap-1.5 bg-void/55 p-2 md:gap-2 md:p-3">
           <span
             aria-hidden
-            className="absolute bottom-8 left-8 top-8 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
+            className="absolute bottom-6 left-6 top-6 hidden w-px bg-gradient-to-b from-amethyst/70 via-edge-bright to-transparent md:block"
           />
           {group.matches.map((match, i) => (
             <Reveal key={match.id} delay={Math.min(i, 6) * 45}>
-              <div className="grid gap-3 md:grid-cols-[44px_1fr] md:items-stretch">
+              <div className="grid gap-2 md:grid-cols-[34px_1fr] md:items-stretch">
                 <div className="hidden md:grid md:place-items-center">
-                  <span className="relative z-[1] grid h-9 w-9 place-items-center border border-amethyst/60 bg-void font-mono text-[11px] font-bold text-glow shadow-[0_0_16px_rgba(168,85,247,0.35)]">
+                  <span className="relative z-[1] grid h-7 w-7 place-items-center border border-amethyst/60 bg-void font-mono text-[10px] font-bold text-glow shadow-[0_0_14px_rgba(168,85,247,0.32)]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
