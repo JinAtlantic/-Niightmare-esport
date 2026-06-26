@@ -87,7 +87,7 @@ const DEFAULT_CONTACT_PAGE: ContactPageCopy = {
     lo: "ສົ່ງຂໍ້ຄວາມເລື່ອງ sponsor, media, event, scrim, recruitment ຫຼື ການຕິດຕໍ່ທີມແບບທາງການ.",
   },
   infoLabel: { en: "Direct Channels", lo: "ຊ່ອງທາງໂດຍກົງ" },
-  mediaKitLabel: { en: "Send Files to NIIGHTMARE", lo: "ສົ່ງໄຟລ໌ໃຫ້ NIIGHTMARE" },
+  mediaKitLabel: { en: "Attachments", lo: "ໄຟລ໌ແນບ" },
   mediaKitDesc: {
     en: "Attach documents, images, videos, proposals, or any files NIIGHTMARE should review.",
     lo: "ແນບເອກະສານ, ຮູບ, ວິດີໂອ, proposal ຫຼື ໄຟລ໌ໃດໆ ທີ່ຕ້ອງການໃຫ້ NIIGHTMARE ກວດເບິ່ງ.",
@@ -504,11 +504,6 @@ export default function HomeEditor() {
               label="Direct channels heading"
               value={contactPage.infoLabel}
               onChange={(infoLabel) => patchContactPage({ infoLabel })}
-            />
-            <BilingualField
-              label="File submission heading"
-              value={contactPage.mediaKitLabel}
-              onChange={(mediaKitLabel) => patchContactPage({ mediaKitLabel })}
             />
             <BilingualTextArea
               label="File submission description"

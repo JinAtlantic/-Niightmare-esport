@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import {
-  ArrowRightIcon,
   DiscordIcon,
   FacebookIcon,
   InstagramIcon,
@@ -48,9 +47,6 @@ const pageSeed = siteSeed.contactPage as ContactPageCopy;
 const inputClass =
   "min-h-[48px] w-full border border-edge bg-void/70 px-4 py-3 text-base text-soul placeholder:text-ash/70 outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-glow-soft";
 const LIQUIPEDIA_URL = "https://liquipedia.net/mobilelegends/Niightmare_Esports";
-
-const fileInputClass =
-  "w-full border border-edge bg-void/70 px-4 py-3 text-sm text-ash outline-none transition-colors file:mr-4 file:border-0 file:bg-amethyst file:px-4 file:py-2 file:font-display file:text-xs file:font-semibold file:uppercase file:tracking-[0.12em] file:text-white hover:border-edge-bright focus:border-amethyst focus:shadow-glow-soft";
 
 function isOldMediaKitCopy(value?: Bilingual) {
   const en = value?.en?.toLowerCase() ?? "";
@@ -158,83 +154,33 @@ export default function ContactClient() {
       <PageHeader title={pick(page.title)} subtitle={pick(page.intro)} />
 
       <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
-        <div className="relative mb-10 overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.14),transparent_34%),linear-gradient(135deg,rgba(28,20,40,0.7),rgba(11,7,16,0.94))] p-4 shadow-glow-soft md:p-6">
-          <span
-            aria-hidden
-            className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-glow/70 to-transparent"
-          />
-          <span aria-hidden className="absolute -right-24 -top-24 h-56 w-56 bg-amethyst/10 blur-3xl" />
-          <div className="relative">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="border border-edge bg-crypt/45 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] md:p-6">
+            <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
+              {pick(page.infoLabel)}
+            </h2>
+            <div className="mt-5 flex flex-col gap-2.5">
               {contactRows.map(({ key, value, href, Icon, external }) => (
                 <a
                   key={key}
                   href={href}
                   target={external ? "_blank" : undefined}
                   rel={external ? "noopener noreferrer" : undefined}
-                  className="hover-glow group relative min-h-[132px] overflow-hidden border border-edge bg-void/60 p-4 text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
+                  className="hover-glow group flex items-center gap-4 border border-edge bg-void/55 p-4 text-soul"
                 >
-                  <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
-                  <div aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rotate-45 border border-amethyst/20 bg-amethyst/5 transition-transform duration-300 group-hover:scale-110" />
-                  <span className="grid h-11 w-11 place-items-center border border-edge-bright bg-crypt text-amethyst shadow-[0_0_18px_rgba(168,85,247,0.12)] transition-colors group-hover:text-glow">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-crypt text-amethyst transition-colors group-hover:text-glow">
                     <Icon size={20} />
                   </span>
-                  <p className="mt-5 font-display text-sm font-bold uppercase tracking-[0.12em] text-spectre">
-                    {pick(page.channelLabels[key])}
-                  </p>
-                  <p className="keep-latin mt-2 break-words text-xs leading-relaxed text-ash">
-                    {key === "email" ? value : href}
-                  </p>
+                  <span className="min-w-0">
+                    <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                      {pick(page.channelLabels[key])}
+                    </span>
+                    <span className="keep-latin mt-1 block break-all text-sm">
+                      {key === "email" ? value : href}
+                    </span>
+                  </span>
                 </a>
               ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="space-y-6">
-            <div className="border border-edge bg-crypt/45 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] md:p-6">
-              <h2 className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-soul">
-              {pick(page.infoLabel)}
-              </h2>
-              <div className="mt-5 flex flex-col gap-2.5">
-                {contactRows.map(({ key, value, href, Icon, external }) => (
-                  <a
-                    key={key}
-                    href={href}
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
-                    className="hover-glow group flex items-center gap-4 border border-edge bg-void/55 p-4 text-soul"
-                  >
-                    <span className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-crypt text-amethyst transition-colors group-hover:text-glow">
-                      <Icon size={20} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
-                        {pick(page.channelLabels[key])}
-                      </span>
-                      <span className="keep-latin mt-1 block break-all text-sm">
-                        {key === "email" ? value : href}
-                      </span>
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(22,16,31,0.9)_42%,rgba(11,7,16,0.95))] p-6">
-              <span aria-hidden className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent" />
-              <h3 className="font-display text-base font-semibold uppercase tracking-[0.18em] text-soul">
-                {pick(page.mediaKitLabel)}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-ash">{pick(page.mediaKitDesc)}</p>
-              <a
-                href="#contact-form"
-                className="hover-glow mt-4 inline-flex min-h-[44px] items-center gap-2 border border-amethyst px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-soul hover:bg-amethyst/15"
-              >
-                {pick(page.mediaKitButton)}
-                <ArrowRightIcon size={16} />
-              </a>
             </div>
           </div>
 
@@ -291,10 +237,16 @@ export default function ContactClient() {
               </div>
 
               <div>
-                <label htmlFor="attachments" className="mb-1.5 block text-sm text-ash">
+                <p className="mb-1.5 block text-sm text-ash">
                   {pick(page.fieldLabels.attachments)}
+                </p>
+                <label
+                  htmlFor="attachments"
+                  className="hover-glow inline-flex min-h-[44px] cursor-pointer items-center border border-amethyst px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-soul hover:bg-amethyst/15"
+                >
+                  {pick(page.mediaKitButton)}
                 </label>
-                <input id="attachments" name="attachments" type="file" multiple className={fileInputClass} />
+                <input id="attachments" name="attachments" type="file" multiple className="sr-only" />
                 <p className="mt-2 text-xs leading-relaxed text-ash-dim">
                   {pick(page.mediaKitDesc)}
                 </p>
