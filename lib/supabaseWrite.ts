@@ -51,6 +51,15 @@ function omitKeys(rows: Record<string, unknown>[], keys: string[]) {
   });
 }
 
+function hasAnyValue(rows: Record<string, unknown>[], keys: string[]) {
+  return rows.some((row) =>
+    keys.some((key) => {
+      const value = row[key];
+      return value !== null && value !== undefined && String(value).trim() !== "";
+    })
+  );
+}
+
 /**
  * Write one content section straight to Supabase — the admin save path once the
  * site reads from Supabase. Each section maps to its table(s); list-backed
@@ -77,19 +86,23 @@ export async function writeSectionToSupabase(
       const members = memberRows(r.staff ?? []);
       const playerProfileColumns = ["birth_date", "country_code", "country_en", "country_lo"];
       const memberProfileColumns = ["country_code", "country_en", "country_lo"];
+      const playersHaveProfileColumns = await hasColumns(db, "players", playerProfileColumns.join(","));
+      const membersHaveProfileColumns = await hasColumns(db, "members", memberProfileColumns.join(","));
+      if (!playersHaveProfileColumns && hasAnyValue(players, playerProfileColumns)) {
+        throw new Error("Supabase players profile columns are missing. Run supabase/schema.sql before saving birth date or flag fields.");
+      }
+      if (!membersHaveProfileColumns && hasAnyValue(members, memberProfileColumns)) {
+        throw new Error("Supabase members profile columns are missing. Run supabase/schema.sql before saving staff flag fields.");
+      }
       await replaceTable(
         db,
         "players",
-        (await hasColumns(db, "players", playerProfileColumns.join(",")))
-          ? players
-          : omitKeys(players, playerProfileColumns)
+        playersHaveProfileColumns ? players : omitKeys(players, playerProfileColumns)
       );
       await replaceTable(
         db,
         "members",
-        (await hasColumns(db, "members", memberProfileColumns.join(",")))
-          ? members
-          : omitKeys(members, memberProfileColumns)
+        membersHaveProfileColumns ? members : omitKeys(members, memberProfileColumns)
       );
     } else if (key === "matches") {
       const m = value as { matches?: Match[]; tournaments?: Tournament[] };

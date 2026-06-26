@@ -27,6 +27,13 @@ function omitProfileColumns<T extends object>(row: T): T {
   return next as T;
 }
 
+function hasProfileValue(row: Record<string, unknown>) {
+  return PROFILE_COLUMNS.some((key) => {
+    const value = row[key];
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  });
+}
+
 /**
  * Upsert one Behind-the-Team member. Admin cookie required; the write itself
  * runs with the service role (bypasses RLS) so the public anon key never needs
@@ -54,7 +61,14 @@ export async function POST(request: Request) {
   if (!db) return NextResponse.json({ ok: true, persisted: false });
 
   const baseRow = staffToRow(member);
-  const row = (await membersHaveProfileColumns(db)) ? baseRow : omitProfileColumns(baseRow);
+  const hasColumns = await membersHaveProfileColumns(db);
+  if (!hasColumns && hasProfileValue(baseRow as unknown as Record<string, unknown>)) {
+    return NextResponse.json(
+      { error: "Supabase members profile columns are missing. Run supabase/schema.sql before saving staff flag fields." },
+      { status: 500 }
+    );
+  }
+  const row = hasColumns ? baseRow : omitProfileColumns(baseRow);
   let error;
   if (UUID.test(member.id)) {
     ({ error } = await db.from("members").upsert(row));
