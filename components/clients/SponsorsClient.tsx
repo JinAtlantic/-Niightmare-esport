@@ -37,15 +37,36 @@ interface SponsorsPageCopy {
 
 const FALLBACK_PAGE = sponsorsSeed.page as SponsorsPageCopy;
 
+const WALL_COPY = {
+  label: { en: "SUPPORTER WALL", lo: "ຜູ້ສະໜັບສະໜູນ" },
+  headline: {
+    en: "POWERED BY BRANDS THAT BACK NIIGHTMARE",
+    lo: "ຂັບເຄື່ອນໂດຍແບຣນທີ່ສະໜັບສະໜູນ NIIGHTMARE",
+  },
+  intro: {
+    en: "A premium partner stage built to make every supporter visible, respected, and remembered.",
+    lo: "ພື້ນທີ່ພາກສ່ວນແບບພຣີມຽມ ເພື່ອໃຫ້ທຸກແບຣນທີ່ສະໜັບສະໜູນເຫັນໄດ້ຊັດ ແລະ ມີຄຸນຄ່າ.",
+  },
+  supporter: { en: "Official Supporter", lo: "ຜູ້ສະໜັບສະໜູນທາງການ" },
+  visit: { en: "Visit Partner", lo: "ເບິ່ງພາກສ່ວນ" },
+  lineup: { en: "SUPPORTER LINEUP", lo: "ລາຍຊື່ຜູ້ສະໜັບສະໜູນ" },
+};
+
+function sponsorInitials(name: string) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "NM";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return words.slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+}
+
 function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number }) {
   const { pick } = useLanguage();
   return (
-    <div className="group relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.86),rgba(11,7,16,0.96))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+    <div className="group relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.72),rgba(11,7,16,0.96))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
       <span
         aria-hidden
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent"
       />
-      <span aria-hidden className="absolute -right-12 -top-12 h-28 w-28 bg-amethyst/10 blur-2xl transition-opacity group-hover:opacity-100" />
       <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-amethyst">
         {String(index + 1).padStart(2, "0")}
       </span>
@@ -57,20 +78,71 @@ function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number 
   );
 }
 
-function SponsorBox({ sponsor }: { sponsor: Sponsor }) {
-  return (
+function SponsorLogoCard({ sponsor, index, featured = false }: { sponsor: Sponsor; index: number; featured?: boolean }) {
+  const { pick } = useLanguage();
+  const linked = sponsor.url && sponsor.url !== "#";
+  const initials = sponsorInitials(sponsor.name);
+  const body = (
+    <>
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-glow/80 to-transparent" />
+      <span aria-hidden className="absolute left-0 top-0 h-10 w-10 border-l-2 border-t-2 border-amethyst/45" />
+      <span aria-hidden className="absolute bottom-0 right-0 h-10 w-10 border-b-2 border-r-2 border-amethyst/30" />
+      <span
+        aria-hidden
+        className={`keep-latin pointer-events-none absolute right-4 top-3 select-none font-display font-black leading-none text-amethyst/[0.08] transition-colors group-hover:text-amethyst/[0.13] ${
+          featured ? "text-8xl md:text-9xl" : "text-6xl"
+        }`}
+      >
+        {initials}
+      </span>
+
+      <div className="relative flex items-center justify-between gap-4">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-amethyst">
+          {pick(WALL_COPY.supporter)}
+        </p>
+        <span className="font-mono text-[10px] font-semibold text-ash-dim">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      <div className="relative mt-10 flex min-h-[74px] items-center">
+        <h3
+          className={`keep-latin break-words font-display font-black uppercase leading-[0.9] tracking-wide text-soul transition-colors group-hover:text-glow ${
+            featured ? "text-4xl sm:text-5xl lg:text-6xl" : "text-2xl sm:text-3xl"
+          }`}
+        >
+          {sponsor.name}
+        </h3>
+      </div>
+
+      <div className="relative mt-8 flex items-center justify-between gap-4 border-t border-edge/80 pt-4">
+        <span className="h-px flex-1 bg-gradient-to-r from-amethyst/50 to-transparent" aria-hidden />
+        <span className="font-display text-xs font-bold uppercase tracking-[0.18em] text-spectre transition-colors group-hover:text-soul">
+          {pick(WALL_COPY.visit)}
+        </span>
+      </div>
+    </>
+  );
+
+  return linked ? (
     <a
       href={sponsor.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="hover-glow group relative grid h-28 place-items-center overflow-hidden border border-edge bg-void/55 px-4 text-center transition-[filter] duration-300 hover:brightness-125"
+      className={`hover-glow group relative flex flex-col justify-between overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(22,16,31,0.92),rgba(11,7,16,0.98))] p-5 transition-[filter,transform,border-color] duration-300 hover:-translate-y-1 hover:border-amethyst/60 hover:brightness-110 ${
+        featured ? "min-h-[260px] md:col-span-2 lg:col-span-3 md:p-7" : "min-h-[190px]"
+      }`}
     >
-      <span aria-hidden className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-spectre/40 to-transparent" />
-      <span aria-hidden className="absolute -right-10 -top-10 h-24 w-24 rotate-45 border border-amethyst/15 bg-amethyst/5 transition-transform group-hover:scale-110" />
-      <span className="keep-latin relative font-rajdhani text-lg font-bold uppercase tracking-[0.1em] text-text-muted transition-colors group-hover:text-soul">
-        {sponsor.name}
-      </span>
+      {body}
     </a>
+  ) : (
+    <div
+      className={`group relative flex flex-col justify-between overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(22,16,31,0.92),rgba(11,7,16,0.98))] p-5 ${
+        featured ? "min-h-[260px] md:col-span-2 lg:col-span-3 md:p-7" : "min-h-[190px]"
+      }`}
+    >
+      {body}
+    </div>
   );
 }
 
@@ -133,23 +205,24 @@ export default function SponsorsClient() {
       <PageHeader title={pick(page.heroTitle)} subtitle={pick(page.heroSubtitle)} />
 
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-        <div className="relative mb-16 overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.16),transparent_34%),linear-gradient(135deg,rgba(28,20,40,0.68),rgba(11,7,16,0.96))] p-4 shadow-glow-soft md:p-6">
+        <div className="relative mb-16 overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.78),rgba(11,7,16,0.97))] p-5 shadow-glow-soft md:p-8">
           <span aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-glow/70 to-transparent" />
-          <span aria-hidden className="absolute -right-24 -top-24 h-56 w-56 bg-amethyst/10 blur-3xl" />
-          <div className="relative grid gap-5 lg:grid-cols-[0.78fr_1.22fr]">
-            <div className="flex min-h-[260px] flex-col justify-between border border-edge bg-void/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6">
-              <div>
-                <SectionLabel>{pick(page.valueLabel)}</SectionLabel>
-                <p className="mt-5 text-base font-medium leading-relaxed text-spectre md:text-lg">
-                  {pick(page.tiersIntro)}
-                </p>
-              </div>
-              <div className="mt-8 grid grid-cols-2 border border-edge bg-crypt/45">
+          <span aria-hidden className="scythe-line absolute inset-x-0 bottom-0 h-[2px] opacity-60" />
+          <div className="relative grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+            <div className="max-w-xl">
+              <SectionLabel>{pick(WALL_COPY.label)}</SectionLabel>
+              <h2 className="mt-5 font-display text-3xl font-black uppercase leading-[0.95] tracking-wide text-soul md:text-5xl">
+                {pick(WALL_COPY.headline)}
+              </h2>
+              <p className="mt-5 text-base font-medium leading-relaxed text-spectre md:text-lg">
+                {pick(WALL_COPY.intro)}
+              </p>
+              <div className="mt-8 grid grid-cols-2 border border-edge bg-void/55">
                 <div className="border-r border-edge px-4 py-3">
                   <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
                     {pick(page.partnersLabel)}
                   </p>
-                  <p className="mt-1 font-display text-xl font-bold text-glow">
+                  <p className="mt-1 font-display text-2xl font-bold text-glow">
                     {data.sponsors.length}
                   </p>
                 </div>
@@ -157,31 +230,45 @@ export default function SponsorsClient() {
                   <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
                     {pick(page.tiersLabel)}
                   </p>
-                  <p className="mt-1 font-display text-xl font-bold text-soul">
+                  <p className="mt-1 font-display text-2xl font-bold text-soul">
                     {data.tiers.length}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {valueProps.slice(0, 4).map((item, index) => (
-                <ValuePropCard key={item.id} item={item} index={index} />
-              ))}
+            <div className="min-w-0">
+              {data.sponsors[0] ? (
+                <SponsorLogoCard sponsor={data.sponsors[0]} index={0} featured />
+              ) : null}
             </div>
           </div>
         </div>
 
         {/* Active partners */}
-        <div className="border border-edge bg-crypt/35 p-4 md:p-5">
-          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-            <SectionLabel>{pick(page.partnersLabel)}</SectionLabel>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-spectre">
-              {data.sponsors.length}
+        <div>
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <SectionLabel>{pick(page.partnersLabel)}</SectionLabel>
+              <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
+                {pick(WALL_COPY.lineup)}
+              </h2>
+            </div>
+            <p className="max-w-md text-sm leading-relaxed text-ash md:text-right">
+              {pick(WALL_COPY.intro)}
             </p>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {data.sponsors.map((sponsor) => (
-              <SponsorBox key={sponsor.id} sponsor={sponsor} />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {data.sponsors.map((sponsor, index) => (
+              <SponsorLogoCard key={sponsor.id} sponsor={sponsor} index={index} featured={index === 0} />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-20">
+          <SectionLabel>{pick(page.valueLabel)}</SectionLabel>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {valueProps.slice(0, 4).map((item, index) => (
+              <ValuePropCard key={item.id} item={item} index={index} />
             ))}
           </div>
         </div>
