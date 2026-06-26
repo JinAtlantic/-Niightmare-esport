@@ -6,6 +6,7 @@ import matchesSeed from "@/data/matches.json";
 import newsSeed from "@/data/news.json";
 import sponsorsSeed from "@/data/sponsors.json";
 import siteSeed from "@/data/site.json";
+import achievementsSeed from "@/data/achievements.json";
 import type { Player, Socials } from "./types";
 
 /**
@@ -202,7 +203,9 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
         : undefined,
     };
 
-    return { roster, matches: matchesOut, news: newsOut, sponsors: sponsorsOut, site };
+    const achievements = (c.achievements as Record<string, unknown> | null) ?? achievementsSeed;
+
+    return { roster, matches: matchesOut, news: newsOut, sponsors: sponsorsOut, site, achievements };
   } catch {
     return null;
   }

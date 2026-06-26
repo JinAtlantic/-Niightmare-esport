@@ -14,7 +14,6 @@ import {
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { resolveRoadmap, type RoadmapContent, type RoadmapHalfId, type RoadmapStage } from "@/lib/roadmap";
-import { tierFromText, type Tier } from "@/lib/tiers";
 import type { Lang } from "@/lib/types";
 
 const statusClass = {
@@ -22,13 +21,13 @@ const statusClass = {
     card: "border-edge bg-void/35 opacity-65",
     node: "border-ash-dim bg-void text-ash",
     icon: Check,
-    label: "text-win",
+    label: "text-ash",
   },
   active: {
     card: "border-amethyst/75 bg-gradient-to-br from-amethyst/[0.18] via-crypt to-void shadow-[0_0_34px_rgba(168,85,247,0.35)]",
     node: "border-amethyst bg-amethyst/15 text-glow shadow-[0_0_22px_rgba(168,85,247,0.75)]",
     icon: Radar,
-    label: "text-loss",
+    label: "text-glow",
   },
   future: {
     card: "border-edge bg-crypt/55",
@@ -37,34 +36,6 @@ const statusClass = {
     label: "text-ash-dim",
   },
 } as const;
-
-const tierClass: Record<Tier | "default", { left: string; tag: string; halo: string }> = {
-  C: {
-    left: "border-l-win",
-    tag: "text-win",
-    halo: "bg-win/10",
-  },
-  B: {
-    left: "border-l-[#38BDF8]",
-    tag: "text-[#7DD3FC]",
-    halo: "bg-[#38BDF8]/10",
-  },
-  A: {
-    left: "border-l-amethyst",
-    tag: "text-glow",
-    halo: "bg-amethyst/10",
-  },
-  S: {
-    left: "border-l-gold",
-    tag: "text-gold",
-    halo: "bg-gold/10",
-  },
-  default: {
-    left: "border-l-amethyst",
-    tag: "text-spectre",
-    halo: "bg-amethyst/10",
-  },
-};
 
 function LangButton({ value, active, onClick }: { value: Lang; active: boolean; onClick: () => void }) {
   return (
@@ -94,11 +65,10 @@ function StageCard({
   const style = statusClass[status];
   const Icon = style.icon;
   const tagLabel = stage.tag.replace(/\s*\/\s*/g, " ").replace(/\s+/g, " ").trim();
-  const tierStyle = tierClass[tierFromText(stage.tag) ?? "default"];
 
   return (
-    <article className={`relative overflow-hidden border border-l-4 p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card} ${tierStyle.left}`}>
-      <span aria-hidden className={`pointer-events-none absolute -right-10 -top-16 h-32 w-32 blur-3xl ${tierStyle.halo}`} />
+    <article className={`relative overflow-hidden border border-l-4 border-l-amethyst p-2.5 transition-all duration-300 sm:p-3 md:p-4 ${style.card}`}>
+      <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 h-32 w-32 bg-amethyst/10 blur-3xl" />
       <div className="flex items-start gap-2 md:gap-3">
         <div className="relative shrink-0">
           {status === "active" && (
@@ -113,7 +83,7 @@ function StageCard({
             <span className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${style.label}`}>
               {status === "active" ? activeLabel : status === "past" ? "CLEARED" : "LOCKED"}
             </span>
-            <span className={`keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${tierStyle.tag}`}>
+            <span className="keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-spectre md:text-[9px]">
               {tagLabel}
             </span>
           </div>
@@ -225,16 +195,6 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
               transition={{ duration: reduce ? 0 : 0.22, ease: "easeOut" }}
               className="mt-3"
             >
-              <div className="mb-3 border border-edge bg-void/45 p-2.5 md:p-4">
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-amethyst md:text-[10px]">
-                  {pick(half.kicker)}
-                </p>
-                <h3 className="mt-1 font-display text-lg font-extrabold uppercase leading-tight text-soul md:text-2xl">
-                  {pick(half.title)}
-                </h3>
-                <p className="mt-1.5 hidden text-xs leading-relaxed text-spectre sm:block md:text-sm">{pick(half.goal)}</p>
-              </div>
-
               <div className="relative grid gap-2.5 md:gap-3">
                 <span aria-hidden className="absolute left-[22px] top-6 hidden h-[calc(100%-3rem)] w-px bg-gradient-to-b from-amethyst via-loss/50 to-edge md:block" />
                 {half.stages.map((stage) => (

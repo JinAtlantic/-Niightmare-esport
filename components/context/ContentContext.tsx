@@ -6,6 +6,7 @@ import rosterSeed from "@/data/roster.json";
 import sponsorsSeed from "@/data/sponsors.json";
 import newsSeed from "@/data/news.json";
 import siteSeed from "@/data/site.json";
+import achievementsSeed from "@/data/achievements.json";
 
 /**
  * Live site content. The root layout server-renders the real cloud content and
@@ -19,6 +20,7 @@ export interface Content {
   sponsors: typeof sponsorsSeed;
   news: typeof newsSeed;
   site: typeof siteSeed;
+  achievements: typeof achievementsSeed;
 }
 
 const SEED: Content = {
@@ -27,6 +29,7 @@ const SEED: Content = {
   sponsors: sponsorsSeed,
   news: newsSeed,
   site: siteSeed,
+  achievements: achievementsSeed,
 };
 
 const ContentCtx = createContext<Content>(SEED);

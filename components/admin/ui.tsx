@@ -300,23 +300,56 @@ export function Section({
   title,
   hint,
   action,
+  defaultOpen = false,
+  collapsible = true,
   children,
 }: {
   title: string;
   hint?: string;
   action?: React.ReactNode;
+  defaultOpen?: boolean;
+  collapsible?: boolean;
   children: React.ReactNode;
 }) {
-  return (
-    <section>
-      <div className="mb-3 flex items-end justify-between gap-3 border-b border-edge pb-2">
-        <div className="min-w-0">
-          <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">{title}</h2>
-          {hint && <p className="mt-0.5 font-mono text-[11px] leading-relaxed text-ash">{hint}</p>}
+  const [open, setOpen] = useState(defaultOpen);
+  if (!collapsible) {
+    return (
+      <section>
+        <div className="mb-3 flex items-end justify-between gap-3 border-b border-edge pb-2">
+          <div className="min-w-0">
+            <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">{title}</h2>
+            {hint && <p className="mt-0.5 font-mono text-[11px] leading-relaxed text-ash">{hint}</p>}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {children}
+      </section>
+    );
+  }
+
+  return (
+    <section className="border border-edge bg-crypt/35">
+      <div className="flex items-stretch justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+          className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-crypt"
+        >
+          <span className="min-w-0">
+            <span className="block font-display text-base font-bold uppercase tracking-wide text-soul">{title}</span>
+            {hint && <span className="mt-0.5 block font-mono text-[11px] leading-relaxed text-ash">{hint}</span>}
+          </span>
+          <span
+            aria-hidden
+            className={`shrink-0 font-mono text-lg leading-none text-amethyst transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          >
+            v
+          </span>
+        </button>
+        {action && <div className="flex shrink-0 items-center pr-3">{action}</div>}
       </div>
-      {children}
+      {open && <div className="border-t border-edge p-4 md:p-5">{children}</div>}
     </section>
   );
 }

@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Only these content sections may be read/written through the admin API. */
-const ALLOWED = new Set<ContentKey>(["matches", "roster", "sponsors", "news", "site"]);
+const ALLOWED = new Set<ContentKey>(["matches", "roster", "sponsors", "news", "site", "achievements"]);
 
 function authed(): boolean {
   return !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
@@ -67,6 +67,7 @@ export async function PUT(request: Request) {
     revalidateTag("content"); // surface the edit on the public site immediately
     revalidatePath("/", "layout");
     revalidatePath("/matches");
+    revalidatePath("/achievements");
     return NextResponse.json({ ok: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Could not save content";

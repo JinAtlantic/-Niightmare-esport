@@ -73,6 +73,12 @@ export async function writeSectionToSupabase(
       const sp = value as { sponsors?: Sponsor[]; tiers?: SponsorTier[] };
       await replaceTable(db, "sponsors", sponsorRows(sp.sponsors ?? []));
       await replaceTable(db, "sponsor_tiers", tierRows(sp.tiers ?? []));
+    } else if (key === "achievements") {
+      const { error } = await db.from("site_settings").upsert({
+        id: 1,
+        achievements: value,
+      });
+      if (error) throw new Error(`site_settings achievements: ${error.message}`);
     } else if (key === "site") {
       const site = value as SiteShape;
       const um = site.upcomingMatch;

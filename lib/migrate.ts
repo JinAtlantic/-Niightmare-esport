@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "./supabaseAdmin";
 import { readAll } from "./store";
 import { staffRoleKey } from "./staff";
 import type {
+  AchievementsData,
   Player,
   StaffMember,
   Match,
@@ -175,6 +176,7 @@ export async function migrateAll(): Promise<MigrateResult> {
   const newsFile = (content.news ?? {}) as { articles?: NewsArticle[] };
   const sponsorsFile = (content.sponsors ?? {}) as { sponsors?: Sponsor[]; tiers?: SponsorTier[] };
   const site = (content.site ?? {}) as SiteShape;
+  const achievements = content.achievements as AchievementsData | undefined;
 
   const players = [
     ...playerRows(roster.mlbb?.players ?? [], "mlbb"),
@@ -247,6 +249,7 @@ export async function migrateAll(): Promise<MigrateResult> {
       media_kit_url: s(site.mediaKitUrl),
       about_us: site.aboutUs ?? null,
       roadmap: site.roadmap ?? null,
+      achievements: achievements ?? null,
     };
     const { error: siteErr } = await db.from("site_settings").upsert(siteSettingsRow);
     if (siteErr) throw new Error(`site_settings: ${siteErr.message}`);

@@ -6,15 +6,13 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
-import achievements from "@/data/achievements.json";
+import { useContent } from "@/components/context/ContentContext";
 import type {
   AchievementsData,
   CampaignEntry,
   FormerPlayer,
   Trophy as TrophyType,
 } from "@/lib/types";
-
-const ACH = achievements as unknown as AchievementsData;
 
 /** Tier badge styling — S-Tier wears the brand violet (biggest stage), the
  *  rest step down in prominence. Full class strings so Tailwind keeps them. */
@@ -176,6 +174,8 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function AchievementsClient() {
   const { pick } = useLanguage();
+  const { achievements } = useContent();
+  const ACH = achievements as unknown as AchievementsData;
   const [tab, setTab] = useState<TabId>("overview");
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BilingualField, Card, SelectField, TextArea, TextField } from "@/components/admin/ui";
+import { BilingualField, Collapsible, SelectField, TextArea, TextField } from "@/components/admin/ui";
 import type { Bilingual } from "@/lib/types";
 import type { RoadmapContent, RoadmapStage, RoadmapStageStatus } from "@/lib/roadmap";
 
@@ -62,7 +62,8 @@ export default function RoadmapEditor({
 
   return (
     <div className="space-y-4">
-      <Card className="space-y-3">
+      <Collapsible title="Popup settings" hint="ปุ่มเปิด popup, หัวข้อ และ active stage" defaultOpen>
+        <div className="space-y-3">
         <h3 className={subhead}>Popup + Active Card</h3>
         <BilingualField label="Button label" value={value.buttonLabel} onChange={(buttonLabel) => onChange({ ...value, buttonLabel })} />
         <BilingualField label="Hero title" value={value.hero.title} onChange={(title) => patchHero({ title })} />
@@ -73,15 +74,14 @@ export default function RoadmapEditor({
           onChange={(activeStageId) => onChange({ ...value, activeStageId })}
         />
         <BilingualField label="Active label" value={value.activeLabel} onChange={(activeLabel) => onChange({ ...value, activeLabel })} />
-      </Card>
+        </div>
+      </Collapsible>
 
       {value.halves.map((half, halfIndex) => (
-        <Card key={half.id} className="space-y-4">
+        <Collapsible key={half.id} title={`${half.id.toUpperCase()} Roadmap`} hint="แก้ tab และ tournament stages">
+          <div className="space-y-4">
           <h3 className={subhead}>{half.id.toUpperCase()} Roadmap</h3>
           <BilingualField label="Tab label" value={half.tab} onChange={(tab) => patchHalf(halfIndex, { tab })} />
-          <BilingualField label="Kicker" value={half.kicker} onChange={(kicker) => patchHalf(halfIndex, { kicker })} />
-          <BilingualField label="Title" value={half.title} onChange={(title) => patchHalf(halfIndex, { title })} />
-          <BilingualTextArea label="Goal" value={half.goal} onChange={(goal) => patchHalf(halfIndex, { goal })} rows={3} />
 
           {half.stages.map((stage, stageIndex) => (
             <div key={stage.id} className="space-y-3 border border-edge bg-void/40 p-3">
@@ -108,7 +108,8 @@ export default function RoadmapEditor({
               </label>
             </div>
           ))}
-        </Card>
+          </div>
+        </Collapsible>
       ))}
     </div>
   );

@@ -2,19 +2,21 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/admin/ui";
+import AchievementsEditor from "@/components/admin/AchievementsEditor";
 import HomeEditor from "@/components/admin/HomeEditor";
 import MatchesEditor from "@/components/admin/MatchesEditor";
 import NewsEditor from "@/components/admin/NewsEditor";
 import RosterEditor from "@/components/admin/RosterEditor";
 import SponsorsEditor from "@/components/admin/SponsorsEditor";
 
-type Tab = "home" | "news" | "matches" | "roster" | "sponsors";
+type Tab = "home" | "news" | "matches" | "achievements" | "roster" | "sponsors";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "home", label: "หน้า Home" },
-  { id: "news", label: "ข่าวสาร" },
-  { id: "matches", label: "แมตช์ & ทัวร์นาเมนต์" },
-  { id: "roster", label: "นักแข่ง (Roster)" },
+  { id: "home", label: "Home" },
+  { id: "news", label: "News" },
+  { id: "matches", label: "Matches" },
+  { id: "achievements", label: "Achievements" },
+  { id: "roster", label: "Roster" },
   { id: "sponsors", label: "Sponsors" },
 ];
 
@@ -28,7 +30,6 @@ export default function AdminApp() {
 
   return (
     <div className="min-h-screen bg-void text-soul">
-      {/* top bar */}
       <header className="border-b border-edge bg-crypt">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-6">
           <div>
@@ -41,50 +42,48 @@ export default function AdminApp() {
           </div>
           <div className="flex items-center gap-2">
             <a href="/" target="_blank" rel="noopener noreferrer">
-              <Button>เปิดดูเว็บ ↗</Button>
+              <Button>Open site</Button>
             </a>
             <Button variant="danger" onClick={logout}>
-              ออกจากระบบ
+              Logout
             </Button>
           </div>
         </div>
       </header>
 
-      {/* publish reminder */}
       <div className="border-b border-edge bg-amethyst/[0.06]">
         <p className="mx-auto max-w-5xl px-4 py-2.5 font-mono text-[11px] leading-relaxed text-spectre md:px-6">
-          ✅ กด <b>บันทึกการเปลี่ยนแปลง</b> แล้ว <b>ขึ้นเว็บออนไลน์ทันที</b> — ไม่ต้องกด Deploy อีกต่อไป (เปิดดูเว็บแล้วรีเฟรชเพื่อเห็นผล)
+          Save changes here, then refresh the public site to see the live update.
         </p>
       </div>
 
-      {/* tabs */}
       <nav className="border-b border-edge">
-        <div className="mx-auto flex max-w-5xl gap-1 px-4 md:px-6">
-          {TABS.map((tDef) => {
-            const active = tab === tDef.id;
+        <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 md:px-6">
+          {TABS.map((tabDef) => {
+            const active = tab === tabDef.id;
             return (
               <button
-                key={tDef.id}
+                key={tabDef.id}
                 type="button"
-                onClick={() => setTab(tDef.id)}
-                className={`-mb-px border-b-2 px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                onClick={() => setTab(tabDef.id)}
+                className={`-mb-px shrink-0 border-b-2 px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
                   active
                     ? "border-amethyst text-soul"
                     : "border-transparent text-ash hover:text-soul"
                 }`}
               >
-                {tDef.label}
+                {tabDef.label}
               </button>
             );
           })}
         </div>
       </nav>
 
-      {/* content */}
       <main className="mx-auto max-w-5xl px-4 py-8 md:px-6">
         {tab === "home" && <HomeEditor />}
         {tab === "news" && <NewsEditor />}
         {tab === "matches" && <MatchesEditor />}
+        {tab === "achievements" && <AchievementsEditor />}
         {tab === "roster" && <RosterEditor />}
         {tab === "sponsors" && <SponsorsEditor />}
       </main>

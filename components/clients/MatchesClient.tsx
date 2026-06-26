@@ -753,12 +753,8 @@ export default function MatchesClient() {
             <button
               type="button"
               onClick={() => setRoadmapOpen(true)}
-              className="group relative mb-4 flex w-full min-w-0 items-center justify-center overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-center transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:px-5 md:py-4"
+              className="group mb-4 flex w-full min-w-0 items-center justify-center overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-center transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:px-5 md:py-4"
             >
-              <span
-                aria-hidden
-                className="absolute inset-x-0 top-0 h-[3px] bg-[linear-gradient(90deg,#34D399_0_25%,#38BDF8_25%_50%,#A855F7_50%_75%,#F5C451_75%_100%)] shadow-[0_0_16px_rgba(168,85,247,0.42)]"
-              />
               <span className="block min-w-0 break-words font-display text-base font-extrabold uppercase tracking-tight text-soul md:text-xl">
                 {pick(roadmap.buttonLabel)}
               </span>

@@ -5,6 +5,7 @@ import roster from "@/data/roster.json";
 import sponsors from "@/data/sponsors.json";
 import news from "@/data/news.json";
 import site from "@/data/site.json";
+import achievements from "@/data/achievements.json";
 
 /**
  * Content store. Editable site content lives in a single Vercel Blob
@@ -14,7 +15,7 @@ import site from "@/data/site.json";
  * the owner edits via the admin, the blob takes over.
  */
 
-export type ContentKey = "matches" | "roster" | "sponsors" | "news" | "site";
+export type ContentKey = "matches" | "roster" | "sponsors" | "news" | "site" | "achievements";
 export type Content = Record<ContentKey, unknown>;
 
 // Each save writes a NEW, uniquely-named blob (immutable URL) rather than
@@ -25,7 +26,7 @@ const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 
 export function bundled(): Content {
   // Deep clone so callers can't mutate the imported modules.
-  return JSON.parse(JSON.stringify({ matches, roster, sponsors, news, site }));
+  return JSON.parse(JSON.stringify({ matches, roster, sponsors, news, site, achievements }));
 }
 
 /** True when cloud storage is configured (so the admin can actually save). */

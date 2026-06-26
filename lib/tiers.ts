@@ -22,8 +22,3 @@ export function tournamentTier(name: string): Tier | null {
   if (/national championship/.test(n) || /\bnational\b/.test(n)) return "C";
   return null;
 }
-
-export function tierFromText(value: string): Tier | null {
-  const match = value.toUpperCase().match(/\b([CBAS])-?\s*TIER\b/);
-  return match ? (match[1] as Tier) : null;
-}
