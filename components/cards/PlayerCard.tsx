@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { countryFlag } from "@/lib/personProfile";
+import { countryFlagImageUrl } from "@/lib/personProfile";
 import type { Player } from "@/lib/types";
 
 // Framer-Motion + the modal load on first profile open only, keeping the
@@ -19,7 +19,7 @@ export default function PlayerCard({ player }: { player: Player }) {
 
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const isSub = !!player.sub;
-  const flag = countryFlag(player.countryCode);
+  const flagUrl = countryFlagImageUrl(player.countryCode);
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
   const photoStyle = {
     objectPosition: `${crop.x}% ${crop.y}%`,
@@ -94,17 +94,25 @@ export default function PlayerCard({ player }: { player: Player }) {
             {isSub ? t("roster.badge_sub") : t("roster.badge_main")}
           </span>
 
-          {flag && (
+          {flagUrl && (
             <span
-              className="pointer-events-none absolute right-3 top-3 z-10 grid h-8 min-w-9 place-items-center border border-edge-bright bg-void/75 px-2 text-lg leading-none shadow-[0_0_12px_rgba(168,85,247,0.28)] backdrop-blur-sm"
+              className="pointer-events-none absolute right-3 top-3 z-10 grid h-8 w-11 place-items-center overflow-hidden border border-edge-bright bg-void/75 p-1 shadow-[0_0_12px_rgba(168,85,247,0.28)] backdrop-blur-sm"
               aria-label={player.countryCode ? `${player.countryCode.toUpperCase()} flag` : "country flag"}
             >
-              <span aria-hidden>{flag}</span>
+              <Image
+                src={flagUrl}
+                alt=""
+                width={40}
+                height={28}
+                unoptimized
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
             </span>
           )}
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#12091d]/96 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4">
-            <p className="mb-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-amethyst">
+            <p className="mb-2 inline-flex max-w-full border border-amethyst/55 bg-amethyst/15 px-2 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.18em] text-glow shadow-[0_0_14px_rgba(168,85,247,0.32)] md:text-[11px]">
               {pick(player.role)}
             </p>
             <h3 className="keep-latin break-words font-display text-xl font-bold uppercase leading-none tracking-wide text-soul transition-colors duration-300 group-hover:text-glow md:text-2xl">

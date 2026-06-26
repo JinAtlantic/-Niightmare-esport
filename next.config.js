@@ -34,6 +34,7 @@ const nextConfig = {
     // Allow remote player/team art served from Vercel Blob.
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "flagcdn.com" },
     ],
   },
   async headers() {

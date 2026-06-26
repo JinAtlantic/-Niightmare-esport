@@ -8,6 +8,12 @@ export function countryFlag(code?: string): string | null {
   );
 }
 
+export function countryFlagImageUrl(code?: string): string | null {
+  const normalized = code?.trim().toLowerCase();
+  if (!normalized || !/^[a-z]{2}$/.test(normalized)) return null;
+  return `https://flagcdn.com/w80/${normalized}.png`;
+}
+
 export function cleanCountryCode(code?: string): string | undefined {
   const normalized = code?.trim().toUpperCase();
   return normalized && /^[A-Z]{2}$/.test(normalized) ? normalized : undefined;
