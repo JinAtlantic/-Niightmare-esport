@@ -69,17 +69,20 @@ export async function POST(request: Request) {
   const base = slug((file as File).name);
   const pathname = `${folder}/${base}-${Date.now().toString(36)}.${ext}`;
   try {
-    const blob = await put(pathname, file, {
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const blob = await put(pathname, bytes, {
       access: "public",
       contentType: file.type,
       token,
       addRandomSuffix: false,
+      allowOverwrite: true,
       cacheControlMaxAge: 31536000, // images are immutable; cache hard
     });
     // The stored path is the full public blob URL (works the same as the old
     // /teams/... local paths in <img src>).
     return NextResponse.json({ ok: true, path: blob.url });
-  } catch {
+  } catch (error) {
+    console.error("admin upload failed", error);
     return NextResponse.json({ error: "Could not upload image" }, { status: 500 });
   }
 }
