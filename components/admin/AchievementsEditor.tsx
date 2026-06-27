@@ -105,7 +105,7 @@ export default function AchievementsEditor() {
   return (
     <div className="space-y-6">
       <SaveBar
-        count={`${stats.length} stats / ${trophies.length} trophies / ${campaign.length} campaign rows`}
+        count={`${stats.length} stats / ${trophies.length} trophies / ${campaign.length} campaign rows / ${formerPlayers.length + staff.length} legacy people`}
         saving={saving}
         error={error}
         savedAt={savedAt}
@@ -217,8 +217,8 @@ export default function AchievementsEditor() {
       </Section>
 
       <Section
-        title="Former players"
-        hint="Legacy roll"
+        title="Legacy roster"
+        hint="People who used to play for NIIGHTMARE"
         action={<Button onClick={() => patch({ formerPlayers: [{ ign: "New Player", name: "", role: "", joined: "", left: "", note: "" }, ...formerPlayers] })}>+ Add</Button>}
       >
         <div className="grid gap-3">
@@ -242,8 +242,8 @@ export default function AchievementsEditor() {
       </Section>
 
       <Section
-        title="Coaching staff"
-        hint="Staff strip on achievements overview"
+        title="Legacy staff / coaches"
+        hint="Past NIIGHTMARE staff only. Current staff should stay on the roster page."
         action={<Button onClick={() => patch({ staff: [...staff, { ign: "New Staff", role: { en: "Coach", lo: "" }, since: "" }] })}>+ Add</Button>}
       >
         <div className="grid gap-3">

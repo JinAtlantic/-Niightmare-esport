@@ -9,6 +9,7 @@ import Reveal from "@/components/ui/Reveal";
 import { useContent } from "@/components/context/ContentContext";
 import type {
   AchievementsData,
+  AchievementStaff,
   CampaignEntry,
   FormerPlayer,
   Trophy as TrophyType,
@@ -236,6 +237,29 @@ function FormerRow({ p }: { p: FormerPlayer }) {
   );
 }
 
+function LegacyStaffRow({ s }: { s: AchievementStaff }) {
+  const { pick } = useLanguage();
+  return (
+    <div className="flex h-full items-center gap-3 border border-edge bg-crypt/30 p-3.5 transition-colors hover:border-edge-bright">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-edge bg-void/60 text-amethyst/75">
+        <Users size={16} strokeWidth={1.8} />
+      </span>
+      <div className="min-w-0">
+        <p className="keep-latin truncate font-display text-sm font-bold uppercase text-soul">{s.ign}</p>
+        <p className="font-mono text-[11px] text-ash">
+          <span>{pick(s.role)}</span>
+          {s.since && (
+            <>
+              <span className="text-ash-dim"> · </span>
+              <span className="tabular-nums">{s.since}</span>
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { id: "overview", label: { en: "Overview", lo: "ພາບລວມ" } },
   { id: "campaign", label: { en: "Campaign", lo: "ໄທມ໌ໄລນ໌" } },
@@ -245,10 +269,20 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function AchievementsClient() {
   const { pick } = useLanguage();
-  const { achievements } = useContent();
+  const { achievements, roster } = useContent();
   const ACH = achievements as unknown as AchievementsData;
   const [tab, setTab] = useState<TabId>("overview");
   const featuredTrophy = ACH.trophies[0];
+  const currentStaffNames = new Set(
+    ((roster as { staff?: { ign?: string; name?: string }[] }).staff ?? [])
+      .flatMap((member) => [member.ign, member.name])
+      .filter(Boolean)
+      .map((name) => String(name).trim().toLowerCase())
+  );
+  const legacyStaff = (ACH.staff ?? []).filter((member) => {
+    const ign = member.ign.trim().toLowerCase();
+    return ign && !currentStaffNames.has(ign);
+  });
 
   return (
     <>
@@ -377,7 +411,7 @@ export default function AchievementsClient() {
                 </div>
               </div>
 
-              <div className="border border-edge bg-crypt/25 p-5 md:p-6">
+              <div className="hidden border border-edge bg-crypt/25 p-5 md:p-6">
                 <div className="flex flex-col gap-2 text-center md:flex-row md:items-end md:justify-between md:text-left">
                   <div>
                     <p className="font-mono text-[11px] font-bold uppercase tracking-[0.3em] text-amethyst">
@@ -430,10 +464,26 @@ export default function AchievementsClient() {
 
           {/* ── LEGACY — former players ─────────────────────────────────── */}
           {tab === "legacy" && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {ACH.formerPlayers.map((p) => (
-                <FormerRow key={p.ign} p={p} />
-              ))}
+            <div className="space-y-8">
+              <div>
+                <SectionLabel centered kicker="PAST PLAYERS">LEGACY ROSTER</SectionLabel>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {ACH.formerPlayers.map((p) => (
+                    <FormerRow key={p.ign} p={p} />
+                  ))}
+                </div>
+              </div>
+
+              {legacyStaff.length > 0 && (
+                <div>
+                  <SectionLabel centered kicker="PAST STAFF">LEGACY STAFF</SectionLabel>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {legacyStaff.map((s) => (
+                      <LegacyStaffRow key={s.ign} s={s} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

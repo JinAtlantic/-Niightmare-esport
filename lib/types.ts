@@ -222,7 +222,7 @@ export interface FormerPlayer {
   note: string;
 }
 
-/** A coach in the Achievements staff strip. */
+/** A past staff member shown in the Achievements legacy view. */
 export interface AchievementStaff {
   ign: string;
   role: Bilingual;

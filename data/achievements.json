@@ -206,7 +206,6 @@
     { "ign": "Zenitsu", "name": "", "role": "Middle", "joined": "2020-12-14", "left": "2021-05-25", "note": "" }
   ],
   "staff": [
-    { "ign": "Coach V", "role": { "en": "Head Coach", "lo": "ຫົວໜ້າຄູຝຶກ" }, "since": "2026" },
     { "ign": "Kyle", "role": { "en": "Coach", "lo": "ຄູຝຶກ" }, "since": "2025" },
     { "ign": "Xs0n", "role": { "en": "Coach", "lo": "ຄູຝຶກ" }, "since": "2024" }
   ]
