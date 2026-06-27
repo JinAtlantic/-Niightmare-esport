@@ -5,8 +5,8 @@
       "lo": "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE"
     },
     "heroSubtitle": {
-      "en": "Join us as we dominate the Lao esports scene",
-      "lo": "ມາຮ່ວມກັບພວກເຮົາໃນຂະນະທີ່ພວກເຮົາຄອງວົງການອີສະປອດລາວ"
+      "en": "Join the brands backing Lao esports on the road to bigger stages.",
+      "lo": "ຮ່ວມກັບແບຣນທີ່ສະໜັບສະໜູນອີສະປອດລາວໃນເສັ້ນທາງສູ່ເວທີທີ່ໃຫຍ່ກວ່າ."
     },
     "partnersLabel": {
       "en": "OUR PARTNERS",
@@ -17,12 +17,12 @@
       "lo": "ລະດັບການສະໜັບສະໜູນ"
     },
     "tiersIntro": {
-      "en": "Three ways to put your brand in front of a passionate Lao gaming audience.",
-      "lo": "ສາມທາງໃນການນໍາແບຣນຂອງທ່ານໄປຫາຜູ້ຊົມເກມລາວທີ່ມີຄວາມຫຼົງໄຫຼ."
+      "en": "Flexible partnership packages for brands that want meaningful visibility with Lao gaming fans.",
+      "lo": "ແພັກເກດພາກສ່ວນທີ່ຍືດຫຍຸ່ນ ສຳລັບແບຣນທີ່ຕ້ອງການການເຫັນທີ່ມີຄຸນຄ່າຕໍ່ແຟນເກມລາວ."
     },
     "valueLabel": {
       "en": "WHY PARTNER WITH US",
-      "lo": "ເປັນຫຍັງຕ້ອງຮ່ວມງານກັບເຮົາ"
+      "lo": "ເປັນຫຍັງຄວນຮ່ວມກັບພວກເຮົາ"
     },
     "valueProps": [
       {
@@ -30,7 +30,7 @@
         "title": { "en": "BRAND EXPOSURE", "lo": "ການເຫັນແບຣນ" },
         "body": {
           "en": "Place your brand across jerseys, matchday assets, streams, and website surfaces.",
-          "lo": "ນໍາແບຣນຂອງທ່ານໄປຢູ່ເທິງເສື້ອແຂ່ງ, ສື່ວັນແຂ່ງ, ຖ່າຍທອດ ແລະ ເວັບໄຊ."
+          "lo": "ນຳແບຣນຂອງທ່ານໄປຢູ່ເທິງເສື້ອແຂ່ງ ສື່ວັນແຂ່ງ ສະຕຣີມ ແລະເວັບໄຊ."
         }
       },
       {
@@ -38,33 +38,33 @@
         "title": { "en": "COMMUNITY ACCESS", "lo": "ເຂົ້າເຖິງຊຸມຊົນ" },
         "body": {
           "en": "Reach young Lao gaming fans through team stories, announcements, and community moments.",
-          "lo": "ເຂົ້າເຖິງແຟນເກມລາວຜ່ານເລື່ອງລາວຂອງທີມ, ປະກາດ ແລະ ກິດຈະກໍາຊຸມຊົນ."
+          "lo": "ເຂົ້າເຖິງແຟນເກມລາວຜ່ານເລື່ອງລາວຂອງທີມ ປະກາດ ແລະກິດຈະກຳຊຸມຊົນ."
         }
       },
       {
         "id": "matchday-visibility",
-        "title": { "en": "MATCHDAY VISIBILITY", "lo": "ການເຫັນໃນວັນແຂ່ງ" },
+        "title": { "en": "MATCHDAY VISIBILITY", "lo": "ຄວາມເດັ່ນໃນວັນແຂ່ງ" },
         "body": {
           "en": "Attach your brand to fixtures, results, highlight content, and tournament moments.",
-          "lo": "ໃຫ້ແບຣນຂອງທ່ານຢູ່ກັບນັດແຂ່ງ, ຜົນແຂ່ງ, ໄຮໄລທ໌ ແລະ ຊ່ວງເວລາຂອງລາຍການ."
+          "lo": "ໃຫ້ແບຣນຂອງທ່ານຢູ່ກັບຕາຕະລາງແຂ່ງ ຜົນແຂ່ງ ໄຮໄລທ໌ ແລະຊ່ວງສຳຄັນຂອງທົວນາເມັນ."
         }
       },
       {
         "id": "content-integration",
-        "title": { "en": "CONTENT INTEGRATION", "lo": "ການຮ່ວມຄອນເທນ" },
+        "title": { "en": "CONTENT INTEGRATION", "lo": "ຄອນເທນຮ່ວມແບຣນ" },
         "body": {
           "en": "Build campaigns around players, roster updates, behind-the-scenes media, and sponsor activations.",
-          "lo": "ສ້າງແຄມເປນຮ່ວມກັບນັກກິລາ, ການອັບເດດທີມ, ສື່ເບື້ອງຫຼັງ ແລະ ກິດຈະກໍາສະປອນເຊີ."
+          "lo": "ສ້າງແຄມເປນຮ່ວມກັບນັກກິລາ ການອັບເດດທີມ ສື່ເບື້ອງຫຼັງ ແລະກິດຈະກຳ sponsor."
         }
       }
     ],
     "ctaTitle": {
       "en": "READY TO BUILD A PARTNERSHIP?",
-      "lo": "ພ້ອມສ້າງພາກສ່ວນຮ່ວມກັນບໍ?"
+      "lo": "ພ້ອມສ້າງພາກສ່ວນຮ່ວມກັນແລ້ວບໍ?"
     },
     "ctaBody": {
       "en": "Tell us your goals and we will shape a package around your brand, budget, and activation window.",
-      "lo": "ບອກເປົ້າໝາຍຂອງທ່ານ ແລ້ວເຮົາຈະຈັດແພັກເກດໃຫ້ເໝາະກັບແບຣນ, ງົບປະມານ ແລະ ຊ່ວງເວລາແຄມເປນ."
+      "lo": "ບອກເປົ້າໝາຍຂອງທ່ານ ແລ້ວພວກເຮົາຈະຈັດແພັກເກດໃຫ້ເໝາະກັບແບຣນ ງົບປະມານ ແລະຊ່ວງເວລາຂອງແຄມເປນ."
     },
     "ctaPrimary": {
       "label": { "en": "CONTACT PARTNERSHIPS", "lo": "ຕິດຕໍ່ພາກສ່ວນ" },
@@ -76,43 +76,43 @@
     }
   },
   "sponsors": [
-    { "id": "s1", "name": "Mekong Mobile", "url": "#" },
-    { "id": "s2", "name": "Lao Net", "url": "#" },
-    { "id": "s3", "name": "ThunderGear", "url": "#" },
-    { "id": "s4", "name": "Vientiane Bank", "url": "#" },
-    { "id": "s5", "name": "Riverside Energy", "url": "#" },
-    { "id": "s6", "name": "Nightfall Apparel", "url": "#" }
+    { "id": "s1", "name": "Mekong Mobile", "url": "#", "logo": "" },
+    { "id": "s2", "name": "Lao Net", "url": "#", "logo": "" },
+    { "id": "s3", "name": "ThunderGear", "url": "#", "logo": "" },
+    { "id": "s4", "name": "Vientiane Bank", "url": "#", "logo": "" },
+    { "id": "s5", "name": "Riverside Energy", "url": "#", "logo": "" },
+    { "id": "s6", "name": "Nightfall Apparel", "url": "#", "logo": "" }
   ],
   "tiers": [
     {
       "id": "tier-title",
-      "name": { "en": "TITLE SPONSOR", "lo": "ສະປອນເຊີຫຼັກ" },
+      "name": { "en": "TITLE SPONSOR", "lo": "TITLE SPONSOR" },
       "color": "#C244C4",
       "benefits": [
-        { "en": "Logo on jersey front", "lo": "ໂລໂກ້ດ້ານໜ້າເສື້ອແຂ່ງ" },
-        { "en": "Branding across all platforms", "lo": "ໂລໂກ້ໃນທຸກຊ່ອງທາງ" },
-        { "en": "Named title sponsor of the team", "lo": "ເປັນສະປອນເຊີຫຼັກຂອງທີມ" },
-        { "en": "Priority at all events and content", "lo": "ໄດ້ສິດທິກ່ອນໃນທຸກກິດຈະກຳ ແລະ ຄອນເທນ" }
+        { "en": "Logo on jersey front", "lo": "ໂລໂກ້ຢູ່ດ້ານໜ້າເສື້ອແຂ່ງ" },
+        { "en": "Branding across all platforms", "lo": "ແບຣນປະກົດໃນທຸກຊ່ອງທາງ" },
+        { "en": "Named title sponsor of the team", "lo": "ສິດໃນຖານະ sponsor ຫຼັກຂອງທີມ" },
+        { "en": "Priority at all events and content", "lo": "ສິດພິເສດໃນງານ ແລະຄອນເທນສຳຄັນ" }
       ]
     },
     {
       "id": "tier-gold",
-      "name": { "en": "GOLD SPONSOR", "lo": "ສະປອນເຊີຄຳ" },
+      "name": { "en": "GOLD SPONSOR", "lo": "GOLD SPONSOR" },
       "color": "#C9A227",
       "benefits": [
-        { "en": "Logo on website and stream overlays", "lo": "ໂລໂກ້ໃນເວັບໄຊ ແລະ ໜ້າຈໍຖ່າຍທອດ" },
-        { "en": "Regular social media mentions", "lo": "ກ່າວເຖິງໃນສື່ສັງຄົມເປັນປະຈຳ" },
-        { "en": "Logo on jersey sleeve", "lo": "ໂລໂກ້ດ້ານແຂນເສື້ອ" }
+        { "en": "Logo on website and stream overlays", "lo": "ໂລໂກ້ຢູ່ເວັບໄຊ ແລະ overlay ການຖ່າຍທອດ" },
+        { "en": "Regular social media mentions", "lo": "ກ່າວເຖິງໃນສື່ສັງຄົມຢ່າງສະໝ່ຳສະເໝີ" },
+        { "en": "Logo on jersey sleeve", "lo": "ໂລໂກ້ຢູ່ແຂນເສື້ອແຂ່ງ" }
       ]
     },
     {
       "id": "tier-community",
-      "name": { "en": "COMMUNITY PARTNER", "lo": "ຄູ່ຮ່ວມງານຊຸມຊົນ" },
+      "name": { "en": "COMMUNITY PARTNER", "lo": "COMMUNITY PARTNER" },
       "color": "#8B2FC9",
       "benefits": [
-        { "en": "Social media shoutouts", "lo": "ກ່າວເຖິງໃນສື່ສັງຄົມ" },
-        { "en": "Logo in partner section", "lo": "ໂລໂກ້ໃນພາກຄູ່ຮ່ວມງານ" },
-        { "en": "Community event collaborations", "lo": "ຮ່ວມຈັດກິດຈະກຳຊຸມຊົນ" }
+        { "en": "Social media shoutouts", "lo": "ການ shoutout ໃນສື່ສັງຄົມ" },
+        { "en": "Logo in partner section", "lo": "ໂລໂກ້ຢູ່ໃນສ່ວນພາກສ່ວນ" },
+        { "en": "Community event collaborations", "lo": "ຮ່ວມຈັດກິດຈະກຳກັບຊຸມຊົນ" }
       ]
     }
   ]

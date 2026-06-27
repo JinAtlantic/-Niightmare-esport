@@ -149,6 +149,7 @@ export function sponsorRows(sponsors: Sponsor[]) {
   return sponsors.map((sp, i) => ({
     name: s(sp.name),
     url: s(sp.url),
+    logo: s(sp.logo),
     sort_order: i,
   }));
 }

@@ -168,6 +168,8 @@ export interface Sponsor {
   id: string;
   name: string;
   url: string;
+  /** Optional sponsor logo URL uploaded from admin. */
+  logo?: string;
 }
 
 export interface SponsorTier {

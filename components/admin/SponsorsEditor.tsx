@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useData } from "@/components/admin/useData";
-import { BilingualField, Button, Card, Collapsible, Label, Section, TextArea, TextField } from "@/components/admin/ui";
+import { BilingualField, Button, Card, Collapsible, ImageField, Label, Section, TextArea, TextField } from "@/components/admin/ui";
 import sponsorsSeed from "@/data/sponsors.json";
 import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
 
@@ -119,7 +119,7 @@ export default function SponsorsEditor() {
   const addSponsor = () =>
     setSponsors([
       ...sponsors,
-      { id: uid("s"), name: "New Partner", url: "#" },
+      { id: uid("s"), name: "New Partner", url: "#", logo: "" },
     ]);
 
   const addTier = () =>
@@ -291,6 +291,12 @@ export default function SponsorsEditor() {
                 label="ชื่อ partner"
                 value={sponsor.name}
                 onChange={(name) => patchSponsor(i, { name })}
+              />
+              <ImageField
+                label="Sponsor logo"
+                value={sponsor.logo}
+                folder="sponsors"
+                onChange={(logo) => patchSponsor(i, { logo })}
               />
               <TextField
                 label="ลิงก์"

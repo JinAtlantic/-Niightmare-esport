@@ -157,6 +157,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
         id: String(r.id),
         name: (r.name as string) ?? "",
         url: (r.url as string) ?? "#",
+        logo: val(r.logo),
       })),
       tiers: ((tiers.data ?? []) as Record<string, unknown>[]).map((r) => ({
         id: String(r.id),
