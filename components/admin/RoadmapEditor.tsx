@@ -69,7 +69,7 @@ export default function RoadmapEditor({
         <BilingualField label="Hero title" value={value.hero.title} onChange={(title) => patchHero({ title })} />
         <BilingualTextArea label="Hero intro" value={value.hero.intro} onChange={(intro) => patchHero({ intro })} rows={3} />
         <TextField
-          label="Active stage ID (example: h1-wild-card, h1-destination, h2-wild-card)"
+          label="Active stage ID (example: h1-step-2, h1-destination, h2-destination)"
           value={value.activeStageId}
           onChange={(activeStageId) => onChange({ ...value, activeStageId })}
         />

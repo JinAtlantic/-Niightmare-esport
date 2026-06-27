@@ -53,7 +53,7 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
       lo: "ແຜນທາງລະດູການທີ່ເບິ່ງງ່າຍສຳລັບແຟນຄັບ ແລະ ສະປອນເຊີ: ຄຶ່ງປີທຳອິດສູ່ MSC x EWC, ຄຶ່ງປີຫຼັງສູ່ M-Series.",
     },
   },
-  activeStageId: "h1-wild-card",
+  activeStageId: "h1-destination",
   activeBadge: {
     en: "CURRENT STATUS: INVASION PREPARATION (ROAD TO RIYADH, SAUDI ARABIA)",
     lo: "ສະຖານະປັດຈຸບັນ: ຕຽມບຸກທະລຸສູ່ ຣິຍາດ, ຊາອຸດີ ອາຣາເບຍ (MSC 2026)",
@@ -95,23 +95,11 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
           title: { en: "MCC Mekong Season 1", lo: "MCC Mekong Season 1" },
           window: { en: "April - June", lo: "ເມສາ - ມິຖຸນາ" },
           body: {
-            en: "Battle top teams from Thailand and Vietnam. Only the MCCM rank 1 team earns the Wild Card route toward MSC x EWC.",
-            lo: "ປະທະທີມແກ່ງຈາກໄທ ແລະ ຫວຽດນາມ. ມີພຽງອັນດັບ 1 ຂອງ MCCM ເທົ່ານັ້ນທີ່ໄດ້ໄປ MSC x EWC ແຕ່ຕ້ອງຜ່ານ Wild Card ກ່ອນ.",
+            en: "Battle top teams from Thailand and Vietnam. Only the MCCM rank 1 team earns the route toward MSC x EWC.",
+            lo: "ປະທະທີມແກ່ງຈາກໄທ ແລະ ຫວຽດນາມ. ມີພຽງອັນດັບ 1 ຂອງ MCCM ເທົ່ານັ້ນທີ່ໄດ້ເສັ້ນທາງໄປສູ່ MSC x EWC.",
           },
           tag: "B-Tier / Regional",
           status: "past",
-        },
-        {
-          id: "h1-wild-card",
-          label: { en: "Wild Card", lo: "Wild Card" },
-          title: { en: "MSC x EWC Wild Card", lo: "MSC x EWC Wild Card" },
-          window: { en: "June - July", lo: "ມິຖຸນາ - ກໍລະກົດ" },
-          body: {
-            en: "The MCCM Season 1 champion must survive the Wild Card bracket. Only Wild Card rank 1 unlocks the MSC x EWC Group Stage.",
-            lo: "ແຊ້ມ MCCM Season 1 ຕ້ອງຜ່ານຮອບ Wild Card ກ່ອນ. ມີພຽງອັນດັບ 1 ຂອງ Wild Card ເທົ່ານັ້ນທີ່ຈະປົດລັອກຕົ໋ວເຂົ້າ Group Stage ຂອງ MSC x EWC.",
-          },
-          tag: "A-Tier / Wild Card",
-          status: "future",
         },
         {
           id: "h1-destination",
@@ -119,8 +107,8 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
           title: { en: "MSC @ Esports World Cup", lo: "MSC @ Esports World Cup" },
           window: { en: "July", lo: "ກໍລະກົດ" },
           body: {
-            en: "The Wild Card rank 1 earns the Group Stage slot at the real MSC x EWC battlefield, chasing a prize pool above 3,000,000 USD.",
-            lo: "ອັນດັບ 1 ຂອງ Wild Card ຈຶ່ງໄດ້ slot ເຂົ້າ Group Stage ໃນສະໜາມຈິງ MSC x EWC ເພື່ອລ່າເງິນລາງວັນກວ່າ 3,000,000 USD.",
+            en: "The final MSC x EWC battlefield awaits in Riyadh, chasing a prize pool above 3,000,000 USD.",
+            lo: "ສະໜາມຈິງ MSC x EWC ທີ່ Riyadh ກຳລັງລໍຖ້າ ເພື່ອລ່າເງິນລາງວັນກວ່າ 3,000,000 USD.",
           },
           tag: "S-Tier / Global Ultimate",
           status: "future",
@@ -156,22 +144,10 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
           title: { en: "MCC Mekong Season 2", lo: "MCC Mekong Season 2" },
           window: { en: "September - November", lo: "ກັນຍາ - ພະຈິກ" },
           body: {
-            en: "The most brutal regional battlefield of the year. MCCM rank 1 flies direct to M-Series; rank 2 enters Wild Card to fight for one final M-Series slot.",
-            lo: "ສະໜາມຮົບພາກພື້ນທີ່ດຸເດືອດທີ່ສຸດຂອງປີ. ອັນດັບ 1 ຂອງ MCCM ໄດ້ຕົ໋ວບິນກົງໄປ M-Series; ອັນດັບ 2 ໄປ Wild Card ເພື່ອຫາ 1 slot ສຸດທ້າຍ.",
+            en: "The most brutal regional battlefield of the year. MCCM rank 1 flies direct to M-Series and the season reaches its final world route.",
+            lo: "ສະໜາມຮົບພາກພື້ນທີ່ດຸເດືອດທີ່ສຸດຂອງປີ. ອັນດັບ 1 ຂອງ MCCM ໄດ້ຕົ໋ວບິນກົງໄປ M-Series ແລະ ປິດເສັ້ນທາງລະດັບໂລກຂອງຊີຊັນ.",
           },
           tag: "B-Tier / Regional Major",
-          status: "future",
-        },
-        {
-          id: "h2-wild-card",
-          label: { en: "Wild Card", lo: "Wild Card" },
-          title: { en: "M-Series Wild Card", lo: "M-Series Wild Card" },
-          window: { en: "November - December", lo: "ພະຈິກ - ທັນວາ" },
-          body: {
-            en: "MCCM Season 2 rank 2 enters the Wild Card war. Only Wild Card rank 1 claims the final route into the M-Series World Championship.",
-            lo: "ອັນດັບ 2 ຂອງ MCCM Season 2 ຈະເຂົ້າສູ່ຮອບ Wild Card. ມີພຽງອັນດັບ 1 ຂອງ Wild Card ເທົ່ານັ້ນທີ່ຈະຄວ້າເສັ້ນທາງສຸດທ້າຍໄປ M-Series World Championship.",
-          },
-          tag: "A-Tier / Wild Card",
           status: "future",
         },
         {
@@ -180,7 +156,7 @@ export const DEFAULT_ROADMAP: RoadmapContent = {
           title: { en: "M-Series World Championship", lo: "M-Series World Championship" },
           window: { en: "December - January", lo: "ທັນວາ - ມັງກອນ" },
           body: {
-            en: "The highest stage in MLBB history: MCCM Season 2 rank 1 flies direct, while Wild Card rank 1 joins the world race for a Champion Skin legacy.",
+            en: "The highest stage in MLBB history: MCCM Season 2 rank 1 flies direct into the world race for a Champion Skin legacy.",
             lo: "ເວທີສູງສຸດໃນປະຫວັດສາດ MLBB: ສູ້ເພື່ອຈາລຶກຊື່ NIIGHTMARE ໃຫ້ເປັນທີມທີ່ແກ່ງທີ່ສຸດໃນໂລກ ແລະ ສ້າງມໍລະດົກ Champion Skin.",
           },
           tag: "S-Tier / World Championship",
@@ -225,13 +201,11 @@ function mergeHalf(fallback: RoadmapHalf, raw?: Partial<RoadmapHalf>): RoadmapHa
 }
 
 export function resolveRoadmap(raw?: Partial<RoadmapContent> | null): RoadmapContent {
-  const hasSavedWildCard = raw?.halves?.some((half) =>
-    half.stages?.some((stage) => stage.id === "h1-wild-card")
-  );
-  const activeStageId =
-    !hasSavedWildCard && raw?.activeStageId === "h1-destination"
-      ? DEFAULT_ROADMAP.activeStageId
-      : raw?.activeStageId ?? DEFAULT_ROADMAP.activeStageId;
+  const requestedActiveStageId = raw?.activeStageId ?? DEFAULT_ROADMAP.activeStageId;
+  const availableStageIds = new Set(DEFAULT_ROADMAP.halves.flatMap((half) => half.stages.map((stage) => stage.id)));
+  const activeStageId = availableStageIds.has(requestedActiveStageId)
+    ? requestedActiveStageId
+    : DEFAULT_ROADMAP.activeStageId;
   const halves = DEFAULT_ROADMAP.halves.map((half, index) => mergeHalf(half, raw?.halves?.[index])).map((half) => ({
     ...half,
     stages: half.stages.map((stage) => ({
