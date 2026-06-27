@@ -3,10 +3,12 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   X,
   Database,
+  Heart,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
@@ -224,6 +226,14 @@ export default function PlayerModal({
             {/* SOCIAL — pinned to the bottom on desktop so the column fills evenly */}
             <div className="mt-7 border-t border-edge pt-6 md:mt-auto">
               <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/roster/${player.id}`}
+                  onClick={onClose}
+                  className="hover-glow inline-flex h-11 items-center gap-2 border border-amethyst/60 bg-amethyst/10 px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-spectre transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+                >
+                  <Heart size={16} strokeWidth={1.75} />
+                  Fan Profile
+                </Link>
                 {player.email && <CopyEmailButton email={player.email} />}
                 <SocialLinks socials={player.socials} size={18} />
                 {player.liquipedia && (

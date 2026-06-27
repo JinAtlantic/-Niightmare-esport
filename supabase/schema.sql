@@ -196,6 +196,41 @@ create table if not exists public.site_settings (
   updated_at         timestamptz default now()
 );
 
+-- ── COMMUNITY / FAN AUTH ───────────────────────────────────────────────────
+-- Fan profiles mirror Supabase Auth users. The website writes likes/comments
+-- with the anon key, protected by RLS, so users must sign in with Google or
+-- Facebook before interacting.
+create table if not exists public.fan_profiles (
+  id              uuid primary key references auth.users(id) on delete cascade,
+  display_name    text,
+  avatar_url      text,
+  provider        text,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+create table if not exists public.player_likes (
+  id              uuid primary key default gen_random_uuid(),
+  player_id       uuid not null references public.players(id) on delete cascade,
+  user_id         uuid not null references public.fan_profiles(id) on delete cascade,
+  created_at      timestamptz default now(),
+  unique (player_id, user_id)
+);
+
+create table if not exists public.player_comments (
+  id              uuid primary key default gen_random_uuid(),
+  player_id       uuid not null references public.players(id) on delete cascade,
+  user_id         uuid not null references public.fan_profiles(id) on delete cascade,
+  body            text not null check (char_length(trim(body)) between 1 and 500),
+  status          text not null default 'visible',
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+create index if not exists idx_player_likes_player_id on public.player_likes(player_id);
+create index if not exists idx_player_likes_user_id on public.player_likes(user_id);
+create index if not exists idx_player_comments_player_created on public.player_comments(player_id, created_at desc);
+
 -- Backfill columns that may be missing on a members table created by an earlier
 -- (Stage 0) run, so the updated_at trigger below has a column to write to.
 alter table public.members add column if not exists updated_at timestamptz default now();
@@ -279,6 +314,36 @@ drop policy if exists "public read site_settings" on public.site_settings;
 create policy "public read site_settings" on public.site_settings for select using (true);
 drop trigger if exists set_site_settings_updated_at on public.site_settings;
 create trigger set_site_settings_updated_at before update on public.site_settings for each row execute function public.set_updated_at();
+
+alter table public.fan_profiles enable row level security;
+drop policy if exists "public read fan_profiles" on public.fan_profiles;
+create policy "public read fan_profiles" on public.fan_profiles for select using (true);
+drop policy if exists "fans insert own profile" on public.fan_profiles;
+create policy "fans insert own profile" on public.fan_profiles for insert with check (auth.uid() = id);
+drop policy if exists "fans update own profile" on public.fan_profiles;
+create policy "fans update own profile" on public.fan_profiles for update using (auth.uid() = id) with check (auth.uid() = id);
+drop trigger if exists set_fan_profiles_updated_at on public.fan_profiles;
+create trigger set_fan_profiles_updated_at before update on public.fan_profiles for each row execute function public.set_updated_at();
+
+alter table public.player_likes enable row level security;
+drop policy if exists "public read player_likes" on public.player_likes;
+create policy "public read player_likes" on public.player_likes for select using (true);
+drop policy if exists "fans like as self" on public.player_likes;
+create policy "fans like as self" on public.player_likes for insert with check (auth.uid() = user_id);
+drop policy if exists "fans unlike own" on public.player_likes;
+create policy "fans unlike own" on public.player_likes for delete using (auth.uid() = user_id);
+
+alter table public.player_comments enable row level security;
+drop policy if exists "public read visible player_comments" on public.player_comments;
+create policy "public read visible player_comments" on public.player_comments for select using (status = 'visible');
+drop policy if exists "fans comment as self" on public.player_comments;
+create policy "fans comment as self" on public.player_comments for insert with check (auth.uid() = user_id);
+drop policy if exists "fans update own comments" on public.player_comments;
+create policy "fans update own comments" on public.player_comments for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "fans delete own comments" on public.player_comments;
+create policy "fans delete own comments" on public.player_comments for delete using (auth.uid() = user_id);
+drop trigger if exists set_player_comments_updated_at on public.player_comments;
+create trigger set_player_comments_updated_at before update on public.player_comments for each row execute function public.set_updated_at();
 
 -- ============================================================================
 -- Seed the single-row config tables with the current site values (only when
