@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crown, Globe2, Users } from "lucide-react";
+import { Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -389,20 +389,11 @@ export default function AchievementsClient() {
                     aria-hidden
                     className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
                   />
-                  <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                  <div className="relative">
                     <div>
-                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-glow">
+                      <h2 className="font-display text-4xl font-black uppercase leading-none tracking-[0.08em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-6xl">
                         {pick(labels.totalRecord)}
-                      </p>
-                      <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-none text-soul md:text-5xl">
-                        {pick(ACH.page.title)}
                       </h2>
-                      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ash md:text-base">
-                        {pick(ACH.page.intro)}
-                      </p>
-                    </div>
-                    <div className="grid h-16 w-16 shrink-0 place-items-center border border-amethyst/35 bg-amethyst/10 text-glow shadow-glow">
-                      <Crown size={30} strokeWidth={1.65} />
                     </div>
                   </div>
 
