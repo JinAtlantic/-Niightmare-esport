@@ -201,7 +201,6 @@ const newScheduleEntry = (): MatchScheduleEntry => ({
   date: "",
   time: "",
   round: { en: "", lo: "" },
-  note: { en: "", lo: "" },
 });
 
 function BilingualTextArea({
@@ -503,14 +502,6 @@ export default function HomeEditor() {
               value={matchSchedule.title}
               onChange={(title) => patchMatchSchedule({ title })}
             />
-            <div className="md:col-span-2">
-              <BilingualTextArea
-                label="Popup intro"
-                value={matchSchedule.intro}
-                rows={2}
-                onChange={(intro) => patchMatchSchedule({ intro })}
-              />
-            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -563,14 +554,6 @@ export default function HomeEditor() {
                     value={entry.time}
                     onChange={(time) => patchScheduleEntry(entry.id, { time })}
                   />
-                  <div className="md:col-span-2">
-                    <BilingualTextArea
-                      label="Note (optional)"
-                      value={entry.note ?? { en: "", lo: "" }}
-                      rows={2}
-                      onChange={(note) => patchScheduleEntry(entry.id, { note })}
-                    />
-                  </div>
                 </div>
               </div>
             ))}

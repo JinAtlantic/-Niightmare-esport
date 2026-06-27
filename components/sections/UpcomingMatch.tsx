@@ -215,9 +215,6 @@ function ScheduleModal({
             <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
               {pick(schedule.title)}
             </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ash">
-              {pick(schedule.intro)}
-            </p>
           </div>
           <button
             type="button"
@@ -246,9 +243,6 @@ function ScheduleModal({
                       <h4 className="keep-latin mt-1 break-words font-display text-xl font-black uppercase tracking-[0.06em] text-soul">
                         NIIGHTMARE <span className="text-glow">VS</span> {entry.opponent || "TBA"}
                       </h4>
-                      {pick(entry.note ?? { en: "", lo: "" }) && (
-                        <p className="mt-2 text-xs leading-relaxed text-ash">{pick(entry.note ?? { en: "", lo: "" })}</p>
-                      )}
                     </div>
                     <div className="grid shrink-0 grid-cols-2 gap-2 sm:min-w-[230px]">
                       <div className="border border-edge bg-crypt/55 px-3 py-2">

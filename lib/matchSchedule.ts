@@ -6,14 +6,12 @@ export interface MatchScheduleEntry {
   date: string;
   time: string;
   round: Bilingual;
-  note?: Bilingual;
 }
 
 export interface MatchScheduleContent {
   enabled: boolean;
   buttonLabel: Bilingual;
   title: Bilingual;
-  intro: Bilingual;
   emptyText: Bilingual;
   entries: MatchScheduleEntry[];
 }
@@ -22,10 +20,6 @@ export const DEFAULT_MATCH_SCHEDULE: MatchScheduleContent = {
   enabled: false,
   buttonLabel: { en: "View Schedule", lo: "ເບິ່ງຕາຕະລາງແຂ່ງ" },
   title: { en: "NIIGHTMARE Match Schedule", lo: "ຕາຕະລາງແຂ່ງ NIIGHTMARE" },
-  intro: {
-    en: "Upcoming NIIGHTMARE fixtures curated by the team.",
-    lo: "ລາຍການແຂ່ງຂອງ NIIGHTMARE ຈາກຕາຕະລາງທີ່ອັບໂຫຼດ.",
-  },
   emptyText: {
     en: "No NIIGHTMARE schedule rows have been added yet.",
     lo: "ຍັງບໍ່ມີລາຍການແຂ່ງຂອງ NIIGHTMARE.",
@@ -35,20 +29,13 @@ export const DEFAULT_MATCH_SCHEDULE: MatchScheduleContent = {
 
 export function hasMatchSchedulePayload(input?: Partial<MatchScheduleContent> | null) {
   if (!input) return false;
-  const diffBi = (key: "buttonLabel" | "title" | "intro" | "emptyText") =>
+  const diffBi = (key: "buttonLabel" | "title" | "emptyText") =>
     Boolean(
       (input[key]?.en ?? DEFAULT_MATCH_SCHEDULE[key].en) !== DEFAULT_MATCH_SCHEDULE[key].en ||
         (input[key]?.lo ?? DEFAULT_MATCH_SCHEDULE[key].lo) !== DEFAULT_MATCH_SCHEDULE[key].lo
     );
 
-  return Boolean(
-    input.enabled ||
-      input.entries?.length ||
-      diffBi("buttonLabel") ||
-      diffBi("title") ||
-      diffBi("intro") ||
-      diffBi("emptyText")
-  );
+  return Boolean(input.enabled || input.entries?.length || diffBi("buttonLabel") || diffBi("title") || diffBi("emptyText"));
 }
 
 function cleanEntry(entry: Partial<MatchScheduleEntry>, index: number): MatchScheduleEntry {
@@ -61,10 +48,6 @@ function cleanEntry(entry: Partial<MatchScheduleEntry>, index: number): MatchSch
       en: entry.round?.en ?? "",
       lo: entry.round?.lo ?? "",
     },
-    note:
-      entry.note?.en || entry.note?.lo
-        ? { en: entry.note?.en ?? "", lo: entry.note?.lo ?? "" }
-        : undefined,
   };
 }
 
@@ -75,10 +58,9 @@ export function resolveMatchSchedule(input?: Partial<MatchScheduleContent> | nul
 
   return {
     ...DEFAULT_MATCH_SCHEDULE,
-    ...(input ?? {}),
+    enabled: input?.enabled ?? DEFAULT_MATCH_SCHEDULE.enabled,
     buttonLabel: { ...DEFAULT_MATCH_SCHEDULE.buttonLabel, ...(input?.buttonLabel ?? {}) },
     title: { ...DEFAULT_MATCH_SCHEDULE.title, ...(input?.title ?? {}) },
-    intro: { ...DEFAULT_MATCH_SCHEDULE.intro, ...(input?.intro ?? {}) },
     emptyText: { ...DEFAULT_MATCH_SCHEDULE.emptyText, ...(input?.emptyText ?? {}) },
     entries,
   };
