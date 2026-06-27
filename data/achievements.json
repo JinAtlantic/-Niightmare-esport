@@ -71,6 +71,7 @@
     { "tier": "S", "first": 0, "second": 0, "third": 0, "top3": 0, "all": 3 },
     { "tier": "A", "first": 0, "second": 0, "third": 0, "top3": 0, "all": 2 },
     { "tier": "B", "first": 3, "second": 3, "third": 2, "top3": 8, "all": 14 },
+    { "tier": "C", "first": 0, "second": 0, "third": 0, "top3": 0, "all": 0 },
     { "tier": "Total", "first": 3, "second": 3, "third": 2, "top3": 8, "all": 19 }
   ],
   "campaign": [
