@@ -321,7 +321,6 @@ function LegacyStaffRow({ s }: { s: AchievementStaff }) {
 
 const TABS = [
   { id: "overview", label: { en: "Overview", lo: "ພາບລວມ" } },
-  { id: "campaign", label: { en: "Campaign", lo: "ໄທມ໌ໄລນ໌" } },
   { id: "legacy", label: { en: "Legacy", lo: "ອະດີດ" } },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
@@ -452,20 +451,6 @@ export default function AchievementsClient() {
           )}
 
           {/* ── CAMPAIGN — full timeline ────────────────────────────────── */}
-          {tab === "campaign" && (
-            <div className="relative mx-auto max-w-3xl">
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-2 left-0 w-px bg-gradient-to-b from-amethyst/60 via-edge-bright to-transparent"
-              />
-              <div className="space-y-4">
-                {ACH.campaign.map((e, i) => (
-                  <TimelineEntry key={`${e.date}-${e.tournament}`} e={e} delay={i * 40} />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* ── LEGACY — former players ─────────────────────────────────── */}
           {tab === "legacy" && (
             <div className="space-y-8">
