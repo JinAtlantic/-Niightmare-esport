@@ -140,10 +140,6 @@ export default function Footer() {
                 {t("footer.terms")}
               </Link>
             </nav>
-
-            <p className="font-display text-xs uppercase tracking-[0.2em] text-accent">
-              {t("footer.tagline")}
-            </p>
           </div>
         </div>
       </div>
