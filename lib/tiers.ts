@@ -8,7 +8,7 @@ export type Tier = "C" | "B" | "A" | "S";
  *   S — M-series World Championship, MLBB Mid-Season Cup
  *   A — Games of the Future / Wild Card routes
  *   B — M Challenge Cup Mekong (and its qualifiers), other MCC
- *   C — national championships / qualifiers
+ *   C — national championships / national-team qualifiers / local cups
  */
 export function tournamentTier(name: string): Tier | null {
   const n = name.toLowerCase();
@@ -19,6 +19,14 @@ export function tournamentTier(name: string): Tier | null {
   }
   if (/games of the future/.test(n)) return "A";
   if (/mekong/.test(n) || /m challenge cup/.test(n) || /\bmcc\b/.test(n)) return "B";
-  if (/national championship/.test(n) || /\bnational\b/.test(n)) return "C";
+  if (
+    /national championship/.test(n) ||
+    /\bnational\b/.test(n) ||
+    /qualifier|selection/.test(n) ||
+    /asian games?/.test(n) ||
+    /richman cup/.test(n)
+  ) {
+    return "C";
+  }
   return null;
 }
