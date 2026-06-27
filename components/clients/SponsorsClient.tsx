@@ -8,7 +8,7 @@ import SectionLabel from "@/components/ui/SectionLabel";
 import { useContent } from "@/components/context/ContentContext";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import sponsorsSeed from "@/data/sponsors.json";
-import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
+import type { Bilingual, Sponsor } from "@/lib/types";
 
 interface SponsorValueProp {
   id: string;
@@ -59,7 +59,6 @@ const COPY = {
   visit: { en: "Visit Sponsor", lo: "ໄປທີ່ Sponsor" },
   close: { en: "Close", lo: "ປິດ" },
   noLink: { en: "Website link not set yet", lo: "ຍັງບໍ່ໄດ້ໃສ່ລິງກ໌ເວັບໄຊ" },
-  tierLabel: { en: "Partner Packages", lo: "ແພັກເກດພາກສ່ວນ" },
 };
 
 const PARTNER_POINTS = {
@@ -264,57 +263,12 @@ function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number 
   );
 }
 
-function TierCard({ tier, cta, label }: { tier: SponsorTier; cta: SponsorCta; label: string }) {
-  const { pick } = useLanguage();
-  return (
-    <div
-      className="group relative flex flex-col overflow-hidden border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.78),rgba(11,7,16,0.96))] transition-transform duration-300 hover:-translate-y-1"
-      style={{ borderTopColor: tier.color, borderTopWidth: 3 }}
-    >
-      <span aria-hidden className="absolute -right-20 -top-20 h-44 w-44 opacity-20 blur-3xl" style={{ backgroundColor: tier.color }} />
-      <div className="relative p-5">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-ash-dim">
-          {label}
-        </p>
-        <h3
-          className="mt-3 font-display text-xl font-bold uppercase tracking-[0.08em]"
-          style={{ color: tier.color }}
-        >
-          {pick(tier.name)}
-        </h3>
-        <ul className="mt-5 flex flex-col gap-3 border-t border-edge pt-5">
-          {tier.benefits.map((benefit, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-text-primary">
-              <span
-                className="mt-1.5 inline-block h-2 w-2 shrink-0"
-                style={{ backgroundColor: tier.color, transform: "skewX(-20deg)" }}
-                aria-hidden
-              />
-              <span>{pick(benefit)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="relative mt-auto p-5 pt-0">
-        <Link
-          href={cta.href}
-          className="flex min-h-[44px] items-center justify-center gap-2 border border-primary px-4 py-2.5 text-center font-display text-sm font-semibold uppercase tracking-[0.12em] text-text-primary transition-colors hover:bg-primary/15"
-        >
-          {pick(cta.label)}
-          <ArrowRightIcon size={15} />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 export default function SponsorsClient() {
   const { pick } = useLanguage();
   const content = useContent();
   const data = content.sponsors as {
     page?: SponsorsPageCopy;
     sponsors: Sponsor[];
-    tiers: SponsorTier[];
   };
   const [activeSponsor, setActiveSponsor] = useState<Sponsor | null>(null);
   const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
@@ -339,20 +293,14 @@ export default function SponsorsClient() {
                 {pick(COPY.wallIntro)}
               </p>
             </div>
-            <div className="grid grid-cols-2 border border-edge bg-void/55 sm:grid-cols-3">
-              <div className="border-b border-r border-edge px-4 py-3 sm:border-b-0">
+            <div className="grid grid-cols-2 border border-edge bg-void/55">
+              <div className="border-r border-edge px-4 py-3">
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
                   {pick(page.partnersLabel)}
                 </p>
                 <p className="mt-1 font-display text-2xl font-bold text-glow">{sponsorCount}</p>
               </div>
-              <div className="border-b border-edge px-4 py-3 sm:border-b-0 sm:border-r">
-                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
-                  {pick(page.tiersLabel)}
-                </p>
-                <p className="mt-1 font-display text-2xl font-bold text-soul">{data.tiers.length}</p>
-              </div>
-              <div className="col-span-2 px-4 py-3 sm:col-span-1">
+              <div className="px-4 py-3">
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
                   {pick(COPY.official)}
                 </p>
@@ -391,18 +339,6 @@ export default function SponsorsClient() {
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {valueProps.slice(0, 4).map((item, index) => (
               <ValuePropCard key={item.id} item={item} index={index} />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-16">
-          <SectionLabel>{pick(COPY.tierLabel)}</SectionLabel>
-          <p className="mt-4 max-w-2xl text-text-muted">
-            {pick(page.tiersIntro)}
-          </p>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {data.tiers.map((tier) => (
-              <TierCard key={tier.id} tier={tier} cta={page.ctaPrimary} label={pick(page.tiersLabel)} />
             ))}
           </div>
         </div>
