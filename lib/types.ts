@@ -180,6 +180,7 @@ export interface SponsorTier {
 // ── Achievements page (static, sourced from Liquipedia) ──────────────────
 export type TournamentTier = "S" | "A" | "B" | "C";
 export type Medal = "gold" | "silver" | "bronze";
+export type PlacementSummaryTier = TournamentTier | "Total";
 
 /** Big tale-of-the-tape number on the Achievements hero. */
 export interface AchievementStat {
@@ -197,6 +198,16 @@ export interface Trophy {
   opponent: string;
   prize: string;
   tier: TournamentTier;
+}
+
+/** Liquipedia Placement Summary row. */
+export interface PlacementSummaryRow {
+  tier: PlacementSummaryTier;
+  first: number;
+  second: number;
+  third: number;
+  top3: number;
+  all: number;
 }
 
 /** One result on the Campaign timeline. */
@@ -233,6 +244,7 @@ export interface AchievementsData {
   page: { kicker: Bilingual; title: Bilingual; intro: Bilingual };
   stats: AchievementStat[];
   trophies: Trophy[];
+  placementSummary?: PlacementSummaryRow[];
   campaign: CampaignEntry[];
   formerPlayers: FormerPlayer[];
   staff: AchievementStaff[];

@@ -18,6 +18,8 @@ import type {
   CampaignEntry,
   FormerPlayer,
   Medal,
+  PlacementSummaryRow,
+  PlacementSummaryTier,
   TournamentTier,
   Trophy,
 } from "@/lib/types";
@@ -33,6 +35,13 @@ const medalOptions = [
   { value: "silver", label: "Silver" },
   { value: "bronze", label: "Bronze" },
 ];
+const placementTierOptions: { value: PlacementSummaryTier; label: string }[] = [
+  { value: "S", label: "S-Tier" },
+  { value: "A", label: "A-Tier" },
+  { value: "B", label: "B-Tier" },
+  { value: "C", label: "C-Tier" },
+  { value: "Total", label: "Total" },
+];
 
 function uid(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -44,6 +53,11 @@ function move<T>(items: T[], index: number, dir: -1 | 1) {
   if (to < 0 || to >= next.length) return next;
   [next[index], next[to]] = [next[to], next[index]];
   return next;
+}
+
+function num(value: string) {
+  const next = Number(value);
+  return Number.isFinite(next) ? next : 0;
 }
 
 function SaveBar({
@@ -86,6 +100,7 @@ export default function AchievementsEditor() {
   const page = data.page ?? seed.page;
   const stats = data.stats ?? [];
   const trophies = data.trophies ?? [];
+  const placementSummary = data.placementSummary ?? seed.placementSummary ?? [];
   const campaign = data.campaign ?? [];
   const formerPlayers = data.formerPlayers ?? [];
   const staff = data.staff ?? [];
@@ -95,6 +110,8 @@ export default function AchievementsEditor() {
     patch({ stats: stats.map((item, i) => (i === index ? { ...item, ...value } : item)) });
   const patchTrophy = (index: number, value: Partial<Trophy>) =>
     patch({ trophies: trophies.map((item, i) => (i === index ? { ...item, ...value } : item)) });
+  const patchPlacementSummary = (index: number, value: Partial<PlacementSummaryRow>) =>
+    patch({ placementSummary: placementSummary.map((item, i) => (i === index ? { ...item, ...value } : item)) });
   const patchCampaign = (index: number, value: Partial<CampaignEntry>) =>
     patch({ campaign: campaign.map((item, i) => (i === index ? { ...item, ...value } : item)) });
   const patchFormer = (index: number, value: Partial<FormerPlayer>) =>
@@ -105,7 +122,7 @@ export default function AchievementsEditor() {
   return (
     <div className="space-y-6">
       <SaveBar
-        count={`${stats.length} stats / ${trophies.length} trophies / ${campaign.length} campaign rows / ${formerPlayers.length + staff.length} legacy people`}
+        count={`${stats.length} stats / ${placementSummary.length} placement rows / ${trophies.length} trophies / ${campaign.length} campaign rows / ${formerPlayers.length + staff.length} legacy people`}
         saving={saving}
         error={error}
         savedAt={savedAt}
@@ -142,6 +159,37 @@ export default function AchievementsEditor() {
               </div>
               <BilingualField label="Label" value={item.label} onChange={(label) => patchStat(index, { label })} />
               <BilingualField label="Detail" value={item.detail} onChange={(detail) => patchStat(index, { detail })} />
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="Placement summary"
+        hint="Liquipedia Placement Summary shown on the Overview tab"
+        action={<Button onClick={() => patch({ placementSummary: [...placementSummary, { tier: "B", first: 0, second: 0, third: 0, top3: 0, all: 0 }] })}>+ Add</Button>}
+      >
+        <div className="grid gap-3">
+          {placementSummary.map((item, index) => (
+            <Card key={`${item.tier}-${index}`} className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">
+                  {item.tier === "Total" ? "Total" : `${item.tier}-Tier`}
+                </p>
+                <div className="flex gap-2">
+                  <Button onClick={() => patch({ placementSummary: move(placementSummary, index, -1) })}>Up</Button>
+                  <Button onClick={() => patch({ placementSummary: move(placementSummary, index, 1) })}>Down</Button>
+                  <Button variant="danger" onClick={() => patch({ placementSummary: placementSummary.filter((_, i) => i !== index) })}>Delete</Button>
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-6">
+                <SelectField label="Tier" value={item.tier} onChange={(tier) => patchPlacementSummary(index, { tier: tier as PlacementSummaryTier })} options={placementTierOptions} />
+                <TextField label="1st" type="number" value={String(item.first)} onChange={(first) => patchPlacementSummary(index, { first: num(first) })} />
+                <TextField label="2nd" type="number" value={String(item.second)} onChange={(second) => patchPlacementSummary(index, { second: num(second) })} />
+                <TextField label="3rd" type="number" value={String(item.third)} onChange={(third) => patchPlacementSummary(index, { third: num(third) })} />
+                <TextField label="Top 3" type="number" value={String(item.top3)} onChange={(top3) => patchPlacementSummary(index, { top3: num(top3) })} />
+                <TextField label="All" type="number" value={String(item.all)} onChange={(all) => patchPlacementSummary(index, { all: num(all) })} />
+              </div>
             </Card>
           ))}
         </div>
