@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Crown, Globe2, Trophy, Users } from "lucide-react";
+import { Award, Crown, Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -12,7 +12,6 @@ import type {
   AchievementStaff,
   CampaignEntry,
   FormerPlayer,
-  Trophy as TrophyType,
 } from "@/lib/types";
 
 /** Tournament tier colour system: C green, B cyan, A violet, S gold. */
@@ -85,6 +84,38 @@ const labels = {
   globalProof: { en: "Global Proof", lo: "ຜົນງານລະດັບໂລກ" },
 };
 
+type PodiumRank = 1 | 2 | 3;
+
+const PODIUM_TONE: Record<
+  PodiumRank,
+  { label: string; text: string; border: string; glow: string; wash: string; line: string }
+> = {
+  1: {
+    label: "1st Place",
+    text: "text-gold",
+    border: "border-gold/45",
+    glow: "shadow-[0_0_34px_rgba(245,196,81,0.24)]",
+    wash: "from-gold/[0.15] via-gold/[0.045]",
+    line: "via-gold/80",
+  },
+  2: {
+    label: "2nd Place",
+    text: "text-silver",
+    border: "border-silver/40",
+    glow: "shadow-[0_0_30px_rgba(192,197,207,0.2)]",
+    wash: "from-silver/[0.13] via-silver/[0.035]",
+    line: "via-silver/70",
+  },
+  3: {
+    label: "3rd Place",
+    text: "text-bronze",
+    border: "border-bronze/45",
+    glow: "shadow-[0_0_30px_rgba(178,111,55,0.2)]",
+    wash: "from-bronze/[0.13] via-bronze/[0.035]",
+    line: "via-bronze/70",
+  },
+};
+
 function formatDate(iso: string, lang: "en" | "lo"): string {
   const date = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(date.valueOf())) return iso;
@@ -99,44 +130,21 @@ function placementTone(e: CampaignEntry): string {
   return e.medal ? MEDAL_TEXT[e.medal] : TIER_TONE[e.tier].text;
 }
 
+function podiumRank(entry: CampaignEntry): PodiumRank | null {
+  if (entry.medal === "gold") return 1;
+  if (entry.medal === "silver") return 2;
+  if (entry.medal === "bronze") return 3;
+  const place = entry.place.toLowerCase();
+  if (/^1(st)?\b/.test(place)) return 1;
+  if (/^2(nd)?\b/.test(place)) return 2;
+  if (/^3(rd)?\b/.test(place)) return 3;
+  return null;
+}
+
 function tenure(p: FormerPlayer): string {
   const a = yr(p.joined);
   const b = yr(p.left);
   return a === b ? a : `${a}–${b}`;
-}
-
-/** A first-place title — the only place gold breaks the violet palette. */
-function TrophyCard({ t }: { t: TrophyType }) {
-  return (
-    <div className="clip-esports relative flex h-full flex-col overflow-hidden border border-gold/35 bg-gradient-to-b from-gold/[0.07] to-crypt p-6 shadow-glow-gold">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"
-      />
-      <div className="flex items-center justify-between">
-        <Trophy size={28} strokeWidth={1.75} className="text-gold" />
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-gold/80">
-          Champion
-        </span>
-      </div>
-      <h3 className="keep-latin mt-5 font-display text-lg font-bold uppercase leading-tight text-soul">
-        {t.tournament}
-      </h3>
-      <div className="mt-3 flex items-center gap-2 font-mono text-sm">
-        <span className="font-bold text-soul">{t.result}</span>
-        {t.opponent && (
-          <>
-            <span className="text-ash-dim">vs</span>
-            <span className="keep-latin text-ash">{t.opponent}</span>
-          </>
-        )}
-      </div>
-      <div className="mt-auto flex items-center justify-between border-t border-gold/15 pt-4 font-mono text-xs">
-        <span className="text-ash-dim">{yr(t.date)}</span>
-        <span className="font-bold tabular-nums text-gold">{t.prize}</span>
-      </div>
-    </div>
-  );
 }
 
 /** One result on the vertical campaign timeline. */
@@ -215,6 +223,122 @@ function TimelineEntry({ e, delay }: { e: CampaignEntry; delay: number }) {
   );
 }
 
+function PodiumDashboard({
+  campaign,
+  years,
+  selectedYear,
+  onYearChange,
+}: {
+  campaign: CampaignEntry[];
+  years: string[];
+  selectedYear: string;
+  onYearChange: (year: string) => void;
+}) {
+  const { lang } = useLanguage();
+  const filtered = selectedYear === "all" ? campaign : campaign.filter((entry) => yr(entry.date) === selectedYear);
+  const podiumRows = filtered
+    .map((entry) => ({ entry, rank: podiumRank(entry) }))
+    .filter((item): item is { entry: CampaignEntry; rank: PodiumRank } => item.rank != null);
+  const counts: Record<PodiumRank, number> = {
+    1: podiumRows.filter((item) => item.rank === 1).length,
+    2: podiumRows.filter((item) => item.rank === 2).length,
+    3: podiumRows.filter((item) => item.rank === 3).length,
+  };
+
+  return (
+    <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/90 via-crypt/55 to-void p-5 shadow-glow-soft md:p-7">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
+      />
+      <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.3em] text-amethyst">
+            Podium Record
+          </p>
+          <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
+            Top 3 Finishes
+          </h3>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {["all", ...years].map((year) => {
+            const active = selectedYear === year;
+            return (
+              <button
+                key={year}
+                type="button"
+                onClick={() => onYearChange(year)}
+                className={`min-h-[38px] border px-3 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors ${
+                  active
+                    ? "border-amethyst bg-amethyst/15 text-soul shadow-[0_0_18px_rgba(168,85,247,0.24)]"
+                    : "border-edge bg-void/45 text-ash hover:border-edge-bright hover:text-soul"
+                }`}
+              >
+                {year === "all" ? "All" : year}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="relative mt-6 grid gap-3 md:grid-cols-3">
+        {([1, 2, 3] as const).map((rank) => {
+          const tone = PODIUM_TONE[rank];
+          return (
+            <div key={rank} className={`relative overflow-hidden border ${tone.border} bg-void/50 p-5 ${tone.glow}`}>
+              <span aria-hidden className={`absolute inset-0 bg-gradient-to-br ${tone.wash} to-transparent`} />
+              <span aria-hidden className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${tone.line} to-transparent`} />
+              <div className="relative">
+                <p className={`font-display text-5xl font-black leading-none tabular-nums ${tone.text}`}>
+                  {counts[rank]}
+                </p>
+                <p className="mt-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul">
+                  {tone.label}
+                </p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
+                  {selectedYear === "all" ? "All years" : selectedYear}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="relative mt-5 border border-edge bg-void/35">
+        {podiumRows.length ? (
+          <div className="divide-y divide-edge/80">
+            {podiumRows.map(({ entry, rank }) => {
+              const tone = PODIUM_TONE[rank];
+              return (
+                <div key={`${entry.date}-${entry.tournament}`} className="grid gap-3 p-4 md:grid-cols-[70px_minmax(0,1fr)_110px] md:items-center">
+                  <div className={`font-display text-2xl font-black ${tone.text}`}>#{rank}</div>
+                  <div className="min-w-0">
+                    <p className="keep-latin truncate font-display text-sm font-bold uppercase text-soul md:text-base">
+                      {entry.tournament}
+                    </p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ash">
+                      {formatDate(entry.date, lang)}
+                    </p>
+                  </div>
+                  <div className="text-left md:text-right">
+                    <p className={`font-display text-sm font-bold uppercase ${tone.text}`}>{entry.place}</p>
+                    <p className="font-mono text-[10px] text-ash">{entry.prize}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="p-5 text-center font-mono text-xs uppercase tracking-[0.18em] text-ash">
+            No podium finishes for this year
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** A past player in the Legacy roll. */
 function FormerRow({ p }: { p: FormerPlayer }) {
   return (
@@ -272,7 +396,11 @@ export default function AchievementsClient() {
   const { achievements, roster } = useContent();
   const ACH = achievements as unknown as AchievementsData;
   const [tab, setTab] = useState<TabId>("overview");
+  const [selectedYear, setSelectedYear] = useState("all");
   const featuredTrophy = ACH.trophies[0];
+  const campaignYears = Array.from(new Set(ACH.campaign.map((entry) => yr(entry.date)).filter(Boolean))).sort(
+    (a, b) => Number(b) - Number(a)
+  );
   const currentStaffNames = new Set(
     ((roster as { staff?: { ign?: string; name?: string }[] }).staff ?? [])
       .flatMap((member) => [member.ign, member.name])
@@ -402,14 +530,12 @@ export default function AchievementsClient() {
                 )}
               </div>
 
-              <div>
-                <SectionLabel centered kicker="HALL OF CHAMPIONS">TROPHY CABINET</SectionLabel>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {ACH.trophies.map((t) => (
-                    <TrophyCard key={t.tournament} t={t} />
-                  ))}
-                </div>
-              </div>
+              <PodiumDashboard
+                campaign={ACH.campaign}
+                years={campaignYears}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
+              />
 
               <div className="hidden border border-edge bg-crypt/25 p-5 md:p-6">
                 <div className="flex flex-col gap-2 text-center md:flex-row md:items-end md:justify-between md:text-left">
