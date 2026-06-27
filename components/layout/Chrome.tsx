@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LiveBanner from "@/components/layout/LiveBanner";
 import Preloader from "@/components/ui/Preloader";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 /**
  * Renders the public site chrome (preloader, navbar, footer) around the page —
@@ -23,6 +24,7 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <GoogleAnalytics />
       <Preloader />
       <Navbar />
       <main className="min-h-screen pt-16">
