@@ -16,6 +16,7 @@ import type {
 } from "./types";
 import type { AboutUsContent } from "./about";
 import type { RoadmapContent } from "./roadmap";
+import type { MatchScheduleContent } from "./matchSchedule";
 
 /**
  * One-time (re-runnable) migration of the current Vercel-Blob content into the
@@ -161,6 +162,7 @@ export interface SiteShape {
   upcomingMatch?: UpcomingMatch;
   aboutUs?: AboutUsContent;
   roadmap?: RoadmapContent;
+  matchSchedule?: MatchScheduleContent;
 }
 
 export interface MigrateResult {
@@ -256,6 +258,7 @@ export async function migrateAll(): Promise<MigrateResult> {
       media_kit_url: s(site.mediaKitUrl),
       about_us: site.aboutUs ?? null,
       roadmap: site.roadmap ?? null,
+      match_schedule: site.matchSchedule ?? null,
       achievements: achievements ?? null,
     };
     const { error: siteErr } = await db.from("site_settings").upsert(siteSettingsRow);

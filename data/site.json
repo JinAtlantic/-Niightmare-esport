@@ -154,6 +154,27 @@
   "communityUrl": "https://discord.gg/niightmare",
   "formspreeEndpoint": "https://formspree.io/f/your-form-id",
   "mediaKitUrl": "/media-kit.pdf",
+  "matchSchedule": {
+    "enabled": false,
+    "image": "",
+    "buttonLabel": {
+      "en": "View Schedule",
+      "lo": "ເບິ່ງຕາຕະລາງແຂ່ງ"
+    },
+    "title": {
+      "en": "NIIGHTMARE Match Schedule",
+      "lo": "ຕາຕະລາງແຂ່ງ NIIGHTMARE"
+    },
+    "intro": {
+      "en": "Upcoming NIIGHTMARE fixtures from the uploaded tournament schedule.",
+      "lo": "ລາຍການແຂ່ງຂອງ NIIGHTMARE ຈາກຕາຕະລາງທີ່ອັບໂຫຼດ."
+    },
+    "emptyText": {
+      "en": "No NIIGHTMARE schedule rows have been added yet.",
+      "lo": "ຍັງບໍ່ມີລາຍການແຂ່ງຂອງ NIIGHTMARE."
+    },
+    "entries": []
+  },
   "upcomingMatch": {
     "status": "next",
     "date": "2026-07-01T19:00:00+07:00",

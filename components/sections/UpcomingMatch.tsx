@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
+import { CloseIcon, EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
-import type { MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
+import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
+import type { Lang, MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
 type Countdown = { d: number; h: number; m: number; s: number; done: boolean };
 
@@ -169,10 +170,132 @@ function CountdownBlock({ cd }: { cd: Countdown }) {
   );
 }
 
+function scheduleDate(entry: MatchScheduleEntry, lang: Lang) {
+  if (!entry.date && !entry.time) return "TBA";
+  const iso = entry.date && entry.time ? `${entry.date}T${entry.time}:00+07:00` : entry.date;
+  if (!iso) return entry.time;
+  const formatted = formatDateTime(iso, lang);
+  return entry.time ? formatted : entry.date;
+}
+
+function ScheduleModal({
+  schedule,
+  lang,
+  pick,
+  onClose,
+}: {
+  schedule: MatchScheduleContent;
+  lang: Lang;
+  pick: (value: { en: string; lo: string }) => string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-5" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
+      <button type="button" className="absolute inset-0 bg-black/82 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden border border-amethyst/45 bg-[linear-gradient(180deg,rgba(22,16,31,0.98),rgba(11,7,16,0.98))] shadow-[0_0_60px_rgba(168,85,247,0.34)]">
+        <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
+        <div className="flex items-start justify-between gap-4 border-b border-edge p-5 md:p-6">
+          <div>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-amethyst">
+              NIIGHTMARE
+            </p>
+            <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
+              {pick(schedule.title)}
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ash">
+              {pick(schedule.intro)}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close schedule"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/80 text-soul transition-colors hover:border-amethyst hover:text-glow"
+          >
+            <CloseIcon size={18} />
+          </button>
+        </div>
+
+        <div className="modal-scroll overflow-y-auto p-4 md:p-6">
+          {schedule.entries.length ? (
+            <div className="grid gap-3">
+              {schedule.entries.map((entry, index) => (
+                <article
+                  key={entry.id}
+                  className="relative overflow-hidden border border-edge bg-void/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
+                >
+                  <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-amethyst shadow-[0_0_18px_rgba(168,85,247,0.65)]" />
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-amethyst">
+                        Match {String(index + 1).padStart(2, "0")}
+                      </p>
+                      <h4 className="keep-latin mt-1 break-words font-display text-xl font-black uppercase tracking-[0.06em] text-soul">
+                        NIIGHTMARE <span className="text-glow">VS</span> {entry.opponent || "TBA"}
+                      </h4>
+                      {pick(entry.note ?? { en: "", lo: "" }) && (
+                        <p className="mt-2 text-xs leading-relaxed text-ash">{pick(entry.note ?? { en: "", lo: "" })}</p>
+                      )}
+                    </div>
+                    <div className="grid shrink-0 grid-cols-2 gap-2 sm:min-w-[230px]">
+                      <div className="border border-edge bg-crypt/55 px-3 py-2">
+                        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">Round</p>
+                        <p className="mt-1 truncate font-display text-sm font-bold uppercase text-spectre">
+                          {pick(entry.round) || "-"}
+                        </p>
+                      </div>
+                      <div className="border border-edge bg-crypt/55 px-3 py-2">
+                        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">Kickoff</p>
+                        <p className="mt-1 font-display text-sm font-bold uppercase text-soul">
+                          {scheduleDate(entry, lang)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="border border-edge bg-void/55 p-6 text-center text-sm text-ash">
+              {pick(schedule.emptyText)}
+            </div>
+          )}
+
+          {schedule.image && (
+            <a
+              href={schedule.image}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex min-h-[42px] items-center border border-edge px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst hover:text-soul"
+            >
+              View uploaded schedule image
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function UpcomingMatch() {
   const { t, pick, lang } = useLanguage();
   const { site } = useContent();
   const match = site.upcomingMatch as UpcomingMatchData;
+  const schedule = resolveMatchSchedule((site as { matchSchedule?: Partial<MatchScheduleContent> }).matchSchedule);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const status: MatchStatus = match.status ?? "next";
   const s = STATUS[status] ?? STATUS.next;
   const GameIcon = match.game === "efootball" ? EfootballIcon : MlbbIcon;
@@ -373,8 +496,23 @@ export default function UpcomingMatch() {
               )}
             </div>
           )}
+
+          {schedule.enabled && (
+            <div className="flex justify-center border-t border-edge bg-void/45 px-4 py-5">
+              <button
+                type="button"
+                onClick={() => setScheduleOpen(true)}
+                className="hover-glow inline-flex min-h-[44px] items-center justify-center border border-amethyst px-5 py-2.5 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul transition-colors hover:bg-amethyst/15"
+              >
+                {pick(schedule.buttonLabel)}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+      {schedule.enabled && scheduleOpen && (
+        <ScheduleModal schedule={schedule} lang={lang} pick={pick} onClose={() => setScheduleOpen(false)} />
+      )}
     </section>
   );
 }

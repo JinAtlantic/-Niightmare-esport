@@ -216,6 +216,8 @@ alter table public.site_settings add column if not exists about_us jsonb;
 alter table public.site_settings add column if not exists roadmap jsonb;
 -- Achievements page content (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists achievements jsonb;
+-- Home upcoming-match schedule popup (admin-editable), stored as one JSON blob.
+alter table public.site_settings add column if not exists match_schedule jsonb;
 drop policy if exists "members are publicly readable" on public.members;
 
 -- ============================================================================

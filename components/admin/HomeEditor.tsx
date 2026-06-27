@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
 import {
   Button,
@@ -28,6 +28,11 @@ import type { UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
+import {
+  resolveMatchSchedule,
+  type MatchScheduleContent,
+  type MatchScheduleEntry,
+} from "@/lib/matchSchedule";
 
 interface Contact {
   email?: string;
@@ -70,6 +75,7 @@ interface SiteFile {
   contact?: Contact;
   aboutUs?: AboutUsContent;
   roadmap?: RoadmapContent;
+  matchSchedule?: MatchScheduleContent;
   contactPage?: ContactPageCopy;
   [key: string]: unknown;
 }
@@ -189,6 +195,15 @@ const STATUS_TH: Record<string, string> = {
 const toLocalInput = (iso: string) => (iso || "").slice(0, 16);
 const fromLocalInput = (v: string) => (v ? `${v}:00+07:00` : "");
 
+const newScheduleEntry = (): MatchScheduleEntry => ({
+  id: `schedule-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+  opponent: "",
+  date: "",
+  time: "",
+  round: { en: "", lo: "" },
+  note: { en: "", lo: "" },
+});
+
 function BilingualTextArea({
   label,
   value,
@@ -224,6 +239,8 @@ function BilingualTextArea({
 export default function HomeEditor() {
   const { data, setData, loading, saving, error, savedAt, save } =
     useData<SiteFile>("site");
+  const [extractingSchedule, setExtractingSchedule] = useState(false);
+  const [scheduleExtractError, setScheduleExtractError] = useState("");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data)
@@ -248,6 +265,36 @@ export default function HomeEditor() {
     setData({ ...data, aboutUs: { ...about, ...p } });
   const roadmap = resolveRoadmap(data.roadmap);
   const patchRoadmap = (rm: RoadmapContent) => setData({ ...data, roadmap: rm });
+  const matchSchedule = resolveMatchSchedule(data.matchSchedule);
+  const patchMatchSchedule = (patch: Partial<MatchScheduleContent>) =>
+    setData({ ...data, matchSchedule: resolveMatchSchedule({ ...matchSchedule, ...patch }) });
+  const patchScheduleEntry = (id: string, patch: Partial<MatchScheduleEntry>) =>
+    patchMatchSchedule({
+      entries: matchSchedule.entries.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)),
+    });
+  const extractScheduleFromImage = async () => {
+    if (!matchSchedule.image) {
+      setScheduleExtractError("Upload schedule image first.");
+      return;
+    }
+    setExtractingSchedule(true);
+    setScheduleExtractError("");
+    try {
+      const res = await fetch("/api/admin/schedule-extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: matchSchedule.image }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Could not extract schedule.");
+      patchMatchSchedule({ entries: json.entries ?? [] });
+      if (json.warning) setScheduleExtractError(json.warning);
+    } catch (err) {
+      setScheduleExtractError(err instanceof Error ? err.message : "Could not extract schedule.");
+    } finally {
+      setExtractingSchedule(false);
+    }
+  };
 
   const isPractice = m.status === "practice";
 
@@ -450,6 +497,123 @@ export default function HomeEditor() {
               PRACTICE” แทนการ vs ทีมอื่น
             </p>
           )}
+        </Card>
+
+        <Card className="mt-4 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+                Upcoming schedule popup
+              </h3>
+              <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
+                Upload a schedule image, auto-fill NIIGHTMARE rows when API is configured, or add/edit rows manually.
+              </p>
+            </div>
+            <Button
+              onClick={() => patchMatchSchedule({ enabled: !matchSchedule.enabled })}
+              variant={matchSchedule.enabled ? "primary" : "ghost"}
+            >
+              {matchSchedule.enabled ? "Popup enabled" : "Popup disabled"}
+            </Button>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <BilingualField
+              label="Button label"
+              value={matchSchedule.buttonLabel}
+              onChange={(buttonLabel) => patchMatchSchedule({ buttonLabel })}
+            />
+            <BilingualField
+              label="Popup title"
+              value={matchSchedule.title}
+              onChange={(title) => patchMatchSchedule({ title })}
+            />
+            <div className="md:col-span-2">
+              <BilingualTextArea
+                label="Popup intro"
+                value={matchSchedule.intro}
+                rows={2}
+                onChange={(intro) => patchMatchSchedule({ intro })}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <ImageField
+                label="Schedule image"
+                value={matchSchedule.image}
+                folder="schedules"
+                onChange={(image) => patchMatchSchedule({ image })}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={extractScheduleFromImage} disabled={extractingSchedule || !matchSchedule.image}>
+              {extractingSchedule ? "Extracting..." : "Auto-fill from image"}
+            </Button>
+            <Button onClick={() => patchMatchSchedule({ entries: [...matchSchedule.entries, newScheduleEntry()] })}>
+              + Add row
+            </Button>
+            {scheduleExtractError && (
+              <span className="font-mono text-[11px] leading-relaxed text-loss">{scheduleExtractError}</span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {matchSchedule.entries.length === 0 && (
+              <p className="border border-edge bg-void/50 p-4 font-mono text-[11px] text-ash">
+                No schedule rows yet.
+              </p>
+            )}
+            {matchSchedule.entries.map((entry, index) => (
+              <div key={entry.id} className="border border-edge bg-void/50 p-4">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-spectre">
+                    Row {index + 1}
+                  </span>
+                  <Button
+                    variant="danger"
+                    onClick={() =>
+                      patchMatchSchedule({ entries: matchSchedule.entries.filter((item) => item.id !== entry.id) })
+                    }
+                  >
+                    Delete
+                  </Button>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <TextField
+                    label="Opponent"
+                    value={entry.opponent}
+                    onChange={(opponent) => patchScheduleEntry(entry.id, { opponent })}
+                  />
+                  <BilingualField
+                    label="Round"
+                    value={entry.round}
+                    onChange={(round) => patchScheduleEntry(entry.id, { round })}
+                  />
+                  <TextField
+                    label="Date"
+                    type="date"
+                    value={entry.date}
+                    onChange={(date) => patchScheduleEntry(entry.id, { date })}
+                  />
+                  <TextField
+                    label="Time"
+                    type="time"
+                    value={entry.time}
+                    onChange={(time) => patchScheduleEntry(entry.id, { time })}
+                  />
+                  <div className="md:col-span-2">
+                    <BilingualTextArea
+                      label="Note (optional)"
+                      value={entry.note ?? { en: "", lo: "" }}
+                      rows={2}
+                      onChange={(note) => patchScheduleEntry(entry.id, { note })}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       </Section>
 

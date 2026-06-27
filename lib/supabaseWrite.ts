@@ -25,6 +25,7 @@ import type {
   SponsorTier,
 } from "./types";
 import type { ContentKey } from "./store";
+import { hasMatchSchedulePayload } from "./matchSchedule";
 
 const NONE = "00000000-0000-0000-0000-000000000000";
 
@@ -160,6 +161,9 @@ export async function writeSectionToSupabase(
         about_us: site.aboutUs ?? null,
         roadmap: site.roadmap ?? null,
       };
+      if (hasMatchSchedulePayload(site.matchSchedule)) {
+        siteSettingsRow.match_schedule = site.matchSchedule ?? null;
+      }
       const { error } = await db.from("site_settings").upsert(siteSettingsRow);
       if (error) throw new Error(`site_settings: ${error.message}`);
     }
