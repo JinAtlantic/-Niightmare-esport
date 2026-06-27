@@ -505,7 +505,7 @@ export default function HomeEditor() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={() => patchMatchSchedule({ entries: [...matchSchedule.entries, newScheduleEntry()] })}>
+            <Button onClick={() => patchMatchSchedule({ enabled: true, entries: [...matchSchedule.entries, newScheduleEntry()] })}>
               + Add row
             </Button>
           </div>
