@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, LogIn, LogOut, MessageCircle, Send } from "lucide-react";
+import { Heart, LogIn, LogOut, MessageCircle, Send, Smartphone, Timer } from "lucide-react";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { getSupabase } from "@/lib/supabase";
@@ -30,11 +30,21 @@ const COPY = {
     lo: "ໂຫວດໃຫ້ນັກກິລາທີ່ທ່ານມັກ ແລະຝາກຂໍ້ຄວາມເຊຍທີ່ສຸພາບ. ຕ້ອງ login ກ່ອນເພື່ອກັນ spam.",
   },
   loginRequired: {
-    en: "Login with Google or Facebook to vote and comment.",
-    lo: "Login ດ້ວຍ Google ຫຼື Facebook ເພື່ອໂຫວດ ແລະຄອມເມັນ.",
+    en: "Login with Google, Facebook, or phone OTP to vote and comment.",
+    lo: "Login ດ້ວຍ Google, Facebook ຫຼື OTP ເບີໂທ ເພື່ອໂຫວດ ແລະຄອມເມັນ.",
   },
   loginGoogle: { en: "Continue with Google", lo: "ເຂົ້າດ້ວຍ Google" },
   loginFacebook: { en: "Continue with Facebook", lo: "ເຂົ້າດ້ວຍ Facebook" },
+  phoneLogin: { en: "Login with phone OTP", lo: "Login ດ້ວຍ OTP ເບີໂທ" },
+  phonePlaceholder: { en: "+85620XXXXXXXX", lo: "+85620XXXXXXXX" },
+  requestOtp: { en: "Request OTP", lo: "ຂໍລະຫັດ OTP" },
+  otpPlaceholder: { en: "Enter 4-6 digit OTP", lo: "ໃສ່ OTP 4-6 ໂຕເລກ" },
+  verifyOtp: { en: "Verify OTP", lo: "ຢືນຢັນ OTP" },
+  otpSent: {
+    en: "OTP sent. Check your SMS and enter the code within 3 minutes.",
+    lo: "ສົ່ງ OTP ແລ້ວ. ກວດ SMS ແລະໃສ່ລະຫັດພາຍໃນ 3 ນາທີ.",
+  },
+  otpExpired: { en: "OTP timer expired. Request a new code.", lo: "ເວລາ OTP ໝົດແລ້ວ. ຂໍລະຫັດໃໝ່." },
   logout: { en: "Logout", lo: "ອອກຈາກລະບົບ" },
   favorite: { en: "Favorite", lo: "ຂວັນໃຈ" },
   favorited: { en: "Favorited", lo: "ໂຫວດແລ້ວ" },
@@ -67,6 +77,7 @@ function displayName(user: User) {
     user.user_metadata?.name ||
     user.user_metadata?.preferred_username ||
     user.email ||
+    user.phone ||
     "NIIGHTMARE Fan"
   );
 }
@@ -79,6 +90,16 @@ function gaEvent(name: string, params: Record<string, string | number | boolean>
   if (typeof window === "undefined") return;
   const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
   gtag?.("event", name, params);
+}
+
+function normalizePhone(phone: string) {
+  return phone.replace(/[^\d+]/g, "").replace(/^00/, "+");
+}
+
+function formatCountdown(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
 }
 
 async function upsertFanProfile(db: SupabaseClient, user: User) {
@@ -98,6 +119,11 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
   const [liked, setLiked] = useState(false);
   const [comments, setComments] = useState<FanComment[]>([]);
   const [commentBody, setCommentBody] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSentTo, setOtpSentTo] = useState("");
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [setupError, setSetupError] = useState(false);
@@ -161,6 +187,21 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db, player.id, supportsCommunity]);
 
+  useEffect(() => {
+    if (!otpExpiresAt) {
+      setSecondsLeft(0);
+      return;
+    }
+    const tick = () => {
+      const next = Math.max(0, Math.ceil((otpExpiresAt - Date.now()) / 1000));
+      setSecondsLeft(next);
+      if (next <= 0) setOtpExpiresAt(null);
+    };
+    tick();
+    const interval = window.setInterval(tick, 1000);
+    return () => window.clearInterval(interval);
+  }, [otpExpiresAt]);
+
   const signIn = async (provider: AuthProvider) => {
     if (!db) return setError(pick(COPY.unavailable));
     setError("");
@@ -176,6 +217,62 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
     await db.auth.signOut();
     setSession(null);
     setLiked(false);
+  };
+
+  const requestPhoneOtp = async () => {
+    if (!db) return setError(pick(COPY.unavailable));
+    const cleanPhone = normalizePhone(phone);
+    if (!/^\+\d{8,15}$/.test(cleanPhone)) {
+      setError("Use international phone format, e.g. +85620XXXXXXXX or +66XXXXXXXXX.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const { error: otpError } = await db.auth.signInWithOtp({
+        phone: cleanPhone,
+        options: { shouldCreateUser: true },
+      });
+      if (otpError) throw otpError;
+      setOtp("");
+      setOtpSentTo(cleanPhone);
+      setOtpExpiresAt(Date.now() + 3 * 60 * 1000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not send OTP.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const verifyPhoneOtp = async () => {
+    if (!db || !otpSentTo) return;
+    const cleanOtp = otp.replace(/\D/g, "");
+    if (!/^\d{4,6}$/.test(cleanOtp)) {
+      setError("OTP must be 4-6 digits.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const { data, error: verifyError } = await db.auth.verifyOtp({
+        phone: otpSentTo,
+        token: cleanOtp,
+        type: "sms",
+      });
+      if (verifyError) throw verifyError;
+      if (data.session?.user) {
+        await upsertFanProfile(db, data.session.user);
+        setSession(data.session);
+        await loadCommunity(data.session);
+      }
+      setOtp("");
+      setOtpSentTo("");
+      setOtpExpiresAt(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "OTP verification failed.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const toggleLike = async () => {
@@ -375,6 +472,63 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
                   >
                     <LogIn size={16} /> {pick(COPY.loginFacebook)}
                   </button>
+                </div>
+                <div className="mt-5 border-t border-edge pt-5">
+                  <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-amethyst">
+                    <Smartphone size={14} /> {pick(COPY.phoneLogin)}
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      disabled={busy}
+                      placeholder={pick(COPY.phonePlaceholder)}
+                      className="min-h-[46px] border border-edge bg-void/70 px-4 font-mono text-sm text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={requestPhoneOtp}
+                      disabled={!db || busy}
+                      className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:bg-amethyst/25 disabled:cursor-not-allowed disabled:opacity-45"
+                    >
+                      {pick(COPY.requestOtp)}
+                    </button>
+                  </div>
+                  {(otpSentTo || otpExpiresAt) && (
+                    <div className="mt-4 border border-edge bg-crypt/70 p-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm leading-relaxed text-spectre">
+                          {secondsLeft > 0 ? pick(COPY.otpSent) : pick(COPY.otpExpired)}
+                        </p>
+                        <span className="inline-flex items-center gap-2 font-mono text-xs font-bold text-glow">
+                          <Timer size={14} /> {formatCountdown(secondsLeft)}
+                        </span>
+                      </div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          value={otp}
+                          onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                          disabled={busy || secondsLeft <= 0}
+                          placeholder={pick(COPY.otpPlaceholder)}
+                          className="min-h-[46px] border border-edge bg-void/70 px-4 font-mono text-center text-lg font-bold tracking-[0.25em] text-soul outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:text-ash-dim focus:border-amethyst disabled:opacity-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={verifyPhoneOtp}
+                          disabled={!db || busy || secondsLeft <= 0 || !otp.trim()}
+                          className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-crypt px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:border-amethyst disabled:cursor-not-allowed disabled:opacity-45"
+                        >
+                          {pick(COPY.verifyOtp)}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
