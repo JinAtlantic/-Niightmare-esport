@@ -11,7 +11,6 @@ export interface MatchScheduleEntry {
 
 export interface MatchScheduleContent {
   enabled: boolean;
-  image?: string;
   buttonLabel: Bilingual;
   title: Bilingual;
   intro: Bilingual;
@@ -21,11 +20,10 @@ export interface MatchScheduleContent {
 
 export const DEFAULT_MATCH_SCHEDULE: MatchScheduleContent = {
   enabled: false,
-  image: "",
   buttonLabel: { en: "View Schedule", lo: "ເບິ່ງຕາຕະລາງແຂ່ງ" },
   title: { en: "NIIGHTMARE Match Schedule", lo: "ຕາຕະລາງແຂ່ງ NIIGHTMARE" },
   intro: {
-    en: "Upcoming NIIGHTMARE fixtures from the uploaded tournament schedule.",
+    en: "Upcoming NIIGHTMARE fixtures curated by the team.",
     lo: "ລາຍການແຂ່ງຂອງ NIIGHTMARE ຈາກຕາຕະລາງທີ່ອັບໂຫຼດ.",
   },
   emptyText: {
@@ -45,7 +43,6 @@ export function hasMatchSchedulePayload(input?: Partial<MatchScheduleContent> | 
 
   return Boolean(
     input.enabled ||
-      input.image ||
       input.entries?.length ||
       diffBi("buttonLabel") ||
       diffBi("title") ||

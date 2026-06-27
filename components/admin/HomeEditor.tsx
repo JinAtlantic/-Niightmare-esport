@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useData } from "@/components/admin/useData";
 import {
   Button,
@@ -239,8 +239,6 @@ function BilingualTextArea({
 export default function HomeEditor() {
   const { data, setData, loading, saving, error, savedAt, save } =
     useData<SiteFile>("site");
-  const [extractingSchedule, setExtractingSchedule] = useState(false);
-  const [scheduleExtractError, setScheduleExtractError] = useState("");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data)
@@ -272,29 +270,6 @@ export default function HomeEditor() {
     patchMatchSchedule({
       entries: matchSchedule.entries.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)),
     });
-  const extractScheduleFromImage = async () => {
-    if (!matchSchedule.image) {
-      setScheduleExtractError("Upload schedule image first.");
-      return;
-    }
-    setExtractingSchedule(true);
-    setScheduleExtractError("");
-    try {
-      const res = await fetch("/api/admin/schedule-extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: matchSchedule.image }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Could not extract schedule.");
-      patchMatchSchedule({ entries: json.entries ?? [] });
-      if (json.warning) setScheduleExtractError(json.warning);
-    } catch (err) {
-      setScheduleExtractError(err instanceof Error ? err.message : "Could not extract schedule.");
-    } finally {
-      setExtractingSchedule(false);
-    }
-  };
 
   const isPractice = m.status === "practice";
 
@@ -506,7 +481,7 @@ export default function HomeEditor() {
                 Upcoming schedule popup
               </h3>
               <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
-                Upload a schedule image, auto-fill NIIGHTMARE rows when API is configured, or add/edit rows manually.
+                Add NIIGHTMARE schedule rows manually, then enable the popup when ready.
               </p>
             </div>
             <Button
@@ -536,26 +511,12 @@ export default function HomeEditor() {
                 onChange={(intro) => patchMatchSchedule({ intro })}
               />
             </div>
-            <div className="md:col-span-2">
-              <ImageField
-                label="Schedule image"
-                value={matchSchedule.image}
-                folder="schedules"
-                onChange={(image) => patchMatchSchedule({ image })}
-              />
-            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={extractScheduleFromImage} disabled={extractingSchedule || !matchSchedule.image}>
-              {extractingSchedule ? "Extracting..." : "Auto-fill from image"}
-            </Button>
             <Button onClick={() => patchMatchSchedule({ entries: [...matchSchedule.entries, newScheduleEntry()] })}>
               + Add row
             </Button>
-            {scheduleExtractError && (
-              <span className="font-mono text-[11px] leading-relaxed text-loss">{scheduleExtractError}</span>
-            )}
           </div>
 
           <div className="space-y-3">

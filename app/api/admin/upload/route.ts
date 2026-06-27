@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Upload targets → folder prefix inside the blob store. */
-const FOLDERS = new Set(["teams", "players", "staff", "schedules"]);
+const FOLDERS = new Set(["teams", "players", "staff"]);
 const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 const EXT: Record<string, string> = {
   "image/png": "png",

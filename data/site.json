@@ -156,7 +156,6 @@
   "mediaKitUrl": "/media-kit.pdf",
   "matchSchedule": {
     "enabled": false,
-    "image": "",
     "buttonLabel": {
       "en": "View Schedule",
       "lo": "ເບິ່ງຕາຕະລາງແຂ່ງ"
@@ -166,7 +165,7 @@
       "lo": "ຕາຕະລາງແຂ່ງ NIIGHTMARE"
     },
     "intro": {
-      "en": "Upcoming NIIGHTMARE fixtures from the uploaded tournament schedule.",
+      "en": "Upcoming NIIGHTMARE fixtures curated by the team.",
       "lo": "ລາຍການແຂ່ງຂອງ NIIGHTMARE ຈາກຕາຕະລາງທີ່ອັບໂຫຼດ."
     },
     "emptyText": {

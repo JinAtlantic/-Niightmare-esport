@@ -274,16 +274,6 @@ function ScheduleModal({
             </div>
           )}
 
-          {schedule.image && (
-            <a
-              href={schedule.image}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex min-h-[42px] items-center border border-edge px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst hover:text-soul"
-            >
-              View uploaded schedule image
-            </a>
-          )}
         </div>
       </div>
     </div>
