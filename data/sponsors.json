@@ -21,57 +21,75 @@
       "lo": "ແພັກເກດພາກສ່ວນທີ່ຍືດຫຍຸ່ນ ສຳລັບແບຣນທີ່ຕ້ອງການການເຫັນທີ່ມີຄຸນຄ່າຕໍ່ແຟນເກມລາວ."
     },
     "valueLabel": {
-      "en": "WHY PARTNER WITH US",
-      "lo": "ເປັນຫຍັງຄວນຮ່ວມກັບພວກເຮົາ"
+      "en": "SPONSORSHIP BENEFITS",
+      "lo": "ສິດປະໂຫຍດຂອງພາກສ່ວນ"
     },
     "valueProps": [
       {
-        "id": "brand-exposure",
-        "title": { "en": "BRAND EXPOSURE", "lo": "ການເຫັນແບຣນ" },
+        "id": "gen-z-reach",
+        "title": {
+          "en": "Gen Z & Millennial Reach",
+          "lo": "ເຂົ້າເຖິງ Gen Z ແລະ Millennial"
+        },
         "body": {
-          "en": "Place your brand across jerseys, matchday assets, streams, and website surfaces.",
-          "lo": "ນຳແບຣນຂອງທ່ານໄປຢູ່ເທິງເສື້ອແຂ່ງ ສື່ວັນແຂ່ງ ສະຕຣີມ ແລະເວັບໄຊ."
+          "en": "Direct Access to Gen Z: Tap into our fast-growing, highly engaged community of esports fans and youth demographics across Laos and Southeast Asia.",
+          "lo": "ເຂົ້າເຖິງກຸ່ມຄົນຮຸ່ນໃໝ່ໂດຍກົງ: ເຊື່ອມຕໍ່ກັບຖານແຟນຄັບກິລາອີສະປອດ ແລະ ກຸ່ມໄວຮຸ່ນທີ່ມີການເຕີບໂຕຢ່າງໄວວາ ທັງໃນປະເທດລາວ ແລະ ທົ່ວພາກພື້ນອາຊີຕາເວັນອອກສຽງໃຕ້."
         }
       },
       {
-        "id": "community-access",
-        "title": { "en": "COMMUNITY ACCESS", "lo": "ເຂົ້າເຖິງຊຸມຊົນ" },
+        "id": "premium-visibility",
+        "title": {
+          "en": "Premium Brand Visibility",
+          "lo": "ພື້ນທີ່ໂຄສະນາພຣີມຽມ"
+        },
         "body": {
-          "en": "Reach young Lao gaming fans through team stories, announcements, and community moments.",
-          "lo": "ເຂົ້າເຖິງແຟນເກມລາວຜ່ານເລື່ອງລາວຂອງທີມ ປະກາດ ແລະກິດຈະກຳຊຸມຊົນ."
+          "en": "High-Impact Placement: Feature your brand prominently on our official team jerseys, website, gaming house backdrop, and all viral social media contents.",
+          "lo": "ພື້ນທີ່ໂຄສະນາລະດັບພຣີມ່ຽມ: ສ້າງຄວາມໂດດເດັ່ນໃຫ້ແບຣນຂອງທ່ານ ເທິງເສື້ອແຂ່ງຢ່າງເປັນທາງການ, ເວັບໄຊທ໌, ແຄມປ໌ຝຶກຊ້ອມ, ແລະ ທຸກຄອນເທນຕ໌ທີ່ເປັນກະແສໃນໂລກອອນລາຍ."
         }
       },
       {
-        "id": "matchday-visibility",
-        "title": { "en": "MATCHDAY VISIBILITY", "lo": "ຄວາມເດັ່ນໃນວັນແຂ່ງ" },
+        "id": "conversion-campaigns",
+        "title": {
+          "en": "Conversion Campaigns",
+          "lo": "ແຄມເປນສ້າງຍອດຂາຍ"
+        },
         "body": {
-          "en": "Attach your brand to fixtures, results, highlight content, and tournament moments.",
-          "lo": "ໃຫ້ແບຣນຂອງທ່ານຢູ່ກັບຕາຕະລາງແຂ່ງ ຜົນແຂ່ງ ໄຮໄລທ໌ ແລະຊ່ວງສຳຄັນຂອງທົວນາເມັນ."
+          "en": "ROI-Focused Marketing: We create tailor-made content, exclusive promo codes, and interactive activations that turn our loyal fans into your active customers.",
+          "lo": "ການຕະຫຼາດທີ່ເນັ້ນຍອດຂາຍຈິງ: ພວກເຮົາພ້ອມຮ່ວມສ້າງຄອນເທນຕ໌ພິເສດ, ແຈກໂຄ້ດສ່ວນລົດ ແລະ ກິດຈະກຳຫຼາກຫຼາຍຮູບແບບ ເພື່ອປ່ຽນແຟນຄັບໃຫ້ມາເປັນລູກຄ້າຂອງທ່ານ."
         }
       },
       {
-        "id": "content-integration",
-        "title": { "en": "CONTENT INTEGRATION", "lo": "ຄອນເທນຮ່ວມແບຣນ" },
+        "id": "global-stage",
+        "title": {
+          "en": "Global Stage Exposure",
+          "lo": "ເວທີໂລກລະດັບ S-Tier"
+        },
         "body": {
-          "en": "Build campaigns around players, roster updates, behind-the-scenes media, and sponsor activations.",
-          "lo": "ສ້າງແຄມເປນຮ່ວມກັບນັກກິລາ ການອັບເດດທີມ ສື່ເບື້ອງຫຼັງ ແລະກິດຈະກຳ sponsor."
+          "en": "Go Global with the Champions: Ride with us onto the world's biggest S-Tier stages—including the Esports World Cup (EWC) in Riyadh and the M-Series. Showcase your brand to millions of global viewers.",
+          "lo": "ກ້າວສູ່ເວທີໂລກໄປພ້ອມກັນ: ຮ່ວມເດີນທາງສູ່ສະໜາມຮົບຍັກໃຫຍ່ລະດັບ S-Tier ທັງເວທີ Esports World Cup (EWC) ທີ່ ຣິຍາດ ແລະ ສຶກ M-Series ພ້ອມນຳສະເໜີແບຣນຂອງທ່ານສູ່ສາຍຕາຜູ້ຊົມນັບລ້ານທົ່ວໂລກ."
         }
       }
     ],
     "ctaTitle": {
-      "en": "READY TO BUILD A PARTNERSHIP?",
-      "lo": "ພ້ອມສ້າງພາກສ່ວນຮ່ວມກັນແລ້ວບໍ?"
+      "en": "WHY PARTNER WITH NIIGHTMARE",
+      "lo": "ເປັນຫຍັງຕ້ອງຮ່ວມກັບ NIIGHTMARE"
     },
     "ctaBody": {
-      "en": "Tell us your goals and we will shape a package around your brand, budget, and activation window.",
-      "lo": "ບອກເປົ້າໝາຍຂອງທ່ານ ແລ້ວພວກເຮົາຈະຈັດແພັກເກດໃຫ້ເໝາະກັບແບຣນ ງົບປະມານ ແລະຊ່ວງເວລາຂອງແຄມເປນ."
+      "en": "Put your brand inside the momentum of Lao esports: team jerseys, matchday stories, social-first campaigns, and world-stage ambition.",
+      "lo": "ນຳແບຣນຂອງທ່ານເຂົ້າສູ່ກະແສຂອງອີສະປອດລາວ: ເສື້ອແຂ່ງ, ເລື່ອງລາວວັນແຂ່ງ, ແຄມເປນ social-first ແລະເປົ້າໝາຍສູ່ເວທີໂລກ."
     },
     "ctaPrimary": {
-      "label": { "en": "CONTACT PARTNERSHIPS", "lo": "ຕິດຕໍ່ພາກສ່ວນ" },
+      "label": {
+        "en": "PARTNER WITH US",
+        "lo": "ຮ່ວມເປັນພັນທະມິດກັບພວກເຮົາ"
+      },
       "href": "/contact"
     },
     "ctaSecondary": {
-      "label": { "en": "VIEW TEAM PROFILE", "lo": "ເບິ່ງໂປຣໄຟລ໌ທີມ" },
+      "label": {
+        "en": "VIEW TEAM PROFILE",
+        "lo": "ເບິ່ງໂປຣໄຟລ໌ທີມ"
+      },
       "href": "/"
     }
   },

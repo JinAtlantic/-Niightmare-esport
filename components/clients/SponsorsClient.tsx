@@ -245,14 +245,21 @@ function SponsorModal({ sponsor, onClose }: { sponsor: Sponsor | null; onClose: 
 function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number }) {
   const { pick } = useLanguage();
   return (
-    <div className="relative overflow-hidden border border-edge bg-crypt/45 p-5">
-      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-      <h3 className="mt-3 font-display text-base font-bold uppercase tracking-[0.08em] text-soul">
+    <div className="group relative min-h-[250px] overflow-hidden border border-edge bg-[linear-gradient(145deg,rgba(28,20,40,0.78),rgba(11,7,16,0.98))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-amethyst/70 hover:shadow-[0_0_34px_rgba(168,85,247,0.22)]">
+      <span aria-hidden className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/75 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <span aria-hidden className="absolute -right-14 -top-14 h-36 w-36 bg-amethyst/10 blur-3xl transition-opacity group-hover:bg-glow/15" />
+      <div className="relative flex items-center justify-between gap-3">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
+          Benefit {String(index + 1).padStart(2, "0")}
+        </span>
+        <span aria-hidden className="h-2 w-8 skew-x-[-18deg] bg-amethyst/65 transition-colors group-hover:bg-glow" />
+      </div>
+      <h3 className="relative mt-5 font-display text-xl font-black uppercase leading-tight tracking-[0.08em] text-soul transition-colors group-hover:text-glow">
         {pick(item.title)}
       </h3>
-      <p className="mt-2 text-sm leading-relaxed text-ash">{pick(item.body)}</p>
+      <p className="relative mt-4 text-sm font-medium leading-relaxed text-ash md:text-[15px]">
+        {pick(item.body)}
+      </p>
     </div>
   );
 }
@@ -303,7 +310,8 @@ function TierCard({ tier, cta, label }: { tier: SponsorTier; cta: SponsorCta; la
 
 export default function SponsorsClient() {
   const { pick } = useLanguage();
-  const data = useContent().sponsors as {
+  const content = useContent();
+  const data = content.sponsors as {
     page?: SponsorsPageCopy;
     sponsors: Sponsor[];
     tiers: SponsorTier[];
@@ -312,6 +320,7 @@ export default function SponsorsClient() {
   const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
   const valueProps = page.valueProps?.length ? page.valueProps : FALLBACK_PAGE.valueProps;
   const sponsorCount = useMemo(() => data.sponsors.length, [data.sponsors.length]);
+  const contactEmail = content.site?.contact?.email || "contact@niightmare.gg";
 
   return (
     <>
@@ -376,6 +385,9 @@ export default function SponsorsClient() {
 
         <div className="mt-16">
           <SectionLabel>{pick(page.valueLabel)}</SectionLabel>
+          <h2 className="mt-3 max-w-3xl font-display text-2xl font-black uppercase leading-tight tracking-[0.08em] text-soul md:text-4xl">
+            {pick(page.ctaTitle)}
+          </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {valueProps.slice(0, 4).map((item, index) => (
               <ValuePropCard key={item.id} item={item} index={index} />
@@ -406,18 +418,17 @@ export default function SponsorsClient() {
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href={page.ctaPrimary.href}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.24)] transition-colors hover:bg-amethyst/25"
+              className="inline-flex min-h-[50px] items-center justify-center gap-2 border border-amethyst bg-amethyst/20 px-7 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.28)] transition-colors hover:bg-amethyst/30"
             >
               {pick(page.ctaPrimary.label)}
               <ArrowRightIcon size={16} />
             </Link>
-            <Link
-              href={page.ctaSecondary.href}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/40 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
+            <a
+              href={`mailto:${contactEmail}`}
+              className="inline-flex min-h-[50px] items-center justify-center border border-edge-bright bg-void/45 px-7 py-3 font-mono text-xs font-bold tracking-[0.12em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
             >
-              {pick(page.ctaSecondary.label)}
-              <ArrowRightIcon size={16} />
-            </Link>
+              {contactEmail}
+            </a>
           </div>
         </div>
       </section>
