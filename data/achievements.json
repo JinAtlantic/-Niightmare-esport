@@ -1,10 +1,10 @@
 {
   "page": {
-    "kicker": { "en": "EST. 2020 · LAO PDR", "lo": "ກໍ່ຕັ້ງ 2020 · ສປປ ລາວ" },
+    "kicker": { "en": "", "lo": "" },
     "title": { "en": "THE RECORD", "lo": "ບັນທຶກນັກຮົບ" },
     "intro": {
-      "en": "Five years haunting the meta — every title, every world stage, and every name that carried the reaper's banner.",
-      "lo": "ຫ້າປີແຫ່ງການຄອງເກມ — ທຸກແຊมป์ ທຸກເວທີໂລກ ແລະ ທຸກຊື່ ທີ່ແບກຮັບ ສັກສີ ແຫ່ງຍົມມະທູດ."
+      "en": "A premium overview of NIIGHTMARE's competitive legacy - championships, podium runs, world-stage appearances, and the record that built the name.",
+      "lo": "ພາບລວມຜົນງານຂອງ NIIGHTMARE ຢ່າງພຣີມຽມ - ແຊມປ໌, ອັນດັບທັອບ, ເວທີລະດັບໂລກ ແລະ ບັນທຶກທີ່ສ້າງຊື່ໃຫ້ທີມ."
     }
   },
   "stats": [
