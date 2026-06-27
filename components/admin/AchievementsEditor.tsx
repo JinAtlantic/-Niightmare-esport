@@ -40,7 +40,6 @@ const placementTierOptions: { value: PlacementSummaryTier; label: string }[] = [
   { value: "A", label: "A-Tier" },
   { value: "B", label: "B-Tier" },
   { value: "C", label: "C-Tier" },
-  { value: "Total", label: "Total" },
 ];
 
 function uid(prefix: string) {
@@ -100,7 +99,7 @@ export default function AchievementsEditor() {
   const page = data.page ?? seed.page;
   const stats = data.stats ?? [];
   const trophies = data.trophies ?? [];
-  const placementSummary = data.placementSummary ?? seed.placementSummary ?? [];
+  const placementSummary = (data.placementSummary ?? seed.placementSummary ?? []).filter((item) => item.tier !== "Total");
   const campaign = data.campaign ?? [];
   const formerPlayers = data.formerPlayers ?? [];
   const staff = data.staff ?? [];
@@ -122,7 +121,7 @@ export default function AchievementsEditor() {
   return (
     <div className="space-y-6">
       <SaveBar
-        count={`${stats.length} stats / ${placementSummary.length} placement rows / ${trophies.length} trophies / ${campaign.length} campaign rows / ${formerPlayers.length + staff.length} legacy people`}
+        count={`${stats.length} stats / ${placementSummary.length} placement tiers / ${trophies.length} trophies / ${campaign.length} campaign rows / ${formerPlayers.length + staff.length} legacy people`}
         saving={saving}
         error={error}
         savedAt={savedAt}
@@ -166,7 +165,7 @@ export default function AchievementsEditor() {
 
       <Section
         title="Placement summary"
-        hint="Liquipedia Placement Summary shown on the Overview tab"
+        hint="Edit S/A/B/C only. Total is calculated automatically on the public Overview."
         action={<Button onClick={() => patch({ placementSummary: [...placementSummary, { tier: "B", first: 0, second: 0, third: 0, top3: 0, all: 0 }] })}>+ Add</Button>}
       >
         <div className="grid gap-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Crown, Globe2, Users } from "lucide-react";
+import { Crown, Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -85,61 +85,11 @@ const labels = {
   globalProof: { en: "Global Proof", lo: "ຜົນງານລະດັບໂລກ" },
 };
 
-type PodiumRank = 1 | 2 | 3;
-type PlacementRank = PodiumRank | "top3" | "all";
-
-const PODIUM_TONE: Record<
-  PlacementRank,
-  { label: string; text: string; border: string; glow: string; wash: string; line: string }
-> = {
-  1: {
-    label: "1st Place",
-    text: "text-gold",
-    border: "border-gold/45",
-    glow: "shadow-[0_0_34px_rgba(245,196,81,0.24)]",
-    wash: "from-gold/[0.15] via-gold/[0.045]",
-    line: "via-gold/80",
-  },
-  2: {
-    label: "2nd Place",
-    text: "text-silver",
-    border: "border-silver/40",
-    glow: "shadow-[0_0_30px_rgba(192,197,207,0.2)]",
-    wash: "from-silver/[0.13] via-silver/[0.035]",
-    line: "via-silver/70",
-  },
-  3: {
-    label: "3rd Place",
-    text: "text-bronze",
-    border: "border-bronze/45",
-    glow: "shadow-[0_0_30px_rgba(178,111,55,0.2)]",
-    wash: "from-bronze/[0.13] via-bronze/[0.035]",
-    line: "via-bronze/70",
-  },
-  top3: {
-    label: "Top 3",
-    text: "text-amethyst",
-    border: "border-amethyst/45",
-    glow: "shadow-[0_0_30px_rgba(168,85,247,0.18)]",
-    wash: "from-amethyst/[0.12] via-amethyst/[0.035]",
-    line: "via-amethyst/70",
-  },
-  all: {
-    label: "All Placements",
-    text: "text-soul",
-    border: "border-edge-bright",
-    glow: "shadow-[0_0_24px_rgba(201,180,246,0.12)]",
-    wash: "from-spectre/[0.08] via-spectre/[0.02]",
-    line: "via-spectre/55",
-  },
-};
-
 const DEFAULT_PLACEMENT_SUMMARY: PlacementSummaryRow[] = [
   { tier: "S", first: 0, second: 0, third: 0, top3: 0, all: 3 },
   { tier: "A", first: 0, second: 0, third: 0, top3: 0, all: 2 },
   { tier: "B", first: 3, second: 3, third: 2, top3: 8, all: 14 },
   { tier: "C", first: 0, second: 0, third: 0, top3: 0, all: 0 },
-  { tier: "Total", first: 3, second: 3, third: 2, top3: 8, all: 19 },
 ];
 
 function formatDate(iso: string, lang: "en" | "lo"): string {
@@ -257,22 +207,16 @@ function placementTierTone(tier: PlacementSummaryRow["tier"]) {
 }
 
 function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
-  const summary = rows.length ? rows : DEFAULT_PLACEMENT_SUMMARY;
-  const total = summary.find((row) => row.tier === "Total") ?? {
+  const baseRows = (rows.length ? rows : DEFAULT_PLACEMENT_SUMMARY).filter((row) => row.tier !== "Total");
+  const total: PlacementSummaryRow = {
     tier: "Total",
-    first: summary.reduce((sum, row) => sum + row.first, 0),
-    second: summary.reduce((sum, row) => sum + row.second, 0),
-    third: summary.reduce((sum, row) => sum + row.third, 0),
-    top3: summary.reduce((sum, row) => sum + row.top3, 0),
-    all: summary.reduce((sum, row) => sum + row.all, 0),
+    first: baseRows.reduce((sum, row) => sum + row.first, 0),
+    second: baseRows.reduce((sum, row) => sum + row.second, 0),
+    third: baseRows.reduce((sum, row) => sum + row.third, 0),
+    top3: baseRows.reduce((sum, row) => sum + row.top3, 0),
+    all: baseRows.reduce((sum, row) => sum + row.all, 0),
   };
-  const cards: { key: PlacementRank; value: number }[] = [
-    { key: 1, value: total.first },
-    { key: 2, value: total.second },
-    { key: 3, value: total.third },
-    { key: "top3", value: total.top3 },
-    { key: "all", value: total.all },
-  ];
+  const summary = [...baseRows, total];
 
   return (
     <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/90 via-crypt/55 to-void p-5 shadow-glow-soft md:p-7">
@@ -286,35 +230,15 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
             Liquipedia Placement Summary
           </p>
           <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
-            Podium Record
+            Placement Table
           </h3>
         </div>
         <p className="max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.18em] text-ash md:text-right">
-          All-time official placements by tournament tier
+          Total row calculates itself from the tiers above
         </p>
       </div>
 
-      <div className="relative mt-6 grid gap-3 md:grid-cols-5">
-        {cards.map((card) => {
-          const tone = PODIUM_TONE[card.key];
-          return (
-            <div key={card.key} className={`relative overflow-hidden border ${tone.border} bg-void/50 p-4 ${tone.glow}`}>
-              <span aria-hidden className={`absolute inset-0 bg-gradient-to-br ${tone.wash} to-transparent`} />
-              <span aria-hidden className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${tone.line} to-transparent`} />
-              <div className="relative">
-                <p className={`font-display text-4xl font-black leading-none tabular-nums ${tone.text} md:text-5xl`}>
-                  {card.value}
-                </p>
-                <p className="mt-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-soul">
-                  {tone.label}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="relative mt-5 overflow-hidden border border-edge bg-void/35">
+      <div className="relative mt-6 overflow-hidden border border-edge bg-void/35">
         <div className="grid grid-cols-[minmax(84px,1fr)_repeat(5,minmax(44px,72px))] border-b border-edge bg-crypt/60 px-3 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-ash md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)]">
           <span>Tier</span>
           <span className="text-right text-gold">1st</span>
@@ -407,7 +331,6 @@ export default function AchievementsClient() {
   const { achievements, roster } = useContent();
   const ACH = achievements as unknown as AchievementsData;
   const [tab, setTab] = useState<TabId>("overview");
-  const featuredTrophy = ACH.trophies[0];
   const currentStaffNames = new Set(
     ((roster as { staff?: { ign?: string; name?: string }[] }).staff ?? [])
       .flatMap((member) => [member.ign, member.name])
@@ -460,7 +383,7 @@ export default function AchievementsClient() {
           {/* ── OVERVIEW — tale of the tape + trophies + staff ──────────── */}
           {tab === "overview" && (
             <div className="space-y-10">
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+              <div className="grid gap-4">
                 <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/85 via-crypt/60 to-void p-5 shadow-glow-soft md:p-7">
                   <span
                     aria-hidden
@@ -497,44 +420,6 @@ export default function AchievementsClient() {
                     ))}
                   </div>
                 </div>
-
-                {featuredTrophy && (
-                  <div className="clip-esports relative overflow-hidden border border-gold/35 bg-gradient-to-b from-gold/[0.11] via-crypt/70 to-void p-5 shadow-glow-gold md:p-7">
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"
-                    />
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-gold/80">
-                          {pick(labels.championshipCore)}
-                        </p>
-                        <h3 className="keep-latin mt-3 font-display text-2xl font-bold uppercase leading-tight text-soul">
-                          {featuredTrophy.tournament}
-                        </h3>
-                      </div>
-                      <Award size={34} strokeWidth={1.65} className="shrink-0 text-gold" />
-                    </div>
-                    <div className="mt-8 grid grid-cols-2 gap-3 border-t border-gold/20 pt-5">
-                      <div>
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-ash-dim">
-                          {pick(labels.date)}
-                        </p>
-                        <p className="mt-2 font-mono text-sm font-bold tabular-nums text-soul">
-                          {yr(featuredTrophy.date)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-ash-dim">
-                          {pick(labels.prize)}
-                        </p>
-                        <p className="mt-2 font-mono text-sm font-bold tabular-nums text-gold">
-                          {featuredTrophy.prize}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <PodiumDashboard rows={ACH.placementSummary ?? DEFAULT_PLACEMENT_SUMMARY} />
