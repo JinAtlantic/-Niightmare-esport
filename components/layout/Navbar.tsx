@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { LogIn, LogOut, UserCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { useFanAuth } from "@/components/context/FanAuthContext";
 import LanguageToggle from "@/components/ui/LanguageToggle";
 import { CloseIcon, MenuIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
@@ -18,8 +20,14 @@ const NAV_ITEMS = [
   { href: "/contact", key: "nav.contact" },
 ];
 
+const AUTH_COPY = {
+  signIn: { en: "Sign in", lo: "ເຂົ້າລະບົບ" },
+  profile: { en: "Profile", lo: "ໂປຣໄຟລ໌" },
+};
+
 export default function Navbar() {
-  const { t } = useLanguage();
+  const { t, pick } = useLanguage();
+  const { session, openSignIn, signOut } = useFanAuth();
   const { site } = useContent();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -91,6 +99,26 @@ export default function Navbar() {
           {/* Right: language toggle + CTA (desktop) */}
           <div className="hidden items-center gap-4 lg:flex">
             <LanguageToggle />
+            {session ? (
+              <button
+                type="button"
+                onClick={signOut}
+                className="inline-flex min-h-[42px] items-center gap-2 border border-edge bg-crypt/70 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em] text-spectre transition-all duration-200 hover:border-loss/60 hover:bg-loss/10 hover:text-loss"
+              >
+                <UserCircle size={15} />
+                <span className="max-w-[130px] truncate">{session.user.email || pick(AUTH_COPY.profile)}</span>
+                <LogOut size={14} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={openSignIn}
+                className="inline-flex min-h-[42px] items-center gap-2 border border-edge bg-crypt/70 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15 hover:shadow-[0_0_18px_rgba(168,85,247,0.22)]"
+              >
+                <LogIn size={15} />
+                {pick(AUTH_COPY.signIn)}
+              </button>
+            )}
             <a
               href={site.communityUrl}
               target="_blank"
@@ -168,6 +196,26 @@ export default function Navbar() {
             ))}
           </ul>
           <div className="mt-auto p-4">
+            {session ? (
+              <button
+                type="button"
+                onClick={signOut}
+                className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 border border-edge bg-void/45 px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-spectre transition-all duration-200 hover:border-loss/60 hover:bg-loss/10 hover:text-loss"
+              >
+                <UserCircle size={15} />
+                <span className="min-w-0 truncate">{session.user.email || pick(AUTH_COPY.profile)}</span>
+                <LogOut size={14} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={openSignIn}
+                className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 border border-edge bg-void/45 px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15"
+              >
+                <LogIn size={15} />
+                {pick(AUTH_COPY.signIn)}
+              </button>
+            )}
             <a
               href={site.communityUrl}
               target="_blank"
