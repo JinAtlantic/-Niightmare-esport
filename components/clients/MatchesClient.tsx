@@ -752,9 +752,6 @@ function GameTournamentSection({
 const selectClass =
   "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
 
-const filterLabelClass =
-  "mb-1.5 block font-mono text-[11px] font-extrabold uppercase tracking-[0.14em] text-soul";
-
 export default function MatchesClient() {
   const { pick } = useLanguage();
   const content = useContent();
@@ -909,7 +906,6 @@ export default function MatchesClient() {
                 own full-width row so long names stay readable. */}
             <div className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
               <label className="block">
-                <span className={filterLabelClass}>{pick({ en: "Game", lo: "ເກມ" })}</span>
                 <select
                   value={selectedGame}
                   onChange={(event) => {
@@ -929,7 +925,6 @@ export default function MatchesClient() {
               </label>
 
               <label className="block">
-                <span className={filterLabelClass}>{pick({ en: "Year", lo: "ປີ" })}</span>
                 <select
                   value={activeYear}
                   onChange={(event) => {
@@ -948,7 +943,6 @@ export default function MatchesClient() {
               </label>
 
               <label className="block">
-                <span className={filterLabelClass}>{pick({ en: "Result", lo: "ຜົນ" })}</span>
                 <select
                   value={resultFilter}
                   onChange={(event) => setResultFilter(event.target.value as ResultFilter)}
@@ -966,7 +960,7 @@ export default function MatchesClient() {
                 <select
                   value={sortOrder}
                   onChange={(event) => setSortOrder(event.target.value as SortOrder)}
-                  className={`${selectClass} mt-[25px]`}
+                  className={selectClass}
                 >
                   {([
                     { id: "newest", label: pick(page.sortNewest) },
@@ -985,10 +979,6 @@ export default function MatchesClient() {
             {/* Tournament — full width; lists every tournament in the current
                 game + year so you can jump straight to one. */}
             <label className="mt-3 block">
-              <span className={filterLabelClass}>
-                {pick({ en: "Tournament", lo: "ລາຍການແຂ່ງ" })}
-                <span className="ml-1.5 text-ash-dim">({tournamentCount})</span>
-              </span>
               <select
                 value={selectedTournament}
                 onChange={(event) => setSelectedTournament(event.target.value)}
