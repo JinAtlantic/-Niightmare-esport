@@ -7,6 +7,7 @@ type CommentStatus = "review" | "visible" | "hidden" | "all";
 
 interface AdminComment {
   id: string;
+  target?: "player" | "team";
   body: string;
   status: Exclude<CommentStatus, "all">;
   created_at: string;
@@ -86,14 +87,14 @@ export default function CommunityModeration() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
-  async function updateStatus(id: string, nextStatus: "visible" | "review" | "hidden") {
-    setSavingId(id);
+  async function updateStatus(comment: AdminComment, nextStatus: "visible" | "review" | "hidden") {
+    setSavingId(`${comment.target ?? "player"}:${comment.id}`);
     setError("");
     try {
       const res = await fetch("/api/admin/community-comments", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: nextStatus }),
+        body: JSON.stringify({ id: comment.id, status: nextStatus, target: comment.target ?? "player" }),
       });
       const json = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(json.error || "Could not update comment.");
@@ -147,13 +148,19 @@ export default function CommunityModeration() {
           comments.map((comment) => {
             const player = one(comment.players);
             const profile = one(comment.fan_profiles);
+            const targetLabel = comment.target === "team" ? "Team" : "Player";
+            const targetName = comment.target === "team" ? "NIIGHTMARE" : player?.ign || "Unknown";
+            const saveKey = `${comment.target ?? "player"}:${comment.id}`;
             return (
-              <Card key={comment.id} className="bg-crypt/70">
+              <Card key={saveKey} className="bg-crypt/70">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] ${STATUS_STYLE[comment.status]}`}>
                         {comment.status}
+                      </span>
+                      <span className="border border-amethyst/40 bg-amethyst/10 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-glow">
+                        {targetLabel}
                       </span>
                       {comment.moderation?.categories?.map((category) => (
                         <span key={category} className="border border-edge bg-void/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">
@@ -163,7 +170,7 @@ export default function CommunityModeration() {
                     </div>
                     <p className="mt-3 text-sm leading-relaxed text-soul">{comment.body}</p>
                     <p className="mt-3 font-mono text-[11px] text-ash">
-                      Player: <span className="text-spectre">{player?.ign || "Unknown"}</span> · Fan:{" "}
+                      {targetLabel}: <span className="text-spectre">{targetName}</span> · Fan:{" "}
                       <span className="text-spectre">{profile?.display_name || "NIIGHTMARE Fan"}</span> ·{" "}
                       {dateLabel(comment.created_at)}
                     </p>
@@ -172,22 +179,22 @@ export default function CommunityModeration() {
                     {comment.status !== "visible" && (
                       <Button
                         variant="primary"
-                        onClick={() => updateStatus(comment.id, "visible")}
-                        disabled={savingId === comment.id}
+                        onClick={() => updateStatus(comment, "visible")}
+                        disabled={savingId === saveKey}
                       >
                         Approve
                       </Button>
                     )}
                     {comment.status !== "review" && (
-                      <Button onClick={() => updateStatus(comment.id, "review")} disabled={savingId === comment.id}>
+                      <Button onClick={() => updateStatus(comment, "review")} disabled={savingId === saveKey}>
                         Review
                       </Button>
                     )}
                     {comment.status !== "hidden" && (
                       <Button
                         variant="danger"
-                        onClick={() => updateStatus(comment.id, "hidden")}
-                        disabled={savingId === comment.id}
+                        onClick={() => updateStatus(comment, "hidden")}
+                        disabled={savingId === saveKey}
                       >
                         Hide
                       </Button>

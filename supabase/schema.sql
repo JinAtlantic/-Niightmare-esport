@@ -227,10 +227,28 @@ create table if not exists public.player_comments (
   updated_at      timestamptz default now()
 );
 
+create table if not exists public.team_likes (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references public.fan_profiles(id) on delete cascade,
+  created_at      timestamptz default now(),
+  unique (user_id)
+);
+
+create table if not exists public.team_comments (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references public.fan_profiles(id) on delete cascade,
+  body            text not null check (char_length(trim(body)) between 1 and 500),
+  status          text not null default 'visible',
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
 create index if not exists idx_player_likes_player_id on public.player_likes(player_id);
 create index if not exists idx_player_likes_user_id on public.player_likes(user_id);
 create index if not exists idx_player_comments_player_created on public.player_comments(player_id, created_at desc);
 create index if not exists idx_player_comments_status_created on public.player_comments(status, created_at desc);
+create index if not exists idx_team_comments_status_created on public.team_comments(status, created_at desc);
+create index if not exists idx_team_likes_user_id on public.team_likes(user_id);
 
 do $$
 begin
@@ -242,6 +260,20 @@ begin
   ) then
     alter table public.player_comments
       add constraint player_comments_status_check
+      check (status in ('visible', 'review', 'hidden'));
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'team_comments_status_check'
+      and conrelid = 'public.team_comments'::regclass
+  ) then
+    alter table public.team_comments
+      add constraint team_comments_status_check
       check (status in ('visible', 'review', 'hidden'));
   end if;
 end $$;
@@ -358,6 +390,25 @@ drop policy if exists "fans delete own comments" on public.player_comments;
 create policy "fans delete own comments" on public.player_comments for delete using (auth.uid() = user_id);
 drop trigger if exists set_player_comments_updated_at on public.player_comments;
 create trigger set_player_comments_updated_at before update on public.player_comments for each row execute function public.set_updated_at();
+
+alter table public.team_likes enable row level security;
+drop policy if exists "public read team_likes" on public.team_likes;
+create policy "public read team_likes" on public.team_likes for select using (true);
+drop policy if exists "fans like team as self" on public.team_likes;
+create policy "fans like team as self" on public.team_likes for insert with check (auth.uid() = user_id);
+drop policy if exists "fans unlike own team like" on public.team_likes;
+create policy "fans unlike own team like" on public.team_likes for delete using (auth.uid() = user_id);
+
+alter table public.team_comments enable row level security;
+drop policy if exists "public read visible team_comments" on public.team_comments;
+create policy "public read visible team_comments" on public.team_comments for select using (status = 'visible');
+drop policy if exists "fans team comment as self" on public.team_comments;
+create policy "fans team comment as self" on public.team_comments for insert with check (auth.uid() = user_id and status = 'review');
+drop policy if exists "fans update own team comments" on public.team_comments;
+drop policy if exists "fans delete own team comments" on public.team_comments;
+create policy "fans delete own team comments" on public.team_comments for delete using (auth.uid() = user_id);
+drop trigger if exists set_team_comments_updated_at on public.team_comments;
+create trigger set_team_comments_updated_at before update on public.team_comments for each row execute function public.set_updated_at();
 
 -- ============================================================================
 -- Seed the single-row config tables with the current site values (only when
