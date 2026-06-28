@@ -956,18 +956,17 @@ export default function MatchesClient() {
                 >
                   {RESULT_FILTERS.map((id) => (
                     <option key={id} value={id}>
-                      {pick(page.filters[id])}
+                      {id === "all" ? pick({ en: "All Result", lo: "ຜົນທັງໝົດ" }) : pick(page.filters[id])}
                     </option>
                   ))}
                 </select>
               </label>
 
               <label className="block">
-                <span className={filterLabelClass}>{pick(page.sortLabel)}</span>
                 <select
                   value={sortOrder}
                   onChange={(event) => setSortOrder(event.target.value as SortOrder)}
-                  className={selectClass}
+                  className={`${selectClass} mt-[25px]`}
                 >
                   {([
                     { id: "newest", label: pick(page.sortNewest) },
