@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { MessageCircle, Send, X } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useFanAuth } from "@/components/context/FanAuthContext";
@@ -62,6 +63,7 @@ export default function PlayerCommentModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   const loadComments = async () => {
     if (!db || !supportsCommunity) return;
@@ -83,6 +85,10 @@ export default function PlayerCommentModal({
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     setNotice("");
     loadComments();
@@ -97,7 +103,7 @@ export default function PlayerCommentModal({
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const submitComment = async () => {
     const cleanBody = body.trim();
@@ -142,21 +148,25 @@ export default function PlayerCommentModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[70] grid place-items-center px-3 py-5" role="dialog" aria-modal="true">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] grid place-items-center overflow-hidden px-3 py-4 sm:px-5 sm:py-6" role="dialog" aria-modal="true">
+      <div aria-hidden className="absolute inset-0 bg-void/55" />
       <button
         type="button"
         aria-label={pick(COPY.close)}
-        className="absolute inset-0 bg-black/78 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/78 backdrop-blur-xl"
         onClick={onClose}
       />
-      <section className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden border border-edge bg-[linear-gradient(145deg,rgba(28,20,40,0.98),rgba(11,7,16,0.99))] shadow-[0_0_46px_rgba(168,85,247,0.24)]">
-        <header className="flex items-start justify-between gap-4 border-b border-edge bg-void/45 px-4 py-4 md:px-5">
+      <section className="relative flex h-[92svh] w-full max-w-5xl flex-col overflow-hidden border border-amethyst/45 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.18),transparent_36%),linear-gradient(145deg,rgba(28,20,40,0.98),rgba(11,7,16,0.99))] shadow-[0_0_72px_rgba(168,85,247,0.34)] sm:h-[88vh]">
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-glow/85 to-transparent" />
+        <span aria-hidden className="pointer-events-none absolute -left-16 top-10 h-40 w-40 bg-amethyst/16 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -right-20 bottom-10 h-44 w-44 bg-loss/10 blur-3xl" />
+        <header className="relative flex items-start justify-between gap-4 border-b border-edge bg-void/55 px-4 py-4 md:px-6 md:py-5">
           <div className="min-w-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-amethyst">
               {pick(COPY.title)}
             </p>
-            <h2 className="keep-latin mt-1 truncate font-display text-3xl font-black uppercase tracking-[0.08em] text-soul">
+            <h2 className="keep-latin mt-1 truncate font-display text-3xl font-black uppercase tracking-[0.08em] text-soul md:text-5xl">
               {player.ign}
             </h2>
           </div>
@@ -164,13 +174,13 @@ export default function PlayerCommentModal({
             type="button"
             onClick={onClose}
             aria-label={pick(COPY.close)}
-            className="grid h-10 w-10 shrink-0 place-items-center border border-edge text-ash transition-colors hover:border-amethyst hover:text-soul"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/70 text-ash transition-colors hover:border-amethyst hover:text-soul"
           >
             <X size={18} />
           </button>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-5">
           {!supportsCommunity ? (
             <p className="border border-loss/40 bg-loss/10 px-4 py-3 text-sm text-loss">{pick(COPY.unavailable)}</p>
           ) : loading ? (
@@ -183,7 +193,7 @@ export default function PlayerCommentModal({
                 const profile = profileOf(comment);
                 const name = profile?.display_name || "NIIGHTMARE Fan";
                 return (
-                  <article key={comment.id} className="border border-edge bg-void/45 p-4">
+                  <article key={comment.id} className="border border-edge bg-void/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-amethyst/15">
                         {profile?.avatar_url ? (
@@ -208,7 +218,7 @@ export default function PlayerCommentModal({
           )}
         </div>
 
-        <footer className="border-t border-edge bg-crypt/70 p-4 md:p-5">
+        <footer className="relative border-t border-edge bg-crypt/85 p-4 md:p-5">
           {error && <p className="mb-3 border border-loss/40 bg-loss/10 px-4 py-3 font-mono text-xs text-loss">{error}</p>}
           {notice && <p className="mb-3 border border-win/40 bg-win/10 px-4 py-3 text-sm text-win">{notice}</p>}
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -235,6 +245,7 @@ export default function PlayerCommentModal({
           </div>
         </footer>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }
