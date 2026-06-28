@@ -50,6 +50,14 @@ const COPY = {
   },
   send: { en: "Send comment", lo: "ສົ່ງຄອມເມັນ" },
   noComments: { en: "No comments yet. Be the first supporter.", lo: "ຍັງບໍ່ມີຄອມເມັນ. ມາເປັນແຟນຄົນທຳອິດ." },
+  reviewQueued: {
+    en: "Comment received. It is hidden until an admin reviews it.",
+    lo: "ໄດ້ຮັບຄອມເມັນແລ້ວ. ຂໍ້ຄວາມນີ້ຈະຖືກເຊື່ອງໄວ້ກ່ອນຈົນກວ່າແອດມິນຈະກວດສອບ.",
+  },
+  commentSent: {
+    en: "Comment posted.",
+    lo: "ສົ່ງຄອມເມັນແລ້ວ.",
+  },
   setupNeeded: {
     en: "Community database is not ready yet. Run the Community SQL block in Supabase first.",
     lo: "ຖານຂໍ້ມູນ Community ຍັງບໍ່ພ້ອມ. ກະລຸນາ run SQL Community ໃນ Supabase ກ່ອນ.",
@@ -104,6 +112,7 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
   const [commentBody, setCommentBody] = useState("");
   const [email, setEmail] = useState("");
   const [magicSent, setMagicSent] = useState(false);
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [setupError, setSetupError] = useState(false);
@@ -252,20 +261,31 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
     if (!db || !session?.user || !supportsCommunity || !body) return;
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       await upsertFanProfile(db, session.user);
-      const { error: insertError } = await db.from("player_comments").insert({
-        player_id: player.id,
-        user_id: session.user.id,
-        body,
+      const response = await fetch("/api/community/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ playerId: player.id, body }),
       });
-      if (insertError) throw insertError;
+      const result = (await response.json().catch(() => ({}))) as { error?: string; status?: "visible" | "review" };
+      if (!response.ok) throw new Error(result.error || "Could not send comment.");
       setCommentBody("");
-      await loadCommunity(session);
+      if (result.status === "review") {
+        setNotice(pick(COPY.reviewQueued));
+      } else {
+        setNotice(pick(COPY.commentSent));
+        await loadCommunity(session);
+      }
       gaEvent("player_commented", {
         player_id: player.id,
         player_name: player.ign,
         comment_length: body.length,
+        moderation_status: result.status || "visible",
       });
     } catch (e) {
       setSetupError(true);
@@ -364,6 +384,11 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
             {error && (
               <p className="mt-3 border border-loss/40 bg-loss/10 px-4 py-3 font-mono text-xs leading-relaxed text-loss">
                 {error}
+              </p>
+            )}
+            {notice && (
+              <p className="mt-3 border border-win/40 bg-win/10 px-4 py-3 font-mono text-xs leading-relaxed text-win">
+                {notice}
               </p>
             )}
 

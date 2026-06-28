@@ -198,8 +198,8 @@ create table if not exists public.site_settings (
 
 -- ── COMMUNITY / FAN AUTH ───────────────────────────────────────────────────
 -- Fan profiles mirror Supabase Auth users. The website writes likes/comments
--- with the anon key, protected by RLS, so users must sign in with Google or
--- Facebook before interacting.
+-- with the anon key, protected by RLS, so users must sign in with Google or a
+-- Magic Link before interacting.
 create table if not exists public.fan_profiles (
   id              uuid primary key references auth.users(id) on delete cascade,
   display_name    text,
@@ -230,6 +230,21 @@ create table if not exists public.player_comments (
 create index if not exists idx_player_likes_player_id on public.player_likes(player_id);
 create index if not exists idx_player_likes_user_id on public.player_likes(user_id);
 create index if not exists idx_player_comments_player_created on public.player_comments(player_id, created_at desc);
+create index if not exists idx_player_comments_status_created on public.player_comments(status, created_at desc);
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'player_comments_status_check'
+      and conrelid = 'public.player_comments'::regclass
+  ) then
+    alter table public.player_comments
+      add constraint player_comments_status_check
+      check (status in ('visible', 'review', 'hidden'));
+  end if;
+end $$;
 
 -- Backfill columns that may be missing on a members table created by an earlier
 -- (Stage 0) run, so the updated_at trigger below has a column to write to.
@@ -337,9 +352,8 @@ alter table public.player_comments enable row level security;
 drop policy if exists "public read visible player_comments" on public.player_comments;
 create policy "public read visible player_comments" on public.player_comments for select using (status = 'visible');
 drop policy if exists "fans comment as self" on public.player_comments;
-create policy "fans comment as self" on public.player_comments for insert with check (auth.uid() = user_id);
+create policy "fans comment as self" on public.player_comments for insert with check (auth.uid() = user_id and status = 'review');
 drop policy if exists "fans update own comments" on public.player_comments;
-create policy "fans update own comments" on public.player_comments for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 drop policy if exists "fans delete own comments" on public.player_comments;
 create policy "fans delete own comments" on public.player_comments for delete using (auth.uid() = user_id);
 drop trigger if exists set_player_comments_updated_at on public.player_comments;
