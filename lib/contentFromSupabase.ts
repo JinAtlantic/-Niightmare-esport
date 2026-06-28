@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { rowToStaff, type MemberRow } from "./members";
+import { cleanMatchVods } from "./matchVods";
 import rosterSeed from "@/data/roster.json";
 import matchesSeed from "@/data/matches.json";
 import newsSeed from "@/data/news.json";
@@ -128,6 +129,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
         score: (r.score as string) ?? "",
         result: r.result,
         vod: (r.vod as string) ?? null,
+        vods: cleanMatchVods(r.vods),
       })),
       tournaments: ((tournaments.data ?? []) as Record<string, unknown>[]).map((r) => ({
         id: String(r.id),

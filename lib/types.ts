@@ -115,6 +115,14 @@ export type MatchResult = "win" | "loss" | "draw";
 /** State of the headline fixture shown on the home page. */
 export type MatchStatus = "next" | "live" | "practice";
 
+export interface MatchVod {
+  /** "series" = one video covers the whole match/series, "game" = one game only. */
+  type: "series" | "game";
+  /** Required when type is "game" so the UI can label Game 1 / Game 2 / Game 3. */
+  game?: number;
+  url: string;
+}
+
 export interface UpcomingMatch {
   /** Drives the badge + styling: upcoming, currently live, or scrim/practice block. */
   status: MatchStatus;
@@ -152,7 +160,10 @@ export interface Match {
   opponentAbbr?: string;
   score: string;
   result: MatchResult;
+  /** Legacy single VOD link kept for old saved data. New edits should use `vods`. */
   vod: string | null;
+  /** Multiple VOD links per match, e.g. Full Match plus Game 1 / Game 2 / Game 3. */
+  vods?: MatchVod[];
 }
 
 export interface Tournament {

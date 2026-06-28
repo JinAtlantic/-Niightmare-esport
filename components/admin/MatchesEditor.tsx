@@ -13,7 +13,8 @@ import {
 } from "@/components/admin/ui";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import matchesSeed from "@/data/matches.json";
-import type { Bilingual, Match, MatchResult, Tournament } from "@/lib/types";
+import { cleanMatchVods } from "@/lib/matchVods";
+import type { Bilingual, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 type GameFilter = "all" | Match["game"];
@@ -82,6 +83,11 @@ const RESULT_OPTS = [
   { value: "loss", label: "Loss" },
 ];
 
+const VOD_TYPE_OPTS = [
+  { value: "series", label: "Full match / whole series" },
+  { value: "game", label: "Single game" },
+];
+
 const ROUND_PRESETS: { id: string; label: string; value: Bilingual }[] = [
   { id: "wild-card", label: "Wild Card", value: { en: "Wild Card", lo: "Wild Card" } },
   { id: "group-stage", label: "Group Stage", value: { en: "Group Stage", lo: "Group Stage" } },
@@ -95,6 +101,17 @@ const emptyText: Bilingual = { en: "", lo: "" };
 const compactInputClass =
   "h-8 w-full border border-edge bg-void/70 px-2 font-mono text-xs text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst";
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
+
+function draftMatchVods(value: unknown): MatchVod[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+    .map((item) => ({
+      type: item.type === "game" ? "game" : "series",
+      game: Number(item.game) || undefined,
+      url: typeof item.url === "string" ? item.url : "",
+    }));
+}
 
 function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
   const j = i + dir;
@@ -187,6 +204,7 @@ export default function MatchesEditor() {
         score: "0-0",
         result: "win",
         vod: null,
+        vods: [],
       },
       ...matches,
     ]);
@@ -202,6 +220,7 @@ export default function MatchesEditor() {
       score: "0-0",
       result: "win",
       vod: null,
+      vods: [],
     };
     setMatches([nextMatch, ...matches]);
     setOpenTournamentId(tournament.id);
@@ -228,6 +247,7 @@ export default function MatchesEditor() {
       id: uid("m"),
       tournament: { ...current.tournament },
       round: current.round ? { ...current.round } : undefined,
+      vods: cleanMatchVods(current.vods).map((vod) => ({ ...vod })),
     };
     const next = matches.slice();
     next.splice(i + 1, 0, clone);
@@ -244,6 +264,35 @@ export default function MatchesEditor() {
   const patchRound = (matchIndex: number, round: Partial<Bilingual>) => {
     const current = matches[matchIndex]?.round ?? emptyText;
     patchMatch(matchIndex, { round: { ...current, ...round } });
+  };
+
+  const setVodList = (matchIndex: number, vods: MatchVod[]) => {
+    const firstUrl = vods.find((vod) => vod.url.trim())?.url.trim();
+    patchMatch(matchIndex, { vods, vod: firstUrl ?? matches[matchIndex]?.vod ?? null });
+  };
+
+  const addVod = (matchIndex: number) => {
+    const current = draftMatchVods(matches[matchIndex]?.vods);
+    setVodList(matchIndex, [...current, { type: "series", url: "" }]);
+  };
+
+  const patchVod = (matchIndex: number, vodIndex: number, patch: Partial<MatchVod>) => {
+    const current = draftMatchVods(matches[matchIndex]?.vods);
+    const next = current.map((vod, idx) => {
+      if (idx !== vodIndex) return vod;
+      const type = patch.type ?? vod.type;
+      return {
+        ...vod,
+        ...patch,
+        type,
+        ...(type === "series" ? { game: undefined } : {}),
+      };
+    });
+    setVodList(matchIndex, next);
+  };
+
+  const removeVod = (matchIndex: number, vodIndex: number) => {
+    setVodList(matchIndex, draftMatchVods(matches[matchIndex]?.vods).filter((_, idx) => idx !== vodIndex));
   };
 
   const matchRefs: MatchRef[] = matches.map((match, index) => ({ match, index }));
@@ -421,12 +470,68 @@ export default function MatchesEditor() {
             onChange={(v) => patchMatch(i, { result: v as Match["result"] })}
             options={RESULT_OPTS}
           />
-          <TextField
-            label="VOD link, optional"
-            value={m.vod ?? ""}
-            onChange={(v) => patchMatch(i, { vod: v.trim() ? v.trim() : null })}
-            placeholder="https://youtube.com/..."
-          />
+          <div className="md:col-span-2">
+            <div className="border border-edge bg-crypt/50 p-2">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
+                    VOD links
+                  </p>
+                  <p className="mt-1 font-mono text-[10px] text-ash-dim">
+                    Use Full Match when one video covers the whole series. Use Game for Game 1 / Game 2 / Game 3.
+                  </p>
+                </div>
+                <Button onClick={() => addVod(i)} className="min-h-[30px] px-2 py-1 text-[10px]">
+                  Add VOD
+                </Button>
+              </div>
+              <TextField
+                label="Legacy VOD fallback"
+                value={m.vod ?? ""}
+                onChange={(v) => patchMatch(i, { vod: v.trim() ? v.trim() : null })}
+                placeholder="Kept for old data. New links should be added below."
+              />
+              <div className="mt-2 space-y-2">
+                {draftMatchVods(m.vods).map((vod, vodIndex) => (
+                  <div key={`${vod.url}-${vodIndex}`} className="grid gap-2 border border-edge bg-void/45 p-2 md:grid-cols-[180px_90px_minmax(0,1fr)_auto]">
+                    <SelectField
+                      label="Type"
+                      value={vod.type}
+                      onChange={(v) => patchVod(i, vodIndex, { type: v as MatchVod["type"] })}
+                      options={VOD_TYPE_OPTS}
+                    />
+                    <TextField
+                      label="Game"
+                      type="number"
+                      value={vod.game ? String(vod.game) : ""}
+                      onChange={(v) => patchVod(i, vodIndex, { game: Number(v) || undefined })}
+                      placeholder="1"
+                    />
+                    <TextField
+                      label="URL"
+                      value={vod.url}
+                      onChange={(v) => patchVod(i, vodIndex, { url: v })}
+                      placeholder="https://youtube.com/..."
+                    />
+                    <div className="flex items-end">
+                      <Button
+                        variant="danger"
+                        onClick={() => removeVod(i, vodIndex)}
+                        className="min-h-[36px] px-2 py-1 text-[10px]"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {!draftMatchVods(m.vods).length && (
+                  <p className="border border-dashed border-edge px-3 py-2 font-mono text-[10px] text-ash-dim">
+                    No multi-VOD links yet.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="md:col-span-2">
             <ImageField
               label="Opponent logo"

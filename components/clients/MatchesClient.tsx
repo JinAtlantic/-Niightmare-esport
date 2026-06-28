@@ -12,9 +12,10 @@ import { PlayIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { tournamentTier, type Tier } from "@/lib/tiers";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
+import { matchVods } from "@/lib/matchVods";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
-import type { Bilingual, GameId, Match, MatchResult, Tournament } from "@/lib/types";
+import type { Bilingual, GameId, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 type ResultFilter = "all" | "wins" | "losses";
@@ -327,31 +328,43 @@ function StatsStrip({
 /** VOD control rendered on every row. Active link when a VOD exists,
  *  otherwise a disabled "VOD SOON" placeholder of the same footprint so
  *  the score/badge/VOD columns stay aligned across all rows. */
-function VodButton({ href, page, compact = false }: { href: string | null; page: MatchesPageCopy; compact?: boolean }) {
-  const { pick } = useLanguage();
+function vodLabel(vod: MatchVod, lang: "en" | "lo") {
+  if (vod.type === "game") return `Game ${vod.game ?? ""}`.trim();
+  return lang === "lo" ? "ທັງແມັດ" : "Full Match";
+}
+
+function VodLinks({ match, page, compact = false }: { match: Match; page: MatchesPageCopy; compact?: boolean }) {
+  const { pick, lang } = useLanguage();
+  const vods = matchVods(match);
   const base =
-    `inline-flex w-full items-center justify-center gap-1.5 border font-mono font-semibold uppercase tracking-[0.1em] transition-colors ${
-      compact ? "min-h-[32px] px-2.5 py-1 text-[9px]" : "min-h-[44px] px-3 py-1.5 text-[11px]"
+    `inline-flex items-center justify-center gap-1.5 border font-mono font-semibold uppercase tracking-[0.1em] transition-colors ${
+      compact ? "min-h-[30px] px-2.5 py-1 text-[9px]" : "min-h-[38px] px-3 py-1.5 text-[10px]"
     }`;
 
-  if (href) {
+  if (vods.length) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`${base} border-edge bg-void/40 text-ash hover:border-amethyst hover:text-glow`}
-      >
-        <PlayIcon size={compact ? 11 : 13} />
-        {pick(page.watchVod)}
-      </a>
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {vods.map((vod, index) => (
+          <a
+            key={`${vod.url}-${index}`}
+            href={vod.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={vod.type === "game" ? `VOD for Game ${vod.game ?? index + 1}` : "VOD for the full match"}
+            className={`${base} border-edge bg-void/40 text-ash hover:border-amethyst hover:text-glow hover:shadow-[0_0_18px_rgba(168,85,247,0.25)]`}
+          >
+            <PlayIcon size={compact ? 10 : 12} />
+            {vodLabel(vod, lang)}
+          </a>
+        ))}
+      </div>
     );
   }
 
   return (
     <span
       aria-disabled="true"
-      className={`${base} cursor-not-allowed border-edge/60 bg-void/20 text-ash-dim`}
+      className={`${base} w-full cursor-not-allowed border-edge/60 bg-void/20 text-ash-dim`}
     >
       {pick(page.vodSoon)}
     </span>
@@ -524,7 +537,7 @@ function MatchCard({
 
       {/* VOD — always present */}
       <div className={`mx-auto ${compact ? "mt-2 max-w-[190px]" : "mt-4 max-w-xs"}`}>
-      <VodButton href={match.vod} page={page} compact={compact} />
+        <VodLinks match={match} page={page} compact={compact} />
       </div>
     </article>
   );

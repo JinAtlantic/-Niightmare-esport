@@ -158,7 +158,8 @@
       "opponent": "LEON",
       "score": "50-51",
       "result": "loss",
-      "vod": null
+      "vod": null,
+      "vods": []
     },
     {
       "id": "m1",
@@ -172,6 +173,12 @@
       "score": "4-1",
       "result": "win",
       "vod": "https://www.youtube.com/live/ntCJ4WWEhQs?si=yx6qZWLqJF2jFSzj&t=720",
+      "vods": [
+        {
+          "type": "series",
+          "url": "https://www.youtube.com/live/ntCJ4WWEhQs?si=yx6qZWLqJF2jFSzj&t=720"
+        }
+      ],
       "opponentLogo": "/teams/wonderer-panda-mqdsgyo6.jpg"
     }
   ],

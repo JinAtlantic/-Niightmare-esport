@@ -17,6 +17,7 @@ import type {
 import type { AboutUsContent } from "./about";
 import type { RoadmapContent } from "./roadmap";
 import type { MatchScheduleContent } from "./matchSchedule";
+import { cleanMatchVods } from "./matchVods";
 
 /**
  * One-time (re-runnable) migration of the current Vercel-Blob content into the
@@ -104,6 +105,7 @@ export function matchRows(matches: Match[]) {
     score: s(m.score),
     result: s(m.result),
     vod: s(m.vod),
+    vods: cleanMatchVods(m.vods),
     sort_order: i,
   }));
 }

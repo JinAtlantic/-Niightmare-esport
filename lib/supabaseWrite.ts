@@ -107,7 +107,12 @@ export async function writeSectionToSupabase(
       );
     } else if (key === "matches") {
       const m = value as { matches?: Match[]; tournaments?: Tournament[] };
-      await replaceTable(db, "matches", matchRows(m.matches ?? []));
+      const rows = matchRows(m.matches ?? []);
+      const matchesHaveVodColumns = await hasColumns(db, "matches", "vods");
+      if (!matchesHaveVodColumns && hasAnyValue(rows, ["vods"])) {
+        throw new Error("Supabase matches.vods column is missing. Run supabase/schema.sql before saving multiple VOD links.");
+      }
+      await replaceTable(db, "matches", matchesHaveVodColumns ? rows : omitKeys(rows, ["vods"]));
       await replaceTable(db, "tournaments", tournamentRows(m.tournaments ?? []));
     } else if (key === "news") {
       const n = value as { articles?: NewsArticle[] };

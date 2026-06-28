@@ -101,6 +101,7 @@ create table if not exists public.matches (
   score           text,
   result          text,  -- 'win' | 'loss' | 'draw'
   vod             text,
+  vods            jsonb   default '[]'::jsonb,
   sort_order      int     default 0,
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
@@ -292,6 +293,7 @@ alter table public.upcoming_match add column if not exists stream_url text;
 -- Optional 3-letter opponent short code shown when no opponent logo is set.
 alter table public.matches add column if not exists opponent_abbr text;
 alter table public.upcoming_match add column if not exists opponent_abbr text;
+alter table public.matches add column if not exists vods jsonb default '[]'::jsonb;
 -- Home "About Us" band copy (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists about_us jsonb;
 -- Matches-page "Niightmare Roadmap" popup (admin-editable), stored as one JSON blob.
