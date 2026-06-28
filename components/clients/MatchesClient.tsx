@@ -750,10 +750,10 @@ function GameTournamentSection({
 }
 
 const selectClass =
-  "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
+  "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
 
 const filterLabelClass =
-  "mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash-dim";
+  "mb-1.5 block font-mono text-[11px] font-extrabold uppercase tracking-[0.14em] text-soul";
 
 export default function MatchesClient() {
   const { pick } = useLanguage();
