@@ -7,9 +7,10 @@ import HomeEditor from "@/components/admin/HomeEditor";
 import MatchesEditor from "@/components/admin/MatchesEditor";
 import RosterEditor from "@/components/admin/RosterEditor";
 import SponsorsEditor from "@/components/admin/SponsorsEditor";
+import ShopEditor from "@/components/admin/ShopEditor";
 import CommunityModeration from "@/components/admin/CommunityModeration";
 
-type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "community";
+type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "community";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Home" },
@@ -17,6 +18,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "achievements", label: "Achievements" },
   { id: "roster", label: "Roster" },
   { id: "sponsors", label: "Sponsors" },
+  { id: "shop", label: "Shop" },
   { id: "community", label: "Community" },
 ];
 
@@ -85,6 +87,7 @@ export default function AdminApp() {
         {tab === "achievements" && <AchievementsEditor />}
         {tab === "roster" && <RosterEditor />}
         {tab === "sponsors" && <SponsorsEditor />}
+        {tab === "shop" && <ShopEditor />}
         {tab === "community" && <CommunityModeration />}
       </main>
     </div>

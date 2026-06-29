@@ -6,6 +6,7 @@
     "matches": { "en": "MATCHES", "lo": "ການແຂ່ງຂັນ" },
     "achievements": { "en": "ACHIEVEMENTS", "lo": "ຜົນງານ" },
     "sponsors": { "en": "SPONSORS", "lo": "ສະປອນເຊີ" },
+    "shop": { "en": "SHOP", "lo": "ຮ້ານຄ້າ" },
     "contact": { "en": "CONTACT", "lo": "ຕິດຕໍ່" },
     "join_community": { "en": "JOIN COMMUNITY", "lo": "ເຂົ້າຮ່ວມຊຸມຊົນ" }
   },

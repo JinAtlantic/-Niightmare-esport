@@ -165,6 +165,7 @@ export async function writeSectionToSupabase(
         media_kit_url: s(site.mediaKitUrl),
         about_us: site.aboutUs ?? null,
         roadmap: site.roadmap ?? null,
+        shop: site.shop ?? null,
       };
       if (hasMatchSchedulePayload(site.matchSchedule)) {
         siteSettingsRow.match_schedule = site.matchSchedule ?? null;

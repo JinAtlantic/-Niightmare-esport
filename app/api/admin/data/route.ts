@@ -68,6 +68,7 @@ export async function PUT(request: Request) {
     revalidatePath("/", "layout");
     revalidatePath("/matches");
     revalidatePath("/achievements");
+    revalidatePath("/shop");
     return NextResponse.json({ ok: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Could not save content";

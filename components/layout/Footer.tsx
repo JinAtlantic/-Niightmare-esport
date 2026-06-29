@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/matches", key: "nav.matches" },
   { href: "/achievements", key: "nav.achievements" },
   { href: "/sponsors", key: "nav.sponsors" },
+  { href: "/shop", key: "nav.shop" },
   { href: "/contact", key: "nav.contact" },
 ];
 

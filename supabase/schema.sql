@@ -302,6 +302,8 @@ alter table public.site_settings add column if not exists roadmap jsonb;
 alter table public.site_settings add column if not exists achievements jsonb;
 -- Home upcoming-match schedule popup (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists match_schedule jsonb;
+-- Shop / 3D jersey config (admin-editable): price, stock, size chart, order links.
+alter table public.site_settings add column if not exists shop jsonb;
 drop policy if exists "members are publicly readable" on public.members;
 
 -- Privacy backfill: Magic Link users may not have a provider display name.
