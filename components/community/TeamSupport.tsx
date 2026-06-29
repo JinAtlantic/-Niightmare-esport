@@ -8,8 +8,8 @@ import TeamCommentModal from "@/components/community/TeamCommentModal";
 
 const COPY = {
   kicker: { en: "Support the club", lo: "ເຊຍສະໂມສອນ" },
-  like: { en: "Like NIIGHTMARE", lo: "ກົດໃຈ NIIGHTMARE" },
-  liked: { en: "Liked NIIGHTMARE", lo: "ກົດໃຈ NIIGHTMARE ແລ້ວ" },
+  like: { en: "Like", lo: "ກົດໃຈ" },
+  liked: { en: "Liked", lo: "ກົດໃຈແລ້ວ" },
   comment: { en: "Comment", lo: "ຄອມເມັນ" },
 };
 
@@ -88,32 +88,35 @@ export default function TeamSupport() {
 
   return (
     <>
-      <div className="max-w-xl border border-amethyst/40 bg-void/50 p-2 shadow-[0_0_28px_rgba(168,85,247,0.18)] backdrop-blur-md">
-        <p className="px-2 pb-2 pt-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-amethyst">
+      {/* Slim utility row — secondary to the hero's primary Shop CTA. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.26em] text-spectre/55">
           {pick(COPY.kicker)}
-        </p>
-        <div className="grid gap-2 sm:grid-cols-[1.15fr_0.85fr]">
+        </span>
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={toggleLike}
             disabled={busy || !supportsCommunity}
-            className={`inline-flex min-h-[48px] items-center justify-center gap-2 border px-4 py-3 font-display text-sm font-black uppercase tracking-[0.14em] transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+            className={`inline-flex min-h-[42px] items-center gap-2 rounded-md border px-3.5 py-2 font-display text-xs font-bold uppercase tracking-[0.12em] backdrop-blur-sm transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
               liked
-                ? "border-loss/60 bg-loss/12 text-loss shadow-[0_0_22px_rgba(251,113,133,0.22)]"
-                : "border-amethyst/70 bg-amethyst/15 text-soul hover:bg-amethyst/25 hover:shadow-[0_0_26px_rgba(168,85,247,0.28)]"
+                ? "border-loss/60 bg-loss/10 text-loss"
+                : "border-edge-bright/70 bg-void/40 text-spectre hover:border-amethyst hover:text-soul"
             }`}
           >
-            <Heart size={17} fill={liked ? "currentColor" : "none"} />
+            <Heart size={15} fill={liked ? "currentColor" : "none"} />
             <span>{liked ? pick(COPY.liked) : pick(COPY.like)}</span>
-            <span className="keep-latin font-mono text-[11px] text-spectre">{likes}</span>
+            {likes > 0 && (
+              <span className="keep-latin font-mono text-[11px] text-ash">{likes}</span>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setCommentOpen(true)}
             disabled={!supportsCommunity}
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 border border-edge-bright bg-void/55 px-4 py-3 font-display text-sm font-black uppercase tracking-[0.14em] text-soul transition-colors hover:border-amethyst hover:bg-amethyst/15 disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex min-h-[42px] items-center gap-2 rounded-md border border-edge-bright/70 bg-void/40 px-3.5 py-2 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre backdrop-blur-sm transition-colors hover:border-amethyst hover:text-soul disabled:cursor-not-allowed disabled:opacity-45"
           >
-            <MessageCircle size={17} />
+            <MessageCircle size={15} />
             {pick(COPY.comment)}
           </button>
         </div>

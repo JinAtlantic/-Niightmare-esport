@@ -17,8 +17,8 @@ const NAV_ITEMS = [
   { href: "/roster", key: "nav.roster" },
   { href: "/matches", key: "nav.matches" },
   { href: "/achievements", key: "nav.achievements" },
-  { href: "/sponsors", key: "nav.sponsors" },
   { href: "/shop", key: "nav.shop" },
+  { href: "/sponsors", key: "nav.sponsors" },
   { href: "/contact", key: "nav.contact" },
 ];
 
