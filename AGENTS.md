@@ -180,45 +180,46 @@ and "Team Snapshot" blocks were removed.
   Card rank 1 enters Group Stage; MCCM Season 2 rank 1 goes direct to M-Series,
   rank 2 goes to Wild Card for the final M-Series slot.
 
-## Next work handoff: Shop / 3D Jersey page
-The next planned feature is a new **Shop** page for NIIGHTMARE team jerseys. This is
-not implemented yet. Before coding it, ask the user for missing product/order details;
-do not start a large implementation from assumptions.
+## Shop / jersey ordering (IMPLEMENTED — 2026-06)
+`/shop` is a live on-site jersey ordering flow. **No 3D viewer** — an early
+placeholder used a procedural Three.js model but the user dropped it as fiddly;
+`components/shop/JerseyModelViewer.tsx` still exists (vanilla Three.js) but is no
+longer imported, so three.js is not bundled on the page. **Do NOT reintroduce
+`@react-three/fiber`** — Next 15 serves a React-19 client runtime while the repo
+pins React 18, so fiber's reconciler reads removed internals (`ReactCurrentBatchConfig`)
+and crashes only at client runtime (tsc/lint/build all pass). Any future 3D must be
+vanilla Three.js in a `useEffect`.
 
-Target experience:
-- A premium dark esports shop page for ordering NIIGHTMARE jerseys.
-- The first screen should be the actual product/order experience, not a marketing-only
-  landing page.
-- Include a 3D human model wearing the jersey. The user wants the model to rotate 360
-  degrees so buyers can inspect fit and proportions.
-- Buyers should be able to choose model gender/body presentation (male/female), model
-  height, and jersey size (S/M/L/XL/XXL or the real size list once provided).
-- The purpose is fit confidence: help buyers understand whether a selected size will
-  look suitable before ordering.
-- Mobile must be excellent; the 3D viewer and controls must not overflow the viewport.
+Product model (one jersey, one edition): currency LAK, base **329,000 ກີບ**, sizes
+S–4XL where **3XL +10,000 / 4XL +20,000** (per-size `surcharge`). Back name/number are
+**locked** to "NIIGHTMARE ESPORTS #7" (reserved, shown with a rights note). The page is
+two tabs styled like the Achievements page: **Order** (reserved note + size→quantity
+rows, supporting several sizes per order and a typeable qty up to 999; customer name,
+phone/WhatsApp, courier dropdown with a free-text "Other", province/city/branch) and
+**My Orders** (the buyer's saved orders from `localStorage`, with an empty state).
+Bilingual EN/Lao throughout.
 
-Recommended implementation shape:
-- Use Three.js / React Three Fiber only if the dependency and build impact are acceptable.
-  If real `.glb`/`.gltf` assets are not available yet, build a clean placeholder viewer
-  and isolate it so real assets can replace it later.
-- Suggested files: `app/shop/page.tsx`, `components/shop/JerseyModelViewer.tsx`,
-  `components/shop/ShopClient.tsx`, and `lib/shop.ts` for size/model configuration.
-- Keep Tailwind styling aligned with the existing Premium Violet Void tokens. Avoid
-  one-off hardcoded colours unless a token does not exist.
-- If shop data must be admin-editable, follow the existing editable JSON pattern for
-  `site_settings` (`schema.sql`, `lib/supabaseWrite.ts`, `lib/migrate.ts`,
-  `lib/contentFromSupabase.ts`, default resolver in `lib/*.ts`, editor in admin).
-- If adding dependencies, update `package.json`/lockfile and run the normal verification
-  commands before push.
+Order flow: **Order & pay** opens a payment popup (big bank **QR** + amount + account).
+"I've transferred" → `POST /api/shop/order` which prices server-side, inserts into the
+**`shop_orders`** Supabase table (service-role only; RLS on, no anon policy) and emails
+the team via the existing Formspree endpoint → green success tick → popup self-closes →
+jumps to the My Orders tab. Payment is **self-declared** (no gateway): orders land as
+`status='paid_declared'`; the team verifies in **/admin → Orders** tab and advances
+status (paid_declared → verified → shipped → cancelled).
 
-Ask the user these questions before implementation:
-- Do you already have real 3D model files (`.glb`/`.gltf`) for male/female models, or
-  should phase 1 use placeholders?
-- Do you have the real jersey texture/design/logo assets to apply to the model?
-- What is the real size chart: chest, length, shoulder, sleeve, and supported sizes?
-- Should the shop support only size/model/height, or also quantity, custom name, custom
-  number, player edition, fan edition, or limited edition?
-- How should orders be handled first: contact form, LINE/Facebook redirect, saved order
-  in Supabase/admin, or payment gateway later?
-- Should prices, stock, product images, and size charts be editable from `/admin`?
-- Should the shop be bilingual EN/Lao like the rest of the site?
+Files: `lib/shop.ts` (config/types/`resolveShop`/`computeOrder`/`validateOrder`; also a
+leftover fit model used only by the unused viewer), `app/shop/page.tsx`,
+`components/shop/ShopClient.tsx`, `app/api/shop/order/route.ts`,
+`app/api/admin/orders/route.ts`, `components/admin/ShopEditor.tsx`,
+`components/admin/OrdersEditor.tsx` (+ tab wired in `AdminApp.tsx`). All shop *config*
+(price, sizes, stock, bank/QR, couriers, contact link, rights note) lives in the
+`site_settings.shop` jsonb blob and is edited in **/admin → Shop** — same editable-JSON
+pattern as `site.aboutUs`/`site.roadmap`.
+
+Owner setup still pending (placeholders shipped): upload the real bank **QR** + account
++ the "Ask for more info" contact link in /admin → Shop. The order route degrades
+gracefully if `shop_orders.items` (per-size breakdown jsonb) hasn't been added; run
+`alter table public.shop_orders add column if not exists items jsonb;` to persist it.
+Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
+automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js
+preview.
