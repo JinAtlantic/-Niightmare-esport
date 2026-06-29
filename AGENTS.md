@@ -7,7 +7,7 @@ overrides them.
 
 ## What this is
 Dark, aggressive **esports website** for NIIGHTMARE Esports (Lao PDR), competing in
-**Mobile Legends: Bang Bang (MLBB)** and **eFootball**. Next.js 14 (App Router) ·
+**Mobile Legends: Bang Bang (MLBB)** and **eFootball**. Next.js 15 (App Router) ·
 TypeScript · Tailwind CSS · bilingual EN/Lao. Live at
 **https://niightmareesport.com** (custom domain, registered + DNS on Cloudflare,
 records DNS-only/grey so Vercel issues SSL). The old `niightmare-esport.vercel.app`
@@ -179,3 +179,46 @@ and "Team Snapshot" blocks were removed.
   Current flow: MCCM Season 1 rank 1 goes to MSC x EWC Wild Card, then Wild
   Card rank 1 enters Group Stage; MCCM Season 2 rank 1 goes direct to M-Series,
   rank 2 goes to Wild Card for the final M-Series slot.
+
+## Next work handoff: Shop / 3D Jersey page
+The next planned feature is a new **Shop** page for NIIGHTMARE team jerseys. This is
+not implemented yet. Before coding it, ask the user for missing product/order details;
+do not start a large implementation from assumptions.
+
+Target experience:
+- A premium dark esports shop page for ordering NIIGHTMARE jerseys.
+- The first screen should be the actual product/order experience, not a marketing-only
+  landing page.
+- Include a 3D human model wearing the jersey. The user wants the model to rotate 360
+  degrees so buyers can inspect fit and proportions.
+- Buyers should be able to choose model gender/body presentation (male/female), model
+  height, and jersey size (S/M/L/XL/XXL or the real size list once provided).
+- The purpose is fit confidence: help buyers understand whether a selected size will
+  look suitable before ordering.
+- Mobile must be excellent; the 3D viewer and controls must not overflow the viewport.
+
+Recommended implementation shape:
+- Use Three.js / React Three Fiber only if the dependency and build impact are acceptable.
+  If real `.glb`/`.gltf` assets are not available yet, build a clean placeholder viewer
+  and isolate it so real assets can replace it later.
+- Suggested files: `app/shop/page.tsx`, `components/shop/JerseyModelViewer.tsx`,
+  `components/shop/ShopClient.tsx`, and `lib/shop.ts` for size/model configuration.
+- Keep Tailwind styling aligned with the existing Premium Violet Void tokens. Avoid
+  one-off hardcoded colours unless a token does not exist.
+- If shop data must be admin-editable, follow the existing editable JSON pattern for
+  `site_settings` (`schema.sql`, `lib/supabaseWrite.ts`, `lib/migrate.ts`,
+  `lib/contentFromSupabase.ts`, default resolver in `lib/*.ts`, editor in admin).
+- If adding dependencies, update `package.json`/lockfile and run the normal verification
+  commands before push.
+
+Ask the user these questions before implementation:
+- Do you already have real 3D model files (`.glb`/`.gltf`) for male/female models, or
+  should phase 1 use placeholders?
+- Do you have the real jersey texture/design/logo assets to apply to the model?
+- What is the real size chart: chest, length, shoulder, sleeve, and supported sizes?
+- Should the shop support only size/model/height, or also quantity, custom name, custom
+  number, player edition, fan edition, or limited edition?
+- How should orders be handled first: contact form, LINE/Facebook redirect, saved order
+  in Supabase/admin, or payment gateway later?
+- Should prices, stock, product images, and size charts be editable from `/admin`?
+- Should the shop be bilingual EN/Lao like the rest of the site?
