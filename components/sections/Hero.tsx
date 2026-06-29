@@ -43,14 +43,6 @@ export default function Hero() {
           and width-contained on desktop so the reaper stays the hero. */}
       <div className="home-hero-content relative z-[2] w-full max-w-7xl">
         <div className="mx-auto flex max-w-[min(34rem,92vw)] flex-col items-center text-center lg:mx-0 lg:max-w-[42rem] lg:items-start lg:text-left">
-          <p
-            className="fx-rise mb-3 inline-flex items-center gap-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.32em] text-spectre/75 md:mb-4 md:text-[11px]"
-            style={{ animationDelay: "0.26s" }}
-          >
-            <span className="h-[5px] w-[5px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
-            {t("hero.kicker")}
-          </p>
-
           <h1 className="home-hero-wordmark keep-latin font-display items-center lg:items-start">
             <span className="home-hero-main">
               N<span className="home-hero-double-i">II</span>GHTMARE
