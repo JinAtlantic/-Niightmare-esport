@@ -7,7 +7,6 @@ import TeamSupport from "@/components/community/TeamSupport";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 
 const COPY = {
-  shopEyebrow: { en: "New · 2026 Jersey Drop", lo: "ໃໝ່ · ເສື້ອທີມ 2026" },
   shopCta: { en: "Shop the Jersey", lo: "ສັ່ງເສື້ອທີມ" },
 };
 
@@ -69,32 +68,24 @@ export default function Hero() {
         />
 
         <div
-          className="fx-rise mt-8 flex flex-col gap-5"
+          className="fx-rise mt-8 flex flex-col items-start gap-4 md:items-end"
           style={{ animationDelay: "0.52s" }}
         >
-          {/* 2026 jersey drop — primary hero action */}
-          <div>
-            <p className="mb-2.5 inline-flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-glow/90">
-              <span className="h-[5px] w-[5px] rounded-full bg-glow shadow-[0_0_10px_#c77dff]" />
-              {pick(COPY.shopEyebrow)}
-            </p>
-            <div>
-              <Link
-                href="/shop"
-                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/15 to-transparent px-7 py-4 font-display text-sm font-black uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-300 hover:border-glow hover:shadow-[0_0_44px_rgba(168,85,247,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
-              >
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]"
-                />
-                <span className="relative">{pick(COPY.shopCta)}</span>
-                <ArrowRightIcon
-                  size={18}
-                  className="relative transition-transform duration-300 group-hover:translate-x-1.5"
-                />
-              </Link>
-            </div>
-          </div>
+          {/* primary hero action — left on mobile, right on desktop */}
+          <Link
+            href="/shop"
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/15 to-transparent px-7 py-4 font-display text-sm font-black uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-300 hover:border-glow hover:shadow-[0_0_44px_rgba(168,85,247,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
+          >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]"
+            />
+            <span className="relative">{pick(COPY.shopCta)}</span>
+            <ArrowRightIcon
+              size={18}
+              className="relative transition-transform duration-300 group-hover:translate-x-1.5"
+            />
+          </Link>
 
           {/* quiet support utility row */}
           <TeamSupport />
