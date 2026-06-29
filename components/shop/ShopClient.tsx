@@ -1,60 +1,29 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
+import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import {
   resolveShop,
-  fitAssessment,
-  recommendSize,
   sizePrice,
   formatPrice,
   computeOrder,
   validateOrder,
   isOtherCourier,
-  SHOP_HEIGHT_MIN,
-  SHOP_HEIGHT_MAX,
-  SHOP_HEIGHT_DEFAULT,
   SHOP_QTY_MAX,
   type ShopContent,
-  type ShopGender,
   type ShopOrderItem,
   type ShopOrderRecord,
 } from "@/lib/shop";
 
-const JerseyModelViewer = dynamic(() => import("@/components/shop/JerseyModelViewer"), {
-  ssr: false,
-  loading: () => <ViewerSkeleton />,
-});
-
 const STORAGE_KEY = "nm-shop-orders";
-
-function ViewerSkeleton() {
-  return (
-    <div className="grid h-full w-full place-items-center">
-      <div className="flex flex-col items-center gap-3">
-        <span className="h-9 w-9 animate-spin rounded-full border-2 border-edge-bright border-t-amethyst" />
-        <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-ash">Loading 3D…</span>
-      </div>
-    </div>
-  );
-}
+type TabId = "order" | "myorders";
 
 const COPY = {
   kicker: { en: "Official Store", lo: "ຮ້ານທາງການ" },
-  dragHint: { en: "Drag to rotate · 360°", lo: "ລາກເພື່ອໝຸນ · 360°" },
-  rotateOn: { en: "Auto-spin: on", lo: "ໝຸນ: ເປີດ" },
-  rotateOff: { en: "Auto-spin: off", lo: "ໝຸນ: ປິດ" },
-  previewNote: { en: "Preview only — choose order quantities below", lo: "ສຳລັບເບິ່ງເທົ່ານັ້ນ — ເລືອກຈຳນວນສັ່ງດ້ານລຸ່ມ" },
-  bodyModel: { en: "Body model", lo: "ໂມເດລຮ່າງກາຍ" },
-  male: { en: "Male", lo: "ຊາຍ" },
-  female: { en: "Female", lo: "ຍິງ" },
-  height: { en: "Model height", lo: "ສ່ວນສູງໂມເດລ" },
-  previewSize: { en: "Preview size", lo: "ໄຊ້ສຳລັບເບິ່ງ" },
-  fitTitle: { en: "Fit preview", lo: "ເບິ່ງຄວາມພໍດີ" },
-  weRecommend: { en: "Recommended", lo: "ແນະນຳ" },
+  tabOrder: { en: "Order", lo: "ສັ່ງຊື້" },
+  tabMine: { en: "My Orders", lo: "ອໍເດີຂອງຂ້ອຍ" },
   reserved: { en: "Reserved", lo: "ສະຫງວນລິຂະສິດ" },
   orderTitle: { en: "Order your jersey", lo: "ສັ່ງຊື້ເສື້ອ" },
   pickQuantities: { en: "Choose quantity per size — order several sizes at once.", lo: "ເລືອກຈຳນວນຕໍ່ໄຊ້ — ສັ່ງຫຼາຍໄຊ້ໃນຄັ້ງດຽວໄດ້." },
@@ -64,7 +33,6 @@ const COPY = {
   courier: { en: "Courier", lo: "ບໍລິສັດຂົນສົ່ງ" },
   pickCourier: { en: "Select courier", lo: "ເລືອກບໍລິສັດຂົນສົ່ງ" },
   otherCourier: { en: "Type courier name", lo: "ພິມຊື່ບໍລິສັດຂົນສົ່ງ" },
-  previewBox: { en: "3D preview", lo: "ເບິ່ງໂມເດລ 3D" },
   province: { en: "Province", lo: "ແຂວງ" },
   city: { en: "City / District", lo: "ເມືອງ" },
   branch: { en: "Branch", lo: "ສາຂາ" },
@@ -91,6 +59,8 @@ const COPY = {
   payError: { en: "Could not save the order. Please try again or contact us.", lo: "ບັນທຶກບໍ່ສຳເລັດ. ລອງໃໝ່ ຫຼື ຕິດຕໍ່ພວກເຮົາ." },
   myOrders: { en: "Your orders", lo: "ອໍເດີຂອງທ່ານ" },
   statusPending: { en: "Awaiting verification", lo: "ລໍຖ້າກວດສອບ" },
+  noOrders: { en: "You have no orders yet.", lo: "ທ່ານຍັງບໍ່ມີອໍເດີ." },
+  goOrder: { en: "Start an order", lo: "ເລີ່ມສັ່ງຊື້" },
   comingSoon: { en: "Store opening soon", lo: "ຮ້ານກຳລັງຈະເປີດ" },
   comingSoonBody: {
     en: "The NIIGHTMARE jersey store is being prepared. Check back shortly.",
@@ -98,36 +68,14 @@ const COPY = {
   },
 };
 
-const FIT_TIP = {
-  tight: { en: "Snug — size up for comfort.", lo: "ຄັບ — ຂຶ້ນໄຊ້ເພື່ອຄວາມສະບາຍ." },
-  fitted: { en: "Athletic, close to the body.", lo: "ຟິດເຂົ້າຮູບ ໃກ້ກັບຕົວ." },
-  regular: { en: "Balanced competition fit.", lo: "ພໍດີແບບການແຂ່ງຂັນ." },
-  relaxed: { en: "Easy, roomy comfort.", lo: "ຫຼວມສະບາຍ." },
-  oversized: { en: "Very loose drape.", lo: "ຫຼວມຫຼາຍ." },
-} as const;
-
 export default function ShopClient() {
-  const { pick, lang } = useLanguage();
+  const { pick } = useLanguage();
   const { site } = useContent();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
-  // preview-only state
-  const [gender, setGender] = useState<ShopGender>("male");
-  const [heightCm, setHeightCm] = useState(SHOP_HEIGHT_DEFAULT);
-  const [autoRotate, setAutoRotate] = useState(true);
-  const recommended = useMemo(() => recommendSize(shop.sizes, heightCm, gender), [shop.sizes, heightCm, gender]);
-  const [previewSizeId, setPreviewSizeId] = useState<string>(() => {
-    const r = recommendSize(shop.sizes, SHOP_HEIGHT_DEFAULT, "male");
-    return r?.id ?? shop.sizes[0]?.id ?? "m";
-  });
-  const previewSize = shop.sizes.find((s) => s.id === previewSizeId) ?? recommended ?? shop.sizes[0];
-  const fit = previewSize ? fitAssessment(previewSize, heightCm, gender) : null;
+  const [tab, setTab] = useState<TabId>("order");
 
-  // order state — quantity per size
-  const [quantities, setQuantities] = useState<Record<string, number>>(() => {
-    const r = recommendSize(shop.sizes, SHOP_HEIGHT_DEFAULT, "male");
-    return r ? { [r.id]: 1 } : {};
-  });
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [courier, setCourier] = useState("");
@@ -157,12 +105,6 @@ export default function ShopClient() {
     .map(([sizeId, quantity]) => ({ sizeId, quantity }));
   const { lines, totalQty, total } = computeOrder(shop, orderItems);
 
-  const toneClass: Record<string, string> = {
-    glow: "text-glow border-glow/40 bg-glow/10",
-    win: "text-win border-win/40 bg-win/10",
-    loss: "text-loss border-loss/40 bg-loss/10",
-  };
-
   function adjustQty(sizeId: string, delta: number) {
     setQuantities((prev) => {
       const cur = prev[sizeId] ?? 0;
@@ -176,7 +118,6 @@ export default function ShopClient() {
     setQuantities((prev) => ({ ...prev, [sizeId]: value }));
   }
 
-  // When "Other" is picked, the typed name is the real courier value.
   const effectiveCourier = isOtherCourier(courier) ? courierOther.trim() : courier;
 
   function currentInput() {
@@ -215,9 +156,11 @@ export default function ShopClient() {
       } catch {
         /* ignore */
       }
+      setQuantities({});
       window.setTimeout(() => {
         setPayOpen(false);
         setPaySuccess(false);
+        setTab("myorders");
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 1900);
     } catch {
@@ -246,9 +189,14 @@ export default function ShopClient() {
     );
   }
 
+  const TABS: { id: TabId; label: string }[] = [
+    { id: "order", label: pick(COPY.tabOrder) },
+    { id: "myorders", label: `${pick(COPY.tabMine)}${myOrders.length ? ` (${myOrders.length})` : ""}` },
+  ];
+
   return (
-    <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
-      <header className="mb-6 md:mb-8">
+    <main className="mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
+      <header className="mb-6 text-center">
         <p className="inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.34em] text-spectre/70">
           <span className="h-[5px] w-[5px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
           {pick(COPY.kicker)}
@@ -256,264 +204,203 @@ export default function ShopClient() {
         <h1 className="mt-3 font-display text-3xl font-bold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.3)] md:text-4xl">
           {pick(shop.productName)}
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-spectre/85 md:text-base">{pick(shop.tagline)}</p>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-spectre/85 md:text-base">{pick(shop.tagline)}</p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8">
-        {/* ── 3D preview (independent of the order) ───────────────────── */}
-        <section className="lg:sticky lg:top-24 lg:self-start">
-          <h2 className="mb-3 font-display text-lg font-bold uppercase tracking-wide text-soul">{pick(COPY.previewBox)}</h2>
-          <div className="relative overflow-hidden rounded-md border border-edge bg-gradient-to-b from-crypt2 via-crypt to-void">
-            <div className="scythe-line absolute inset-x-0 top-0 h-[2px] opacity-70" aria-hidden />
-            <div className="relative h-[clamp(360px,52vh,560px)] w-full">
-              {previewSize && (
-                <JerseyModelViewer
-                  gender={gender}
-                  heightCm={heightCm}
-                  size={previewSize}
-                  jerseyName={shop.fixedJerseyName}
-                  jerseyNumber={shop.fixedJerseyNumber}
-                  autoRotate={autoRotate}
-                  className="h-full w-full"
-                />
-              )}
-            </div>
-            <div className="flex items-center justify-between gap-3 border-t border-edge bg-void/60 px-4 py-3">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash">{pick(COPY.dragHint)}</span>
-              <button
-                type="button"
-                onClick={() => setAutoRotate((v) => !v)}
-                className="rounded-md border border-edge px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre transition-colors hover:border-amethyst hover:text-soul"
-              >
-                {autoRotate ? pick(COPY.rotateOn) : pick(COPY.rotateOff)}
-              </button>
-            </div>
-          </div>
-
-          {/* preview controls */}
-          <div className="mt-4 grid gap-4 rounded-md border border-edge bg-crypt/50 p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amethyst">{pick(COPY.previewNote)}</p>
-            <div className="grid grid-cols-2 gap-2">
-              {(["male", "female"] as ShopGender[]).map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => setGender(g)}
-                  className={`min-h-[44px] rounded-md border px-4 py-2.5 font-display text-sm font-bold uppercase tracking-[0.1em] transition-all ${
-                    gender === g ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/50 text-spectre hover:border-edge-bright hover:text-soul"
-                  }`}
-                >
-                  {pick(g === "male" ? COPY.male : COPY.female)}
-                </button>
-              ))}
-            </div>
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.height)}</span>
-                <span className="font-mono text-sm font-bold text-soul">{heightCm} cm</span>
-              </div>
-              <input
-                type="range"
-                min={SHOP_HEIGHT_MIN}
-                max={SHOP_HEIGHT_MAX}
-                value={heightCm}
-                onChange={(e) => setHeightCm(Number(e.target.value))}
-                className="shop-range w-full"
-                aria-label={pick(COPY.height)}
-              />
-            </div>
-            <div>
-              <span className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.previewSize)}</span>
-              <div className="flex flex-wrap gap-2">
-                {shop.sizes.map((s) => {
-                  const active = previewSize?.id === s.id;
-                  const isRec = recommended?.id === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => setPreviewSizeId(s.id)}
-                      className={`relative min-w-[52px] rounded-md border px-3 py-2 font-display text-sm font-bold uppercase tracking-wide transition-all ${
-                        active ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/50 text-spectre hover:border-edge-bright hover:text-soul"
-                      }`}
-                    >
-                      {s.label}
-                      {isRec && <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-glow shadow-[0_0_8px_#c77dff]" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {fit && previewSize && (
-              <div className="flex items-center justify-between gap-3 border-t border-edge/60 pt-3">
-                <div>
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.fitTitle)}</span>
-                  <p className="mt-1 text-sm text-spectre/90">{pick(FIT_TIP[fit.level])}</p>
-                </div>
-                <span className={`shrink-0 rounded-full border px-3 py-1 font-display text-xs font-bold uppercase tracking-[0.12em] ${toneClass[fit.tone]}`}>
-                  {pick(fit.label)}
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ── order form ──────────────────────────────────────────────── */}
-        <section id="order-form" className="space-y-5">
-          <div className="rounded-md border border-amethyst/35 bg-amethyst/[0.06] p-4">
-            <p className="mb-1 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
-              <LockGlyph /> {pick(COPY.reserved)}
-            </p>
-            <p className="text-[13px] leading-relaxed text-spectre/90">{pick(shop.rightsNote)}</p>
-            <p className="mt-2 font-display text-sm font-bold uppercase tracking-wide text-soul">
-              {shop.fixedJerseyName} · #{shop.fixedJerseyNumber}
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{pick(COPY.orderTitle)}</h2>
-            <p className="mt-1 text-[13px] text-spectre/80">{pick(COPY.pickQuantities)}</p>
-          </div>
-
-          {/* size × quantity rows */}
-          <div className={`grid gap-2 rounded-md border p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
-            {shop.sizes.map((s) => {
-              const price = sizePrice(shop, s);
-              const qty = quantities[s.id] ?? 0;
-              return (
-                <div
-                  key={s.id}
-                  className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 ${qty > 0 ? "bg-amethyst/[0.07]" : ""}`}
-                >
-                  <div className="min-w-0">
-                    <span className="font-display text-base font-bold uppercase tracking-wide text-soul">{s.label}</span>
-                    <span className="ml-2 font-mono text-[11px] text-ash">
-                      {formatPrice(price, shop.currency)}
-                      {s.surcharge > 0 ? ` (+${s.surcharge.toLocaleString("en-US")})` : ""}
-                    </span>
-                  </div>
-                  {s.inStock ? (
-                    <div className="inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
-                      <Stepper label="−" onClick={() => adjustQty(s.id, -1)} dim={qty === 0} />
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        aria-label={`${s.label} quantity`}
-                        value={qty === 0 ? "" : String(qty)}
-                        placeholder="0"
-                        onChange={(e) => setQtyExact(s.id, e.target.value)}
-                        className={`w-12 bg-transparent text-center font-display text-base font-bold outline-none placeholder:text-ash-dim ${qty > 0 ? "text-soul" : "text-ash-dim"}`}
-                      />
-                      <Stepper label="+" onClick={() => adjustQty(s.id, 1)} />
-                    </div>
-                  ) : (
-                    <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-loss">{pick(COPY.soldOut)}</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* customer */}
-          <Field label={pick(COPY.fullName)} error={errors.customerName}>
-            <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={inputClass(errors.customerName)} autoComplete="name" />
-          </Field>
-          <Field label={pick(COPY.phone)} error={errors.phone}>
-            <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass(errors.phone)} autoComplete="tel" placeholder="+856 …" />
-          </Field>
-          <Field label={pick(COPY.courier)} error={errors.courier}>
-            <select value={courier} onChange={(e) => setCourier(e.target.value)} className={inputClass(errors.courier)}>
-              <option value="">{pick(COPY.pickCourier)}</option>
-              {shop.couriers.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            {isOtherCourier(courier) && (
-              <input
-                type="text"
-                value={courierOther}
-                onChange={(e) => setCourierOther(e.target.value)}
-                placeholder={pick(COPY.otherCourier)}
-                className={`mt-2 ${inputClass(errors.courier)}`}
-              />
-            )}
-          </Field>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Field label={pick(COPY.province)} error={errors.province}>
-              <input type="text" value={province} onChange={(e) => setProvince(e.target.value)} className={inputClass(errors.province)} />
-            </Field>
-            <Field label={pick(COPY.city)} error={errors.city}>
-              <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass(errors.city)} />
-            </Field>
-            <Field label={pick(COPY.branch)} error={errors.branch}>
-              <input type="text" value={branch} onChange={(e) => setBranch(e.target.value)} className={inputClass(errors.branch)} />
-            </Field>
-          </div>
-
-          {/* price + actions */}
-          <div className="rounded-md border border-edge bg-crypt/60 p-5">
-            <div className="flex items-end justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
-                {lines.length > 0 && (
-                  <p className="mt-1 truncate font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
-                )}
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-soul sm:text-3xl">
-                  {formatPrice(total, shop.currency)}
-                </p>
-                <p className="font-mono text-[11px] text-ash">
-                  {totalQty} {pick(COPY.pieces)}
-                </p>
-              </div>
-            </div>
-            {Object.keys(errors).length > 0 && <p className="mt-3 font-mono text-[11px] text-loss">{pick(COPY.fixErrors)}</p>}
+      {/* tabs — switch between Order and My Orders */}
+      <div className="mb-8 flex items-center justify-center gap-1 border-b border-edge">
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
             <button
+              key={t.id}
               type="button"
-              onClick={startOrder}
-              className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-soul transition-all hover:bg-amethyst/25 hover:shadow-[0_0_24px_rgba(168,85,247,0.35)]"
+              onClick={() => setTab(t.id)}
+              aria-pressed={active}
+              className={`relative -mb-px px-6 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.14em] transition-colors md:px-8 md:text-base ${
+                active ? "text-soul" : "text-ash hover:text-soul"
+              }`}
             >
-              {pick(COPY.placeOrder)}
+              <span className="keep-latin">{t.label}</span>
+              <span
+                aria-hidden
+                className={`absolute inset-x-0 bottom-0 h-[2px] -skew-x-[24deg] bg-gradient-to-r from-amethyst to-glow transition-opacity duration-300 ${
+                  active ? "opacity-100 shadow-[0_0_14px_rgba(168,85,247,0.7)]" : "opacity-0"
+                }`}
+              />
             </button>
-            {contactHref && (
-              <a
-                href={contactHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2.5 block text-center font-mono text-[11px] uppercase tracking-[0.16em] text-ash transition-colors hover:text-spectre"
-              >
-                {pick(COPY.askMore)}
-              </a>
-            )}
-          </div>
-        </section>
+          );
+        })}
       </div>
 
-      {/* view my order — below the order experience */}
-      {myOrders.length > 0 && (
-        <section className="mt-8 rounded-md border border-win/40 bg-win/[0.06] p-4 md:p-5">
-          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-win">{pick(COPY.myOrders)}</p>
-          <div className="grid gap-2.5">
-            {myOrders.map((o, i) => (
-              <div
-                key={(o.id ?? "") + i}
-                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md border border-edge bg-void/50 px-4 py-3"
-              >
-                <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
-                  {pick(shop.productName)} · {o.sizeSummary} · {o.totalQty} {pick(COPY.pieces)}
-                </span>
-                <span className="font-mono text-xs text-spectre">{formatPrice(o.total, o.currency)}</span>
-                <span className="rounded-full border border-glow/40 bg-glow/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-glow">
-                  {pick(COPY.statusPending)}
-                </span>
+      <div key={tab} className="animate-fadeIn">
+        {/* ── ORDER ──────────────────────────────────────────────────── */}
+        {tab === "order" && (
+          <section id="order-form" className="space-y-5">
+            <div className="rounded-md border border-amethyst/35 bg-amethyst/[0.06] p-4">
+              <p className="mb-1 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
+                <LockGlyph /> {pick(COPY.reserved)}
+              </p>
+              <p className="text-[13px] leading-relaxed text-spectre/90">{pick(shop.rightsNote)}</p>
+              <p className="mt-2 font-display text-sm font-bold uppercase tracking-wide text-soul">
+                {shop.fixedJerseyName} · #{shop.fixedJerseyNumber}
+              </p>
+            </div>
+
+            <div>
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{pick(COPY.orderTitle)}</h2>
+              <p className="mt-1 text-[13px] text-spectre/80">{pick(COPY.pickQuantities)}</p>
+            </div>
+
+            <div className={`grid gap-2 rounded-md border p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
+              {shop.sizes.map((s) => {
+                const price = sizePrice(shop, s);
+                const qty = quantities[s.id] ?? 0;
+                return (
+                  <div key={s.id} className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 ${qty > 0 ? "bg-amethyst/[0.07]" : ""}`}>
+                    <div className="min-w-0">
+                      <span className="font-display text-base font-bold uppercase tracking-wide text-soul">{s.label}</span>
+                      <span className="ml-2 font-mono text-[11px] text-ash">
+                        {formatPrice(price, shop.currency)}
+                        {s.surcharge > 0 ? ` (+${s.surcharge.toLocaleString("en-US")})` : ""}
+                      </span>
+                    </div>
+                    {s.inStock ? (
+                      <div className="inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
+                        <Stepper label="−" onClick={() => adjustQty(s.id, -1)} dim={qty === 0} />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          aria-label={`${s.label} quantity`}
+                          value={qty === 0 ? "" : String(qty)}
+                          placeholder="0"
+                          onChange={(e) => setQtyExact(s.id, e.target.value)}
+                          className={`w-12 bg-transparent text-center font-display text-base font-bold outline-none placeholder:text-ash-dim ${qty > 0 ? "text-soul" : "text-ash-dim"}`}
+                        />
+                        <Stepper label="+" onClick={() => adjustQty(s.id, 1)} />
+                      </div>
+                    ) : (
+                      <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-loss">{pick(COPY.soldOut)}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <Field label={pick(COPY.fullName)} error={errors.customerName}>
+              <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={inputClass(errors.customerName)} autoComplete="name" />
+            </Field>
+            <Field label={pick(COPY.phone)} error={errors.phone}>
+              <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass(errors.phone)} autoComplete="tel" placeholder="+856 …" />
+            </Field>
+            <Field label={pick(COPY.courier)} error={errors.courier}>
+              <select value={courier} onChange={(e) => setCourier(e.target.value)} className={inputClass(errors.courier)}>
+                <option value="">{pick(COPY.pickCourier)}</option>
+                {shop.couriers.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              {isOtherCourier(courier) && (
+                <input
+                  type="text"
+                  value={courierOther}
+                  onChange={(e) => setCourierOther(e.target.value)}
+                  placeholder={pick(COPY.otherCourier)}
+                  className={`mt-2 ${inputClass(errors.courier)}`}
+                />
+              )}
+            </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Field label={pick(COPY.province)} error={errors.province}>
+                <input type="text" value={province} onChange={(e) => setProvince(e.target.value)} className={inputClass(errors.province)} />
+              </Field>
+              <Field label={pick(COPY.city)} error={errors.city}>
+                <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass(errors.city)} />
+              </Field>
+              <Field label={pick(COPY.branch)} error={errors.branch}>
+                <input type="text" value={branch} onChange={(e) => setBranch(e.target.value)} className={inputClass(errors.branch)} />
+              </Field>
+            </div>
+
+            <div className="rounded-md border border-edge bg-crypt/60 p-5">
+              <div className="flex items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
+                  {lines.length > 0 && (
+                    <p className="mt-1 truncate font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
+                  )}
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-soul sm:text-3xl">{formatPrice(total, shop.currency)}</p>
+                  <p className="font-mono text-[11px] text-ash">
+                    {totalQty} {pick(COPY.pieces)}
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+              {Object.keys(errors).length > 0 && <p className="mt-3 font-mono text-[11px] text-loss">{pick(COPY.fixErrors)}</p>}
+              <button
+                type="button"
+                onClick={startOrder}
+                className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-soul transition-all hover:bg-amethyst/25 hover:shadow-[0_0_24px_rgba(168,85,247,0.35)]"
+              >
+                {pick(COPY.placeOrder)}
+              </button>
+              {contactHref && (
+                <a
+                  href={contactHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2.5 block text-center font-mono text-[11px] uppercase tracking-[0.16em] text-ash transition-colors hover:text-spectre"
+                >
+                  {pick(COPY.askMore)}
+                </a>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── MY ORDERS ──────────────────────────────────────────────── */}
+        {tab === "myorders" && (
+          <section>
+            {myOrders.length === 0 ? (
+              <div className="rounded-md border border-edge bg-crypt/40 p-10 text-center">
+                <p className="text-sm text-ash">{pick(COPY.noOrders)}</p>
+                <button
+                  type="button"
+                  onClick={() => setTab("order")}
+                  className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-md border border-amethyst bg-amethyst/15 px-5 py-2.5 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul transition-all hover:bg-amethyst/25"
+                >
+                  {pick(COPY.goOrder)}
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-2.5">
+                {myOrders.map((o, i) => (
+                  <div key={(o.id ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                      <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
+                        {pick(shop.productName)} · {o.sizeSummary}
+                      </span>
+                      <span className="rounded-full border border-glow/40 bg-glow/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-glow">
+                        {pick(COPY.statusPending)}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-3 font-mono text-[11px] text-ash">
+                      <span>
+                        {o.totalQty} {pick(COPY.pieces)}
+                        {o.createdAt ? ` · ${new Date(o.createdAt).toLocaleDateString("en-GB")}` : ""}
+                      </span>
+                      <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.total, o.currency)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+      </div>
 
       {/* ── payment popup ─────────────────────────────────────────────── */}
       {payOpen && (
