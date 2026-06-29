@@ -39,36 +39,40 @@ export default function Hero() {
 
       <div className="hero-grain" aria-hidden />
 
-      <div className="home-hero-content relative z-[2] w-full max-w-7xl">
-        <div className="home-hero-copy">
-          <h1 className="home-hero-wordmark keep-latin font-display">
-            <span className="home-hero-main">
-              N<span className="home-hero-double-i">II</span>GHTMARE
+      <div className="home-hero-content relative z-[2] w-full max-w-7xl lg:flex lg:items-end lg:justify-between lg:gap-10">
+        {/* Wordmark + tagline. On desktop this group bottom-aligns next to the
+            actions so the whole lockup sits low and grounded. */}
+        <div className="lg:min-w-0">
+          <div className="home-hero-copy">
+            <h1 className="home-hero-wordmark keep-latin font-display">
+              <span className="home-hero-main">
+                N<span className="home-hero-double-i">II</span>GHTMARE
+              </span>
+              <span className="home-hero-sub">ESPORT</span>
+            </h1>
+          </div>
+
+          <p
+            className="home-hero-tagline fx-rise keep-latin font-display"
+            style={{ animationDelay: "0.34s" }}
+          >
+            {t("hero.tagline")}
+            {/* Lao reads as one phrase (no inter-word space); EN keeps the gap. */}
+            {lang === "lo" ? "" : " "}
+            <span className="tagline-accent text-glow">
+              {t("hero.tagline_accent")}
             </span>
-            <span className="home-hero-sub">ESPORT</span>
-          </h1>
+          </p>
+
+          <div
+            className="fx-rise mt-6 h-[2px] w-[180px] -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_18px_rgba(168,85,247,0.65)]"
+            style={{ animationDelay: "0.42s" }}
+            aria-hidden
+          />
         </div>
 
-        <p
-          className="home-hero-tagline fx-rise keep-latin font-display"
-          style={{ animationDelay: "0.34s" }}
-        >
-          {t("hero.tagline")}
-          {/* Lao reads as one phrase (no inter-word space); EN keeps the gap. */}
-          {lang === "lo" ? "" : " "}
-          <span className="tagline-accent text-glow">
-            {t("hero.tagline_accent")}
-          </span>
-        </p>
-
         <div
-          className="fx-rise mt-6 h-[2px] w-[180px] -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_18px_rgba(168,85,247,0.65)]"
-          style={{ animationDelay: "0.42s" }}
-          aria-hidden
-        />
-
-        <div
-          className="fx-rise mt-8 flex flex-col items-start md:items-end"
+          className="fx-rise mt-9 flex flex-col items-center lg:mt-0 lg:shrink-0 lg:items-end"
           style={{ animationDelay: "0.52s" }}
         >
           {/* CTA + support share one shrink-to-fit column so the Like/Comment
