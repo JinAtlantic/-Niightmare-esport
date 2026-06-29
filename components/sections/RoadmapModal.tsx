@@ -188,7 +188,7 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-5" role="dialog" aria-modal="true" aria-label={pick(roadmap.buttonLabel)}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-label={pick(roadmap.buttonLabel)}>
       <motion.div
         className="absolute inset-0 bg-black/84 backdrop-blur-sm"
         onClick={onClose}
@@ -209,11 +209,11 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
           <span aria-hidden className="pointer-events-none absolute inset-0 bg-crypt" />
           <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent" />
 
-          <header className="relative z-10 overflow-hidden border-b border-edge bg-gradient-to-br from-crypt2 via-crypt to-void p-3 md:p-6">
+          <header className="relative z-10 overflow-hidden border-b border-edge bg-gradient-to-br from-crypt2 via-crypt to-void p-3 pr-12 md:p-6">
             <div className="pointer-events-none absolute right-0 top-0 h-44 w-44 border-l border-loss/15 bg-loss/[0.05] [clip-path:polygon(34%_0,100%_0,100%_100%,0_100%)]" />
             <div className="relative flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-3xl">
-                <h2 className="keep-latin font-display text-[1.65rem] font-extrabold uppercase leading-none tracking-tight text-soul md:text-4xl">
+              <div className="min-w-0 max-w-3xl">
+                <h2 className="keep-latin truncate font-display text-[clamp(1.05rem,4.8vw,2.25rem)] font-extrabold uppercase leading-tight tracking-tight text-soul">
                   {pick(roadmap.hero.title)}
                 </h2>
                 <p className="mt-3 hidden max-w-2xl text-xs leading-relaxed text-spectre sm:block md:text-sm">
@@ -276,7 +276,7 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-2 top-2 z-30 grid h-9 w-9 place-items-center border border-edge bg-void/85 text-soul backdrop-blur transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:h-10 md:w-10"
+          className="absolute -right-2 -top-2 z-30 grid h-9 w-9 place-items-center border border-edge bg-void/85 text-soul shadow-[0_6px_22px_rgba(0,0,0,0.6)] backdrop-blur transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void sm:-right-3 sm:-top-3 md:h-10 md:w-10"
         >
           <X size={20} strokeWidth={2} />
         </button>
