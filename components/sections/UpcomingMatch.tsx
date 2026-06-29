@@ -205,71 +205,52 @@ function ScheduleModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-5" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
-      <button type="button" className="absolute inset-0 bg-black/82 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden border border-amethyst/45 bg-[linear-gradient(180deg,rgba(22,16,31,0.98),rgba(11,7,16,0.98))] shadow-[0_0_60px_rgba(168,85,247,0.34)]">
-        <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
-        <div className="flex items-start justify-between gap-4 border-b border-edge p-5 md:p-6">
-          <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-amethyst">
-              NIIGHTMARE
-            </p>
-            <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
-              {pick(schedule.title)}
-            </h3>
-          </div>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
+      <button type="button" className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-md border border-edge-bright bg-crypt shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)]">
+        {/* header — just the title + close */}
+        <div className="flex items-center justify-between gap-4 border-b border-edge px-5 py-4">
+          <h3 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul md:text-xl">
+            {pick(schedule.title)}
+          </h3>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close schedule"
-            className="grid h-10 w-10 shrink-0 place-items-center border border-edge bg-void/80 text-soul transition-colors hover:border-amethyst hover:text-glow"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
           >
-            <CloseIcon size={18} />
+            <CloseIcon size={16} />
           </button>
         </div>
 
-        <div className="modal-scroll overflow-y-auto p-4 md:p-6">
+        {/* a clean, scannable list — one match per row */}
+        <div className="modal-scroll overflow-y-auto px-5">
           {schedule.entries.length ? (
-            <div className="grid gap-3">
-              {schedule.entries.map((entry, index) => (
-                <article
+            <ul>
+              {schedule.entries.map((entry) => (
+                <li
                   key={entry.id}
-                  className="relative overflow-hidden border border-edge bg-void/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
+                  className="flex items-center justify-between gap-4 border-b border-edge/50 py-4 last:border-0"
                 >
-                  <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-amethyst shadow-[0_0_18px_rgba(168,85,247,0.65)]" />
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-amethyst">
-                        Match {String(index + 1).padStart(2, "0")}
+                  <div className="min-w-0">
+                    <p className="keep-latin break-words font-display text-base font-bold uppercase tracking-[0.03em] text-soul">
+                      NIIGHTMARE <span className="text-glow">vs</span> {entry.opponent || "TBA"}
+                    </p>
+                    {pick(entry.round) && (
+                      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ash">
+                        {pick(entry.round)}
                       </p>
-                      <h4 className="keep-latin mt-1 break-words font-display text-xl font-black uppercase tracking-[0.06em] text-soul">
-                        NIIGHTMARE <span className="text-glow">VS</span> {entry.opponent || "TBA"}
-                      </h4>
-                    </div>
-                    <div className="grid shrink-0 grid-cols-2 gap-2 sm:min-w-[230px]">
-                      <div className="border border-edge bg-crypt/55 px-3 py-2">
-                        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">Round</p>
-                        <p className="mt-1 truncate font-display text-sm font-bold uppercase text-spectre">
-                          {pick(entry.round) || "-"}
-                        </p>
-                      </div>
-                      <div className="border border-edge bg-crypt/55 px-3 py-2">
-                        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash-dim">Kickoff</p>
-                        <p className="mt-1 font-display text-sm font-bold uppercase text-soul">
-                          {scheduleDate(entry, lang)}
-                        </p>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                </article>
+                  <p className="shrink-0 text-right font-mono text-xs font-semibold uppercase tracking-[0.1em] text-spectre sm:text-sm">
+                    {scheduleDate(entry, lang)}
+                  </p>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
-            <div className="border border-edge bg-void/55 p-6 text-center text-sm text-ash">
-              {pick(schedule.emptyText)}
-            </div>
+            <p className="py-10 text-center text-sm text-ash">{pick(schedule.emptyText)}</p>
           )}
-
         </div>
       </div>
     </div>
