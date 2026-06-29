@@ -327,6 +327,8 @@ create table if not exists public.shop_orders (
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
 );
+-- Per-size breakdown for multi-size orders: [{ sizeId, label, quantity, unitPrice, lineTotal }, …]
+alter table public.shop_orders add column if not exists items jsonb;
 alter table public.shop_orders enable row level security;
 drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
 create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();

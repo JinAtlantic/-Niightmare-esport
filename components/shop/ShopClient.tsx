@@ -11,6 +11,7 @@ import {
   recommendSize,
   sizePrice,
   formatPrice,
+  computeOrder,
   validateOrder,
   SHOP_HEIGHT_MIN,
   SHOP_HEIGHT_MAX,
@@ -18,7 +19,7 @@ import {
   SHOP_QTY_MAX,
   type ShopContent,
   type ShopGender,
-  type ShopOrderInput,
+  type ShopOrderItem,
   type ShopOrderRecord,
 } from "@/lib/shop";
 
@@ -45,18 +46,18 @@ const COPY = {
   dragHint: { en: "Drag to rotate · 360°", lo: "ລາກເພື່ອໝຸນ · 360°" },
   rotateOn: { en: "Auto-spin: on", lo: "ໝຸນ: ເປີດ" },
   rotateOff: { en: "Auto-spin: off", lo: "ໝຸນ: ປິດ" },
+  previewNote: { en: "Preview only — choose order quantities below", lo: "ສຳລັບເບິ່ງເທົ່ານັ້ນ — ເລືອກຈຳນວນສັ່ງດ້ານລຸ່ມ" },
   bodyModel: { en: "Body model", lo: "ໂມເດລຮ່າງກາຍ" },
   male: { en: "Male", lo: "ຊາຍ" },
   female: { en: "Female", lo: "ຍິງ" },
   height: { en: "Model height", lo: "ສ່ວນສູງໂມເດລ" },
+  previewSize: { en: "Preview size", lo: "ໄຊ້ສຳລັບເບິ່ງ" },
   fitTitle: { en: "Fit preview", lo: "ເບິ່ງຄວາມພໍດີ" },
-  weRecommend: { en: "Recommended size", lo: "ໄຊ້ທີ່ແນະນຳ" },
+  weRecommend: { en: "Recommended", lo: "ແນະນຳ" },
   reserved: { en: "Reserved", lo: "ສະຫງວນລິຂະສິດ" },
   orderTitle: { en: "Order your jersey", lo: "ສັ່ງຊື້ເສື້ອ" },
-  quantity: { en: "Quantity", lo: "ຈຳນວນ (ກີ່ໂຕ)" },
-  size: { en: "Size", lo: "ໄຊ້ເສື້ອ" },
-  pickSize: { en: "Select a size", lo: "ເລືອກໄຊ້" },
-  soldOut: { en: "sold out", lo: "ໝົດ" },
+  pickQuantities: { en: "Choose quantity per size — order several sizes at once.", lo: "ເລືອກຈຳນວນຕໍ່ໄຊ້ — ສັ່ງຫຼາຍໄຊ້ໃນຄັ້ງດຽວໄດ້." },
+  soldOut: { en: "Sold out", lo: "ໝົດ" },
   fullName: { en: "Full name", lo: "ຊື່ ແລະ ນາມສະກຸນ" },
   phone: { en: "Phone / WhatsApp", lo: "ເບີໂທ / WhatsApp" },
   courier: { en: "Courier", lo: "ບໍລິສັດຂົນສົ່ງ" },
@@ -64,12 +65,12 @@ const COPY = {
   province: { en: "Province", lo: "ແຂວງ" },
   city: { en: "City / District", lo: "ເມືອງ" },
   branch: { en: "Branch", lo: "ສາຂາ" },
+  items: { en: "Items", lo: "ລາຍການ" },
   total: { en: "Total", lo: "ລາຄາລວມ" },
-  each: { en: "each", lo: "ຕໍ່ໂຕ" },
+  pieces: { en: "pcs", lo: "ໂຕ" },
   placeOrder: { en: "Order & pay", lo: "ສັ່ງຊື້ & ຈ່າຍເງິນ" },
-  fixErrors: { en: "Please fill in the highlighted fields.", lo: "ກະລຸນາຕື່ມຂໍ້ມູນທີ່ໝາຍໄວ້." },
+  fixErrors: { en: "Select at least one size and fill the highlighted fields.", lo: "ເລືອກຢ່າງໜ້ອຍ 1 ໄຊ້ ແລະ ຕື່ມຂໍ້ມູນທີ່ໝາຍໄວ້." },
   askMore: { en: "Ask for more info", lo: "ສອບຖາມຂໍ້ມູນເພີ່ມເຕີມ" },
-  // payment popup
   payTitle: { en: "Transfer to pay", lo: "ໂອນເງິນເພື່ອຈ່າຍ" },
   scan: { en: "Scan this QR with your banking app", lo: "ສະແກນ QR ນີ້ດ້ວຍແອັບທະນາຄານ" },
   amount: { en: "Amount", lo: "ຈຳນວນເງິນ" },
@@ -85,10 +86,8 @@ const COPY = {
     lo: "ຂອບໃຈ — ທີມງານຈະກວດສອບການຈ່າຍເງິນ ແລະ ຢືນຢັນການຈັດສົ່ງ.",
   },
   payError: { en: "Could not save the order. Please try again or contact us.", lo: "ບັນທຶກບໍ່ສຳເລັດ. ລອງໃໝ່ ຫຼື ຕິດຕໍ່ພວກເຮົາ." },
-  // my orders
   myOrders: { en: "Your orders", lo: "ອໍເດີຂອງທ່ານ" },
   statusPending: { en: "Awaiting verification", lo: "ລໍຖ້າກວດສອບ" },
-  qtyShort: { en: "Qty", lo: "ຈຳນວນ" },
   comingSoon: { en: "Store opening soon", lo: "ຮ້ານກຳລັງຈະເປີດ" },
   comingSoonBody: {
     en: "The NIIGHTMARE jersey store is being prepared. Check back shortly.",
@@ -109,11 +108,23 @@ export default function ShopClient() {
   const { site } = useContent();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
+  // preview-only state
   const [gender, setGender] = useState<ShopGender>("male");
   const [heightCm, setHeightCm] = useState(SHOP_HEIGHT_DEFAULT);
   const [autoRotate, setAutoRotate] = useState(true);
+  const recommended = useMemo(() => recommendSize(shop.sizes, heightCm, gender), [shop.sizes, heightCm, gender]);
+  const [previewSizeId, setPreviewSizeId] = useState<string>(() => {
+    const r = recommendSize(shop.sizes, SHOP_HEIGHT_DEFAULT, "male");
+    return r?.id ?? shop.sizes[0]?.id ?? "m";
+  });
+  const previewSize = shop.sizes.find((s) => s.id === previewSizeId) ?? recommended ?? shop.sizes[0];
+  const fit = previewSize ? fitAssessment(previewSize, heightCm, gender) : null;
 
-  const [quantity, setQuantity] = useState(1);
+  // order state — quantity per size
+  const [quantities, setQuantities] = useState<Record<string, number>>(() => {
+    const r = recommendSize(shop.sizes, SHOP_HEIGHT_DEFAULT, "male");
+    return r ? { [r.id]: 1 } : {};
+  });
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [courier, setCourier] = useState("");
@@ -121,13 +132,7 @@ export default function ShopClient() {
   const [city, setCity] = useState("");
   const [branch, setBranch] = useState("");
 
-  const recommended = useMemo(() => recommendSize(shop.sizes, heightCm, gender), [shop.sizes, heightCm, gender]);
-  const [sizeId, setSizeId] = useState<string>(() => {
-    const r = recommendSize(shop.sizes, SHOP_HEIGHT_DEFAULT, "male");
-    return r?.id ?? shop.sizes[0]?.id ?? "m";
-  });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof ShopOrderInput, boolean>>>({});
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [payOpen, setPayOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [paySuccess, setPaySuccess] = useState(false);
@@ -143,10 +148,10 @@ export default function ShopClient() {
     }
   }, []);
 
-  const selectedSize = shop.sizes.find((s) => s.id === sizeId) ?? recommended ?? shop.sizes[0];
-  const fit = selectedSize ? fitAssessment(selectedSize, heightCm, gender) : null;
-  const unit = sizePrice(shop, selectedSize);
-  const total = unit * quantity;
+  const orderItems: ShopOrderItem[] = Object.entries(quantities)
+    .filter(([, q]) => q > 0)
+    .map(([sizeId, quantity]) => ({ sizeId, quantity }));
+  const { lines, totalQty, total } = computeOrder(shop, orderItems);
 
   const toneClass: Record<string, string> = {
     glow: "text-glow border-glow/40 bg-glow/10",
@@ -154,22 +159,20 @@ export default function ShopClient() {
     loss: "text-loss border-loss/40 bg-loss/10",
   };
 
-  function currentInput(): ShopOrderInput {
-    return {
-      quantity,
-      sizeId: selectedSize?.id ?? sizeId,
-      customerName,
-      phone,
-      courier,
-      province,
-      city,
-      branch,
-    };
+  function adjustQty(sizeId: string, delta: number) {
+    setQuantities((prev) => {
+      const cur = prev[sizeId] ?? 0;
+      return { ...prev, [sizeId]: Math.max(0, Math.min(SHOP_QTY_MAX, cur + delta)) };
+    });
+  }
+
+  function currentInput() {
+    return { items: orderItems, customerName, phone, courier, province, city, branch };
   }
 
   function startOrder() {
     const errs = validateOrder(currentInput());
-    setErrors(errs);
+    setErrors(errs as Record<string, boolean>);
     if (Object.keys(errs).length) {
       document.getElementById("order-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
@@ -199,7 +202,6 @@ export default function ShopClient() {
       } catch {
         /* ignore */
       }
-      // close the popup automatically after the success tick
       window.setTimeout(() => {
         setPayOpen(false);
         setPaySuccess(false);
@@ -233,12 +235,9 @@ export default function ShopClient() {
 
   return (
     <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
-      {/* my orders — pinned at the very top once you've ordered */}
       {myOrders.length > 0 && (
         <section className="mb-8 rounded-md border border-win/40 bg-win/[0.06] p-4 md:p-5">
-          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-win">
-            {pick(COPY.myOrders)}
-          </p>
+          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-win">{pick(COPY.myOrders)}</p>
           <div className="grid gap-2.5">
             {myOrders.map((o, i) => (
               <div
@@ -246,7 +245,7 @@ export default function ShopClient() {
                 className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md border border-edge bg-void/50 px-4 py-3"
               >
                 <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
-                  {pick(shop.productName)} · {o.sizeLabel} · {pick(COPY.qtyShort)} {o.quantity}
+                  {pick(shop.productName)} · {o.sizeSummary} · {o.totalQty} {pick(COPY.pieces)}
                 </span>
                 <span className="font-mono text-xs text-spectre">{formatPrice(o.total, o.currency)}</span>
                 <span className="rounded-full border border-glow/40 bg-glow/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-glow">
@@ -270,16 +269,16 @@ export default function ShopClient() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8">
-        {/* ── 3D viewer + fit ─────────────────────────────────────────── */}
+        {/* ── 3D preview (independent of the order) ───────────────────── */}
         <section className="lg:sticky lg:top-24 lg:self-start">
           <div className="relative overflow-hidden rounded-md border border-edge bg-gradient-to-b from-crypt2 via-crypt to-void">
             <div className="scythe-line absolute inset-x-0 top-0 h-[2px] opacity-70" aria-hidden />
             <div className="relative h-[clamp(360px,52vh,560px)] w-full">
-              {selectedSize && (
+              {previewSize && (
                 <JerseyModelViewer
                   gender={gender}
                   heightCm={heightCm}
-                  size={selectedSize}
+                  size={previewSize}
                   jerseyName={shop.fixedJerseyName}
                   jerseyNumber={shop.fixedJerseyNumber}
                   autoRotate={autoRotate}
@@ -299,8 +298,9 @@ export default function ShopClient() {
             </div>
           </div>
 
-          {/* fit controls */}
+          {/* preview controls */}
           <div className="mt-4 grid gap-4 rounded-md border border-edge bg-crypt/50 p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amethyst">{pick(COPY.previewNote)}</p>
             <div className="grid grid-cols-2 gap-2">
               {(["male", "female"] as ShopGender[]).map((g) => (
                 <button
@@ -308,9 +308,7 @@ export default function ShopClient() {
                   type="button"
                   onClick={() => setGender(g)}
                   className={`min-h-[44px] rounded-md border px-4 py-2.5 font-display text-sm font-bold uppercase tracking-[0.1em] transition-all ${
-                    gender === g
-                      ? "border-amethyst bg-amethyst/15 text-soul"
-                      : "border-edge bg-void/50 text-spectre hover:border-edge-bright hover:text-soul"
+                    gender === g ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/50 text-spectre hover:border-edge-bright hover:text-soul"
                   }`}
                 >
                   {pick(g === "male" ? COPY.male : COPY.female)}
@@ -332,7 +330,29 @@ export default function ShopClient() {
                 aria-label={pick(COPY.height)}
               />
             </div>
-            {fit && selectedSize && (
+            <div>
+              <span className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.previewSize)}</span>
+              <div className="flex flex-wrap gap-2">
+                {shop.sizes.map((s) => {
+                  const active = previewSize?.id === s.id;
+                  const isRec = recommended?.id === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setPreviewSizeId(s.id)}
+                      className={`relative min-w-[52px] rounded-md border px-3 py-2 font-display text-sm font-bold uppercase tracking-wide transition-all ${
+                        active ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/50 text-spectre hover:border-edge-bright hover:text-soul"
+                      }`}
+                    >
+                      {s.label}
+                      {isRec && <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-glow shadow-[0_0_8px_#c77dff]" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {fit && previewSize && (
               <div className="flex items-center justify-between gap-3 border-t border-edge/60 pt-3">
                 <div>
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.fitTitle)}</span>
@@ -348,7 +368,6 @@ export default function ShopClient() {
 
         {/* ── order form ──────────────────────────────────────────────── */}
         <section id="order-form" className="space-y-5">
-          {/* reserved name/number note */}
           <div className="rounded-md border border-amethyst/35 bg-amethyst/[0.06] p-4">
             <p className="mb-1 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
               <LockGlyph /> {pick(COPY.reserved)}
@@ -359,65 +378,49 @@ export default function ShopClient() {
             </p>
           </div>
 
-          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{pick(COPY.orderTitle)}</h2>
+          <div>
+            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-soul">{pick(COPY.orderTitle)}</h2>
+            <p className="mt-1 text-[13px] text-spectre/80">{pick(COPY.pickQuantities)}</p>
+          </div>
 
-          {/* quantity + size */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={pick(COPY.quantity)}>
-              <div className="inline-flex items-center rounded-md border border-edge bg-void/50">
-                <Stepper label="−" onClick={() => setQuantity((q) => Math.max(1, q - 1))} />
-                <span className="w-12 text-center font-display text-lg font-bold text-soul">{quantity}</span>
-                <Stepper label="+" onClick={() => setQuantity((q) => Math.min(SHOP_QTY_MAX, q + 1))} />
-              </div>
-            </Field>
-            <Field label={pick(COPY.size)} error={errors.sizeId}>
-              <select
-                value={selectedSize?.id ?? ""}
-                onChange={(e) => setSizeId(e.target.value)}
-                className={inputClass(errors.sizeId)}
-              >
-                {shop.sizes.map((s) => (
-                  <option key={s.id} value={s.id} disabled={!s.inStock}>
-                    {s.label}
-                    {s.surcharge > 0 ? ` (+${s.surcharge.toLocaleString("en-US")} ${shop.currency})` : ""}
-                    {!s.inStock ? ` — ${pick(COPY.soldOut)}` : ""}
-                  </option>
-                ))}
-              </select>
-              {recommended && (
-                <p className="mt-1.5 font-mono text-[11px] text-spectre">
-                  {pick(COPY.weRecommend)}:{" "}
-                  <button type="button" onClick={() => setSizeId(recommended.id)} className="font-bold text-glow hover:underline">
-                    {recommended.label}
-                  </button>
-                </p>
-              )}
-            </Field>
+          {/* size × quantity rows */}
+          <div className={`grid gap-2 rounded-md border p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
+            {shop.sizes.map((s) => {
+              const price = sizePrice(shop, s);
+              const qty = quantities[s.id] ?? 0;
+              return (
+                <div
+                  key={s.id}
+                  className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 ${qty > 0 ? "bg-amethyst/[0.07]" : ""}`}
+                >
+                  <div className="min-w-0">
+                    <span className="font-display text-base font-bold uppercase tracking-wide text-soul">{s.label}</span>
+                    <span className="ml-2 font-mono text-[11px] text-ash">
+                      {formatPrice(price, shop.currency)}
+                      {s.surcharge > 0 ? ` (+${s.surcharge.toLocaleString("en-US")})` : ""}
+                    </span>
+                  </div>
+                  {s.inStock ? (
+                    <div className="inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
+                      <Stepper label="−" onClick={() => adjustQty(s.id, -1)} dim={qty === 0} />
+                      <span className={`w-9 text-center font-display text-base font-bold ${qty > 0 ? "text-soul" : "text-ash-dim"}`}>{qty}</span>
+                      <Stepper label="+" onClick={() => adjustQty(s.id, 1)} />
+                    </div>
+                  ) : (
+                    <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-loss">{pick(COPY.soldOut)}</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* customer */}
           <Field label={pick(COPY.fullName)} error={errors.customerName}>
-            <input
-              type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              className={inputClass(errors.customerName)}
-              autoComplete="name"
-            />
+            <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={inputClass(errors.customerName)} autoComplete="name" />
           </Field>
           <Field label={pick(COPY.phone)} error={errors.phone}>
-            <input
-              type="tel"
-              inputMode="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className={inputClass(errors.phone)}
-              autoComplete="tel"
-              placeholder="+856 …"
-            />
+            <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass(errors.phone)} autoComplete="tel" placeholder="+856 …" />
           </Field>
-
-          {/* shipping */}
           <Field label={pick(COPY.courier)} error={errors.courier}>
             <select value={courier} onChange={(e) => setCourier(e.target.value)} className={inputClass(errors.courier)}>
               <option value="">{pick(COPY.pickCourier)}</option>
@@ -443,17 +446,18 @@ export default function ShopClient() {
           {/* price + actions */}
           <div className="rounded-md border border-edge bg-crypt/60 p-5">
             <div className="flex items-end justify-between gap-3">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
+                {lines.length > 0 && (
+                  <p className="mt-1 font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
+                )}
+              </div>
               <div className="text-right">
                 <p className="font-display text-3xl font-bold text-soul">{formatPrice(total, shop.currency)}</p>
-                <p className="font-mono text-[11px] text-ash">
-                  {formatPrice(unit, shop.currency)} {pick(COPY.each)} × {quantity}
-                </p>
+                <p className="font-mono text-[11px] text-ash">{totalQty} {pick(COPY.pieces)}</p>
               </div>
             </div>
-            {Object.keys(errors).length > 0 && (
-              <p className="mt-3 font-mono text-[11px] text-loss">{pick(COPY.fixErrors)}</p>
-            )}
+            {Object.keys(errors).length > 0 && <p className="mt-3 font-mono text-[11px] text-loss">{pick(COPY.fixErrors)}</p>}
             <button
               type="button"
               onClick={startOrder}
@@ -478,12 +482,7 @@ export default function ShopClient() {
       {/* ── payment popup ─────────────────────────────────────────────── */}
       {payOpen && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/82 backdrop-blur-sm"
-            aria-label={pick(COPY.cancel)}
-            onClick={() => !submitting && setPayOpen(false)}
-          />
+          <button type="button" className="absolute inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={() => !submitting && setPayOpen(false)} />
           <div className="relative z-10 flex max-h-[88vh] w-full max-w-md flex-col overflow-y-auto rounded-md border border-edge-bright bg-crypt p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] md:p-6">
             {paySuccess ? (
               <div className="flex flex-col items-center gap-4 py-8 text-center">
@@ -507,7 +506,6 @@ export default function ShopClient() {
                   </button>
                 </div>
 
-                {/* big QR */}
                 <div className="mx-auto grid aspect-square w-full max-w-[260px] place-items-center overflow-hidden rounded-md border border-edge-bright bg-white p-2">
                   {qrSrc ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -518,8 +516,8 @@ export default function ShopClient() {
                 </div>
                 <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
 
-                {/* amount + bank */}
                 <div className="mt-4 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">
+                  <Row label={pick(COPY.items)} value={lines.map((l) => `${l.label}×${l.quantity}`).join(", ")} />
                   <Row label={pick(COPY.amount)} value={formatPrice(total, shop.currency)} strong />
                   <Row label={pick(COPY.bank)} value={shop.bank.bankName} />
                   <Row label={pick(COPY.accName)} value={shop.bank.accountName} />
@@ -548,32 +546,22 @@ export default function ShopClient() {
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
 
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: boolean;
-  children: React.ReactNode;
-}) {
+function Field({ label, error, children }: { label: string; error?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className={`mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.18em] ${error ? "text-loss" : "text-ash"}`}>
-        {label}
-      </span>
+      <span className={`mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.18em] ${error ? "text-loss" : "text-ash"}`}>{label}</span>
       {children}
     </label>
   );
 }
 
-function Stepper({ label, onClick }: { label: string; onClick: () => void }) {
+function Stepper({ label, onClick, dim }: { label: string; onClick: () => void; dim?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label === "+" ? "increase" : "decrease"}
-      className="grid h-12 w-12 place-items-center font-display text-xl font-bold text-spectre transition-colors hover:text-amethyst"
+      className={`grid h-11 w-11 place-items-center font-display text-xl font-bold transition-colors hover:text-amethyst ${dim ? "text-ash-dim" : "text-spectre"}`}
     >
       {label}
     </button>
@@ -584,7 +572,7 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   return (
     <div className="flex items-center justify-between gap-3">
       <span className="text-ash">{label}</span>
-      <span className={strong ? "font-display text-base font-bold text-soul" : "text-spectre"}>{value}</span>
+      <span className={strong ? "font-display text-base font-bold text-soul" : "text-right text-spectre"}>{value}</span>
     </div>
   );
 }

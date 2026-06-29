@@ -3,14 +3,22 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Card } from "@/components/admin/ui";
 
+interface OrderLine {
+  label: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
 interface OrderRow {
   id: string;
   created_at: string;
   quantity: number;
   size: string;
-  unit_price: number;
+  unit_price: number | null;
   total: number;
   currency: string;
+  items: OrderLine[] | null;
   customer_name: string;
   phone: string;
   courier: string;
@@ -120,13 +128,23 @@ export default function OrdersEditor() {
                 </div>
               </div>
 
+              {Array.isArray(o.items) && o.items.length > 1 && (
+                <div className="border-t border-edge pt-3 font-mono text-[11px] text-spectre">
+                  {o.items.map((l, idx) => (
+                    <span key={idx} className="mr-3 inline-block">
+                      {l.label} × {l.quantity} = {fmt(l.lineTotal, o.currency)}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="grid gap-1.5 border-t border-edge pt-3 font-mono text-[11px] text-spectre md:grid-cols-2">
                 <span>โทร: {o.phone}</span>
                 <span>ขนส่ง: {o.courier}</span>
                 <span>แขวง: {o.province}</span>
                 <span>เมือง: {o.city}</span>
                 <span>สาขา: {o.branch}</span>
-                <span>ต่อตัว: {fmt(o.unit_price, o.currency)}</span>
+                <span>รวม: {o.quantity} ตัว</span>
               </div>
 
               <div className="flex flex-wrap gap-2 border-t border-edge pt-3">

@@ -253,11 +253,25 @@ export function recommendSize(sizes: ShopSize[], heightCm: number, gender: ShopG
   );
 }
 
-/* ── Order ────────────────────────────────────────────────────────────────── */
+/* ── Order (multiple sizes per order) ───────────────────────────────────────
+ * The 3D viewer's size is preview-only. The order is a cart: a quantity per
+ * size, so a buyer can order several sizes in one go. */
+
+export interface ShopOrderItem {
+  sizeId: string;
+  quantity: number;
+}
+
+export interface ShopOrderLine {
+  sizeId: string;
+  label: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
 
 export interface ShopOrderInput {
-  quantity: number;
-  sizeId: string;
+  items: ShopOrderItem[];
   customerName: string;
   phone: string;
   courier: string;
@@ -266,21 +280,51 @@ export interface ShopOrderInput {
   branch: string;
 }
 
-export interface ShopOrderRecord extends ShopOrderInput {
+export interface ShopOrderRecord {
   id?: string;
-  sizeLabel: string;
-  unitPrice: number;
+  items: ShopOrderLine[];
+  sizeSummary: string;
+  totalQty: number;
   total: number;
   currency: string;
+  customerName: string;
+  phone: string;
+  courier: string;
+  province: string;
+  city: string;
+  branch: string;
   createdAt?: string;
   status?: string;
 }
 
-/** Validate the order form. Returns a map of field → error key (empty = valid). */
-export function validateOrder(input: ShopOrderInput): Partial<Record<keyof ShopOrderInput, boolean>> {
-  const errors: Partial<Record<keyof ShopOrderInput, boolean>> = {};
-  if (!(input.quantity >= 1)) errors.quantity = true;
-  if (!input.sizeId) errors.sizeId = true;
+/** Resolve cart items against the live catalogue and compute authoritative totals. */
+export function computeOrder(
+  content: ShopContent,
+  items: ShopOrderItem[]
+): { lines: ShopOrderLine[]; totalQty: number; total: number } {
+  const lines: ShopOrderLine[] = [];
+  for (const it of items) {
+    const size = content.sizes.find((s) => s.id === it.sizeId);
+    const qty = Math.floor(Number(it.quantity) || 0);
+    if (!size || !size.inStock || qty < 1) continue;
+    const unitPrice = sizePrice(content, size);
+    lines.push({ sizeId: size.id, label: size.label, quantity: qty, unitPrice, lineTotal: unitPrice * qty });
+  }
+  const totalQty = lines.reduce((a, l) => a + l.quantity, 0);
+  const total = lines.reduce((a, l) => a + l.lineTotal, 0);
+  return { lines, totalQty, total };
+}
+
+export function summariseLines(lines: ShopOrderLine[]): string {
+  return lines.map((l) => `${l.label}×${l.quantity}`).join(", ");
+}
+
+export type ShopOrderField = "items" | "customerName" | "phone" | "courier" | "province" | "city" | "branch";
+
+/** Validate the order form. Returns a map of field → true when invalid. */
+export function validateOrder(input: ShopOrderInput): Partial<Record<ShopOrderField, boolean>> {
+  const errors: Partial<Record<ShopOrderField, boolean>> = {};
+  if (!input.items.some((i) => Number(i.quantity) >= 1)) errors.items = true;
   if (!input.customerName.trim()) errors.customerName = true;
   if (!input.phone.trim()) errors.phone = true;
   if (!input.courier.trim()) errors.courier = true;
@@ -294,13 +338,15 @@ export function validateOrder(input: ShopOrderInput): Partial<Record<keyof ShopO
 export function buildOrderMessage(content: ShopContent, order: ShopOrderRecord, lang: Lang): string {
   const L =
     lang === "lo"
-      ? { head: "ສັ່ງຊື້ເສື້ອ NIIGHTMARE", product: "ສິນຄ້າ", size: "ໄຊ້", qty: "ຈຳນວນ", name: "ຊື່ຜູ້ສັ່ງ", phone: "ເບີໂທ/WhatsApp", ship: "ຂົນສົ່ງ", total: "ລາຄາລວມ" }
-      : { head: "NIIGHTMARE jersey order", product: "Product", size: "Size", qty: "Quantity", name: "Customer", phone: "Phone/WhatsApp", ship: "Delivery", total: "Total" };
+      ? { head: "ສັ່ງຊື້ເສື້ອ NIIGHTMARE", product: "ສິນຄ້າ", items: "ລາຍການ", qty: "ຈຳນວນລວມ", name: "ຊື່ຜູ້ສັ່ງ", phone: "ເບີໂທ/WhatsApp", ship: "ຂົນສົ່ງ", total: "ລາຄາລວມ" }
+      : { head: "NIIGHTMARE jersey order", product: "Product", items: "Items", qty: "Total qty", name: "Customer", phone: "Phone/WhatsApp", ship: "Delivery", total: "Total" };
+  const itemLines = order.items.map((l) => `  - ${l.label} × ${l.quantity} = ${formatPrice(l.lineTotal, order.currency)}`).join("\n");
   return [
     L.head,
     `${L.product}: ${content.productName[lang] ?? content.productName.en}`,
-    `${L.size}: ${order.sizeLabel}`,
-    `${L.qty}: ${order.quantity}`,
+    `${L.items}:`,
+    itemLines,
+    `${L.qty}: ${order.totalQty}`,
     `${L.name}: ${order.customerName}`,
     `${L.phone}: ${order.phone}`,
     `${L.ship}: ${order.courier} · ${order.province} · ${order.city} · ${order.branch}`,

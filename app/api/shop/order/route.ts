@@ -3,11 +3,13 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import {
   resolveShop,
-  sizePrice,
+  computeOrder,
+  summariseLines,
   validateOrder,
   buildOrderMessage,
   type ShopContent,
   type ShopOrderInput,
+  type ShopOrderItem,
   type ShopOrderRecord,
 } from "@/lib/shop";
 
@@ -42,9 +44,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
+  const rawItems = Array.isArray(body.items) ? (body.items as unknown[]) : [];
+  const items: ShopOrderItem[] = rawItems
+    .slice(0, 20)
+    .map((it) => {
+      const o = (it ?? {}) as Record<string, unknown>;
+      return {
+        sizeId: str(o.sizeId, 12).toLowerCase(),
+        quantity: Math.max(0, Math.min(50, Math.floor(Number(o.quantity) || 0))),
+      };
+    })
+    .filter((it) => it.sizeId && it.quantity > 0);
+
   const input: ShopOrderInput = {
-    quantity: Math.max(1, Math.min(50, Math.floor(Number(body.quantity) || 0))),
-    sizeId: str(body.sizeId, 12).toLowerCase(),
+    items,
     customerName: str(body.customerName, 120),
     phone: str(body.phone, 60),
     courier: str(body.courier, 80),
@@ -76,43 +89,51 @@ export async function POST(request: Request) {
   if (!shop.enabled) {
     return NextResponse.json({ error: "Shop is closed" }, { status: 403 });
   }
-  const size = shop.sizes.find((s) => s.id === input.sizeId);
-  if (!size || !size.inStock) {
-    return NextResponse.json({ error: "Size unavailable", fields: { sizeId: true } }, { status: 400 });
-  }
 
-  const unitPrice = sizePrice(shop, size);
-  const total = unitPrice * input.quantity;
+  const { lines, totalQty, total } = computeOrder(shop, input.items);
+  if (!lines.length) {
+    return NextResponse.json({ error: "No available sizes selected", fields: { items: true } }, { status: 400 });
+  }
+  const summary = summariseLines(lines);
   const record: ShopOrderRecord = {
-    ...input,
-    sizeLabel: size.label,
-    unitPrice,
+    items: lines,
+    sizeSummary: summary,
+    totalQty,
     total,
     currency: shop.currency,
+    customerName: input.customerName,
+    phone: input.phone,
+    courier: input.courier,
+    province: input.province,
+    city: input.city,
+    branch: input.branch,
   };
 
   // Persist to Supabase (source of truth for the admin Orders tab).
   const db = getSupabaseAdmin();
   let id: string | undefined;
   if (db) {
-    const { data, error } = await db
-      .from("shop_orders")
-      .insert({
-        quantity: input.quantity,
-        size: size.label,
-        unit_price: unitPrice,
-        total,
-        currency: shop.currency,
-        customer_name: input.customerName,
-        phone: input.phone,
-        courier: input.courier,
-        province: input.province,
-        city: input.city,
-        branch: input.branch,
-        status: "paid_declared",
-      })
-      .select("id")
-      .single();
+    const row: Record<string, unknown> = {
+      quantity: totalQty,
+      size: summary,
+      items: lines,
+      unit_price: lines.length === 1 ? lines[0].unitPrice : null,
+      total,
+      currency: shop.currency,
+      customer_name: input.customerName,
+      phone: input.phone,
+      courier: input.courier,
+      province: input.province,
+      city: input.city,
+      branch: input.branch,
+      status: "paid_declared",
+    };
+    let { data, error } = await db.from("shop_orders").insert(row).select("id").single();
+    // Resilience: if the `items` column hasn't been added yet, store without it.
+    if (error && /items/.test(error.message)) {
+      delete row.items;
+      ({ data, error } = await db.from("shop_orders").insert(row).select("id").single());
+    }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
