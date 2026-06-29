@@ -111,7 +111,12 @@ export const DEFAULT_SHOP: ShopContent = {
 export const SHOP_HEIGHT_MIN = 150;
 export const SHOP_HEIGHT_MAX = 200;
 export const SHOP_HEIGHT_DEFAULT = 172;
-export const SHOP_QTY_MAX = 50;
+export const SHOP_QTY_MAX = 999;
+
+/** True when a courier value means "Other" (so the buyer types a custom name). */
+export function isOtherCourier(value: string): boolean {
+  return /^other$/i.test(value.trim()) || /ອື່ນ|อื่น/.test(value);
+}
 
 const mergeBi = (fallback: Bilingual, raw?: Partial<Bilingual> | null): Bilingual => ({
   en: raw?.en ?? fallback.en,

@@ -13,6 +13,7 @@ import {
   formatPrice,
   computeOrder,
   validateOrder,
+  isOtherCourier,
   SHOP_HEIGHT_MIN,
   SHOP_HEIGHT_MAX,
   SHOP_HEIGHT_DEFAULT,
@@ -62,6 +63,8 @@ const COPY = {
   phone: { en: "Phone / WhatsApp", lo: "ເບີໂທ / WhatsApp" },
   courier: { en: "Courier", lo: "ບໍລິສັດຂົນສົ່ງ" },
   pickCourier: { en: "Select courier", lo: "ເລືອກບໍລິສັດຂົນສົ່ງ" },
+  otherCourier: { en: "Type courier name", lo: "ພິມຊື່ບໍລິສັດຂົນສົ່ງ" },
+  previewBox: { en: "3D preview", lo: "ເບິ່ງໂມເດລ 3D" },
   province: { en: "Province", lo: "ແຂວງ" },
   city: { en: "City / District", lo: "ເມືອງ" },
   branch: { en: "Branch", lo: "ສາຂາ" },
@@ -128,6 +131,7 @@ export default function ShopClient() {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [courier, setCourier] = useState("");
+  const [courierOther, setCourierOther] = useState("");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [branch, setBranch] = useState("");
@@ -166,8 +170,17 @@ export default function ShopClient() {
     });
   }
 
+  function setQtyExact(sizeId: string, raw: string) {
+    const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
+    const value = Number.isFinite(n) ? Math.max(0, Math.min(SHOP_QTY_MAX, n)) : 0;
+    setQuantities((prev) => ({ ...prev, [sizeId]: value }));
+  }
+
+  // When "Other" is picked, the typed name is the real courier value.
+  const effectiveCourier = isOtherCourier(courier) ? courierOther.trim() : courier;
+
   function currentInput() {
-    return { items: orderItems, customerName, phone, courier, province, city, branch };
+    return { items: orderItems, customerName, phone, courier: effectiveCourier, province, city, branch };
   }
 
   function startOrder() {
@@ -235,28 +248,6 @@ export default function ShopClient() {
 
   return (
     <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
-      {myOrders.length > 0 && (
-        <section className="mb-8 rounded-md border border-win/40 bg-win/[0.06] p-4 md:p-5">
-          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-win">{pick(COPY.myOrders)}</p>
-          <div className="grid gap-2.5">
-            {myOrders.map((o, i) => (
-              <div
-                key={(o.id ?? "") + i}
-                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md border border-edge bg-void/50 px-4 py-3"
-              >
-                <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
-                  {pick(shop.productName)} · {o.sizeSummary} · {o.totalQty} {pick(COPY.pieces)}
-                </span>
-                <span className="font-mono text-xs text-spectre">{formatPrice(o.total, o.currency)}</span>
-                <span className="rounded-full border border-glow/40 bg-glow/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-glow">
-                  {pick(COPY.statusPending)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       <header className="mb-6 md:mb-8">
         <p className="inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.34em] text-spectre/70">
           <span className="h-[5px] w-[5px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
@@ -271,6 +262,7 @@ export default function ShopClient() {
       <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8">
         {/* ── 3D preview (independent of the order) ───────────────────── */}
         <section className="lg:sticky lg:top-24 lg:self-start">
+          <h2 className="mb-3 font-display text-lg font-bold uppercase tracking-wide text-soul">{pick(COPY.previewBox)}</h2>
           <div className="relative overflow-hidden rounded-md border border-edge bg-gradient-to-b from-crypt2 via-crypt to-void">
             <div className="scythe-line absolute inset-x-0 top-0 h-[2px] opacity-70" aria-hidden />
             <div className="relative h-[clamp(360px,52vh,560px)] w-full">
@@ -403,7 +395,15 @@ export default function ShopClient() {
                   {s.inStock ? (
                     <div className="inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
                       <Stepper label="−" onClick={() => adjustQty(s.id, -1)} dim={qty === 0} />
-                      <span className={`w-9 text-center font-display text-base font-bold ${qty > 0 ? "text-soul" : "text-ash-dim"}`}>{qty}</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        aria-label={`${s.label} quantity`}
+                        value={qty === 0 ? "" : String(qty)}
+                        placeholder="0"
+                        onChange={(e) => setQtyExact(s.id, e.target.value)}
+                        className={`w-12 bg-transparent text-center font-display text-base font-bold outline-none placeholder:text-ash-dim ${qty > 0 ? "text-soul" : "text-ash-dim"}`}
+                      />
                       <Stepper label="+" onClick={() => adjustQty(s.id, 1)} />
                     </div>
                   ) : (
@@ -430,6 +430,15 @@ export default function ShopClient() {
                 </option>
               ))}
             </select>
+            {isOtherCourier(courier) && (
+              <input
+                type="text"
+                value={courierOther}
+                onChange={(e) => setCourierOther(e.target.value)}
+                placeholder={pick(COPY.otherCourier)}
+                className={`mt-2 ${inputClass(errors.courier)}`}
+              />
+            )}
           </Field>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Field label={pick(COPY.province)} error={errors.province}>
@@ -446,15 +455,19 @@ export default function ShopClient() {
           {/* price + actions */}
           <div className="rounded-md border border-edge bg-crypt/60 p-5">
             <div className="flex items-end justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
                 {lines.length > 0 && (
-                  <p className="mt-1 font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
+                  <p className="mt-1 truncate font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
                 )}
               </div>
-              <div className="text-right">
-                <p className="font-display text-3xl font-bold text-soul">{formatPrice(total, shop.currency)}</p>
-                <p className="font-mono text-[11px] text-ash">{totalQty} {pick(COPY.pieces)}</p>
+              <div className="shrink-0 text-right">
+                <p className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-soul sm:text-3xl">
+                  {formatPrice(total, shop.currency)}
+                </p>
+                <p className="font-mono text-[11px] text-ash">
+                  {totalQty} {pick(COPY.pieces)}
+                </p>
               </div>
             </div>
             {Object.keys(errors).length > 0 && <p className="mt-3 font-mono text-[11px] text-loss">{pick(COPY.fixErrors)}</p>}
@@ -478,6 +491,29 @@ export default function ShopClient() {
           </div>
         </section>
       </div>
+
+      {/* view my order — below the order experience */}
+      {myOrders.length > 0 && (
+        <section className="mt-8 rounded-md border border-win/40 bg-win/[0.06] p-4 md:p-5">
+          <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-win">{pick(COPY.myOrders)}</p>
+          <div className="grid gap-2.5">
+            {myOrders.map((o, i) => (
+              <div
+                key={(o.id ?? "") + i}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md border border-edge bg-void/50 px-4 py-3"
+              >
+                <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
+                  {pick(shop.productName)} · {o.sizeSummary} · {o.totalQty} {pick(COPY.pieces)}
+                </span>
+                <span className="font-mono text-xs text-spectre">{formatPrice(o.total, o.currency)}</span>
+                <span className="rounded-full border border-glow/40 bg-glow/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-glow">
+                  {pick(COPY.statusPending)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── payment popup ─────────────────────────────────────────────── */}
       {payOpen && (

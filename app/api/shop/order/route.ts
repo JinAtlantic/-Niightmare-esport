@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       const o = (it ?? {}) as Record<string, unknown>;
       return {
         sizeId: str(o.sizeId, 12).toLowerCase(),
-        quantity: Math.max(0, Math.min(50, Math.floor(Number(o.quantity) || 0))),
+        quantity: Math.max(0, Math.min(999, Math.floor(Number(o.quantity) || 0))),
       };
     })
     .filter((it) => it.sizeId && it.quantity > 0);
