@@ -10,7 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@react-three/fiber": "^8.18.0",
     "@supabase/supabase-js": "^2.108.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.4.0",
