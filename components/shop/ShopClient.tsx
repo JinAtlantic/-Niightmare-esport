@@ -324,7 +324,7 @@ export default function ShopClient() {
                 <div className="min-w-0">
                   <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
                   {lines.length > 0 && (
-                    <p className="mt-1 truncate font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
+                    <p className="mt-1 break-words font-mono text-[11px] text-spectre">{lines.map((l) => `${l.label}×${l.quantity}`).join(" · ")}</p>
                   )}
                 </div>
                 <div className="shrink-0 text-right">
