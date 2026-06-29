@@ -238,8 +238,8 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
         </p>
       </div>
 
-      <div className="relative mt-6 overflow-hidden border border-edge bg-void/35">
-        <div className="grid grid-cols-[minmax(84px,1fr)_repeat(5,minmax(44px,72px))] border-b border-edge bg-crypt/60 px-3 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-ash md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)]">
+      <div className="relative mt-6 overflow-x-auto border border-edge bg-void/35">
+        <div className="grid grid-cols-[minmax(60px,1.1fr)_repeat(5,minmax(38px,1fr))] border-b border-edge bg-crypt/60 px-3 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-ash md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)]">
           <span>Tier</span>
           <span className="text-right text-gold">1st</span>
           <span className="text-right text-silver">2nd</span>
@@ -253,7 +253,7 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
               return (
                 <div
                   key={row.tier}
-                  className={`grid grid-cols-[minmax(84px,1fr)_repeat(5,minmax(44px,72px))] items-center px-3 py-3 font-mono text-xs tabular-nums md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)] ${row.tier === "Total" ? "bg-amethyst/10" : ""}`}
+                  className={`grid grid-cols-[minmax(60px,1.1fr)_repeat(5,minmax(38px,1fr))] items-center px-3 py-3 font-mono text-xs tabular-nums md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)] ${row.tier === "Total" ? "bg-amethyst/10" : ""}`}
                 >
                   <div className="min-w-0">
                     <span className={`inline-flex border ${tone.border} ${tone.bg} px-2 py-1 font-display text-xs font-black uppercase tracking-[0.12em] ${tone.text} ${tone.glow}`}>
@@ -477,10 +477,6 @@ export default function AchievementsClient() {
           )}
 
         </div>
-
-        <p className="mt-14 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-ash-dim">
-          Competitive record sourced from Liquipedia
-        </p>
       </section>
     </>
   );

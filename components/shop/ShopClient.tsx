@@ -21,7 +21,6 @@ const STORAGE_KEY = "nm-shop-orders";
 type TabId = "order" | "myorders";
 
 const COPY = {
-  kicker: { en: "Official Store", lo: "ຮ້ານທາງການ" },
   tabOrder: { en: "Order", lo: "ສັ່ງຊື້" },
   tabMine: { en: "My Orders", lo: "ອໍເດີຂອງຂ້ອຍ" },
   reserved: { en: "Reserved", lo: "ສະຫງວນລິຂະສິດ" },
@@ -197,11 +196,7 @@ export default function ShopClient() {
   return (
     <main className="mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
       <header className="mb-6 text-center">
-        <p className="inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.34em] text-spectre/70">
-          <span className="h-[5px] w-[5px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
-          {pick(COPY.kicker)}
-        </p>
-        <h1 className="mt-3 font-display text-3xl font-bold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.3)] md:text-4xl">
+        <h1 className="font-display text-3xl font-bold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.3)] md:text-4xl">
           {pick(shop.productName)}
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-spectre/85 md:text-base">{pick(shop.tagline)}</p>
