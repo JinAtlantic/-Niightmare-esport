@@ -8,6 +8,7 @@ import SectionLabel from "@/components/ui/SectionLabel";
 import { useContent } from "@/components/context/ContentContext";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import sponsorsSeed from "@/data/sponsors.json";
+import { safeHref, safeImageSrc, safeMailto } from "@/lib/safety";
 import type { Bilingual, Sponsor } from "@/lib/types";
 
 interface SponsorValueProp {
@@ -84,16 +85,16 @@ function sponsorInitials(name: string) {
 }
 
 function isExternalLink(url: string | undefined) {
-  return Boolean(url && url !== "#");
+  return Boolean(safeHref(url));
 }
 
 function SponsorLogo({ sponsor, className = "" }: { sponsor: Sponsor; className?: string }) {
   const initials = sponsorInitials(sponsor.name);
   return (
     <div className={`grid place-items-center overflow-hidden bg-void/70 ${className}`}>
-      {sponsor.logo ? (
+      {safeImageSrc(sponsor.logo) ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={sponsor.logo} alt={`${sponsor.name} logo`} className="max-h-full max-w-full object-contain" />
+        <img src={safeImageSrc(sponsor.logo)} alt={`${sponsor.name} logo`} className="max-h-full max-w-full object-contain" />
       ) : (
         <span className="keep-latin font-display text-2xl font-black tracking-wide text-glow">{initials}</span>
       )}
@@ -212,7 +213,7 @@ function SponsorModal({ sponsor, onClose }: { sponsor: Sponsor | null; onClose: 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               {linked ? (
                 <a
-                  href={sponsor.url}
+                  href={safeHref(sponsor.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-soul shadow-[0_0_24px_rgba(168,85,247,0.2)] transition-colors hover:bg-amethyst/25"
@@ -353,14 +354,14 @@ export default function SponsorsClient() {
           </p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href={page.ctaPrimary.href}
+              href={safeHref(page.ctaPrimary.href, "/contact")}
               className="inline-flex min-h-[50px] items-center justify-center gap-2 border border-amethyst bg-amethyst/20 px-7 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.28)] transition-colors hover:bg-amethyst/30"
             >
               {pick(page.ctaPrimary.label)}
               <ArrowRightIcon size={16} />
             </Link>
             <a
-              href={`mailto:${contactEmail}`}
+              href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
               className="inline-flex min-h-[50px] items-center justify-center border border-edge-bright bg-void/45 px-7 py-3 font-mono text-xs font-bold tracking-[0.12em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
             >
               {contactEmail}

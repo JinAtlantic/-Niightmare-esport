@@ -16,7 +16,7 @@ const SCOPE = "jinatlantics-projects";
 const NODE_DIR = "C:\\Users\\iTAPE\\AppData\\Local\\nodejs-portable\\node-v22.12.0-win-x64";
 
 export async function POST() {
-  if (adminDisabled() || !verifyToken(cookies().get(COOKIE_NAME)?.value)) {
+  if (adminDisabled() || !verifyToken((await cookies()).get(COOKIE_NAME)?.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

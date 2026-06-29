@@ -25,9 +25,10 @@ async function getPlayer(playerId: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { playerId: string };
+  params: Promise<{ playerId: string }>;
 }): Promise<Metadata> {
-  const player = await getPlayer(params.playerId);
+  const { playerId } = await params;
+  const player = await getPlayer(playerId);
   if (!player) return { title: "Player not found" };
   const title = `${player.ign} Fan Profile`;
   const description = `Vote and comment for ${player.ign} on the NIIGHTMARE Esports community profile.`;
@@ -43,9 +44,10 @@ export async function generateMetadata({
 export default async function PlayerProfilePage({
   params,
 }: {
-  params: { playerId: string };
+  params: Promise<{ playerId: string }>;
 }) {
-  const player = await getPlayer(params.playerId);
+  const { playerId } = await params;
+  const player = await getPlayer(playerId);
   if (!player) notFound();
 
   return (

@@ -304,6 +304,12 @@ alter table public.site_settings add column if not exists achievements jsonb;
 alter table public.site_settings add column if not exists match_schedule jsonb;
 drop policy if exists "members are publicly readable" on public.members;
 
+-- Privacy backfill: Magic Link users may not have a provider display name.
+-- Never expose an email address as the public fan name.
+update public.fan_profiles
+set display_name = 'NIIGHTMARE Fan'
+where display_name ~* '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$';
+
 -- ============================================================================
 -- Row Level Security: public read everywhere, writes only via service role.
 -- Plain per-table statements (re-runnable) — read each as: turn on RLS, allow

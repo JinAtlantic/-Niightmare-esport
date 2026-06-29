@@ -5,6 +5,7 @@ import Link from "next/link";
 import PageHeader from "@/components/layout/PageHeader";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { ArrowRightIcon } from "@/components/ui/Icons";
+import { safeHref } from "@/lib/safety";
 import type { Bilingual } from "@/lib/types";
 
 /**
@@ -36,18 +37,19 @@ function Block({ block }: { block: LegalBlock }) {
     );
   }
 
-  const isMail = block.link?.href.startsWith("mailto:");
+  const href = safeHref(block.link?.href);
+  const isMail = href.startsWith("mailto:");
   return (
     <p>
       {pick(block.p)}
-      {block.link && (
+      {block.link && href && (
         <>
           {" "}
-          {block.link.href.startsWith("/") ? (
-            <Link href={block.link.href}>{pick(block.link.label)}</Link>
+          {href.startsWith("/") ? (
+            <Link href={href}>{pick(block.link.label)}</Link>
           ) : (
             <a
-              href={block.link.href}
+              href={href}
               {...(isMail ? {} : { target: "_blank", rel: "noopener noreferrer" })}
             >
               {pick(block.link.label)}

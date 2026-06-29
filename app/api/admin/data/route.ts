@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic";
 /** Only these content sections may be read/written through the admin API. */
 const ALLOWED = new Set<ContentKey>(["matches", "roster", "sponsors", "news", "site", "achievements"]);
 
-function authed(): boolean {
-  return !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
+async function authed(): Promise<boolean> {
+  return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
 }
 
 function asKey(name: string | null): ContentKey | null {
@@ -22,7 +22,7 @@ function asKey(name: string | null): ContentKey | null {
 }
 
 export async function GET(request: Request) {
-  if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const key = asKey(new URL(request.url).searchParams.get("file"));
   if (!key) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
   try {
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const key = asKey(new URL(request.url).searchParams.get("file"));
   if (!key) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
 

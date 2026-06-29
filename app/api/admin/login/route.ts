@@ -22,6 +22,15 @@ function rateLimited(ip: string): boolean {
   return rec.count > MAX_ATTEMPTS;
 }
 
+function clientIp(request: Request): string {
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-real-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    "unknown"
+  );
+}
+
 /** Constant-time string compare (hash to a fixed length first). */
 function safeEqual(a: string, b: string): boolean {
   const ha = crypto.createHash("sha256").update(a).digest();
@@ -32,8 +41,7 @@ function safeEqual(a: string, b: string): boolean {
 export async function POST(request: Request) {
   if (adminDisabled()) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const ip = clientIp(request);
   if (rateLimited(ip)) {
     return NextResponse.json(
       { ok: false, error: "ลองมากเกินไป กรุณารอสักครู่แล้วลองใหม่" },
@@ -53,6 +61,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "รหัสผ่านไม่ถูกต้อง" }, { status: 401 });
   }
 
+  attempts.delete(ip);
   const res = NextResponse.json({ ok: true });
   res.cookies.set(COOKIE_NAME, makeToken(), {
     httpOnly: true,

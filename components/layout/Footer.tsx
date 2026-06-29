@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { DiscordIcon, FacebookIcon, InstagramIcon, LiquipediaIcon, MailIcon, YoutubeIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
+import { safeHref, safeMailto } from "@/lib/safety";
 
 const NAV_ITEMS = [
   { href: "/", key: "nav.home" },
@@ -25,11 +26,11 @@ export default function Footer() {
   // value is set, so emptying a link in the admin removes its icon here.
   const c = site.contact as Record<string, string | undefined>;
   const socials = [
-    { href: c.email ? `mailto:${c.email}` : "", label: "Email", Icon: MailIcon },
-    { href: c.facebook, label: "Facebook", Icon: FacebookIcon },
-    { href: c.instagram, label: "Instagram", Icon: InstagramIcon },
-    { href: c.youtube, label: "YouTube", Icon: YoutubeIcon },
-    { href: c.discord, label: "Discord", Icon: DiscordIcon },
+    { href: safeMailto(c.email), label: "Email", Icon: MailIcon },
+    { href: safeHref(c.facebook), label: "Facebook", Icon: FacebookIcon },
+    { href: safeHref(c.instagram), label: "Instagram", Icon: InstagramIcon },
+    { href: safeHref(c.youtube), label: "YouTube", Icon: YoutubeIcon },
+    { href: safeHref(c.discord), label: "Discord", Icon: DiscordIcon },
     { href: LIQUIPEDIA_URL, label: "Liquipedia", Icon: LiquipediaIcon },
   ].filter((s): s is { href: string; label: string; Icon: typeof MailIcon } => !!s.href);
 

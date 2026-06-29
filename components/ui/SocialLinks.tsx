@@ -1,5 +1,6 @@
 import React from "react";
 import { FacebookIcon, InstagramIcon, TiktokIcon, WhatsappIcon, YoutubeIcon } from "@/components/ui/Icons";
+import { safeHref } from "@/lib/safety";
 import type { Socials } from "@/lib/types";
 
 interface SocialLinksProps {
@@ -23,7 +24,7 @@ export default function SocialLinks({ socials, size = 18, className = "", compac
   // Only render an icon when there is a real link. Empty values and the "#"
   // placeholder are treated as "not set" and hidden.
   const visible = items.filter(({ key }) => {
-    const link = socials[key]?.trim();
+    const link = safeHref(socials[key]);
     return link && link !== "#";
   });
 
@@ -34,7 +35,7 @@ export default function SocialLinks({ socials, size = 18, className = "", compac
       {visible.map(({ key, label, Icon }) => (
         <a
           key={key}
-          href={socials[key]}
+          href={safeHref(socials[key])}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}

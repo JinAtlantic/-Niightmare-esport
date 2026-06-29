@@ -13,6 +13,7 @@ import { formatDate } from "@/lib/format";
 import { tournamentTier, type Tier } from "@/lib/tiers";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
 import { matchVods } from "@/lib/matchVods";
+import { safeHref } from "@/lib/safety";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
@@ -335,7 +336,7 @@ function vodLabel(vod: MatchVod, lang: "en" | "lo") {
 
 function VodLinks({ match, page, compact = false }: { match: Match; page: MatchesPageCopy; compact?: boolean }) {
   const { pick, lang } = useLanguage();
-  const vods = matchVods(match);
+  const vods = matchVods(match).map((vod) => ({ ...vod, url: safeHref(vod.url) })).filter((vod) => vod.url);
   const base =
     `inline-flex items-center justify-center gap-1.5 border font-mono font-semibold uppercase tracking-[0.1em] transition-colors ${
       compact ? "min-h-[30px] px-2.5 py-1 text-[9px]" : "min-h-[38px] px-3 py-1.5 text-[10px]"

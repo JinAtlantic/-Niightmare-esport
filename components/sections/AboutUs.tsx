@@ -8,6 +8,7 @@ import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
+import { safeHref } from "@/lib/safety";
 
 /**
  * Home-page "About Us" band — a single, centred manifesto led by the big
@@ -22,6 +23,7 @@ export default function AboutUs() {
   const about: AboutUsContent = resolveAbout(
     (site as { aboutUs?: Partial<AboutUsContent> }).aboutUs
   );
+  const primaryHref = safeHref(about.primaryCta.href, "/contact");
 
   return (
     <section className="relative overflow-hidden border-t border-edge bg-void px-4 py-20 md:px-6 md:py-24">
@@ -68,7 +70,7 @@ export default function AboutUs() {
         <Reveal delay={220}>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
             <Link
-              href={about.primaryCta.href}
+              href={primaryHref}
               className="group inline-flex items-center gap-2.5 rounded-md border border-edge-bright bg-void/40 px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.18em] text-spectre backdrop-blur-sm transition-all duration-300 hover:border-amethyst/60 hover:text-soul focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
             >
               {pick(about.primaryCta.label)}

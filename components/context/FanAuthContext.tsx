@@ -5,6 +5,7 @@ import { LogIn, Mail, X } from "lucide-react";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { getSupabase } from "@/lib/supabase";
+import { publicFanAvatar, publicFanName } from "@/lib/safety";
 
 interface FanAuthContextValue {
   db: SupabaseClient | null;
@@ -37,17 +38,15 @@ const COPY = {
 const FanAuthContext = createContext<FanAuthContextValue | null>(null);
 
 function displayName(user: User) {
-  return (
+  return publicFanName(
     user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    user.user_metadata?.preferred_username ||
-    user.email ||
-    "NIIGHTMARE Fan"
+      user.user_metadata?.name ||
+      user.user_metadata?.preferred_username
   );
 }
 
 function avatarUrl(user: User) {
-  return user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+  return publicFanAvatar(user.user_metadata?.avatar_url || user.user_metadata?.picture);
 }
 
 export function FanAuthProvider({ children }: { children: React.ReactNode }) {

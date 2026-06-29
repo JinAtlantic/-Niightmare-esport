@@ -10,6 +10,7 @@ import { useFanAuth } from "@/components/context/FanAuthContext";
 import LanguageToggle from "@/components/ui/LanguageToggle";
 import { CloseIcon, MenuIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
+import { publicFanName, safeHref } from "@/lib/safety";
 
 const NAV_ITEMS = [
   { href: "/", key: "nav.home" },
@@ -32,6 +33,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const communityHref = safeHref(site.communityUrl);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -106,7 +108,7 @@ export default function Navbar() {
                 className="inline-flex min-h-[42px] items-center gap-2 border border-edge bg-crypt/70 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em] text-spectre transition-all duration-200 hover:border-loss/60 hover:bg-loss/10 hover:text-loss"
               >
                 <UserCircle size={15} />
-                <span className="max-w-[130px] truncate">{session.user.email || pick(AUTH_COPY.profile)}</span>
+                <span className="max-w-[130px] truncate">{publicFanName(session.user.user_metadata?.full_name || session.user.user_metadata?.name) || pick(AUTH_COPY.profile)}</span>
                 <LogOut size={14} />
               </button>
             ) : (
@@ -119,14 +121,16 @@ export default function Navbar() {
                 {pick(AUTH_COPY.signIn)}
               </button>
             )}
-            <a
-              href={site.communityUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-amethyst-deep px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15 hover:shadow-[0_0_22px_rgba(168,85,247,0.3)]"
-            >
-              {t("nav.join_community")}
-            </a>
+            {communityHref && (
+              <a
+                href={communityHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-amethyst-deep px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15 hover:shadow-[0_0_22px_rgba(168,85,247,0.3)]"
+              >
+                {t("nav.join_community")}
+              </a>
+            )}
           </div>
 
           {/* Mobile controls */}
@@ -203,7 +207,7 @@ export default function Navbar() {
                 className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 border border-edge bg-void/45 px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-spectre transition-all duration-200 hover:border-loss/60 hover:bg-loss/10 hover:text-loss"
               >
                 <UserCircle size={15} />
-                <span className="min-w-0 truncate">{session.user.email || pick(AUTH_COPY.profile)}</span>
+                <span className="min-w-0 truncate">{publicFanName(session.user.user_metadata?.full_name || session.user.user_metadata?.name) || pick(AUTH_COPY.profile)}</span>
                 <LogOut size={14} />
               </button>
             ) : (
@@ -216,14 +220,16 @@ export default function Navbar() {
                 {pick(AUTH_COPY.signIn)}
               </button>
             )}
-            <a
-              href={site.communityUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex min-h-[44px] items-center justify-center border border-amethyst-deep px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15"
-            >
-              {t("nav.join_community")}
-            </a>
+            {communityHref && (
+              <a
+                href={communityHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[44px] items-center justify-center border border-amethyst-deep px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15"
+              >
+                {t("nav.join_community")}
+              </a>
+            )}
           </div>
         </aside>
       </div>

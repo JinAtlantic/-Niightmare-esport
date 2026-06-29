@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { safeImageSrc } from "@/lib/safety";
 
 interface OpponentLogoProps {
   /**
@@ -37,6 +38,7 @@ export function opponentMonogram(name: string, abbr?: string): string {
 export default function OpponentLogo({ src, name, abbr, size = 28, className = "" }: OpponentLogoProps) {
   const dimension = { width: size, height: size, minWidth: size };
   const mono = opponentMonogram(name, abbr);
+  const safeSrc = safeImageSrc(src);
   // 3-char codes need a smaller glyph to sit inside the same fixed box.
   const fontSize = size * (mono.length >= 3 ? 0.32 : 0.42);
 
@@ -47,9 +49,9 @@ export default function OpponentLogo({ src, name, abbr, size = 28, className = "
       role="img"
       aria-label={`${name} logo`}
     >
-      {src ? (
+      {safeSrc ? (
         <Image
-          src={src}
+          src={safeSrc}
           alt=""
           className="h-full w-full object-contain drop-shadow-[0_0_12px_rgba(0,0,0,0.65)]"
           width={size}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { safeImageSrc } from "@/lib/safety";
 import type { Sponsor } from "@/lib/types";
 
 interface ObsSponsorOverlayProps {
@@ -18,6 +19,7 @@ function sponsorInitials(name: string) {
 }
 
 function SponsorMark({ sponsor, compact = false }: { sponsor: Sponsor; compact?: boolean }) {
+  const logo = safeImageSrc(sponsor.logo);
   return (
     <div
       className={`flex items-center gap-3 border border-white/10 bg-black/42 px-4 shadow-[0_0_24px_rgba(168,85,247,0.16)] backdrop-blur-md ${
@@ -25,9 +27,9 @@ function SponsorMark({ sponsor, compact = false }: { sponsor: Sponsor; compact?:
       }`}
     >
       <div className={`${compact ? "h-9 w-16" : "h-11 w-20"} grid shrink-0 place-items-center overflow-hidden`}>
-        {sponsor.logo ? (
+        {logo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={sponsor.logo} alt="" className="max-h-full max-w-full object-contain" />
+          <img src={logo} alt="" className="max-h-full max-w-full object-contain" />
         ) : (
           <span className="keep-latin font-display text-xl font-black tracking-wide text-glow">
             {sponsorInitials(sponsor.name)}

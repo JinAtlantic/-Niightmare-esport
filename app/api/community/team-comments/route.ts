@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { analyzeCommentModeration } from "@/lib/commentModeration";
+import { checkCommentRateLimit } from "@/lib/communityRateLimit";
 import { getSupabaseAdmin, supabaseAdminEnabled } from "@/lib/supabaseAdmin";
+import { publicFanAvatar, publicFanName } from "@/lib/safety";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,15 +15,12 @@ function bearerToken(request: Request) {
 
 function displayName(user: { user_metadata?: Record<string, unknown>; email?: string }) {
   const metadata = user.user_metadata ?? {};
-  return (
-    String(metadata.full_name || metadata.name || metadata.preferred_username || user.email || "").trim() ||
-    "NIIGHTMARE Fan"
-  );
+  return publicFanName(metadata.full_name || metadata.name || metadata.preferred_username);
 }
 
 function avatarUrl(user: { user_metadata?: Record<string, unknown> }) {
   const metadata = user.user_metadata ?? {};
-  return String(metadata.avatar_url || metadata.picture || "");
+  return publicFanAvatar(metadata.avatar_url || metadata.picture);
 }
 
 export async function POST(request: Request) {
@@ -51,6 +50,9 @@ export async function POST(request: Request) {
   if (authError || !authData.user) return NextResponse.json({ error: "Login expired." }, { status: 401 });
 
   const user = authData.user;
+  const rateLimit = await checkCommentRateLimit(db, user.id);
+  if (!rateLimit.ok) return NextResponse.json({ error: rateLimit.error }, { status: 429 });
+
   const moderation = analyzeCommentModeration(body);
 
   const { error: profileError } = await db.from("fan_profiles").upsert({

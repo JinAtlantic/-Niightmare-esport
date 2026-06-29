@@ -14,7 +14,6 @@ const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/webp": "webp",
   "image/gif": "gif",
-  "image/svg+xml": "svg",
 };
 
 /** Slugify a filename base so it is safe and predictable. */
@@ -30,7 +29,7 @@ function slug(name: string): string {
 }
 
 export async function POST(request: Request) {
-  if (adminDisabled() || !verifyToken(cookies().get(COOKIE_NAME)?.value)) {
+  if (adminDisabled() || !verifyToken((await cookies()).get(COOKIE_NAME)?.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

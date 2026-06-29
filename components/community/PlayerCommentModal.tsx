@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { MessageCircle, Send, X } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useFanAuth } from "@/components/context/FanAuthContext";
+import { publicFanAvatar, publicFanName } from "@/lib/safety";
 import type { Player } from "@/lib/types";
 
 interface FanComment {
@@ -191,14 +192,15 @@ export default function PlayerCommentModal({
             <div className="space-y-3">
               {comments.map((comment) => {
                 const profile = profileOf(comment);
-                const name = profile?.display_name || "NIIGHTMARE Fan";
+                const name = publicFanName(profile?.display_name);
+                const avatar = publicFanAvatar(profile?.avatar_url);
                 return (
                   <article key={comment.id} className="border border-edge bg-void/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-amethyst/15">
-                        {profile?.avatar_url ? (
+                        {avatar ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                          <img src={avatar} alt="" className="h-full w-full object-cover" />
                         ) : (
                           <span className="font-mono text-xs font-bold text-glow">{name.slice(0, 2).toUpperCase()}</span>
                         )}

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Card, SelectField, Section } from "@/components/admin/ui";
+import { publicFanName } from "@/lib/safety";
 
 type CommentStatus = "review" | "visible" | "hidden" | "all";
 
@@ -171,7 +172,7 @@ export default function CommunityModeration() {
                     <p className="mt-3 text-sm leading-relaxed text-soul">{comment.body}</p>
                     <p className="mt-3 font-mono text-[11px] text-ash">
                       {targetLabel}: <span className="text-spectre">{targetName}</span> · Fan:{" "}
-                      <span className="text-spectre">{profile?.display_name || "NIIGHTMARE Fan"}</span> ·{" "}
+                      <span className="text-spectre">{publicFanName(profile?.display_name)}</span> ·{" "}
                       {dateLabel(comment.created_at)}
                     </p>
                   </div>

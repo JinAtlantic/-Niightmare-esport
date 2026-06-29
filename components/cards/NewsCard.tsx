@@ -4,6 +4,7 @@ import React from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
+import { safeHref } from "@/lib/safety";
 import type { NewsArticle } from "@/lib/types";
 
 type Variant = "featured" | "compact" | "default";
@@ -29,6 +30,7 @@ export default function NewsCard({
   index?: number;
 }) {
   const { t, pick, lang } = useLanguage();
+  const safeLink = safeHref(article.link);
   const date = (
     <time dateTime={article.date} className="font-mono tracking-wider">
       {formatDate(article.date, lang)}
@@ -39,7 +41,7 @@ export default function NewsCard({
   if (variant === "compact") {
     return (
       <a
-        href={article.link}
+        href={safeLink || undefined}
         className="group relative flex h-full flex-col justify-center gap-2.5 overflow-hidden border-l-2 border-edge py-5 pl-6 pr-3"
       >
         <span
@@ -61,13 +63,13 @@ export default function NewsCard({
   }
 
   const featured = variant === "featured";
-  const hasLink = Boolean(article.link && article.link !== "#");
-  const external = hasLink && /^https?:\/\//.test(article.link);
+  const hasLink = Boolean(safeLink);
+  const external = hasLink && /^https?:\/\//.test(safeLink);
 
   // ── Featured + default cards — panel with corner cut and top accent ──────
   return (
     <a
-      href={hasLink ? article.link : undefined}
+      href={hasLink ? safeLink : undefined}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={`hover-glow clip-diagonal group relative flex h-full flex-col overflow-hidden border border-edge bg-crypt ${
         featured ? "p-7 md:p-9" : "p-6"

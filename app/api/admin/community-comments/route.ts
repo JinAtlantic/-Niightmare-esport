@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 
 const ALLOWED_STATUS = new Set(["visible", "review", "hidden"]);
 
-function authed(): boolean {
-  return !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
+async function authed(): Promise<boolean> {
+  return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
 }
 
 function missingRelation(error: { message?: string; code?: string } | null) {
@@ -19,7 +19,7 @@ function missingRelation(error: { message?: string; code?: string } | null) {
 }
 
 export async function GET(request: Request) {
-  if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!supabaseAdminEnabled) return NextResponse.json({ comments: [], persisted: false });
 
   const db = getSupabaseAdmin();
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!supabaseAdminEnabled) return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 });
 
   let payload: { id?: string; status?: string; target?: string };

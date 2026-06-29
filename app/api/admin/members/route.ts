@@ -9,8 +9,8 @@ import type { StaffMember } from "@/lib/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function authed(): boolean {
-  return !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
+async function authed(): Promise<boolean> {
+  return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -41,7 +41,7 @@ function hasProfileValue(row: Record<string, unknown>) {
  * configured yet, so the editor can update the screen and say so honestly.
  */
 export async function POST(request: Request) {
-  if (!authed()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   let member: StaffMember;
   try {

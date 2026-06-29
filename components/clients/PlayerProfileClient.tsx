@@ -7,6 +7,7 @@ import { Heart, LogIn, LogOut, Mail, MessageCircle, Send } from "lucide-react";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { getSupabase } from "@/lib/supabase";
+import { publicFanAvatar, publicFanName } from "@/lib/safety";
 import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile";
 import type { Player } from "@/lib/types";
 
@@ -74,17 +75,15 @@ function isUuid(value: string) {
 }
 
 function displayName(user: User) {
-  return (
+  return publicFanName(
     user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    user.user_metadata?.preferred_username ||
-    user.email ||
-    "NIIGHTMARE Fan"
+      user.user_metadata?.name ||
+      user.user_metadata?.preferred_username
   );
 }
 
 function avatarUrl(user: User) {
-  return user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+  return publicFanAvatar(user.user_metadata?.avatar_url || user.user_metadata?.picture);
 }
 
 function gaEvent(name: string, params: Record<string, string | number | boolean>) {
@@ -518,14 +517,15 @@ export default function PlayerProfileClient({ player }: { player: Player }) {
                   const profile = Array.isArray(comment.fan_profiles)
                     ? comment.fan_profiles[0]
                     : comment.fan_profiles;
-                  const name = profile?.display_name || "NIIGHTMARE Fan";
+                  const name = publicFanName(profile?.display_name);
+                  const avatar = publicFanAvatar(profile?.avatar_url);
                   return (
                     <article key={comment.id} className="border border-edge bg-void/45 p-4">
                       <div className="flex items-center gap-3">
                         <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-amethyst/15">
-                          {profile?.avatar_url ? (
+                          {avatar ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                            <img src={avatar} alt="" className="h-full w-full object-cover" />
                           ) : (
                             <span className="font-mono text-xs font-bold text-glow">{name.slice(0, 2).toUpperCase()}</span>
                           )}

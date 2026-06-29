@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminPage() {
+export default async function AdminPage() {
   // Local-only: 404 on the deployed (Vercel) site.
   if (adminDisabled()) notFound();
-  const authed = verifyToken(cookies().get(COOKIE_NAME)?.value);
+  const authed = verifyToken((await cookies()).get(COOKIE_NAME)?.value);
   return authed ? <AdminApp /> : <LoginScreen />;
 }

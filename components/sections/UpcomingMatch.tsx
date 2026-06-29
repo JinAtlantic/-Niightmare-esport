@@ -8,6 +8,7 @@ import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
+import { safeHref, safeImageSrc } from "@/lib/safety";
 import type { Lang, MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
 type Countdown = { d: number; h: number; m: number; s: number; done: boolean };
@@ -66,11 +67,12 @@ function Crest({
   monoClass: string;
 }) {
   const [failed, setFailed] = useState(false);
+  const safeLogo = safeImageSrc(logo);
   return (
     <div className={`relative grid place-items-center ${boxClass}`}>
-      {logo && !failed ? (
+      {safeLogo && !failed ? (
         <Image
-          src={logo}
+          src={safeLogo}
           alt={name}
           fill
           sizes="(min-width: 1024px) 184px, (min-width: 768px) 156px, 104px"
@@ -283,6 +285,7 @@ export default function UpcomingMatch() {
   const status: MatchStatus = match.status ?? "next";
   const s = STATUS[status] ?? STATUS.next;
   const GameIcon = match.game === "efootball" ? EfootballIcon : MlbbIcon;
+  const streamHref = safeHref(match.streamUrl);
 
   const hasOpponent = Boolean(match.opponent && match.opponent.trim());
   const round = match.round && (match.round.en || match.round.lo) ? match.round : null;
@@ -465,9 +468,9 @@ export default function UpcomingMatch() {
                     {t("sections.upcoming_status_live")}
                   </span>
 
-                  {match.streamUrl && (
+                  {streamHref && (
                     <a
-                      href={match.streamUrl}
+                      href={streamHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="group inline-flex w-full max-w-sm items-center justify-center gap-2.5 rounded-md border border-loss/60 bg-gradient-to-b from-loss/25 to-loss/10 px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.2em] text-soul shadow-[0_0_30px_rgba(251,113,133,0.5)] transition-all duration-300 hover:from-loss/35 hover:to-loss/15 hover:shadow-[0_0_48px_rgba(251,113,133,0.78)] focus:outline-none focus-visible:ring-2 focus-visible:ring-loss focus-visible:ring-offset-2 focus-visible:ring-offset-void sm:w-auto md:text-base"

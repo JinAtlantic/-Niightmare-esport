@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
 import siteSeed from "@/data/site.json";
+import { safeHref, safeHttpUrl, safeMailto } from "@/lib/safety";
 import type { Bilingual } from "@/lib/types";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -80,42 +81,42 @@ export default function ContactClient() {
     {
       key: "email" as const,
       value: contact.email,
-      href: contact.email ? `mailto:${contact.email}` : "",
+      href: safeMailto(contact.email),
       Icon: MailIcon,
       external: false,
     },
     {
       key: "facebook" as const,
       value: contact.facebook,
-      href: contact.facebook,
+      href: safeHref(contact.facebook),
       Icon: FacebookIcon,
       external: true,
     },
     {
       key: "instagram" as const,
       value: contact.instagram,
-      href: contact.instagram,
+      href: safeHref(contact.instagram),
       Icon: InstagramIcon,
       external: true,
     },
     {
       key: "youtube" as const,
       value: contact.youtube,
-      href: contact.youtube,
+      href: safeHref(contact.youtube),
       Icon: YoutubeIcon,
       external: true,
     },
     {
       key: "tiktok" as const,
       value: contact.tiktok,
-      href: contact.tiktok,
+      href: safeHref(contact.tiktok),
       Icon: TiktokIcon,
       external: true,
     },
     {
       key: "discord" as const,
       value: contact.discord,
-      href: contact.discord,
+      href: safeHref(contact.discord),
       Icon: DiscordIcon,
       external: true,
     },
@@ -133,7 +134,9 @@ export default function ContactClient() {
     const form = e.currentTarget;
     setStatus("submitting");
     try {
-      const res = await fetch(site.formspreeEndpoint, {
+      const endpoint = safeHttpUrl(site.formspreeEndpoint);
+      if (!endpoint) throw new Error("Contact endpoint is not configured.");
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { Accept: "application/json" },
         body: new FormData(form),

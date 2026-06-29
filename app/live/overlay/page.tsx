@@ -43,16 +43,17 @@ function positiveInt(value: string | undefined, fallback: number, min: number, m
 export default async function LiveOverlayPage({
   searchParams,
 }: {
-  searchParams: OverlaySearchParams;
+  searchParams: Promise<OverlaySearchParams>;
 }) {
+  const params = await searchParams;
   const content = await getSiteContent();
   const sponsorsFile = content.sponsors as { sponsors?: Sponsor[] };
   const allSponsors = sponsorsFile.sponsors ?? [];
-  const limit = positiveInt(searchParams.limit, 6, 1, 12);
-  const sponsors = filterSponsors(allSponsors, searchParams.sponsors).slice(0, limit);
-  const position = searchParams.position === "top" ? "top" : "bottom";
-  const mode = searchParams.mode === "corner" ? "corner" : "bar";
-  const seconds = positiveInt(searchParams.speed, 12, 5, 60);
+  const limit = positiveInt(params.limit, 6, 1, 12);
+  const sponsors = filterSponsors(allSponsors, params.sponsors).slice(0, limit);
+  const position = params.position === "top" ? "top" : "bottom";
+  const mode = params.mode === "corner" ? "corner" : "bar";
+  const seconds = positiveInt(params.speed, 12, 5, 60);
 
   return (
     <ObsSponsorOverlay

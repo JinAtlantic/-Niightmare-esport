@@ -13,6 +13,7 @@ import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
 import { formatDate } from "@/lib/format";
 import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile";
+import { safeHref } from "@/lib/safety";
 import type { Player } from "@/lib/types";
 
 function SectionHead({ label }: { label: string }) {
@@ -48,6 +49,7 @@ export default function PlayerModal({
   const countryName = player.country ? pick(player.country) : player.countryCode?.toUpperCase();
   const birthDate = formatBirthDate(player.birthDate, lang);
   const age = calculateAge(player.birthDate);
+  const liquipediaHref = safeHref(player.liquipedia);
 
   // Roster tenure periods — some players leave and return, so this can be
   // several "<joined> – <left|Present>" spans. Empty when none are set.
@@ -226,9 +228,9 @@ export default function PlayerModal({
               <div className="flex flex-wrap items-center gap-2">
                 {player.email && <CopyEmailButton email={player.email} />}
                 <SocialLinks socials={player.socials} size={18} />
-                {player.liquipedia && (
+                {liquipediaHref && (
                   <a
-                    href={player.liquipedia}
+                    href={liquipediaHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${player.ign} — Liquipedia`}

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  * `{ authed: true }` only for a valid, unexpired admin session — guests always
  * get `false`, so the public site never renders the edit UI.
  */
-export function GET() {
-  const authed = !adminDisabled() && verifyToken(cookies().get(COOKIE_NAME)?.value);
+export async function GET() {
+  const authed = !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
   return NextResponse.json({ authed }, { headers: { "Cache-Control": "no-store" } });
 }
