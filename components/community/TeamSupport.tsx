@@ -7,7 +7,6 @@ import { useFanAuth } from "@/components/context/FanAuthContext";
 import TeamCommentModal from "@/components/community/TeamCommentModal";
 
 const COPY = {
-  kicker: { en: "Support the club", lo: "ເຊຍສະໂມສອນ" },
   like: { en: "Like", lo: "ກົດໃຈ" },
   liked: { en: "Liked", lo: "ກົດໃຈແລ້ວ" },
   comment: { en: "Comment", lo: "ຄອມເມັນ" },
@@ -90,9 +89,6 @@ export default function TeamSupport() {
     <>
       {/* Slim utility row — secondary to the hero's primary Shop CTA. */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.26em] text-spectre/55">
-          {pick(COPY.kicker)}
-        </span>
         <div className="flex items-center gap-2">
           <button
             type="button"
