@@ -68,27 +68,31 @@ export default function Hero() {
         />
 
         <div
-          className="fx-rise mt-8 flex flex-col items-start gap-4 md:items-end"
+          className="fx-rise mt-8 flex flex-col items-start md:items-end"
           style={{ animationDelay: "0.52s" }}
         >
-          {/* primary hero action — left on mobile, right on desktop */}
-          <Link
-            href="/shop"
-            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/15 to-transparent px-7 py-4 font-display text-sm font-black uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-300 hover:border-glow hover:shadow-[0_0_44px_rgba(168,85,247,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
-          >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]"
-            />
-            <span className="relative">{pick(COPY.shopCta)}</span>
-            <ArrowRightIcon
-              size={18}
-              className="relative transition-transform duration-300 group-hover:translate-x-1.5"
-            />
-          </Link>
+          {/* CTA + support share one shrink-to-fit column so the Like/Comment
+              row sits directly under the Shop button, edges aligned. */}
+          <div className="flex flex-col items-stretch gap-3">
+            {/* primary hero action — left on mobile, right on desktop */}
+            <Link
+              href="/shop"
+              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/15 to-transparent px-7 py-4 font-display text-sm font-black uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-300 hover:border-glow hover:shadow-[0_0_44px_rgba(168,85,247,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]"
+              />
+              <span className="relative">{pick(COPY.shopCta)}</span>
+              <ArrowRightIcon
+                size={18}
+                className="relative transition-transform duration-300 group-hover:translate-x-1.5"
+              />
+            </Link>
 
-          {/* quiet support utility row */}
-          <TeamSupport />
+            {/* quiet support utility row — matches the Shop button width */}
+            <TeamSupport />
+          </div>
         </div>
       </div>
     </section>

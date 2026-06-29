@@ -87,35 +87,33 @@ export default function TeamSupport() {
 
   return (
     <>
-      {/* Slim utility row — secondary to the hero's primary Shop CTA. */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={toggleLike}
-            disabled={busy || !supportsCommunity}
-            className={`inline-flex min-h-[42px] items-center gap-2 rounded-md border px-3.5 py-2 font-display text-xs font-bold uppercase tracking-[0.12em] backdrop-blur-sm transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
-              liked
-                ? "border-loss/60 bg-loss/10 text-loss"
-                : "border-edge-bright/70 bg-void/40 text-spectre hover:border-amethyst hover:text-soul"
-            }`}
-          >
-            <Heart size={15} fill={liked ? "currentColor" : "none"} />
-            <span>{liked ? pick(COPY.liked) : pick(COPY.like)}</span>
-            {likes > 0 && (
-              <span className="keep-latin font-mono text-[11px] text-ash">{likes}</span>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => setCommentOpen(true)}
-            disabled={!supportsCommunity}
-            className="inline-flex min-h-[42px] items-center gap-2 rounded-md border border-edge-bright/70 bg-void/40 px-3.5 py-2 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre backdrop-blur-sm transition-colors hover:border-amethyst hover:text-soul disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            <MessageCircle size={15} />
-            {pick(COPY.comment)}
-          </button>
-        </div>
+      {/* Slim utility row — fills its column so it lines up under the Shop CTA. */}
+      <div className="flex w-full items-stretch gap-2">
+        <button
+          type="button"
+          onClick={toggleLike}
+          disabled={busy || !supportsCommunity}
+          className={`inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-md border px-3.5 py-2 font-display text-xs font-bold uppercase tracking-[0.12em] backdrop-blur-sm transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+            liked
+              ? "border-loss/60 bg-loss/10 text-loss"
+              : "border-edge-bright/70 bg-void/40 text-spectre hover:border-amethyst hover:text-soul"
+          }`}
+        >
+          <Heart size={15} fill={liked ? "currentColor" : "none"} />
+          <span>{liked ? pick(COPY.liked) : pick(COPY.like)}</span>
+          {likes > 0 && (
+            <span className="keep-latin font-mono text-[11px] text-ash">{likes}</span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setCommentOpen(true)}
+          disabled={!supportsCommunity}
+          className="inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-md border border-edge-bright/70 bg-void/40 px-3.5 py-2 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre backdrop-blur-sm transition-colors hover:border-amethyst hover:text-soul disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          <MessageCircle size={15} />
+          {pick(COPY.comment)}
+        </button>
       </div>
       <TeamCommentModal
         open={commentOpen}
