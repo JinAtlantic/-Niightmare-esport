@@ -55,18 +55,20 @@ const mono = localFont({
   preload: false,
   fallback: ["ui-monospace", "monospace"],
 });
-// Lao face (Phetsarath) — self-hosted. Only fetched by the browser when Lao is
-// active (the CSS references it under html.lang-lo), so EN visitors never
-// download it.
+// Lao face (Noto Sans Lao) — self-hosted. A clean, modern, highly readable
+// sans-serif chosen over the more formal Phetsarath. Only fetched by the
+// browser when Lao is active (the CSS references it under html.lang-lo), and
+// only for Lao glyphs (Latin text keeps the Latin faces via the font stack),
+// so EN visitors never download it.
 const lao = localFont({
   src: [
-    { path: "./fonts/Phetsarath-400.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/Phetsarath-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/NotoSansLao-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/NotoSansLao-700.woff2", weight: "700", style: "normal" },
   ],
-  variable: "--font-phetsarath",
+  variable: "--font-lao",
   display: "swap",
   preload: false,
-  fallback: ["Phetsarath", "sans-serif"],
+  fallback: ["Noto Sans Lao", "sans-serif"],
 });
 
 const fontVars = `${display.variable} ${barlow.variable} ${mono.variable} ${lao.variable}`;

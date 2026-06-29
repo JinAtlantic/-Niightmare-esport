@@ -84,8 +84,15 @@ npx --yes vercel@latest --prod --yes --token $tok --scope jinatlantics-projects
 ## Gotchas (will burn time if ignored)
 - **`next/font/google` HANGS the build here** (silent, never returns). All fonts are
   therefore **self-hosted** via `next/font/local` (woff2 in `app/fonts/`, vars
-  `--font-rajdhani/-barlow/-mono/-phetsarath`). Do NOT switch any font back to
+  `--font-rajdhani/-barlow/-mono/-lao`). Do NOT switch any font back to
   `next/font/google`.
+- **Lao font + mixed scripts**: the Lao face is **Noto Sans Lao** (`--font-lao`,
+  self-hosted; chosen over the formal Phetsarath for readability). In Lao mode
+  (`html.lang-lo`, see `app/globals.css`) each role keeps its **Latin font FIRST**
+  with `var(--font-lao)` only as a fallback, so Latin glyphs stay on-brand
+  (Chakra Petch / Barlow / JetBrains Mono) and only Lao glyphs use Noto Sans Lao.
+  Don't re-add a blanket `font-family: var(--font-lao) !important` — that's what
+  made English text render in the Lao face.
 - **Don't run `npm run build` while the dev server is up** — the production output
   clobbers the dev `.next` and the running server starts throwing `Cannot find module
   './###.js'`. If it happens: kill :3000, `Remove-Item -Recurse -Force .next`, restart

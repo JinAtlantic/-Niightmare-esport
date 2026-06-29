@@ -4,7 +4,7 @@
 
 :root {
   /* Font CSS variables (--font-rajdhani, --font-barlow, --font-mono,
-     --font-phetsarath) are injected by next/font in app/layout.tsx, which
+     --font-lao) are injected by next/font in app/layout.tsx, which
      self-hosts the fonts. */
 
   --void: #0b0710;
@@ -40,16 +40,24 @@ h6,
 }
 
 /* ----------------------------------------------------------------
-   BILINGUAL: when Lao is active, use Phetsarath for everything
-   and bump the base size slightly so Lao script stays readable.
-   .keep-latin opts an element back into the Latin display font
-   (used for the brand wordmark / in-game names).
+   BILINGUAL: when Lao is active, keep each role's Latin face FIRST and
+   add Noto Sans Lao as a fallback. Latin glyphs render in the original
+   font (Chakra Petch / Barlow / JetBrains Mono) exactly as in EN mode;
+   only Lao glyphs — which the Latin faces don't contain — fall through
+   to Noto Sans Lao. So English words stay on-brand even inside Lao mode.
+   The base size is bumped slightly so Lao script stays readable.
+   .keep-latin still pins an element to the pure Latin display font.
 ------------------------------------------------------------------ */
 html.lang-lo {
   font-size: 17px;
 }
 
 html.lang-lo body,
+html.lang-lo .font-barlow {
+  font-family: var(--font-barlow), var(--font-lao), system-ui, sans-serif !important;
+  line-height: 1.65;
+}
+
 html.lang-lo h1,
 html.lang-lo h2,
 html.lang-lo h3,
@@ -57,11 +65,13 @@ html.lang-lo h4,
 html.lang-lo h5,
 html.lang-lo h6,
 html.lang-lo .font-display,
-html.lang-lo .font-rajdhani,
-html.lang-lo .font-mono,
-html.lang-lo .font-barlow {
-  font-family: var(--font-phetsarath) !important;
-  letter-spacing: 0;
+html.lang-lo .font-rajdhani {
+  font-family: var(--font-rajdhani), var(--font-lao), system-ui, sans-serif !important;
+  line-height: 1.4;
+}
+
+html.lang-lo .font-mono {
+  font-family: var(--font-mono), var(--font-lao), ui-monospace, monospace !important;
   line-height: 1.65;
 }
 
