@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { ADMIN_PASSWORD, COOKIE_NAME, SESSION_MAX_AGE, adminDisabled, makeToken } from "@/lib/adminAuth";
+import {
+  ADMIN_PASSWORD,
+  COOKIE_NAME,
+  SESSION_MAX_AGE,
+  adminDisabled,
+  adminTotpEnabled,
+  makeToken,
+  verifyTotpCode,
+} from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Best-effort in-memory rate limit. Serverless instances are ephemeral, so this
 // is not bulletproof, but it meaningfully slows password guessing per instance.
-const WINDOW_MS = 10 * 60 * 1000; // 10 min
+const WINDOW_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 8;
 const attempts = new Map<string, { count: number; resetAt: number }>();
 
@@ -31,7 +39,7 @@ function clientIp(request: Request): string {
   );
 }
 
-/** Constant-time string compare (hash to a fixed length first). */
+/** Constant-time string compare by hashing both inputs to a fixed length first. */
 function safeEqual(a: string, b: string): boolean {
   const ha = crypto.createHash("sha256").update(a).digest();
   const hb = crypto.createHash("sha256").update(b).digest();
@@ -44,21 +52,35 @@ export async function POST(request: Request) {
   const ip = clientIp(request);
   if (rateLimited(ip)) {
     return NextResponse.json(
-      { ok: false, error: "ลองมากเกินไป กรุณารอสักครู่แล้วลองใหม่" },
+      { ok: false, error: "Too many login attempts. Wait a few minutes and try again." },
       { status: 429 }
     );
   }
 
   let password = "";
+  let totp = "";
   try {
     const body = await request.json();
     password = typeof body?.password === "string" ? body.password : "";
+    totp = typeof body?.totp === "string" ? body.totp : "";
   } catch {
-    return NextResponse.json({ ok: false, error: "Bad request" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Bad request." }, { status: 400 });
   }
 
   if (!safeEqual(password, ADMIN_PASSWORD)) {
-    return NextResponse.json({ ok: false, error: "รหัสผ่านไม่ถูกต้อง" }, { status: 401 });
+    return NextResponse.json({ ok: false, error: "Invalid password." }, { status: 401 });
+  }
+
+  if (!verifyTotpCode(totp)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: adminTotpEnabled()
+          ? "Invalid two-factor code."
+          : "Two-factor authentication is not configured.",
+      },
+      { status: 401 }
+    );
   }
 
   attempts.delete(ip);
@@ -66,7 +88,7 @@ export async function POST(request: Request) {
   res.cookies.set(COOKIE_NAME, makeToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: SESSION_MAX_AGE,
   });
