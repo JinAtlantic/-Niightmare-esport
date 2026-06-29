@@ -39,18 +39,24 @@ export default function Hero() {
 
       <div className="hero-grain" aria-hidden />
 
-      <div className="home-hero-content relative z-[2] w-full max-w-7xl lg:flex lg:items-end lg:justify-between lg:gap-10">
-        {/* Wordmark + tagline. On desktop this group bottom-aligns next to the
-            actions so the whole lockup sits low and grounded. */}
-        <div className="lg:min-w-0">
-          <div className="home-hero-copy">
-            <h1 className="home-hero-wordmark keep-latin font-display">
-              <span className="home-hero-main">
-                N<span className="home-hero-double-i">II</span>GHTMARE
-              </span>
-              <span className="home-hero-sub">ESPORT</span>
-            </h1>
-          </div>
+      {/* One disciplined lower lockup: centred on mobile, anchored bottom-left
+          and width-contained on desktop so the reaper stays the hero. */}
+      <div className="home-hero-content relative z-[2] w-full max-w-7xl">
+        <div className="mx-auto flex max-w-[min(34rem,92vw)] flex-col items-center text-center lg:mx-0 lg:max-w-[42rem] lg:items-start lg:text-left">
+          <p
+            className="fx-rise mb-3 inline-flex items-center gap-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.32em] text-spectre/75 md:mb-4 md:text-[11px]"
+            style={{ animationDelay: "0.26s" }}
+          >
+            <span className="h-[5px] w-[5px] rounded-full bg-amethyst shadow-[0_0_10px_#c77dff]" />
+            {t("hero.kicker")}
+          </p>
+
+          <h1 className="home-hero-wordmark keep-latin font-display items-center lg:items-start">
+            <span className="home-hero-main">
+              N<span className="home-hero-double-i">II</span>GHTMARE
+            </span>
+            <span className="home-hero-sub">ESPORT</span>
+          </h1>
 
           <p
             className="home-hero-tagline fx-rise keep-latin font-display"
@@ -65,37 +71,35 @@ export default function Hero() {
           </p>
 
           <div
-            className="fx-rise mt-6 h-[2px] w-[180px] -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_18px_rgba(168,85,247,0.65)]"
+            className="fx-rise mt-6 h-[2px] w-[160px] -skew-x-[24deg] bg-gradient-to-r from-amethyst via-glow to-transparent shadow-[0_0_18px_rgba(168,85,247,0.65)]"
             style={{ animationDelay: "0.42s" }}
             aria-hidden
           />
-        </div>
 
-        <div
-          className="fx-rise mt-9 flex flex-col items-center lg:mt-0 lg:shrink-0 lg:items-end"
-          style={{ animationDelay: "0.52s" }}
-        >
-          {/* CTA + support share one shrink-to-fit column so the Like/Comment
-              row sits directly under the Shop button, edges aligned. */}
-          <div className="flex flex-col items-stretch gap-3">
-            {/* primary hero action — left on mobile, right on desktop */}
-            <Link
-              href="/shop"
-              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/15 to-transparent px-7 py-4 font-display text-sm font-black uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-300 hover:border-glow hover:shadow-[0_0_44px_rgba(168,85,247,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
-            >
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]"
-              />
-              <span className="relative">{pick(COPY.shopCta)}</span>
-              <ArrowRightIcon
-                size={18}
-                className="relative transition-transform duration-300 group-hover:translate-x-1.5"
-              />
-            </Link>
+          {/* actions: primary Shop CTA + a quiet Like/Comment row beneath it */}
+          <div
+            className="fx-rise mt-8 flex w-full flex-col items-center lg:items-start"
+            style={{ animationDelay: "0.52s" }}
+          >
+            <div className="flex w-full max-w-[19rem] flex-col items-stretch gap-3 lg:w-auto lg:max-w-none">
+              <Link
+                href="/shop"
+                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/15 to-transparent px-7 py-4 font-display text-sm font-black uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-300 hover:border-glow hover:shadow-[0_0_44px_rgba(168,85,247,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow focus-visible:ring-offset-2 focus-visible:ring-offset-void md:text-base"
+              >
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]"
+                />
+                <span className="relative">{pick(COPY.shopCta)}</span>
+                <ArrowRightIcon
+                  size={18}
+                  className="relative transition-transform duration-300 group-hover:translate-x-1.5"
+                />
+              </Link>
 
-            {/* quiet support utility row — matches the Shop button width */}
-            <TeamSupport />
+              {/* quiet support utility row — matches the Shop button width */}
+              <TeamSupport />
+            </div>
           </div>
         </div>
       </div>

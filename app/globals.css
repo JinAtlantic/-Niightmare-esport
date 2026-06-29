@@ -477,7 +477,7 @@ html.lang-lo .keep-latin {
   flex-direction: column;
   gap: 0.02em;
   font-weight: 800;
-  font-size: clamp(2.55rem, 8vw, 7rem);
+  font-size: clamp(2.55rem, 6.2vw, 5.6rem);
   line-height: 0.82;
   text-transform: uppercase;
   letter-spacing: 0;
@@ -554,7 +554,7 @@ html.lang-lo .keep-latin {
     0 0 30px rgba(168, 85, 247, 0.42);
 }
 html.lang-lo .home-hero-wordmark {
-  font-size: clamp(2.4rem, 8vw, 6.5882rem);
+  font-size: clamp(2.4rem, 5.8vw, 5.2rem);
   line-height: 0.82;
   letter-spacing: 0;
 }
@@ -566,7 +566,7 @@ html.lang-lo .home-hero-tagline {
 }
 @media (max-width: 767px) {
   .home-hero-content {
-    transform: translateY(clamp(-4.25rem, -7svh, -2.75rem));
+    transform: translateY(clamp(-1.5rem, -2.5svh, -0.5rem));
   }
   .hero-bg--reaper {
     object-position: 56% 28%;
