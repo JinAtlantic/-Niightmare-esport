@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { CloseIcon, EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
-import { formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
 import { safeHref, safeImageSrc } from "@/lib/safety";
@@ -172,12 +172,26 @@ function CountdownBlock({ cd }: { cd: Countdown }) {
   );
 }
 
-function scheduleDate(entry: MatchScheduleEntry, lang: Lang) {
-  if (!entry.date && !entry.time) return "TBA";
-  const iso = entry.date && entry.time ? `${entry.date}T${entry.time}:00+07:00` : entry.date;
-  if (!iso) return entry.time;
-  const formatted = formatDateTime(iso, lang);
-  return entry.time ? formatted : entry.date;
+/** Split a schedule entry into a date label + an optional time label for the date panel. */
+function scheduleParts(entry: MatchScheduleEntry, lang: Lang): { date: string; time: string | null } {
+  if (!entry.date && !entry.time) return { date: "TBA", time: null };
+  if (!entry.date) return { date: entry.time, time: null };
+  const iso = entry.time ? `${entry.date}T${entry.time}:00+07:00` : entry.date;
+  const date = formatDate(iso, lang);
+  if (!entry.time) return { date, time: null };
+  let time = entry.time;
+  const d = new Date(iso);
+  if (!Number.isNaN(d.getTime())) {
+    try {
+      time = new Intl.DateTimeFormat(lang === "lo" ? "lo-LA" : "en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(d);
+    } catch {
+      time = entry.time;
+    }
+  }
+  return { date, time };
 }
 
 function ScheduleModal({
@@ -207,12 +221,20 @@ function ScheduleModal({
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
       <button type="button" className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-md border border-edge-bright bg-crypt shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)]">
-        {/* header — just the title + close */}
-        <div className="flex items-center justify-between gap-4 border-b border-edge px-5 py-4">
-          <h3 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul md:text-xl">
-            {pick(schedule.title)}
-          </h3>
+      <div className="relative z-10 flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-md border border-edge-bright bg-crypt shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)]">
+        {/* a hairline of amethyst across the top — the site's signature seam */}
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent" />
+
+        {/* header — kicker + title + close */}
+        <div className="flex items-start justify-between gap-4 border-b border-edge px-5 py-4">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-amethyst">
+              {schedule.entries.length} {schedule.entries.length === 1 ? (lang === "lo" ? "ນັດ" : "Fixture") : lang === "lo" ? "ນັດ" : "Fixtures"}
+            </p>
+            <h3 className="mt-1.5 font-display text-lg font-bold uppercase leading-tight tracking-[0.08em] text-soul md:text-xl">
+              {pick(schedule.title)}
+            </h3>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -223,30 +245,45 @@ function ScheduleModal({
           </button>
         </div>
 
-        {/* a clean, scannable list — one match per row */}
+        {/* one card per fixture — a framed date/time panel beside the matchup */}
         <div className="modal-scroll overflow-y-auto px-5">
           {schedule.entries.length ? (
-            <ul>
-              {schedule.entries.map((entry) => (
-                <li
-                  key={entry.id}
-                  className="flex items-center justify-between gap-4 border-b border-edge/50 py-4 last:border-0"
-                >
-                  <div className="min-w-0">
-                    <p className="keep-latin break-words font-display text-base font-bold uppercase tracking-[0.03em] text-soul">
-                      NIIGHTMARE <span className="text-glow">vs</span> {entry.opponent || "TBA"}
-                    </p>
-                    {pick(entry.round) && (
-                      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ash">
-                        {pick(entry.round)}
+            <ul className="space-y-2.5 py-5">
+              {schedule.entries.map((entry) => {
+                const { date, time } = scheduleParts(entry, lang);
+                return (
+                  <li
+                    key={entry.id}
+                    className="group relative flex items-stretch overflow-hidden rounded-md border border-edge bg-void/40 transition-colors hover:border-edge-bright"
+                  >
+                    <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-amethyst via-glow to-amethyst/20" />
+
+                    {/* date / time zone */}
+                    <div className="flex w-[92px] shrink-0 flex-col items-center justify-center gap-1 border-r border-edge/70 bg-crypt/50 px-2.5 py-3 text-center sm:w-[108px]">
+                      <p className="font-mono text-[11px] font-semibold uppercase leading-tight tracking-[0.06em] text-spectre">
+                        {date}
                       </p>
-                    )}
-                  </div>
-                  <p className="shrink-0 text-right font-mono text-xs font-semibold uppercase tracking-[0.1em] text-spectre sm:text-sm">
-                    {scheduleDate(entry, lang)}
-                  </p>
-                </li>
-              ))}
+                      {time && (
+                        <p className="font-display text-sm font-bold tabular-nums text-glow [text-shadow:0_0_16px_rgba(199,125,255,0.5)]">
+                          {time}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* matchup zone */}
+                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 px-4 py-3">
+                      <p className="keep-latin break-words font-display text-base font-bold uppercase leading-tight tracking-[0.03em] text-soul">
+                        NIIGHTMARE <span className="text-glow">vs</span> {entry.opponent || "TBA"}
+                      </p>
+                      {pick(entry.round) && (
+                        <span className="inline-flex w-fit items-center rounded-sm border border-edge bg-void/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                          {pick(entry.round)}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="py-10 text-center text-sm text-ash">{pick(schedule.emptyText)}</p>
