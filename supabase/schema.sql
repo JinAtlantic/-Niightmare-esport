@@ -304,6 +304,32 @@ alter table public.site_settings add column if not exists achievements jsonb;
 alter table public.site_settings add column if not exists match_schedule jsonb;
 -- Shop / 3D jersey config (admin-editable): price, stock, size chart, order links.
 alter table public.site_settings add column if not exists shop jsonb;
+
+-- ── SHOP ORDERS (customer jersey orders) ────────────────────────────────────
+-- Written ONLY by the server route (service role) after a buyer declares their
+-- bank transfer; read ONLY in the admin Orders tab. RLS on with no anon policy
+-- so the public anon key can neither read nor write customer data.
+create table if not exists public.shop_orders (
+  id              uuid primary key default gen_random_uuid(),
+  quantity        int,
+  size            text,
+  unit_price      bigint,
+  total           bigint,
+  currency        text,
+  customer_name   text,
+  phone           text,
+  courier         text,
+  province        text,
+  city            text,
+  branch          text,
+  status          text default 'paid_declared',  -- paid_declared | verified | shipped | cancelled
+  note            text,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+alter table public.shop_orders enable row level security;
+drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
+create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();
 drop policy if exists "members are publicly readable" on public.members;
 
 -- Privacy backfill: Magic Link users may not have a provider display name.

@@ -8,9 +8,10 @@ import MatchesEditor from "@/components/admin/MatchesEditor";
 import RosterEditor from "@/components/admin/RosterEditor";
 import SponsorsEditor from "@/components/admin/SponsorsEditor";
 import ShopEditor from "@/components/admin/ShopEditor";
+import OrdersEditor from "@/components/admin/OrdersEditor";
 import CommunityModeration from "@/components/admin/CommunityModeration";
 
-type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "community";
+type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "orders" | "community";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Home" },
@@ -19,6 +20,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "roster", label: "Roster" },
   { id: "sponsors", label: "Sponsors" },
   { id: "shop", label: "Shop" },
+  { id: "orders", label: "Orders" },
   { id: "community", label: "Community" },
 ];
 
@@ -88,6 +90,7 @@ export default function AdminApp() {
         {tab === "roster" && <RosterEditor />}
         {tab === "sponsors" && <SponsorsEditor />}
         {tab === "shop" && <ShopEditor />}
+        {tab === "orders" && <OrdersEditor />}
         {tab === "community" && <CommunityModeration />}
       </main>
     </div>

@@ -6,34 +6,27 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { bodyMetrics, type ShopGender, type ShopSize } from "@/lib/shop";
 
 /**
- * Placeholder 3D jersey viewer — vanilla Three.js (NO @react-three/fiber).
+ * Placeholder 3D jersey viewer — vanilla Three.js (NO @react-three/fiber, which
+ * crashes under Next 15's React-19 client runtime). A stylised human figure,
+ * built with LatheGeometry for a natural torso/limb silhouette and scaled by
+ * wearer height + gender, wears a jersey whose chest girth and length come from
+ * the selected size — so the drape loosens/tightens as size or body changes.
  *
- * Why vanilla: Next 15's App Router runs a React 19 client runtime, while the
- * project is pinned to React 18. @react-three/fiber's react-reconciler reads
- * React-18 internals that React 19 removed (ReactCurrentBatchConfig), which
- * crashes in production. Three.js itself has no React coupling, so driving the
- * scene imperatively in an effect is bullet-proof here.
- *
- * A procedural mannequin (scaled by wearer height + gender) wears a jersey whose
- * chest girth and length come straight from the selected size's measurements, so
- * the drape visibly loosens/tightens as the buyer changes size or body. The
- * whole figure orbits 360°.
- *
- * SWAPPING IN A REAL MODEL: replace buildFigure() with a GLTFLoader load
- * (`new GLTFLoader().load(url, ...)`) and morph/scale the loaded mesh by the same
- * props — the renderer, lights, controls and UI stay untouched.
+ * SWAPPING IN A REAL MODEL: replace buildFigure() with a GLTFLoader load and
+ * morph/scale the mesh by the same props — renderer, lights, controls stay.
  */
 
 const COLOR = {
-  body: 0x3a2e50,
-  bodyDark: 0x2a2138,
-  skin: 0xc9b4f6,
+  skin: 0xcdb8f0,
+  skinDark: 0xb49ee0,
+  hair: 0x1a1320,
   jersey: 0x1c1428,
   jerseyTrim: 0xa855f7,
   glow: 0xc77dff,
+  short: 0x161019,
 };
 
-const CM = 0.01; // cm → world units (metres)
+const CM = 0.01;
 const circToRadius = (circCm: number) => (circCm * CM) / (2 * Math.PI);
 
 interface ViewerProps {
@@ -46,25 +39,31 @@ interface ViewerProps {
   className?: string;
 }
 
-/** Back-panel name + number drawn on a canvas — no font asset required. */
 function makeBackTexture(name: string, number: string): THREE.CanvasTexture | null {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  ctx.fillStyle = "#1C1428";
-  ctx.fillRect(0, 0, 512, 512);
+  ctx.clearRect(0, 0, 512, 512);
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ECE7F2";
-  ctx.font = "bold 76px Arial, sans-serif";
-  const cleanName = (name || "").toUpperCase().slice(0, 12);
-  if (cleanName) ctx.fillText(cleanName, 256, 150);
+  // name — auto-fit width
+  const cleanName = (name || "").toUpperCase().slice(0, 18);
+  if (cleanName) {
+    let fs = 72;
+    ctx.font = `bold ${fs}px Arial, sans-serif`;
+    while (ctx.measureText(cleanName).width > 470 && fs > 28) {
+      fs -= 4;
+      ctx.font = `bold ${fs}px Arial, sans-serif`;
+    }
+    ctx.fillStyle = "#ECE7F2";
+    ctx.fillText(cleanName, 256, 150);
+  }
   const cleanNumber = (number || "").replace(/[^0-9]/g, "").slice(0, 2);
   if (cleanNumber) {
     ctx.fillStyle = "#C77DFF";
     ctx.font = "bold 300px Arial, sans-serif";
-    ctx.fillText(cleanNumber, 256, 400);
+    ctx.fillText(cleanNumber, 256, 410);
   }
   const tex = new THREE.CanvasTexture(canvas);
   tex.anisotropy = 4;
@@ -78,7 +77,14 @@ interface BuiltFigure {
   dispose: () => void;
 }
 
-/** Build the mannequin + jersey + ground as one disposable group. */
+/** Revolve a profile (array of [radius, y] in metres) into a smooth solid. */
+function lathe(points: [number, number][], segments = 40): THREE.LatheGeometry {
+  return new THREE.LatheGeometry(
+    points.map(([r, y]) => new THREE.Vector2(Math.max(0.0008, r), y)),
+    segments
+  );
+}
+
 function buildFigure(
   gender: ShopGender,
   heightCm: number,
@@ -94,97 +100,184 @@ function buildFigure(
 
   const m = bodyMetrics(heightCm, gender);
   const H = heightCm * CM;
-  const legLen = 0.46 * H;
-  const torsoLen = 0.3 * H;
-  const neckLen = 0.045 * H;
-  const headR = 0.066 * H;
-  const hipR = circToRadius(m.hip * 2.4);
-  const chestR = circToRadius(m.chest);
-  const shoulderHalf = m.shoulder * 0.5 * CM;
-  const armR = 0.052 * H;
-  const legR = 0.07 * H;
+  const legLen = 0.47 * H;
+  const torsoLen = 0.31 * H;
+  const neckLen = 0.05 * H;
+  const headR = 0.072 * H;
 
   const hipY = legLen;
   const shoulderY = legLen + torsoLen;
-  const headCenterY = shoulderY + neckLen + headR;
+  const neckTopY = shoulderY + neckLen;
+  const headCenterY = neckTopY + headR * 0.92;
 
-  const bodyMat = track(new THREE.MeshStandardMaterial({ color: COLOR.body, roughness: 0.85, metalness: 0.05 }));
-  const limbMat = track(new THREE.MeshStandardMaterial({ color: COLOR.bodyDark, roughness: 0.9, metalness: 0.04 }));
-  const skinMat = track(new THREE.MeshStandardMaterial({ color: COLOR.skin, roughness: 0.6, metalness: 0.05 }));
-  const jerseyMat = track(new THREE.MeshStandardMaterial({ color: COLOR.jersey, roughness: 0.55, metalness: 0.15 }));
+  const chestR = circToRadius(m.chest);
+  const waistR = chestR * (gender === "female" ? 0.74 : 0.82);
+  const hipBodyR = Math.max(circToRadius(m.hip * 2.2), waistR * (gender === "female" ? 1.06 : 0.96));
+  const shoulderHalf = m.shoulder * 0.5 * CM;
+  const shoulderR = 0.06 * H;
+  const armR = 0.045 * H;
+  const legR = 0.072 * H;
+
+  const skinMat = track(new THREE.MeshStandardMaterial({ color: COLOR.skin, roughness: 0.62, metalness: 0.04 }));
+  const skinDarkMat = track(new THREE.MeshStandardMaterial({ color: COLOR.skinDark, roughness: 0.68, metalness: 0.03 }));
+  const hairMat = track(new THREE.MeshStandardMaterial({ color: COLOR.hair, roughness: 0.85, metalness: 0.05 }));
+  const shortMat = track(new THREE.MeshStandardMaterial({ color: COLOR.short, roughness: 0.8, metalness: 0.05 }));
+  const jerseyMat = track(new THREE.MeshStandardMaterial({ color: COLOR.jersey, roughness: 0.5, metalness: 0.16 }));
   const trimMat = track(
     new THREE.MeshStandardMaterial({
       color: COLOR.jerseyTrim,
       emissive: new THREE.Color(COLOR.jerseyTrim),
-      emissiveIntensity: 0.35,
+      emissiveIntensity: 0.32,
       roughness: 0.4,
       metalness: 0.2,
     })
   );
 
   const group = new THREE.Group();
-  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, pos: [number, number, number], cast = true) => {
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, cast = true) => {
     track(geo);
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(pos[0], pos[1], pos[2]);
     mesh.castShadow = cast;
     group.add(mesh);
     return mesh;
   };
 
-  /* ── mannequin ── */
-  add(new THREE.SphereGeometry(headR, 24, 24), skinMat, [0, headCenterY, 0]);
-  add(new THREE.CylinderGeometry(headR * 0.45, headR * 0.5, neckLen, 16), skinMat, [0, shoulderY + neckLen * 0.5, 0]);
-  add(new THREE.CylinderGeometry(chestR, hipR, torsoLen, 28), bodyMat, [0, hipY + torsoLen * 0.5, 0]);
-  for (const s of [-1, 1]) {
-    const arm = add(
-      new THREE.CapsuleGeometry(armR, torsoLen * 0.9, 6, 14),
-      limbMat,
-      [s * (shoulderHalf + armR * 0.2), shoulderY - torsoLen * 0.42, 0]
-    );
-    arm.castShadow = true;
-  }
-  for (const s of [-1, 1]) {
-    add(new THREE.CapsuleGeometry(legR, legLen * 0.82, 6, 14), limbMat, [s * hipR * 0.5, legLen * 0.5, 0]);
-  }
+  /* ── head + neck + hair ── */
+  const head = add(new THREE.SphereGeometry(headR, 28, 28), skinMat);
+  head.position.y = headCenterY;
+  head.scale.set(0.92, 1.12, 0.96);
+  const hair = add(new THREE.SphereGeometry(headR * 1.02, 24, 24), hairMat);
+  hair.position.set(0, headCenterY + headR * 0.18, -headR * 0.05);
+  hair.scale.set(0.96, 1.05, 1);
+  const neck = add(new THREE.CylinderGeometry(headR * 0.5, headR * 0.62, neckLen * 1.4, 18), skinDarkMat);
+  neck.position.y = shoulderY + neckLen * 0.55;
 
-  /* ── jersey ── */
-  const bodyChestR = chestR;
-  const jerseyR = Math.max(bodyChestR * 1.04, circToRadius(size.chest));
-  const jerseyLen = size.length * CM;
-  const garmentShoulderHalf = Math.max(m.shoulder, size.shoulder) * 0.5 * CM;
-  const sleeveLen = size.sleeve * CM;
-  const topY = shoulderY;
-  const centerY = topY - jerseyLen * 0.5;
-
-  add(new THREE.CylinderGeometry(jerseyR * 0.84, jerseyR, jerseyLen, 30, 1, false), jerseyMat, [0, centerY, 0]);
-  add(new THREE.CylinderGeometry(jerseyR * 0.84, jerseyR * 0.86, jerseyLen * 0.05, 30), trimMat, [0, topY, 0]);
-  add(
-    new THREE.CylinderGeometry(jerseyR, jerseyR, jerseyLen * 0.04, 30),
-    trimMat,
-    [0, centerY - jerseyLen * 0.5, 0],
-    false
+  /* ── torso (lathe profile, hip → shoulder) ── */
+  const torso = add(
+    lathe([
+      [hipBodyR * 0.55, hipY - 0.01],
+      [hipBodyR * 0.98, hipY + torsoLen * 0.06],
+      [hipBodyR, hipY + torsoLen * 0.16],
+      [waistR, hipY + torsoLen * 0.44],
+      [chestR * 0.99, hipY + torsoLen * 0.74],
+      [chestR * 0.9, shoulderY - torsoLen * 0.02],
+      [chestR * 0.6, shoulderY + 0.005],
+    ]),
+    skinMat
   );
+  torso.position.y = 0;
+
+  /* ── shoulders + arms ── */
   for (const s of [-1, 1]) {
-    const sleeve = new THREE.Mesh(
-      track(new THREE.CylinderGeometry(size.sleeve * 0.42 * CM, jerseyR * 0.5, sleeveLen, 18, 1, true)),
+    const sh = add(new THREE.SphereGeometry(shoulderR, 20, 20), skinMat);
+    sh.position.set(s * shoulderHalf, shoulderY - shoulderR * 0.35, 0);
+    sh.scale.set(1, 0.9, 1);
+
+    // jersey shoulder cap — dark fabric over the bare shoulder so it reads as clothed
+    const cap = add(new THREE.SphereGeometry(shoulderR * 1.16, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.62), jerseyMat);
+    cap.position.set(s * shoulderHalf, shoulderY - shoulderR * 0.2, 0);
+    cap.scale.set(1.05, 1, 1.05);
+
+    const armLen = torsoLen * 1.06;
+    const arm = add(
+      lathe([
+        [armR * 1.05, 0],
+        [armR, -armLen * 0.42],
+        [armR * 0.82, -armLen * 0.55],
+        [armR * 0.88, -armLen * 0.9],
+        [armR * 0.74, -armLen],
+      ]),
+      skinDarkMat
+    );
+    arm.position.set(s * (shoulderHalf + shoulderR * 0.1), shoulderY - shoulderR * 0.45, 0);
+    arm.rotation.z = s * 0.1;
+    // hand
+    const hand = add(new THREE.SphereGeometry(armR * 0.95, 14, 14), skinMat);
+    hand.position.set(s * (shoulderHalf + shoulderR * 0.1 + armLen * 0.1), shoulderY - shoulderR * 0.45 - armLen, 0);
+    hand.scale.set(0.82, 1.12, 0.62);
+  }
+
+  /* ── hips shorts + legs ── */
+  const pelvis = add(
+    lathe([
+      [hipBodyR * 0.6, hipY + 0.005],
+      [hipBodyR * 1.02, hipY - torsoLen * 0.04],
+      [hipBodyR, hipY - torsoLen * 0.14],
+      [hipBodyR * 0.7, hipY - torsoLen * 0.2],
+    ]),
+    shortMat
+  );
+  pelvis.position.y = 0;
+
+  for (const s of [-1, 1]) {
+    const legTopY = hipY - torsoLen * 0.16;
+    const thigh = add(
+      lathe([
+        [legR * 1.04, 0],
+        [legR * 0.92, -legLen * 0.45],
+        [legR * 0.7, -legLen * 0.52],
+        [legR * 0.72, -legLen * 0.92],
+        [legR * 0.5, -legLen],
+      ]),
+      skinDarkMat
+    );
+    thigh.position.set(s * hipBodyR * 0.5, legTopY, 0);
+    // foot
+    const foot = add(new THREE.BoxGeometry(legR * 1.1, legR * 0.7, legR * 2.2), skinMat);
+    foot.position.set(s * hipBodyR * 0.5, legTopY - legLen + legR * 0.2, legR * 0.5);
+  }
+
+  /* ── jersey (lathe, follows torso but looser/longer per size) ── */
+  const garmentR = Math.max(chestR * 1.06, circToRadius(size.chest));
+  const garmentWaistR = Math.max(waistR * 1.08, garmentR * 0.9);
+  const garmentHipR = Math.max(hipBodyR * 1.05, garmentR * 0.94);
+  const jerseyLen = size.length * CM;
+  const collarY = shoulderY + 0.01;
+  const hemY = collarY - jerseyLen;
+
+  const jersey = add(
+    lathe([
+      [garmentHipR * 0.86, hemY - 0.005],
+      [garmentHipR, hemY + 0.012],
+      [garmentHipR * 0.99, hemY + jerseyLen * 0.22],
+      [garmentWaistR, hemY + jerseyLen * 0.52],
+      [garmentR, hemY + jerseyLen * 0.82],
+      [garmentR * 0.9, collarY - 0.01],
+      [garmentR * 0.58, collarY],
+    ]),
+    jerseyMat
+  );
+  jersey.position.y = 0;
+
+  // collar + hem trims
+  const collar = add(new THREE.TorusGeometry(garmentR * 0.6, garmentR * 0.05, 12, 28), trimMat, false);
+  collar.position.y = collarY - 0.005;
+  collar.rotation.x = Math.PI / 2;
+  const hem = add(new THREE.CylinderGeometry(garmentHipR * 1.005, garmentHipR * 1.005, jerseyLen * 0.03, 40), trimMat, false);
+  hem.position.y = hemY + jerseyLen * 0.04;
+
+  // short sleeves over the shoulders
+  for (const s of [-1, 1]) {
+    const sleeveLen = size.sleeve * CM;
+    const sleeve = add(
+      new THREE.CylinderGeometry(armR * 0.95, garmentR * 0.52, sleeveLen, 22, 1, true),
       jerseyMat
     );
-    sleeve.position.set(s * (garmentShoulderHalf + sleeveLen * 0.35), topY - sleeveLen * 0.35, 0);
-    sleeve.rotation.z = s * 0.5;
-    sleeve.castShadow = true;
-    group.add(sleeve);
+    sleeve.position.set(s * (shoulderHalf + sleeveLen * 0.32), shoulderY - sleeveLen * 0.28, 0);
+    sleeve.rotation.z = s * (Math.PI / 2 - 0.42);
   }
-  // chest logo placeholder
-  add(new THREE.BoxGeometry(jerseyR * 0.5, jerseyLen * 0.16, 0.004), trimMat, [0, topY - jerseyLen * 0.32, jerseyR * 0.86], false);
 
-  // back name + number panel
+  // chest logo placeholder (emissive panel)
+  const logo = add(new THREE.BoxGeometry(garmentR * 0.5, jerseyLen * 0.14, 0.004), trimMat, false);
+  logo.position.set(0, collarY - jerseyLen * 0.3, garmentR * 0.95);
+
+  // back name + number
   const backTex = makeBackTexture(jerseyName, jerseyNumber);
   if (backTex) {
     track(backTex);
-    const backMat = track(new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.6, metalness: 0.05, transparent: true }));
-    const back = new THREE.Mesh(track(new THREE.PlaneGeometry(jerseyR * 1.2, jerseyLen * 0.72)), backMat);
-    back.position.set(0, topY - jerseyLen * 0.42, -jerseyR * 0.9);
+    const backMat = track(new THREE.MeshStandardMaterial({ map: backTex, transparent: true, roughness: 0.6, metalness: 0.05 }));
+    const back = new THREE.Mesh(track(new THREE.PlaneGeometry(garmentR * 1.5, jerseyLen * 0.66)), backMat);
+    back.position.set(0, collarY - jerseyLen * 0.42, -garmentR * 1.0);
     back.rotation.y = Math.PI;
     group.add(back);
   }
@@ -192,25 +285,28 @@ function buildFigure(
   /* ── ground: shadow catcher + glow ring ── */
   const shadowCatcher = new THREE.Mesh(
     track(new THREE.CircleGeometry(H * 0.7, 48)),
-    track(new THREE.ShadowMaterial({ transparent: true, opacity: 0.35 }))
+    track(new THREE.ShadowMaterial({ transparent: true, opacity: 0.34 }))
   );
   shadowCatcher.rotation.x = -Math.PI / 2;
+  shadowCatcher.position.y = hipY - torsoLen * 0.16 - legLen + 0.001;
   shadowCatcher.receiveShadow = true;
   group.add(shadowCatcher);
 
   const ring = new THREE.Mesh(
-    track(new THREE.RingGeometry(H * 0.55, H * 0.6, 64)),
-    track(new THREE.MeshBasicMaterial({ color: COLOR.jerseyTrim, transparent: true, opacity: 0.25, side: THREE.DoubleSide }))
+    track(new THREE.RingGeometry(H * 0.5, H * 0.55, 64)),
+    track(new THREE.MeshBasicMaterial({ color: COLOR.jerseyTrim, transparent: true, opacity: 0.22, side: THREE.DoubleSide }))
   );
   ring.rotation.x = -Math.PI / 2;
-  ring.position.y = 0.001;
+  ring.position.y = shadowCatcher.position.y + 0.001;
   group.add(ring);
 
-  group.position.y = -H * 0.06;
+  // recentre so feet sit near y=0 of the group
+  const feetY = hipY - torsoLen * 0.16 - legLen;
+  group.position.y = -feetY - H * 0.02;
 
   return {
     group,
-    targetY: H * 0.52,
+    targetY: H * 0.5,
     dispose: () => disposables.forEach((d) => d.dispose()),
   };
 }
@@ -237,7 +333,6 @@ export default function JerseyModelViewer({
   const autoRotateRef = useRef(autoRotate);
   autoRotateRef.current = autoRotate;
 
-  // mount: renderer / scene / camera / controls / lights / loop
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
@@ -257,7 +352,7 @@ export default function JerseyModelViewer({
     renderer.domElement.style.touchAction = "pan-y";
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 50);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
     camera.position.set(0, 1, 3);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -266,14 +361,13 @@ export default function JerseyModelViewer({
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.rotateSpeed = 0.85;
-    controls.minPolarAngle = Math.PI * 0.32;
-    controls.maxPolarAngle = Math.PI * 0.6;
-    controls.autoRotateSpeed = 1.1;
+    controls.minPolarAngle = Math.PI * 0.34;
+    controls.maxPolarAngle = Math.PI * 0.58;
+    controls.autoRotateSpeed = 1.0;
 
-    // lights
-    const ambient = new THREE.AmbientLight(0xb8a6e8, 0.55);
-    scene.add(ambient);
-    const key = new THREE.DirectionalLight(0xffffff, 1.5);
+    const hemi = new THREE.HemisphereLight(0xd9c9ff, 0x140f1c, 0.8);
+    scene.add(hemi);
+    const key = new THREE.DirectionalLight(0xffffff, 1.45);
     key.position.set(3, 6, 4);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -282,14 +376,15 @@ export default function JerseyModelViewer({
     key.shadow.camera.left = -3;
     key.shadow.camera.right = 3;
     key.shadow.camera.top = 4;
-    key.shadow.camera.bottom = -1;
+    key.shadow.camera.bottom = -2;
+    key.shadow.bias = -0.0004;
     scene.add(key);
-    const rim = new THREE.DirectionalLight(COLOR.glow, 1.1);
+    const rim = new THREE.DirectionalLight(COLOR.glow, 1.15);
     rim.position.set(-4, 3, -5);
     scene.add(rim);
-    const point = new THREE.PointLight(COLOR.jerseyTrim, 6, 9);
-    point.position.set(0, 1, 3);
-    scene.add(point);
+    const fill = new THREE.DirectionalLight(0xb9a6ec, 0.5);
+    fill.position.set(-2, 1.5, 4);
+    scene.add(fill);
 
     const renderLoop = () => {
       controls.autoRotate = autoRotateRef.current;
@@ -325,22 +420,19 @@ export default function JerseyModelViewer({
     };
   }, []);
 
-  // rebuild the figure whenever the configuration changes
   useEffect(() => {
     const core = coreRef.current;
     if (!core) return;
-
     if (core.figure) {
       core.scene.remove(core.figure.group);
       core.figure.dispose();
     }
-
     const figure = buildFigure(gender, heightCm, size, jerseyName, jerseyNumber);
     core.scene.add(figure.group);
     core.figure = figure;
 
     const H = heightCm * CM;
-    core.camera.position.set(0, H * 0.55, H * 1.7);
+    core.camera.position.set(0, H * 0.52, H * 1.65);
     core.controls.target.set(0, figure.targetY, 0);
     core.controls.update();
   }, [gender, heightCm, size, jerseyName, jerseyNumber]);
