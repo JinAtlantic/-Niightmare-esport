@@ -124,7 +124,10 @@ hardcode hexes.
 All site content is JSON in [`/data`](./data) (`news/roster/matches/sponsors/site/
 translations`); every translatable value is `{ "en": "...", "lo": "..." }` — keep both.
 Shapes are documented in the README. The **admin editor at `/admin`** is cloud-backed
-(Vercel Blob) and writes live without a redeploy; it's gated off in production.
+(Vercel Blob) and writes live without a redeploy; it's gated off in production. The admin
+session cookie (`nm_admin`, `lib/adminAuth.ts` + `app/api/admin/login`) is **`sameSite: "lax"`**
+(strict withheld it on bookmark/link navigations → re-login every visit) and lasts
+**365 days** (`SESSION_MAX_AGE`), so a device stays signed in; "Log out" clears it.
 **Image uploads** (admin media via `ImageField` → `/api/admin/upload`, and customer
 payment slips) go to the public **Supabase Storage `uploads` bucket** (`lib/supabaseStorage.ts`),
 NOT Vercel Blob — the free Blob store gets suspended at its usage cap
@@ -245,11 +248,21 @@ put it in the transfer note is **admin-editable** (`shop.bank.refNote`, bilingua
 also **attach a payment slip** (required to enable "I've transferred"); the image is
 downscaled client-side, posted as a base64 data URL on `slip`, uploaded to the public
 **Supabase Storage** `uploads` bucket server-side (via `lib/supabaseStorage.ts`, service
-role), and stored as `shop_orders.slip_url`. /admin →
-Orders floats `paid_declared` orders to the top and shows the ref code + total + slip
-thumbnail next to the status buttons, so the boss matches the slip/note and clicks verify.
-Expired (>7d) reservations are auto-removed from the buyer's My Orders, and a buyer can
+role), and stored as `shop_orders.slip_url`.
+Expired (>24h) reservations are auto-removed from the buyer's My Orders, and a buyer can
 delete any of their own My Orders entries (localStorage only — the admin/Supabase copy stays).
+
+**/admin → Orders** is split into **4 status sub-tabs** (with counts): รอชำระ
+(awaiting_payment), กำลังตรวจ (paid_declared — the default/actionable bucket), จ่ายแล้ว
+(verified + cancelled), ส่งแล้ว (shipped). Each card **headlines the order ref code + amount**
+(the two fields matched against the slip) + the slip thumbnail; customer name/phone/courier/
+address fold into a `<details>` dropdown (plus the signed-in buyer's `user_email` if present).
+The **ส่งแล้ว tab leads with a sales report** — total revenue, units sold, and per-size,
+grouped by **day / month / year** (`SalesReport` in `OrdersEditor.tsx`). Each order's shown
+**time is `updated_at`** (the last change — the transfer time once paid). **NB: the
+`shop_orders.updated_at` DB trigger does NOT fire in the live DB**, so the pay route and the
+admin status PATCH set `updated_at` **explicitly** in the update payload — keep doing that or
+the time will freeze at `created_at`.
 
 **QR framing:** the QR is drawn as a CSS background on a square so a long bank-app
 screenshot can be cropped to just the QR. `/admin → Shop` has zoom + X/Y position sliders
