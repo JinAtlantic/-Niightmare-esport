@@ -358,6 +358,19 @@ drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
 create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();
 drop policy if exists "members are publicly readable" on public.members;
 
+-- Web Push subscriptions for admin order alerts. One row per browser/device that
+-- opted in (admin has no per-user identity — it's a shared password — so we key
+-- on the push endpoint). Service-role only; never publicly readable.
+create table if not exists public.push_subscriptions (
+  id          uuid primary key default gen_random_uuid(),
+  endpoint    text unique not null,
+  p256dh      text not null,
+  auth        text not null,
+  user_agent  text,
+  created_at  timestamptz default now()
+);
+alter table public.push_subscriptions enable row level security;
+
 -- Privacy backfill: Magic Link users may not have a provider display name.
 -- Never expose an email address as the public fan name.
 update public.fan_profiles

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { uploadToStorage } from "@/lib/supabaseStorage";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
+import { sendPushToAll } from "@/lib/push";
 import {
   resolveShop,
   computeOrder,
@@ -236,6 +237,20 @@ export async function POST(request: Request) {
   }
 
   const paidRecord: ShopOrderRecord = { ...record, slipUrl, status: "paid_declared" };
+
+  // Push the team an instant on-screen alert (best-effort — works even when the
+  // admin tab is closed / phone is asleep). Only fires on a declared transfer.
+  try {
+    const amount = `${total.toLocaleString("en-US")} ${shop.currency}`;
+    await sendPushToAll({
+      title: "💰 มีออเดอร์โอนเงินแล้ว",
+      body: `${input.customerName} · ${summary} · ${amount}${refCode ? ` · ${refCode}` : ""}`,
+      url: "/admin",
+      tag: `nm-order-${id ?? refCode ?? Date.now()}`,
+    });
+  } catch {
+    /* push is best-effort — the order is already stored */
+  }
 
   // Notify the team by email (best-effort) through the existing Formspree endpoint.
   if (formspree) {

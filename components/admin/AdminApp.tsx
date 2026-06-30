@@ -10,6 +10,7 @@ import SponsorsEditor from "@/components/admin/SponsorsEditor";
 import ShopEditor from "@/components/admin/ShopEditor";
 import OrdersEditor from "@/components/admin/OrdersEditor";
 import CommunityModeration from "@/components/admin/CommunityModeration";
+import PushNotifications from "@/components/admin/PushNotifications";
 
 type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "orders" | "community";
 
@@ -59,6 +60,11 @@ export default function AdminApp() {
         <p className="mx-auto max-w-5xl px-4 py-2.5 font-mono text-[11px] leading-relaxed text-spectre md:px-6">
           Save changes here, then refresh the public site to see the live update.
         </p>
+      </div>
+
+      {/* per-device push opt-in for instant paid-order alerts */}
+      <div className="border-b border-edge bg-void/40">
+        <PushNotifications />
       </div>
 
       <nav className="border-b border-edge">

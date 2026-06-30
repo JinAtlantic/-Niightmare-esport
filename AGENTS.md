@@ -307,6 +307,23 @@ to persist them: `alter table public.shop_orders add column if not exists items 
 `alter table public.shop_orders add column if not exists ref_code text;`
 `alter table public.shop_orders add column if not exists slip_url text;`
 `alter table public.shop_orders add column if not exists shipping_image_url text;`
+**Admin push alerts (Web Push):** when a buyer declares a transfer (the PAY intent flips
+an order to `paid_declared`), `app/api/shop/order/route.ts` calls `sendPushToAll()`
+(`lib/push.ts`) to fire an **OS notification (sound + vibration) to every opted-in admin
+device — even with the tab closed / phone asleep**. Admin is a shared password (no per-user
+identity), so subscriptions are keyed per browser endpoint in the **`push_subscriptions`**
+Supabase table (run its `create table` from `schema.sql`). Opt-in UI is
+`components/admin/PushNotifications.tsx` (mounted in `AdminApp.tsx`): it registers the
+service worker **`public/sw.js`**, requests permission, subscribes via `PushManager`, and
+POSTs to `/api/admin/push/subscribe`; a **ทดสอบ** button hits `/api/admin/push/test`.
+Requires VAPID env vars in `.env.local` **and Vercel** (`NEXT_PUBLIC_VAPID_PUBLIC_KEY` is
+baked at BUILD time → must be set before the deploy that should expose it):
+`NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (generate once with
+`node -e "console.log(require('web-push').generateVAPIDKeys())"`). The feature degrades to
+"ยังไม่ได้ตั้งค่า VAPID keys" if unset. **iOS caveat:** Safari only delivers Web Push when
+the site is added to the Home Screen (installed as a PWA); desktop Chrome/Edge/Firefox and
+Android Chrome work directly.
+
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js
 preview.
