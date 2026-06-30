@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
+import { useFanAuth } from "@/components/context/FanAuthContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import type { Lang } from "@/lib/types";
 import {
@@ -76,6 +77,8 @@ const COPY = {
   timeLeft: { en: "Time left to pay", lo: "ເຫຼືອເວລາຈ່າຍ" },
   removeOrder: { en: "Remove", lo: "ລຶບ" },
   removeConfirm: { en: "Remove this order from your list?", lo: "ລຶບອໍເດີນີ້ອອກຈາກລາຍການຂອງທ່ານບໍ?" },
+  loginToOrder: { en: "Sign in with Google to order", lo: "ເຂົ້າສູ່ລະບົບດ້ວຍ Google ເພື່ອສັ່ງຊື້" },
+  loginHint: { en: "You'll be asked to sign in before paying.", lo: "ລະບົບຈະໃຫ້ເຂົ້າສູ່ລະບົບກ່ອນຈ່າຍເງິນ." },
   comingSoon: { en: "Store opening soon", lo: "ຮ້ານກຳລັງຈະເປີດ" },
   comingSoonBody: {
     en: "The NIIGHTMARE jersey store is being prepared. Check back shortly.",
@@ -102,6 +105,7 @@ function formatRemaining(ms: number, lang: Lang): string {
 export default function ShopClient() {
   const { pick, lang } = useLanguage();
   const { site } = useContent();
+  const { session, openSignIn } = useFanAuth();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
   const [tab, setTab] = useState<TabId>("order");
@@ -133,8 +137,25 @@ export default function ShopClient() {
 
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  // Set when the buyer pressed "Order & pay" while signed out — once they sign in
+  // we resume and reserve the order automatically.
+  const [pendingOrder, setPendingOrder] = useState(false);
+  const placeOrderRef = useRef<() => void>(() => {});
 
   useEffect(() => setMounted(true), []);
+
+  // Keep a ref to the latest reserve fn so the resume effect calls fresh state.
+  useEffect(() => {
+    placeOrderRef.current = placeOrder;
+  });
+
+  // Resume the order the moment the buyer finishes signing in.
+  useEffect(() => {
+    if (session && pendingOrder) {
+      setPendingOrder(false);
+      placeOrderRef.current();
+    }
+  }, [session, pendingOrder]);
 
   useEffect(() => {
     try {
@@ -219,15 +240,25 @@ export default function ShopClient() {
     return { items: orderItems, customerName, phone, courier: effectiveCourier, province, city, branch };
   }
 
-  // Reserve the order (status awaiting_payment) so it lands in /admin and My
-  // Orders with a 7-day countdown, then open the pay popup.
-  async function startOrder() {
+  // Validate, require sign-in, then reserve. Buying requires a signed-in account.
+  function startOrder() {
     const errs = validateOrder(currentInput());
     setErrors(errs as Record<string, boolean>);
     if (Object.keys(errs).length) {
       document.getElementById("order-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
+    if (!session) {
+      setPendingOrder(true);
+      openSignIn();
+      return;
+    }
+    placeOrder();
+  }
+
+  // Reserve the order (status awaiting_payment) so it lands in /admin and My
+  // Orders with a 7-day countdown, then open the pay popup.
+  async function placeOrder() {
     setOrderError("");
     setReserving(true);
     const ref = "NM-" + Math.random().toString(36).slice(2, 7).toUpperCase();
@@ -235,7 +266,7 @@ export default function ShopClient() {
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent: "reserve", ref, ...currentInput() }),
+        body: JSON.stringify({ intent: "reserve", ref, userEmail: session?.user?.email ?? "", ...currentInput() }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "reserve failed");
@@ -314,6 +345,7 @@ export default function ShopClient() {
           orderId: payingOrder.id,
           ref: payingOrder.refCode,
           slip,
+          userEmail: session?.user?.email ?? "",
           items: payItems,
           customerName: payingOrder.customerName,
           phone: payingOrder.phone,
@@ -524,6 +556,9 @@ export default function ShopClient() {
               >
                 {reserving ? pick(COPY.sending) : pick(COPY.placeOrder)}
               </button>
+              {!session && (
+                <p className="mt-2.5 text-center font-mono text-[11px] leading-relaxed text-spectre/80">{pick(COPY.loginHint)}</p>
+              )}
               {contactHref && (
                 <a
                   href={contactHref}

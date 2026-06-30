@@ -347,6 +347,9 @@ alter table public.shop_orders add column if not exists items jsonb;
 alter table public.shop_orders add column if not exists ref_code text;
 -- Public URL of the customer-uploaded payment slip image (Supabase Storage).
 alter table public.shop_orders add column if not exists slip_url text;
+-- Email of the signed-in buyer (the shop now requires sign-in to order). The
+-- order route degrades gracefully if this column is missing, but add it to keep it.
+alter table public.shop_orders add column if not exists user_email text;
 alter table public.shop_orders enable row level security;
 drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
 create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();

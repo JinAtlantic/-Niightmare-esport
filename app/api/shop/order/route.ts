@@ -63,8 +63,8 @@ async function insertOrder(
   const work = { ...row };
   let { data, error } = await db.from("shop_orders").insert(work).select("id, created_at").single();
   let guard = 0;
-  while (error && guard < 3) {
-    const col = ["items", "ref_code", "slip_url"].find((c) => error!.message.includes(c));
+  while (error && guard < 4) {
+    const col = ["items", "ref_code", "slip_url", "user_email"].find((c) => error!.message.includes(c));
     if (!col) break;
     delete work[col];
     guard++;
@@ -147,6 +147,8 @@ export async function POST(request: Request) {
   // Short reference code the buyer is asked to put in the transfer note, so the
   // team can match a payment to one order (no amount tampering).
   const refCode = cleanRefCode(body.ref);
+  // Signed-in buyer's email (buying requires sign-in). Stored for the team's reference.
+  const userEmail = str(body.userEmail, 200);
 
   const baseRow = (status: string, slipUrl: string | null): Record<string, unknown> => ({
     quantity: totalQty,
@@ -155,6 +157,7 @@ export async function POST(request: Request) {
     unit_price: lines.length === 1 ? lines[0].unitPrice : null,
     total,
     ref_code: refCode || null,
+    user_email: userEmail || null,
     currency: shop.currency,
     customer_name: input.customerName,
     phone: input.phone,

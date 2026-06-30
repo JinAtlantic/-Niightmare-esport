@@ -29,6 +29,7 @@ interface OrderRow {
   province: string;
   city: string;
   branch: string;
+  user_email: string | null;
   status: string;
 }
 
@@ -253,6 +254,7 @@ export default function OrdersEditor() {
                 </summary>
                 <div className="mt-2.5 grid gap-1.5 font-mono text-[11px] text-spectre md:grid-cols-2">
                   <span>ชื่อ: {o.customer_name}</span>
+                  {o.user_email && <span className="keep-latin break-all">บัญชี: {o.user_email}</span>}
                   <span>โทร: {o.phone}</span>
                   <span>ขนส่ง: {o.courier}</span>
                   <span>แขวง: {o.province}</span>
