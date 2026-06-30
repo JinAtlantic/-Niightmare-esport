@@ -44,6 +44,15 @@ const COPY = {
   payTitle: { en: "Transfer to pay", lo: "ໂອນເງິນເພື່ອຈ່າຍ" },
   scan: { en: "Scan this QR with your banking app", lo: "ສະແກນ QR ນີ້ດ້ວຍແອັບທະນາຄານ" },
   amount: { en: "Amount", lo: "ຈຳນວນເງິນ" },
+  payExact: { en: "Transfer this exact amount", lo: "ໂອນຈຳນວນນີ້ໃຫ້ຖືກຕ້ອງ" },
+  payRefNote: {
+    en: "The last digits are a reference so we can verify your payment — please transfer the exact amount.",
+    lo: "ເລກທ້າຍແມ່ນລະຫັດອ້າງອີງເພື່ອໃຫ້ພວກເຮົາກວດສອບການຈ່າຍ — ກະລຸນາໂອນໃຫ້ຖືກຕ້ອງ.",
+  },
+  attachSlip: { en: "Attach payment slip", lo: "ແນບສະລິບການໂອນ" },
+  slipPick: { en: "Tap to upload your slip", lo: "ກົດເພື່ອອັບໂຫລດສະລິບ" },
+  slipChange: { en: "Change slip", lo: "ປ່ຽນສະລິບ" },
+  slipRequired: { en: "Please attach your payment slip first.", lo: "ກະລຸນາແນບສະລິບການໂອນກ່ອນ." },
   bank: { en: "Bank", lo: "ທະນາຄານ" },
   accName: { en: "Account name", lo: "ຊື່ບັນຊີ" },
   accNo: { en: "Account number", lo: "ເລກບັນຊີ" },
@@ -89,6 +98,11 @@ export default function ShopClient() {
   const [paySuccess, setPaySuccess] = useState(false);
   const [payError, setPayError] = useState("");
   const [myOrders, setMyOrders] = useState<ShopOrderRecord[]>([]);
+  // Per-order reference offset (1–99 kip) makes the exact transfer amount near-unique
+  // so the team can match a bank deposit to one order. Set when the popup opens.
+  const [payOffset, setPayOffset] = useState(1);
+  const [slip, setSlip] = useState("");
+  const [slipName, setSlipName] = useState("");
 
   useEffect(() => {
     try {
@@ -132,17 +146,37 @@ export default function ShopClient() {
     }
     setPayError("");
     setPaySuccess(false);
+    setPayOffset(1 + Math.floor(Math.random() * 99));
+    setSlip("");
+    setSlipName("");
     setPayOpen(true);
   }
 
+  async function onSlipPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPayError("");
+    try {
+      const dataUrl = await downscaleImage(file);
+      setSlip(dataUrl);
+      setSlipName(file.name);
+    } catch {
+      setPayError(pick(COPY.payError));
+    }
+  }
+
   async function confirmTransfer() {
+    if (!slip) {
+      setPayError(pick(COPY.slipRequired));
+      return;
+    }
     setSubmitting(true);
     setPayError("");
     try {
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(currentInput()),
+        body: JSON.stringify({ ...currentInput(), offset: payOffset, slip }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "save failed");
@@ -387,7 +421,7 @@ export default function ShopClient() {
                         {o.totalQty} {pick(COPY.pieces)}
                         {o.createdAt ? ` · ${new Date(o.createdAt).toLocaleDateString("en-GB")}` : ""}
                       </span>
-                      <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.total, o.currency)}</span>
+                      <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.payable ?? o.total, o.currency)}</span>
                     </div>
                   </div>
                 ))}
@@ -434,21 +468,51 @@ export default function ShopClient() {
                 </div>
                 <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
 
-                <div className="mt-4 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">
+                {/* exact amount to transfer — the odd kip is the verification reference */}
+                <div className="mt-4 rounded-md border border-amethyst/45 bg-amethyst/10 p-4 text-center">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.payExact)}</p>
+                  <p className="mt-1 break-words font-display text-2xl font-black tabular-nums text-soul sm:text-3xl">
+                    {formatPrice(total + payOffset, shop.currency)}
+                  </p>
+                  <p className="mt-2 text-[11px] leading-relaxed text-spectre/80">{pick(COPY.payRefNote)}</p>
+                </div>
+
+                <div className="mt-3 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">
                   <Row label={pick(COPY.items)} value={lines.map((l) => `${l.label}×${l.quantity}`).join(", ")} />
-                  <Row label={pick(COPY.amount)} value={formatPrice(total, shop.currency)} strong />
                   <Row label={pick(COPY.bank)} value={shop.bank.bankName} />
                   <Row label={pick(COPY.accName)} value={shop.bank.accountName} />
                   <Row label={pick(COPY.accNo)} value={shop.bank.accountNumber} />
                 </div>
                 <p className="mt-3 text-center text-[12px] leading-relaxed text-spectre/80">{pick(shop.bank.note)}</p>
 
+                {/* attach payment slip (required) — the team verifies against this */}
+                <div className="mt-4">
+                  <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.attachSlip)}</p>
+                  <label className="block cursor-pointer">
+                    <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onSlipPick} />
+                    {slip ? (
+                      <span className="flex items-center gap-3 rounded-md border border-win/50 bg-win/10 p-2.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={slip} alt="slip preview" className="h-16 w-16 shrink-0 rounded object-cover" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-mono text-[11px] text-soul">{slipName}</span>
+                          <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-win">{pick(COPY.slipChange)}</span>
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="flex min-h-[56px] items-center justify-center gap-2 rounded-md border border-dashed border-edge-bright bg-void/40 px-3 font-mono text-[11px] uppercase tracking-[0.14em] text-ash transition-colors hover:border-amethyst hover:text-soul">
+                        {pick(COPY.slipPick)}
+                      </span>
+                    )}
+                  </label>
+                </div>
+
                 {payError && <p className="mt-3 text-center font-mono text-[11px] text-loss">{payError}</p>}
 
                 <button
                   type="button"
                   onClick={confirmTransfer}
-                  disabled={submitting}
+                  disabled={submitting || !slip}
                   className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-win/60 bg-win/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-win transition-all hover:bg-win/25 hover:shadow-[0_0_24px_rgba(52,211,153,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? pick(COPY.sending) : pick(COPY.transferred)}
@@ -463,6 +527,34 @@ export default function ShopClient() {
 }
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
+
+/** Read an image file, downscale it (longest edge ≤ 1400px) and return a JPEG
+ *  data URL. Keeps the uploaded slip small (~100–300 KB) so it posts fast and
+ *  loads instantly in the admin Orders tab. Falls back to the raw file on error. */
+function downscaleImage(file: File, maxEdge = 1400, quality = 0.82): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.onload = () => {
+      const src = String(reader.result || "");
+      const img = new Image();
+      img.onerror = () => resolve(src); // fall back to the original data URL
+      img.onload = () => {
+        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+        if (scale >= 1) return resolve(src);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(src);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 function Field({ label, error, children }: { label: string; error?: boolean; children: React.ReactNode }) {
   return (

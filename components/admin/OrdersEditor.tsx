@@ -17,6 +17,8 @@ interface OrderRow {
   size: string;
   unit_price: number | null;
   total: number;
+  payable: number | null;
+  slip_url: string | null;
   currency: string;
   items: OrderLine[] | null;
   customer_name: string;
@@ -87,6 +89,12 @@ export default function OrdersEditor() {
   }
 
   const pending = orders.filter((o) => o.status === "paid_declared").length;
+  // Float orders awaiting verification to the top so the boss sees them first.
+  const sorted = [...orders].sort((a, b) => {
+    const aw = a.status === "paid_declared" ? 0 : 1;
+    const bw = b.status === "paid_declared" ? 0 : 1;
+    return aw - bw;
+  });
 
   return (
     <div className="space-y-5">
@@ -111,7 +119,7 @@ export default function OrdersEditor() {
       )}
 
       <div className="space-y-3">
-        {orders.map((o) => {
+        {sorted.map((o) => {
           const opt = STATUS_OPTS.find((s) => s.value === o.status);
           return (
             <Card key={o.id} className="space-y-3">
@@ -123,10 +131,27 @@ export default function OrdersEditor() {
                   <p className="mt-0.5 font-mono text-[11px] text-ash">{fmtDate(o.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-display text-lg font-bold text-soul">{fmt(o.total, o.currency)}</p>
+                  {/* the exact amount the customer should have transferred — match this in the bank app */}
+                  <p className="font-display text-lg font-bold text-soul">{fmt(o.payable ?? o.total, o.currency)}</p>
+                  {o.payable != null && o.payable !== o.total && (
+                    <p className="font-mono text-[10px] text-ash-dim">ฐาน {fmt(o.total, o.currency)}</p>
+                  )}
                   <p className={`font-mono text-[11px] ${opt?.tone ?? "text-ash"}`}>{opt?.label ?? o.status}</p>
                 </div>
               </div>
+
+              {o.slip_url && (
+                <a
+                  href={o.slip_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 rounded-md border border-edge bg-void/40 p-2.5 transition-colors hover:border-amethyst"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={o.slip_url} alt="payment slip" className="h-16 w-16 shrink-0 rounded object-cover" />
+                  <span className="font-mono text-[11px] text-spectre">ดูสลิปเต็ม ↗</span>
+                </a>
+              )}
 
               {Array.isArray(o.items) && o.items.length > 1 && (
                 <div className="border-t border-edge pt-3 font-mono text-[11px] text-spectre">

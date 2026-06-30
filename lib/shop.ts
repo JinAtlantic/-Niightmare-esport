@@ -291,6 +291,9 @@ export interface ShopOrderRecord {
   sizeSummary: string;
   totalQty: number;
   total: number;
+  /** Exact amount the buyer must transfer = total + a tiny per-order reference
+   * offset, so the team can match a bank deposit to one order without a gateway. */
+  payable?: number;
   currency: string;
   customerName: string;
   phone: string;
@@ -298,8 +301,20 @@ export interface ShopOrderRecord {
   province: string;
   city: string;
   branch: string;
+  /** Public URL of the uploaded payment slip (Vercel Blob). */
+  slipUrl?: string;
   createdAt?: string;
   status?: string;
+}
+
+/** Largest kip added as a per-order payment reference (keeps the surcharge trivial). */
+export const SHOP_PAY_REF_MAX = 99;
+
+/** Clamp a client-supplied reference offset into [1, SHOP_PAY_REF_MAX]. */
+export function clampPayOffset(raw: unknown): number {
+  const v = Math.floor(Number(raw) || 0);
+  if (!Number.isFinite(v) || v < 1) return 1;
+  return Math.min(SHOP_PAY_REF_MAX, v);
 }
 
 /** Resolve cart items against the live catalogue and compute authoritative totals. */

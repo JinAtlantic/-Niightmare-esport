@@ -7,6 +7,8 @@ import {
   summariseLines,
   validateOrder,
   buildOrderMessage,
+  clampPayOffset,
+  formatPrice,
   type ShopContent,
   type ShopOrderInput,
   type ShopOrderItem,
@@ -30,6 +32,36 @@ function rateLimited(ip: string): boolean {
 }
 
 const str = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max);
+
+const SLIP_MAX_BYTES = 4 * 1024 * 1024; // 4 MB
+
+/** Decode a base64 image data URL and upload the payment slip to Vercel Blob.
+ *  Best-effort: returns undefined (order still saves) if storage isn't set up
+ *  or the payload is invalid/too big. */
+async function uploadSlip(slip: unknown): Promise<string | undefined> {
+  if (typeof slip !== "string" || !slip.startsWith("data:image/")) return undefined;
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return undefined;
+  const m = /^data:(image\/(png|jpeg|webp));base64,([\s\S]+)$/.exec(slip);
+  if (!m) return undefined;
+  try {
+    const bytes = Buffer.from(m[3], "base64");
+    if (!bytes.length || bytes.length > SLIP_MAX_BYTES) return undefined;
+    const ext = m[2] === "jpeg" ? "jpg" : m[2];
+    const { put } = await import("@vercel/blob");
+    const name = `shop-slips/slip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const blob = await put(name, bytes, {
+      access: "public",
+      contentType: m[1],
+      token,
+      addRandomSuffix: false,
+      cacheControlMaxAge: 31536000,
+    });
+    return blob.url;
+  } catch {
+    return undefined;
+  }
+}
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -95,11 +127,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No available sizes selected", fields: { items: true } }, { status: 400 });
   }
   const summary = summariseLines(lines);
+
+  // Exact transfer amount = total + a tiny per-order reference offset, so the
+  // team can match an incoming bank deposit to exactly one order by amount.
+  const payable = total + clampPayOffset(body.offset);
+
+  // Upload the customer's payment slip (best-effort; order still saves without it).
+  const slipUrl = await uploadSlip(body.slip);
+
   const record: ShopOrderRecord = {
     items: lines,
     sizeSummary: summary,
     totalQty,
     total,
+    payable,
     currency: shop.currency,
     customerName: input.customerName,
     phone: input.phone,
@@ -107,6 +148,7 @@ export async function POST(request: Request) {
     province: input.province,
     city: input.city,
     branch: input.branch,
+    slipUrl,
   };
 
   // Persist to Supabase (source of truth for the admin Orders tab).
@@ -119,6 +161,7 @@ export async function POST(request: Request) {
       items: lines,
       unit_price: lines.length === 1 ? lines[0].unitPrice : null,
       total,
+      payable,
       currency: shop.currency,
       customer_name: input.customerName,
       phone: input.phone,
@@ -126,12 +169,18 @@ export async function POST(request: Request) {
       province: input.province,
       city: input.city,
       branch: input.branch,
+      slip_url: slipUrl ?? null,
       status: "paid_declared",
     };
     let { data, error } = await db.from("shop_orders").insert(row).select("id").single();
-    // Resilience: if the `items` column hasn't been added yet, store without it.
-    if (error && /items/.test(error.message)) {
-      delete row.items;
+    // Resilience: if an optional column hasn't been added to the table yet
+    // (items / payable / slip_url), drop it and retry instead of 500ing.
+    let guard = 0;
+    while (error && guard < 3) {
+      const col = ["items", "payable", "slip_url"].find((c) => error!.message.includes(c));
+      if (!col) break;
+      delete row[col];
+      guard++;
       ({ data, error } = await db.from("shop_orders").insert(row).select("id").single());
     }
     if (error) {
@@ -148,7 +197,10 @@ export async function POST(request: Request) {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           _subject: `NIIGHTMARE jersey order — ${input.customerName}`,
-          message: buildOrderMessage(shop, record, "en"),
+          message:
+            buildOrderMessage(shop, record, "en") +
+            `\nExact transfer amount: ${formatPrice(payable, shop.currency)}` +
+            (slipUrl ? `\nPayment slip: ${slipUrl}` : `\nPayment slip: (not attached)`),
           name: input.customerName,
           phone: input.phone,
         }),
@@ -158,5 +210,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, id, order: { ...record, id, status: "paid_declared" } });
+  return NextResponse.json({ ok: true, id, order: { ...record, id, payable, slipUrl, status: "paid_declared" } });
 }
