@@ -442,37 +442,55 @@ export default function OrdersEditor() {
                 </div>
               </div>
 
-              {/* what was ordered + status */}
+              {/* what sizes were ordered + status */}
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-edge pt-2.5">
-                <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">{o.size} · {o.quantity} ตัว</span>
+                <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">{o.size}</span>
                 <span className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
                   {expired ? "รอชำระ · หมดเวลา 24 ชม" : opt?.label ?? o.status}
                 </span>
               </div>
 
-              {/* time of the last change — relative first, exact below */}
-              <p className="font-mono text-[11px] text-ash">
-                <span className="text-spectre">{timeAgo(orderTime(o))}</span>
-                <span className="text-ash-dim"> · {fmtDate(orderTime(o))}</span>
-              </p>
+              {/* total quantity on its own row (kept clear of the size list) */}
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">รวมการซื้อทั้งหมด</span>
+                <span className="font-display text-base font-bold text-soul">{o.quantity} ตัว</span>
+              </div>
 
+              {/* time of the last change — big and prominent */}
+              <div className="rounded-md border border-edge bg-void/40 px-3 py-2">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-ash">วันเวลา</span>
+                <span className="font-display text-lg font-bold tracking-wide text-soul">{fmtDate(orderTime(o))}</span>
+                <span className="ml-2 font-mono text-[11px] text-spectre">({timeAgo(orderTime(o))})</span>
+              </div>
+
+              {/* payment slip — collapsed by default to keep the list short */}
               {o.slip_url && (
-                <a
-                  href={o.slip_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 rounded-md border border-edge bg-void/40 p-2.5 transition-colors hover:border-amethyst"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={o.slip_url} alt="payment slip" className="h-20 w-20 shrink-0 rounded object-cover" />
-                  <span className="font-mono text-[11px] text-spectre">ดูสลิปเต็ม ↗</span>
-                </a>
+                <details className="group rounded-md border border-edge bg-void/40">
+                  <summary className="flex cursor-pointer list-none items-center gap-1.5 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-spectre transition-colors hover:text-soul [&::-webkit-details-marker]:hidden">
+                    <span className="inline-block transition-transform group-open:rotate-90">▸</span>
+                    ดูสลิปการโอน
+                  </summary>
+                  <a
+                    href={o.slip_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 border-t border-edge/60 p-2.5 transition-colors hover:bg-void/60"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={o.slip_url} alt="payment slip" className="h-24 w-24 shrink-0 rounded object-cover" />
+                    <span className="font-mono text-[11px] text-spectre">ดูสลิปเต็ม ↗</span>
+                  </a>
+                </details>
               )}
 
-              {/* shipping image the buyer will see (e.g. courier parcel number) */}
+              {/* shipping image the buyer will see (e.g. courier parcel number) — dropdown */}
               {showShipping && (
-                <div className="rounded-md border border-amethyst/30 bg-void/40 p-2.5">
-                  <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ash">รูปใบรับของ / เลขพัสดุ (ลูกค้าจะเห็น)</p>
+                <details className="group rounded-md border border-amethyst/30 bg-void/40">
+                  <summary className="flex cursor-pointer list-none items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ash transition-colors hover:text-soul [&::-webkit-details-marker]:hidden">
+                    <span className="inline-block transition-transform group-open:rotate-90">▸</span>
+                    รูปใบรับของ / เลขพัสดุ {o.shipping_image_url ? "(แนบแล้ว ✓)" : "(ยังไม่แนบ)"}
+                  </summary>
+                  <div className="border-t border-amethyst/20 p-2.5">
                   {o.shipping_image_url ? (
                     <div className="flex items-center gap-3">
                       <a href={o.shipping_image_url} target="_blank" rel="noreferrer" className="shrink-0">
@@ -515,7 +533,8 @@ export default function OrdersEditor() {
                       />
                     </label>
                   )}
-                </div>
+                  </div>
+                </details>
               )}
 
               {/* everything else folded into a dropdown */}
@@ -568,18 +587,23 @@ export default function OrdersEditor() {
                 </button>
               )}
 
-              {/* manual status set + permanent delete */}
+              {/* manual status set (dropdown — back or forward to any state) + permanent delete */}
               <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
-                {STATUS_OPTS.filter((s) => s.value !== "cancelled").map((s) => (
-                  <Button
-                    key={s.value}
-                    variant={o.status === s.value ? "primary" : "ghost"}
-                    onClick={() => setStatus(o.id, s.value)}
+                <label className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ash">
+                  เปลี่ยนสถานะ
+                  <select
+                    value={o.status}
+                    onChange={(e) => setStatus(o.id, e.target.value)}
                     disabled={busy}
+                    className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul focus:border-amethyst focus:outline-none disabled:opacity-50"
                   >
-                    {s.label}
-                  </Button>
-                ))}
+                    {STATUS_OPTS.filter((s) => s.value !== "cancelled" || o.status === "cancelled").map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <button
                   type="button"
                   onClick={() => deleteOrder(o)}
@@ -601,18 +625,28 @@ export default function OrdersEditor() {
 
 function SalesReport({ orders }: { orders: OrderRow[] }) {
   const [gran, setGran] = useState<"day" | "month" | "year">("month");
+  const [period, setPeriod] = useState("all");
   const currency = orders[0]?.currency || "ກີບ";
 
-  const totalRevenue = orders.reduce((a, o) => a + Number(o.total || 0), 0);
-  const totalUnits = orders.reduce((a, o) => a + Number(o.quantity || 0), 0);
+  // Every period available at this granularity, for the picker.
+  const keyLabels = new Map<string, string>();
+  for (const o of orders) keyLabels.set(periodKey(o.created_at, gran), periodLabel(o.created_at, gran));
+  const periodOpts = [...keyLabels.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  // When the granularity changes the old key may not exist → fall back to "all".
+  const effective = keyLabels.has(period) ? period : "all";
+
+  const shown = effective === "all" ? orders : orders.filter((o) => periodKey(o.created_at, gran) === effective);
+
+  const totalRevenue = shown.reduce((a, o) => a + Number(o.total || 0), 0);
+  const totalUnits = shown.reduce((a, o) => a + Number(o.quantity || 0), 0);
   const totalSizes: Record<string, number> = {};
-  for (const o of orders) {
+  for (const o of shown) {
     const sc = sizeCounts(o);
     for (const k in sc) totalSizes[k] = (totalSizes[k] ?? 0) + sc[k];
   }
 
   const groups = new Map<string, { label: string; revenue: number; units: number; sizes: Record<string, number> }>();
-  for (const o of orders) {
+  for (const o of shown) {
     const key = periodKey(o.created_at, gran);
     let g = groups.get(key);
     if (!g) {
@@ -634,20 +668,28 @@ function SalesReport({ orders }: { orders: OrderRow[] }) {
 
   return (
     <Card className="space-y-4 border-amethyst/30">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดขายรวม (ส่งแล้ว)</p>
-          <p className="font-display text-3xl font-black tabular-nums text-win">{fmt(totalRevenue, currency)}</p>
-          <p className="mt-0.5 font-mono text-[11px] text-spectre">
-            ขายได้ <span className="font-bold text-soul">{totalUnits}</span> ตัว · {orders.length} ออเดอร์
-          </p>
-        </div>
+      {/* summary first */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
+          ยอดขายรวม (ส่งแล้ว) · {effective === "all" ? "ทั้งหมด" : keyLabels.get(effective)}
+        </p>
+        <p className="font-display text-3xl font-black tabular-nums text-win">{fmt(totalRevenue, currency)}</p>
+        <p className="mt-0.5 font-mono text-[11px] text-spectre">
+          ขายได้ <span className="font-bold text-soul">{totalUnits}</span> ตัว · {shown.length} ออเดอร์
+        </p>
+      </div>
+
+      {/* sort / period controls — below the summary */}
+      <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
         <div className="flex gap-1.5">
           {GRANS.map((g) => (
             <button
               key={g.id}
               type="button"
-              onClick={() => setGran(g.id)}
+              onClick={() => {
+                setGran(g.id);
+                setPeriod("all");
+              }}
               className={`rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
                 gran === g.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
               }`}
@@ -656,6 +698,19 @@ function SalesReport({ orders }: { orders: OrderRow[] }) {
             </button>
           ))}
         </div>
+        {/* pick a specific day / month / year, or all */}
+        <select
+          value={effective}
+          onChange={(e) => setPeriod(e.target.value)}
+          className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[11px] text-soul focus:border-amethyst focus:outline-none"
+        >
+          <option value="all">ทั้งหมด</option>
+          {periodOpts.map(([k, label]) => (
+            <option key={k} value={k}>
+              {label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {sortSizes(totalSizes).length > 0 && (
@@ -668,7 +723,7 @@ function SalesReport({ orders }: { orders: OrderRow[] }) {
         </div>
       )}
 
-      {rows.length > 0 && (
+      {effective === "all" && rows.length > 0 && (
         <div className="space-y-1.5 border-t border-edge pt-3">
           {rows.map((g) => (
             <div key={g.label} className="rounded-md border border-edge bg-void/40 p-2.5">
