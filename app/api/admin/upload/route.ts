@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { put } from "@vercel/blob";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
+import { storageEnabled, uploadToStorage } from "@/lib/supabaseStorage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,10 +33,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
+  if (!storageEnabled) {
     return NextResponse.json(
-      { error: "Storage not configured (BLOB_READ_WRITE_TOKEN missing)" },
+      { error: "Storage not configured (SUPABASE_SERVICE_ROLE_KEY missing)" },
       { status: 500 }
     );
   }
@@ -69,17 +68,10 @@ export async function POST(request: Request) {
   const pathname = `${folder}/${base}-${Date.now().toString(36)}.${ext}`;
   try {
     const bytes = Buffer.from(await file.arrayBuffer());
-    const blob = await put(pathname, bytes, {
-      access: "public",
-      contentType: file.type,
-      token,
-      addRandomSuffix: false,
-      allowOverwrite: true,
-      cacheControlMaxAge: 31536000, // images are immutable; cache hard
-    });
-    // The stored path is the full public blob URL (works the same as the old
+    // The stored path is the full public Storage URL (works the same as the old
     // /teams/... local paths in <img src>).
-    return NextResponse.json({ ok: true, path: blob.url });
+    const url = await uploadToStorage(pathname, bytes, file.type);
+    return NextResponse.json({ ok: true, path: url });
   } catch (error) {
     console.error("admin upload failed", error);
     return NextResponse.json({ error: "Could not upload image" }, { status: 500 });

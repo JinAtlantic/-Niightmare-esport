@@ -125,6 +125,10 @@ All site content is JSON in [`/data`](./data) (`news/roster/matches/sponsors/sit
 translations`); every translatable value is `{ "en": "...", "lo": "..." }` — keep both.
 Shapes are documented in the README. The **admin editor at `/admin`** is cloud-backed
 (Vercel Blob) and writes live without a redeploy; it's gated off in production.
+**Image uploads** (admin media via `ImageField` → `/api/admin/upload`, and customer
+payment slips) go to the public **Supabase Storage `uploads` bucket** (`lib/supabaseStorage.ts`),
+NOT Vercel Blob — the free Blob store gets suspended at its usage cap
+(`limits-exceeded-suspended`), which silently breaks every upload as "Could not upload image".
 **Behind-the-Team / roster members** use **Supabase** (service-role writes, login-gated
 inline editor) — needs 3 env vars, see `.env.example`. Copy `.env.example` → `.env.local`
 and fill secrets; never commit `.env.local`.
@@ -220,8 +224,9 @@ overcharged). Each order gets a short **reference code** (`NM-XXXXX`, generated 
 on popup open, sent as `ref`, sanitised by `cleanRefCode`, stored in `shop_orders.ref_code`)
 shown in the pay popup with a note to put it in the transfer's note field. The buyer must
 also **attach a payment slip** (required to enable "I've transferred"); the image is
-downscaled client-side, posted as a base64 data URL on `slip`, uploaded to Vercel Blob
-server-side (needs `BLOB_READ_WRITE_TOKEN`), and stored as `shop_orders.slip_url`. /admin →
+downscaled client-side, posted as a base64 data URL on `slip`, uploaded to the public
+**Supabase Storage** `uploads` bucket server-side (via `lib/supabaseStorage.ts`, service
+role), and stored as `shop_orders.slip_url`. /admin →
 Orders floats `paid_declared` orders to the top and shows the ref code + total + slip
 thumbnail next to the status buttons, so the boss matches the slip/note and clicks verify.
 

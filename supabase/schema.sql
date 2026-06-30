@@ -305,6 +305,19 @@ alter table public.site_settings add column if not exists match_schedule jsonb;
 -- Shop / 3D jersey config (admin-editable): price, stock, size chart, order links.
 alter table public.site_settings add column if not exists shop jsonb;
 
+-- ── STORAGE BUCKET (admin media + customer payment slips) ───────────────────
+-- All image uploads live in one public bucket. Moved off Vercel Blob, whose free
+-- store gets suspended at its usage cap (`limits-exceeded-suspended`), silently
+-- breaking every upload. Public-read; writes are service-role only from the API
+-- routes (app/api/admin/upload, app/api/shop/order via lib/supabaseStorage.ts).
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('uploads', 'uploads', true, 5242880,
+        array['image/png','image/jpeg','image/webp','image/gif'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
 -- ── SHOP ORDERS (customer jersey orders) ────────────────────────────────────
 -- Written ONLY by the server route (service role) after a buyer declares their
 -- bank transfer; read ONLY in the admin Orders tab. RLS on with no anon policy
@@ -332,7 +345,7 @@ alter table public.shop_orders add column if not exists items jsonb;
 -- Short order reference code (e.g. "NM-7K3QX") the buyer is asked to put in the
 -- transfer note, so the team can match a payment to one order (manual, no gateway).
 alter table public.shop_orders add column if not exists ref_code text;
--- Public URL of the customer-uploaded payment slip image (Vercel Blob).
+-- Public URL of the customer-uploaded payment slip image (Supabase Storage).
 alter table public.shop_orders add column if not exists slip_url text;
 alter table public.shop_orders enable row level security;
 drop trigger if exists set_shop_orders_updated_at on public.shop_orders;

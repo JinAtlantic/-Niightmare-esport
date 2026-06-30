@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { uploadToStorage } from "@/lib/supabaseStorage";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import {
   resolveShop,
@@ -34,29 +35,19 @@ const str = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max);
 
 const SLIP_MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 
-/** Decode a base64 image data URL and upload the payment slip to Vercel Blob.
+/** Decode a base64 image data URL and upload the payment slip to Supabase Storage.
  *  Best-effort: returns undefined (order still saves) if storage isn't set up
  *  or the payload is invalid/too big. */
 async function uploadSlip(slip: unknown): Promise<string | undefined> {
   if (typeof slip !== "string" || !slip.startsWith("data:image/")) return undefined;
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return undefined;
   const m = /^data:(image\/(png|jpeg|webp));base64,([\s\S]+)$/.exec(slip);
   if (!m) return undefined;
   try {
     const bytes = Buffer.from(m[3], "base64");
     if (!bytes.length || bytes.length > SLIP_MAX_BYTES) return undefined;
     const ext = m[2] === "jpeg" ? "jpg" : m[2];
-    const { put } = await import("@vercel/blob");
     const name = `shop-slips/slip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const blob = await put(name, bytes, {
-      access: "public",
-      contentType: m[1],
-      token,
-      addRandomSuffix: false,
-      cacheControlMaxAge: 31536000,
-    });
-    return blob.url;
+    return await uploadToStorage(name, bytes, m[1]);
   } catch {
     return undefined;
   }
