@@ -75,6 +75,9 @@ const fontVars = `${display.variable} ${barlow.variable} ${mono.variable} ${lao.
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // Public-site PWA manifest (id "/"). The /admin route overrides this with its
+  // own manifest (id "/admin") so Android installs them as two separate apps.
+  manifest: "/site.webmanifest",
   title: {
     default: "NIIGHTMARE Esports — Lao PDR | MLBB & eFootball",
     template: "%s | NIIGHTMARE Esports",

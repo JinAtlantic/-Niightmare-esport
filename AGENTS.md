@@ -329,8 +329,14 @@ the site is added to the Home Screen (installed as a PWA); desktop Chrome/Edge/F
 Android Chrome work directly.
 
 **PWA / install prompt:** the home-screen app icon is the NIIGHTMARE logo (`app/icon.png`
-favicon, `app/apple-icon.png` for iOS, `public/icon-{192,512}.png` + `app/manifest.ts` for
-Android install). `components/ui/InstallPrompt.tsx` (mounted in the **public** branch of
+favicon, `app/apple-icon.png` for iOS, `public/icon-{192,512}.png` for Android install).
+**Two separate manifests** so the public site and /admin install as distinct Android apps
+(a single shared manifest made Android treat the whole origin as one app, so you couldn't
+add both): `public/site.webmanifest` (id/scope `/`, linked via root `layout.tsx`
+`metadata.manifest`) and `public/admin.webmanifest` (id/scope `/admin`, linked via
+`app/admin/page.tsx` `metadata.manifest`, which overrides the root for that route). Don't
+re-add a file-based `app/manifest.ts` — it injects a global link on every page and would
+double up on /admin. `components/ui/InstallPrompt.tsx` (mounted in the **public** branch of
 `Chrome.tsx`, so never on /admin) is a dismissible bottom banner that nudges fans to add the
 site: Android/desktop Chrome get a one-tap **Install** via the `beforeinstallprompt` event;
 iOS Safari gets the Share→"Add to Home Screen" instructions. It registers `sw.js` site-wide

@@ -10,6 +10,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Admin",
   robots: { index: false, follow: false },
+  // Separate PWA identity (id/scope "/admin") so it installs as its own
+  // home-screen app, distinct from the public site.
+  manifest: "/admin.webmanifest",
 };
 
 export default async function AdminPage() {
