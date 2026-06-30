@@ -210,19 +210,31 @@ phone/WhatsApp, courier dropdown with a free-text "Other", province/city/branch)
 **My Orders** (the buyer's saved orders from `localStorage`, with an empty state).
 Bilingual EN/Lao throughout.
 
-Order flow: **Order & pay** opens a payment popup (big bank **QR** + amount + account).
-"I've transferred" → `POST /api/shop/order` which prices server-side, inserts into the
-**`shop_orders`** Supabase table (service-role only; RLS on, no anon policy) and emails
-the team via the existing Formspree endpoint → green success tick → popup self-closes →
-jumps to the My Orders tab. Payment is **self-declared** (no gateway): orders land as
-`status='paid_declared'`; the team verifies in **/admin → Orders** tab and advances
-status (paid_declared → verified → shipped → cancelled).
+Order flow is **reserve → pay** (two `POST /api/shop/order` calls, distinguished by
+`body.intent`): **Order & pay** first prices server-side and inserts the order as
+`status='awaiting_payment'` (`intent:"reserve"`), then opens the payment popup. The
+popup is **portaled to `document.body`** with background scroll locked so it always
+centres in the viewport (a transformed ancestor used to capture the `fixed` positioning).
+Attaching a slip + "I've transferred" (`intent:"pay"`, sends the reserved `orderId`)
+updates that row to `status='paid_declared'`, uploads the slip, and emails the team via
+Formspree → success tick → popup self-closes → My Orders tab. Payment is **self-declared**
+(no gateway). The team verifies in **/admin → Orders** and advances status
+(awaiting_payment → paid_declared → verified → shipped → cancelled).
+
+**Pay window / My Orders:** a reserved order shows in the buyer's `localStorage` **My
+Orders** with a live **7-day countdown** + a **Pay now** button (reopens the popup for that
+order); past 7 days it displays as cancelled (`isOrderExpired` / `payWindowRemaining` in
+`lib/shop.ts`, `SHOP_PAYMENT_WINDOW_DAYS = 7`). /admin → Orders shows the same with a
+"หมดเวลา 7 วัน" tag on expired awaiting orders. The 7-day cancel is a **display-only**
+computation on both sides (no cron); admin can still set status manually.
 
 **Manual-verification aids (no gateway):** the buyer transfers the **exact order total**
 (no amount tampering — an earlier random-kip scheme was dropped so customers never feel
 overcharged). Each order gets a short **reference code** (`NM-XXXXX`, generated client-side
-on popup open, sent as `ref`, sanitised by `cleanRefCode`, stored in `shop_orders.ref_code`)
-shown in the pay popup with a note to put it in the transfer's note field. The buyer must
+on reserve, sent as `ref`, sanitised by `cleanRefCode`, stored in `shop_orders.ref_code`)
+shown big + **copyable** (clipboard) in the pay popup and in My Orders. The instruction to
+put it in the transfer note is **admin-editable** (`shop.bank.refNote`, bilingual, set in
+/admin → Shop). The buyer must
 also **attach a payment slip** (required to enable "I've transferred"); the image is
 downscaled client-side, posted as a base64 data URL on `slip`, uploaded to the public
 **Supabase Storage** `uploads` bucket server-side (via `lib/supabaseStorage.ts`, service
