@@ -261,7 +261,11 @@ downscaled client-side, posted as a base64 data URL on `slip`, uploaded to the p
 **Supabase Storage** `uploads` bucket server-side (via `lib/supabaseStorage.ts`, service
 role), and stored as `shop_orders.slip_url`.
 Expired (>24h) reservations are auto-removed from the buyer's My Orders, and a buyer can
-delete any of their own My Orders entries (localStorage only — the admin/Supabase copy stays).
+delete any of their own My Orders entries. Deleting an **awaiting_payment** entry also hard-
+deletes the server/admin copy (`DELETE /api/shop/order` with the order UUID; the handler only
+removes rows still `status='awaiting_payment'`, so a paid/processing order can't be erased
+this way). Deleting a paid/processing entry stays localStorage-only — the Supabase copy
+remains for the team.
 
 **/admin → Orders** is split into **4 status sub-tabs** (with counts): รอชำระ
 (awaiting_payment), กำลังตรวจ (paid_declared — the default/actionable bucket), จ่ายแล้ว

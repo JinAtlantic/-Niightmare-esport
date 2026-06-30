@@ -273,6 +273,18 @@ export default function ShopClient() {
 
   function removeOrder(idx: number) {
     if (!window.confirm(pick(COPY.removeConfirm))) return;
+    // If it's still an unpaid reservation, also delete the server/admin copy so it
+    // doesn't linger in /admin. Paid / processing orders stay on the server.
+    const target = myOrders[idx];
+    if (target?.id && target.status === "awaiting_payment") {
+      fetch("/api/shop/order", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: target.id }),
+      }).catch(() => {
+        /* best-effort — the local copy is removed regardless */
+      });
+    }
     setMyOrders((prev) => {
       const next = prev.filter((_, i) => i !== idx);
       persist(next);

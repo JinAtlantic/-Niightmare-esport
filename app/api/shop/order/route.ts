@@ -275,3 +275,31 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true, id, order: { ...paidRecord, id } });
 }
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Buyer self-cancel: lets a customer delete their OWN order while it's still an
+// unpaid reservation (awaiting_payment), removing it from /admin too. Identified
+// by the unguessable order UUID; the status guard means a paid/processing order
+// can never be deleted this way (only awaiting_payment rows match).
+export async function DELETE(request: Request) {
+  let body: { id?: string };
+  try {
+    body = (await request.json()) as { id?: string };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const id = String(body.id || "").trim();
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: "Bad request" }, { status: 400 });
+
+  const db = getSupabaseAdmin();
+  if (!db) return NextResponse.json({ ok: true, deleted: 0 });
+  const { data, error } = await db
+    .from("shop_orders")
+    .delete()
+    .eq("id", id)
+    .eq("status", "awaiting_payment")
+    .select("id");
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true, deleted: data?.length ?? 0 });
+}
