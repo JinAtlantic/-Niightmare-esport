@@ -241,6 +241,13 @@ downscaled client-side, posted as a base64 data URL on `slip`, uploaded to the p
 role), and stored as `shop_orders.slip_url`. /admin →
 Orders floats `paid_declared` orders to the top and shows the ref code + total + slip
 thumbnail next to the status buttons, so the boss matches the slip/note and clicks verify.
+Expired (>7d) reservations are auto-removed from the buyer's My Orders, and a buyer can
+delete any of their own My Orders entries (localStorage only — the admin/Supabase copy stays).
+
+**QR framing:** the QR is drawn as a CSS background on a square so a long bank-app
+screenshot can be cropped to just the QR. `/admin → Shop` has zoom + X/Y position sliders
+with a live preview; values live in `shop.bank.qrZoom/qrX/qrY` (jsonb, no migration) and
+both the admin preview and the shop popup share `qrFrameStyle()` in `lib/shop.ts`.
 
 Files: `lib/shop.ts` (config/types/`resolveShop`/`computeOrder`/`validateOrder`; also a
 leftover fit model used only by the unused viewer), `app/shop/page.tsx`,
