@@ -39,6 +39,14 @@ const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
   { value: "cancelled", label: "ยกเลิก", tone: "text-loss" },
 ];
 
+type TabId = "awaiting" | "checking" | "paid";
+
+const TABS: { id: TabId; label: string; match: (s: string) => boolean }[] = [
+  { id: "awaiting", label: "รอชำระ", match: (s) => s === "awaiting_payment" },
+  { id: "checking", label: "กำลังตรวจ", match: (s) => s === "paid_declared" },
+  { id: "paid", label: "จ่ายแล้ว", match: (s) => s === "verified" || s === "shipped" || s === "cancelled" },
+];
+
 const fmt = (n: number, c: string) => `${Number(n || 0).toLocaleString("en-US")} ${c}`;
 const fmtDate = (iso: string) => {
   try {
@@ -53,6 +61,7 @@ export default function OrdersEditor() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string>("");
+  const [tab, setTab] = useState<TabId>("checking");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -90,63 +99,88 @@ export default function OrdersEditor() {
     }
   }
 
-  const pending = orders.filter((o) => o.status === "paid_declared").length;
-  const awaiting = orders.filter((o) => o.status === "awaiting_payment" && !isOrderExpired(o.created_at, o.status)).length;
-  // Float orders awaiting verification to the top so the boss sees them first.
-  const sorted = [...orders].sort((a, b) => {
-    const aw = a.status === "paid_declared" ? 0 : 1;
-    const bw = b.status === "paid_declared" ? 0 : 1;
-    return aw - bw;
-  });
+  const counts: Record<TabId, number> = {
+    awaiting: orders.filter((o) => TABS[0].match(o.status)).length,
+    checking: orders.filter((o) => TABS[1].match(o.status)).length,
+    paid: orders.filter((o) => TABS[2].match(o.status)).length,
+  };
+
+  const activeTab = TABS.find((t) => t.id === tab) ?? TABS[1];
+  const visible = orders
+    .filter((o) => activeTab.match(o.status))
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">ออเดอร์เสื้อ</h2>
-          <p className="mt-0.5 font-mono text-[11px] text-ash">
-            ทั้งหมด {orders.length} รายการ · รอตรวจสอบ <span className="text-glow">{pending}</span> · รอชำระ <span className="text-spectre">{awaiting}</span>
-          </p>
-        </div>
+        <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">ออเดอร์เสื้อ</h2>
         <Button onClick={load} disabled={loading}>
           {loading ? "กำลังโหลด…" : "รีเฟรช"}
         </Button>
       </div>
 
+      {/* 3 sub-tabs so the boss checks one bucket at a time */}
+      <div className="grid grid-cols-3 gap-2">
+        {TABS.map((t) => {
+          const active = t.id === tab;
+          const tone = t.id === "awaiting" ? "text-spectre" : t.id === "checking" ? "text-glow" : "text-win";
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`rounded-md border px-3 py-2.5 text-center transition-colors ${
+                active ? "border-amethyst bg-amethyst/15" : "border-edge bg-void/40 hover:border-edge-bright"
+              }`}
+            >
+              <span className={`block font-display text-sm font-bold uppercase tracking-wide ${active ? "text-soul" : "text-ash"}`}>
+                {t.label}
+              </span>
+              <span className={`font-mono text-lg font-bold tabular-nums ${active ? tone : "text-ash-dim"}`}>{counts[t.id]}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {error && <p className="font-mono text-[11px] text-loss">{error}</p>}
 
-      {!loading && orders.length === 0 && (
+      {!loading && visible.length === 0 && (
         <Card>
-          <p className="text-center font-mono text-[11px] text-ash">ยังไม่มีออเดอร์</p>
+          <p className="text-center font-mono text-[11px] text-ash">ไม่มีออเดอร์ในหมวดนี้</p>
         </Card>
       )}
 
       <div className="space-y-3">
-        {sorted.map((o) => {
+        {visible.map((o) => {
           const opt = STATUS_OPTS.find((s) => s.value === o.status);
           const expired = isOrderExpired(o.created_at, o.status);
           return (
             <Card key={o.id} className="space-y-3">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              {/* Order ref + amount — the two fields the boss matches against the slip */}
+              <div className="flex flex-wrap items-stretch justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-display text-base font-bold uppercase tracking-wide text-soul">
-                    {o.customer_name} · {o.size} · x{o.quantity}
-                  </p>
-                  {o.ref_code && (
-                    <span className="mt-1 inline-block rounded border border-glow/40 bg-glow/10 px-2 py-0.5 font-mono text-[11px] font-bold tracking-[0.1em] text-glow">
-                      {o.ref_code}
-                    </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">เลขออเดอร์</span>
+                  {o.ref_code ? (
+                    <p className="keep-latin font-display text-2xl font-black tracking-[0.12em] text-glow">{o.ref_code}</p>
+                  ) : (
+                    <p className="font-mono text-sm text-ash-dim">—</p>
                   )}
-                  <p className="mt-1 font-mono text-[11px] text-ash">{fmtDate(o.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  {/* the amount the customer should have transferred — match this in the bank app */}
-                  <p className="font-display text-lg font-bold text-soul">{fmt(o.total, o.currency)}</p>
-                  <p className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
-                    {expired ? "รอชำระ · หมดเวลา 7 วัน" : opt?.label ?? o.status}
-                  </p>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดโอน</span>
+                  <p className="font-display text-2xl font-black tabular-nums text-soul">{fmt(o.total, o.currency)}</p>
                 </div>
               </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-edge pt-2.5">
+                <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
+                  {o.customer_name} · {o.size} · x{o.quantity}
+                </span>
+                <span className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
+                  {expired ? "รอชำระ · หมดเวลา 7 วัน" : opt?.label ?? o.status}
+                </span>
+              </div>
+              <p className="font-mono text-[11px] text-ash">{fmtDate(o.created_at)}</p>
 
               {o.slip_url && (
                 <a
@@ -156,7 +190,7 @@ export default function OrdersEditor() {
                   className="flex items-center gap-3 rounded-md border border-edge bg-void/40 p-2.5 transition-colors hover:border-amethyst"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={o.slip_url} alt="payment slip" className="h-16 w-16 shrink-0 rounded object-cover" />
+                  <img src={o.slip_url} alt="payment slip" className="h-20 w-20 shrink-0 rounded object-cover" />
                   <span className="font-mono text-[11px] text-spectre">ดูสลิปเต็ม ↗</span>
                 </a>
               )}
