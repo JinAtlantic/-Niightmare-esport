@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
@@ -51,6 +51,7 @@ const COPY = {
   scan: { en: "Scan this QR with your banking app", lo: "ສະແກນ QR ນີ້ດ້ວຍແອັບທະນາຄານ" },
   payExact: { en: "Amount to transfer", lo: "ຈຳນວນທີ່ຕ້ອງໂອນ" },
   refCode: { en: "Order reference", lo: "ເລກອ້າງອີງອໍເດີ" },
+  refHeading: { en: "Put this order number in the transfer note", lo: "ໃສ່ເລກອໍເດີນີ້ໃນໝາຍເຫດການໂອນ" },
   copyRef: { en: "Copy", lo: "ກັອບປີ້" },
   copied: { en: "Copied!", lo: "ກັອບແລ້ວ!" },
   attachSlip: { en: "Attach payment slip", lo: "ແນບສະລິບການໂອນ" },
@@ -77,8 +78,6 @@ const COPY = {
   timeLeft: { en: "Time left to pay", lo: "ເຫຼືອເວລາຈ່າຍ" },
   removeOrder: { en: "Remove", lo: "ລຶບ" },
   removeConfirm: { en: "Remove this order from your list?", lo: "ລຶບອໍເດີນີ້ອອກຈາກລາຍການຂອງທ່ານບໍ?" },
-  loginToOrder: { en: "Sign in with Google to order", lo: "ເຂົ້າສູ່ລະບົບດ້ວຍ Google ເພື່ອສັ່ງຊື້" },
-  loginHint: { en: "You'll be asked to sign in before paying.", lo: "ລະບົບຈະໃຫ້ເຂົ້າສູ່ລະບົບກ່ອນຈ່າຍເງິນ." },
   comingSoon: { en: "Store opening soon", lo: "ຮ້ານກຳລັງຈະເປີດ" },
   comingSoonBody: {
     en: "The NIIGHTMARE jersey store is being prepared. Check back shortly.",
@@ -105,7 +104,9 @@ function formatRemaining(ms: number, lang: Lang): string {
 export default function ShopClient() {
   const { pick, lang } = useLanguage();
   const { site } = useContent();
-  const { session, openSignIn } = useFanAuth();
+  // Login is optional — buying doesn't require it; if the visitor happens to be
+  // signed in (fan zone), we attach their email to the order for the team.
+  const { session } = useFanAuth();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
   const [tab, setTab] = useState<TabId>("order");
@@ -137,25 +138,8 @@ export default function ShopClient() {
 
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  // Set when the buyer pressed "Order & pay" while signed out — once they sign in
-  // we resume and reserve the order automatically.
-  const [pendingOrder, setPendingOrder] = useState(false);
-  const placeOrderRef = useRef<() => void>(() => {});
 
   useEffect(() => setMounted(true), []);
-
-  // Keep a ref to the latest reserve fn so the resume effect calls fresh state.
-  useEffect(() => {
-    placeOrderRef.current = placeOrder;
-  });
-
-  // Resume the order the moment the buyer finishes signing in.
-  useEffect(() => {
-    if (session && pendingOrder) {
-      setPendingOrder(false);
-      placeOrderRef.current();
-    }
-  }, [session, pendingOrder]);
 
   useEffect(() => {
     try {
@@ -240,25 +224,16 @@ export default function ShopClient() {
     return { items: orderItems, customerName, phone, courier: effectiveCourier, province, city, branch };
   }
 
-  // Validate, require sign-in, then reserve. Buying requires a signed-in account.
-  function startOrder() {
+  // Validate, then reserve the order (status awaiting_payment) so it lands in
+  // /admin and My Orders with a 7-day countdown, then open the pay popup. No
+  // sign-in required.
+  async function startOrder() {
     const errs = validateOrder(currentInput());
     setErrors(errs as Record<string, boolean>);
     if (Object.keys(errs).length) {
       document.getElementById("order-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    if (!session) {
-      setPendingOrder(true);
-      openSignIn();
-      return;
-    }
-    placeOrder();
-  }
-
-  // Reserve the order (status awaiting_payment) so it lands in /admin and My
-  // Orders with a 7-day countdown, then open the pay popup.
-  async function placeOrder() {
     setOrderError("");
     setReserving(true);
     const ref = "NM-" + Math.random().toString(36).slice(2, 7).toUpperCase();
@@ -556,9 +531,6 @@ export default function ShopClient() {
               >
                 {reserving ? pick(COPY.sending) : pick(COPY.placeOrder)}
               </button>
-              {!session && (
-                <p className="mt-2.5 text-center font-mono text-[11px] leading-relaxed text-spectre/80">{pick(COPY.loginHint)}</p>
-              )}
               {contactHref && (
                 <a
                   href={contactHref}
@@ -704,28 +676,31 @@ export default function ShopClient() {
                   )}
                   <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
 
-                  {/* exact amount + a copyable order reference, plus the editable note */}
+                  {/* exact amount to transfer */}
                   <div className="mt-4 rounded-md border border-amethyst/45 bg-amethyst/10 p-4 text-center">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.payExact)}</p>
                     <p className="mt-1 break-words font-display text-2xl font-black tabular-nums text-soul sm:text-3xl">
                       {formatPrice(payingOrder.total, payingOrder.currency)}
                     </p>
+                  </div>
 
-                    <div className="mt-3 border-t border-amethyst/25 pt-3">
-                      <p className="text-sm font-semibold leading-relaxed text-soul">{pick(shop.bank.refNote)}</p>
-                      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ash">{pick(COPY.refCode)}</p>
-                      <div className="mt-1.5 flex items-center justify-center gap-2">
-                        <span className="keep-latin rounded border border-glow/60 bg-void/60 px-3 py-1.5 font-mono text-xl font-black tracking-[0.18em] text-glow">
-                          {payingOrder.refCode}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => copyRef(payingOrder.refCode || "")}
-                          className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-glow/50 bg-glow/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-glow transition-colors hover:bg-glow/20"
-                        >
-                          {copied ? pick(COPY.copied) : pick(COPY.copyRef)}
-                        </button>
-                      </div>
+                  {/* LOUD callout: write the order code in the transfer note */}
+                  <div className="mt-3 rounded-md border-2 border-glow bg-glow/15 p-4 text-center shadow-[0_0_22px_rgba(199,125,255,0.25)]">
+                    <p className="flex items-center justify-center gap-2 font-display text-base font-black uppercase leading-tight tracking-wide text-glow">
+                      <WarnGlyph /> {pick(COPY.refHeading)}
+                    </p>
+                    <p className="mt-2 text-[13px] font-semibold leading-relaxed text-soul">{pick(shop.bank.refNote)}</p>
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                      <span className="keep-latin rounded-md border-2 border-glow/70 bg-void/70 px-4 py-2 font-display text-2xl font-black tracking-[0.22em] text-glow sm:text-3xl">
+                        {payingOrder.refCode}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => copyRef(payingOrder.refCode || "")}
+                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-glow/60 bg-glow/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.12em] text-glow transition-colors hover:bg-glow/25"
+                      >
+                        {copied ? pick(COPY.copied) : pick(COPY.copyRef)}
+                      </button>
                     </div>
                   </div>
 
@@ -855,6 +830,16 @@ function CheckGlyph() {
   return (
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function WarnGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0">
+      <path d="M12 3l9 16H3l9-16Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M12 10v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="17" r="1" fill="currentColor" />
     </svg>
   );
 }

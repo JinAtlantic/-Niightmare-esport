@@ -210,12 +210,12 @@ phone/WhatsApp, courier dropdown with a free-text "Other", province/city/branch)
 **My Orders** (the buyer's saved orders from `localStorage`, with an empty state).
 Bilingual EN/Lao throughout.
 
-**Buying requires sign-in.** Pressing **Order & pay** while signed out opens the existing
-**FanAuth** modal (`useFanAuth()` — Google OAuth + email magic link, already wired app-wide
-via `FanAuthProvider` in `app/layout.tsx`); once signed in the order auto-resumes. The
-signed-in email is sent as `userEmail` and stored in `shop_orders.user_email` (the order
-route drops it gracefully if that column is missing — run the `add column if not exists
-user_email` in schema.sql to keep it). Shown in /admin Orders under the card dropdown.
+**Buying does NOT require sign-in** (decided against gating — manual slip verification is the
+real safeguard, so a login wall just costs conversions). Login is **optional**: if the visitor
+happens to be signed in via the app-wide **FanAuth** (`useFanAuth()` — Google + magic link,
+`FanAuthProvider` in `app/layout.tsx`), their email rides along as `userEmail` and is stored
+in `shop_orders.user_email` (order route drops it gracefully if the column is missing) and
+shown in /admin Orders under the card dropdown. Otherwise the field is just empty.
 
 Order flow is **reserve → pay** (two `POST /api/shop/order` calls, distinguished by
 `body.intent`): **Order & pay** first prices server-side and inserts the order as
