@@ -78,6 +78,12 @@ export const metadata: Metadata = {
   // Public-site PWA manifest (id "/"). The /admin route overrides this with its
   // own manifest (id "/admin") so Android installs them as two separate apps.
   manifest: "/site.webmanifest",
+  // Icons driven via metadata (not the app/icon.png file convention) so the
+  // /admin route can cleanly override them with the reaper icon.
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
   title: {
     default: "NIIGHTMARE Esports — Lao PDR | MLBB & eFootball",
     template: "%s | NIIGHTMARE Esports",

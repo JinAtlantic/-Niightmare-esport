@@ -11,8 +11,12 @@ export const metadata: Metadata = {
   title: "Admin",
   robots: { index: false, follow: false },
   // Separate PWA identity (id/scope "/admin") so it installs as its own
-  // home-screen app, distinct from the public site.
+  // home-screen app, distinct from the public site — with the reaper icon.
   manifest: "/admin.webmanifest",
+  icons: {
+    icon: "/admin-icon-192.png",
+    apple: "/admin-apple-icon.png",
+  },
 };
 
 export default async function AdminPage() {

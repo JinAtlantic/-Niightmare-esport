@@ -328,8 +328,13 @@ baked at BUILD time → must be set before the deploy that should expose it):
 the site is added to the Home Screen (installed as a PWA); desktop Chrome/Edge/Firefox and
 Android Chrome work directly.
 
-**PWA / install prompt:** the home-screen app icon is the NIIGHTMARE logo (`app/icon.png`
-favicon, `app/apple-icon.png` for iOS, `public/icon-{192,512}.png` for Android install).
+**PWA / install prompt:** icons are driven via **`metadata.icons` (config-based), not the
+`app/icon.png` file convention** — the files live in `public/` (`icon.png`, `apple-icon.png`,
+`icon-{192,512}.png`) so the /admin route can cleanly override them. The public site uses
+the NIIGHTMARE logo; **/admin uses the reaper icon** (`public/admin-icon-{192,512}.png`,
+`public/admin-apple-icon.png`, flattened onto `#0B0710`) set in `app/admin/page.tsx`
+`metadata.icons`. Don't re-add `app/icon.png`/`app/apple-icon.png` (file convention) — they
+inject globally and would double up with the metadata icons on /admin.
 **Two separate manifests** so the public site and /admin install as distinct Android apps
 (a single shared manifest made Android treat the whole origin as one app, so you couldn't
 add both): `public/site.webmanifest` (id/scope `/`, linked via root `layout.tsx`
