@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
@@ -74,6 +74,12 @@ const COPY = {
   goOrder: { en: "Start an order", lo: "ເລີ່ມສັ່ງຊື້" },
   statusAwaiting: { en: "Awaiting transfer", lo: "ລໍຖ້າການໂອນ" },
   statusPaid: { en: "Transferred · processing", lo: "ໂອນແລ້ວ · ກຳລັງດຳເນີນການ" },
+  statusVerified: { en: "Payment confirmed · preparing", lo: "ຢືນຢັນການຈ່າຍ · ກຳລັງກຽມຈັດສົ່ງ" },
+  statusShipped: { en: "Shipped — please wait for delivery", lo: "ຈັດສົ່ງແລ້ວ — ກະລຸນາລໍຖ້າຮັບເຄື່ອງ" },
+  statusCancelled: { en: "Cancelled", lo: "ຍົກເລີກ" },
+  orderDetails: { en: "Order details", lo: "ລາຍລະອຽດອໍເດີ" },
+  shipImageLabel: { en: "Shipping / parcel number", lo: "ໝາຍເລກພັດສະດຸ / ໃບຮັບເຄື່ອງ" },
+  viewFull: { en: "View full", lo: "ເບິ່ງເຕັມ" },
   payNow: { en: "Pay now", lo: "ຈ່າຍເງິນ" },
   timeLeft: { en: "Time left to pay", lo: "ເຫຼືອເວລາຈ່າຍ" },
   removeOrder: { en: "Remove", lo: "ລຶບ" },
@@ -109,6 +115,16 @@ export default function ShopClient() {
   const { session } = useFanAuth();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
+  // My Orders are scoped to the signed-in account, so on a shared device each
+  // person keeps their own list: signed-in orders live under a per-email key,
+  // signed-out (guest) orders under the base key. Login is still optional —
+  // logging out hides an account's orders; logging back in restores them.
+  const accountEmail = (session?.user?.email ?? "").trim().toLowerCase();
+  const storageKey = accountEmail ? `${STORAGE_KEY}::${accountEmail}` : STORAGE_KEY;
+  // Latest key for the long-lived interval below (which keeps its mount-time closure).
+  const storageKeyRef = useRef(storageKey);
+  storageKeyRef.current = storageKey;
+
   const [tab, setTab] = useState<TabId>("order");
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -141,19 +157,24 @@ export default function ShopClient() {
 
   useEffect(() => setMounted(true), []);
 
+  // Reload whenever the account (storageKey) changes — sign in/out/switch swaps
+  // which list is shown, and an empty/absent key must clear the previous one.
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) {
+        setMyOrders([]);
+        return;
+      }
       const parsed = JSON.parse(raw) as ShopOrderRecord[];
       // Drop reservations that blew past the 24-hour pay window.
       const kept = parsed.filter((o) => !isOrderExpired(o.createdAt, o.status));
       setMyOrders(kept);
-      if (kept.length !== parsed.length) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(kept));
+      if (kept.length !== parsed.length) window.localStorage.setItem(storageKey, JSON.stringify(kept));
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [storageKey]);
 
   // Tick so the My Orders countdown stays live, and auto-remove expired ones.
   useEffect(() => {
@@ -163,7 +184,7 @@ export default function ShopClient() {
         const kept = prev.filter((o) => !isOrderExpired(o.createdAt, o.status));
         if (kept.length === prev.length) return prev;
         try {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(kept));
+          window.localStorage.setItem(storageKeyRef.current, JSON.stringify(kept));
         } catch {
           /* ignore */
         }
@@ -172,6 +193,60 @@ export default function ShopClient() {
     }, 30000);
     return () => window.clearInterval(id);
   }, []);
+
+  // Pull the latest status + shipping image from the server (My Orders otherwise
+  // lives only in localStorage and never learns about admin changes). Reads the
+  // current list via a ref and writes straight to the account's key, so it never
+  // loops or targets a stale key after sign-in/out.
+  const myOrdersRef = useRef(myOrders);
+  myOrdersRef.current = myOrders;
+  const syncStatuses = useCallback(async () => {
+    const ids = myOrdersRef.current.map((o) => o.id).filter((x): x is string => !!x);
+    if (!ids.length) return;
+    try {
+      const res = await fetch(`/api/shop/order/status?ids=${encodeURIComponent(ids.join(","))}`);
+      const json = (await res.json()) as {
+        synced?: boolean;
+        orders?: { id: string; status: string; shippingImageUrl: string | null }[];
+      };
+      if (!json?.synced) return; // server couldn't confirm — leave local copies alone
+      const map = new Map((json.orders ?? []).map((r) => [r.id, r]));
+      setMyOrders((prev) => {
+        let changed = false;
+        const nextList = prev.map((o) => {
+          if (!o.id) return o;
+          const live = map.get(o.id);
+          if (!live) {
+            // Server no longer has this id → the admin deleted/cancelled it.
+            if (o.status === "cancelled") return o;
+            changed = true;
+            return { ...o, status: "cancelled" };
+          }
+          const shipUrl = live.shippingImageUrl ?? undefined;
+          if (o.status !== live.status || o.shippingImageUrl !== shipUrl) {
+            changed = true;
+            return { ...o, status: live.status, shippingImageUrl: shipUrl };
+          }
+          return o;
+        });
+        if (changed) {
+          try {
+            window.localStorage.setItem(storageKeyRef.current, JSON.stringify(nextList));
+          } catch {
+            /* ignore */
+          }
+        }
+        return changed ? nextList : prev;
+      });
+    } catch {
+      /* offline — keep local copies */
+    }
+  }, []);
+
+  // Refresh statuses when the buyer opens My Orders (and when the account changes).
+  useEffect(() => {
+    if (tab === "myorders") syncStatuses();
+  }, [tab, storageKey, syncStatuses]);
 
   // Lock background scroll while the payment popup is open so it can't scroll away.
   useEffect(() => {
@@ -190,7 +265,7 @@ export default function ShopClient() {
 
   function persist(list: ShopOrderRecord[]) {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      window.localStorage.setItem(storageKey, JSON.stringify(list));
     } catch {
       /* ignore */
     }
@@ -565,8 +640,27 @@ export default function ShopClient() {
                   const awaiting = o.status === "awaiting_payment";
                   const expired = isOrderExpired(o.createdAt, o.status, now);
                   const remaining = payWindowRemaining(o.createdAt, now);
-                  const badge = awaiting ? pick(COPY.statusAwaiting) : pick(COPY.statusPaid);
-                  const badgeCls = awaiting ? "border-spectre/40 bg-spectre/10 text-spectre" : "border-win/40 bg-win/10 text-win";
+                  const st = o.status || "paid_declared";
+                  const badge =
+                    st === "awaiting_payment"
+                      ? pick(COPY.statusAwaiting)
+                      : st === "verified"
+                        ? pick(COPY.statusVerified)
+                        : st === "shipped"
+                          ? pick(COPY.statusShipped)
+                          : st === "cancelled"
+                            ? pick(COPY.statusCancelled)
+                            : pick(COPY.statusPaid);
+                  const badgeCls =
+                    st === "awaiting_payment"
+                      ? "border-spectre/40 bg-spectre/10 text-spectre"
+                      : st === "verified"
+                        ? "border-glow/40 bg-glow/10 text-glow"
+                        : st === "shipped"
+                          ? "border-amethyst/50 bg-amethyst/15 text-glow"
+                          : st === "cancelled"
+                            ? "border-loss/40 bg-loss/10 text-loss"
+                            : "border-win/40 bg-win/10 text-win";
                   return (
                     <div key={(o.id ?? o.refCode ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -608,6 +702,49 @@ export default function ShopClient() {
                           </button>
                         </div>
                       )}
+
+                      {/* shipping image the team attached (e.g. courier parcel number) */}
+                      {o.shippingImageUrl && (st === "shipped" || st === "verified") && (
+                        <div className="mt-3 border-t border-edge pt-3">
+                          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ash">{pick(COPY.shipImageLabel)}</p>
+                          <a
+                            href={safeHref(o.shippingImageUrl)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-3 rounded-md border border-edge bg-void/40 p-2.5 transition-colors hover:border-amethyst"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={safeImageSrc(o.shippingImageUrl)} alt="shipping" className="h-20 w-20 shrink-0 rounded object-cover" />
+                            <span className="font-mono text-[11px] text-spectre">{pick(COPY.viewFull)} ↗</span>
+                          </a>
+                        </div>
+                      )}
+
+                      {/* read-only recap of what the buyer entered */}
+                      <details className="group mt-3 border-t border-edge/60 pt-2.5">
+                        <summary className="flex cursor-pointer list-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ash transition-colors hover:text-soul [&::-webkit-details-marker]:hidden">
+                          <span className="inline-block transition-transform group-open:rotate-90">▸</span>
+                          {pick(COPY.orderDetails)}
+                        </summary>
+                        <div className="mt-2.5 grid gap-1.5 font-mono text-[11px] text-spectre">
+                          <span>{pick(COPY.fullName)}: {o.customerName}</span>
+                          <span className="keep-latin">{pick(COPY.phone)}: {o.phone}</span>
+                          <span>{pick(COPY.courier)}: {o.courier}</span>
+                          <span>{pick(COPY.province)}: {o.province}</span>
+                          <span>{pick(COPY.city)}: {o.city}</span>
+                          <span>{pick(COPY.branch)}: {o.branch}</span>
+                          {o.refCode && <span className="keep-latin">{pick(COPY.refCode)}: {o.refCode}</span>}
+                        </div>
+                        {Array.isArray(o.items) && o.items.length > 0 && (
+                          <div className="mt-2.5 border-t border-edge/60 pt-2.5 font-mono text-[11px] text-spectre">
+                            {o.items.map((l, idx) => (
+                              <span key={idx} className="mr-3 inline-block keep-latin">
+                                {l.label} × {l.quantity}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </details>
 
                       <div className="mt-3 flex justify-end border-t border-edge/60 pt-2.5">
                         <button

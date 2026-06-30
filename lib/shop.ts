@@ -369,6 +369,9 @@ export interface ShopOrderRecord {
   branch: string;
   /** Public URL of the uploaded payment slip (Vercel Blob). */
   slipUrl?: string;
+  /** Public URL of the admin-uploaded shipping image (e.g. courier parcel number),
+   *  synced back from the server and shown once the order is shipped. */
+  shippingImageUrl?: string;
   createdAt?: string;
   status?: string;
 }

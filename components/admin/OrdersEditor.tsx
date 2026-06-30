@@ -21,6 +21,7 @@ interface OrderRow {
   total: number;
   ref_code: string | null;
   slip_url: string | null;
+  shipping_image_url: string | null;
   currency: string;
   items: OrderLine[] | null;
   customer_name: string;
@@ -40,6 +41,57 @@ const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
   { value: "shipped", label: "ส่งแล้ว", tone: "text-spectre" },
   { value: "cancelled", label: "ยกเลิก", tone: "text-loss" },
 ];
+
+// Quick-advance button: one tap to the natural next step in the flow.
+const NEXT_STEP: Record<string, { value: string; label: string } | undefined> = {
+  awaiting_payment: { value: "paid_declared", label: "แจ้งว่าโอนแล้ว" },
+  paid_declared: { value: "verified", label: "ยืนยันการจ่าย" },
+  verified: { value: "shipped", label: "ทำเครื่องหมายส่งแล้ว" },
+};
+
+const normPhone = (p: string) => (p || "").replace(/\D/g, "");
+
+/** Human "x นาทีที่แล้ว" relative time (computed at render; admin refreshes to update). */
+function timeAgo(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return "";
+  const s = Math.floor((Date.now() - t) / 1000);
+  if (s < 60) return "เมื่อสักครู่";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} นาทีที่แล้ว`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} ชม.ที่แล้ว`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d} วันที่แล้ว`;
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `${mo} เดือนที่แล้ว`;
+  return `${Math.floor(mo / 12)} ปีที่แล้ว`;
+}
+
+/** Read an image File and downscale it to a JPEG data URL (admin shipping photos). */
+async function fileToDownscaledDataUrl(file: File, max = 1400): Promise<string> {
+  const dataUrl = await new Promise<string>((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result));
+    r.onerror = () => rej(new Error("read"));
+    r.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = () => rej(new Error("img"));
+    i.src = dataUrl;
+  });
+  const scale = Math.min(1, max / Math.max(img.width, img.height));
+  if (scale >= 1) return dataUrl;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.85);
+}
 
 type TabId = "awaiting" | "checking" | "paid" | "shipped";
 
@@ -106,6 +158,9 @@ export default function OrdersEditor() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string>("");
   const [tab, setTab] = useState<TabId>("checking");
+  const [query, setQuery] = useState("");
+  const [sortDir, setSortDir] = useState<"new" | "old">("new");
+  const [copied, setCopied] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -145,6 +200,77 @@ export default function OrdersEditor() {
     }
   }
 
+  // Hard-delete: purge a junk / mismatched-transfer order from the DB entirely.
+  async function deleteOrder(o: OrderRow) {
+    if (!window.confirm(`ยกเลิกและลบออเดอร์ ${o.ref_code || o.customer_name || ""} ออกถาวร?\nลบแล้วกู้คืนไม่ได้`)) return;
+    setBusyId(o.id);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: o.id }),
+      });
+      if (!res.ok) throw new Error();
+      setOrders((rows) => rows.filter((r) => r.id !== o.id));
+    } catch {
+      setError("ลบออเดอร์ไม่สำเร็จ");
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  // Attach a shipping image (e.g. the courier branch's parcel/receipt number) that
+  // the buyer then sees in My Orders.
+  async function uploadShipping(id: string, file: File) {
+    setBusyId(id);
+    setError("");
+    try {
+      const dataUrl = await fileToDownscaledDataUrl(file);
+      const res = await fetch("/api/admin/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, shippingImage: dataUrl }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "");
+      const url: string | null = json.shippingImageUrl ?? null;
+      const nowIso = new Date().toISOString();
+      setOrders((rows) => rows.map((r) => (r.id === id ? { ...r, shipping_image_url: url, updated_at: nowIso } : r)));
+    } catch (e) {
+      setError(e instanceof Error && e.message ? e.message : "อัปโหลดรูปไม่สำเร็จ");
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  async function clearShipping(id: string) {
+    setBusyId(id);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, clearShippingImage: true }),
+      });
+      if (!res.ok) throw new Error();
+      setOrders((rows) => rows.map((r) => (r.id === id ? { ...r, shipping_image_url: null } : r)));
+    } catch {
+      setError("ลบรูปไม่สำเร็จ");
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  async function copy(text: string, key: string) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+      window.setTimeout(() => setCopied((c) => (c === key ? "" : c)), 1400);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+
   const counts: Record<TabId, number> = {
     awaiting: orders.filter((o) => TABS[0].match(o.status)).length,
     checking: orders.filter((o) => TABS[1].match(o.status)).length,
@@ -152,10 +278,40 @@ export default function OrdersEditor() {
     shipped: orders.filter((o) => TABS[3].match(o.status)).length,
   };
 
+  // Flag orders that share a phone or signed-in email with another order — a hint
+  // the boss may be looking at a duplicate / repeat submission.
+  const phoneCounts = new Map<string, number>();
+  const emailCounts = new Map<string, number>();
+  for (const o of orders) {
+    const p = normPhone(o.phone);
+    if (p) phoneCounts.set(p, (phoneCounts.get(p) ?? 0) + 1);
+    const e = (o.user_email || "").trim().toLowerCase();
+    if (e) emailCounts.set(e, (emailCounts.get(e) ?? 0) + 1);
+  }
+  const dupCount = (o: OrderRow): number => {
+    const p = normPhone(o.phone);
+    const e = (o.user_email || "").trim().toLowerCase();
+    return Math.max(p ? phoneCounts.get(p) ?? 1 : 1, e ? emailCounts.get(e) ?? 1 : 1);
+  };
+
   const activeTab = TABS.find((t) => t.id === tab) ?? TABS[1];
+  const q = query.trim().toLowerCase();
+  const qDigits = normPhone(query);
   const visible = orders
     .filter((o) => activeTab.match(o.status))
-    .sort((a, b) => new Date(orderTime(b)).getTime() - new Date(orderTime(a)).getTime());
+    .filter((o) => {
+      if (!q) return true;
+      return (
+        (o.ref_code || "").toLowerCase().includes(q) ||
+        (o.customer_name || "").toLowerCase().includes(q) ||
+        (o.user_email || "").toLowerCase().includes(q) ||
+        (!!qDigits && normPhone(o.phone).includes(qDigits))
+      );
+    })
+    .sort((a, b) => {
+      const diff = new Date(orderTime(b)).getTime() - new Date(orderTime(a)).getTime();
+      return sortDir === "new" ? diff : -diff;
+    });
 
   return (
     <div className="space-y-5">
@@ -190,6 +346,45 @@ export default function OrdersEditor() {
         })}
       </div>
 
+      {/* search + sort — find an order by number/name/phone, newest or oldest first */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[180px] flex-1">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ค้นหา เลขออเดอร์ / ชื่อ / เบอร์"
+            className="w-full rounded-md border border-edge bg-void/60 px-3 py-2 pr-8 font-mono text-[12px] text-soul placeholder:text-ash-dim focus:border-amethyst focus:outline-none"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="ล้าง"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-ash transition-colors hover:text-soul"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        <div className="flex gap-1.5">
+          {([
+            { id: "new", label: "ล่าสุดก่อน" },
+            { id: "old", label: "เก่าสุดก่อน" },
+          ] as const).map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSortDir(s.id)}
+              className={`rounded-md border px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
+                sortDir === s.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {error && <p className="font-mono text-[11px] text-loss">{error}</p>}
 
       {tab === "shipped" && <SalesReport orders={visible} />}
@@ -204,6 +399,10 @@ export default function OrdersEditor() {
         {visible.map((o) => {
           const opt = STATUS_OPTS.find((s) => s.value === o.status);
           const expired = isOrderExpired(o.created_at, o.status);
+          const dup = dupCount(o);
+          const next = NEXT_STEP[o.status];
+          const showShipping = o.status === "verified" || o.status === "shipped";
+          const busy = busyId === o.id;
           return (
             <Card key={o.id} className="space-y-3">
               {/* Order ref + amount — the two fields the boss matches against the slip */}
@@ -211,14 +410,35 @@ export default function OrdersEditor() {
                 <div className="min-w-0">
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">เลขออเดอร์</span>
                   {o.ref_code ? (
-                    <p className="keep-latin font-display text-2xl font-black tracking-[0.12em] text-glow">{o.ref_code}</p>
+                    <button
+                      type="button"
+                      onClick={() => copy(o.ref_code || "", `ref-${o.id}`)}
+                      title="คัดลอกเลขออเดอร์"
+                      className="keep-latin block font-display text-2xl font-black tracking-[0.12em] text-glow transition-colors hover:text-soul"
+                    >
+                      {o.ref_code} <span className="align-middle text-sm">⧉</span>
+                      {copied === `ref-${o.id}` && <span className="ml-1 align-middle font-mono text-[10px] text-win">คัดลอกแล้ว</span>}
+                    </button>
                   ) : (
                     <p className="font-mono text-sm text-ash-dim">—</p>
+                  )}
+                  {dup > 1 && (
+                    <span className="mt-1 inline-block rounded border border-loss/50 bg-loss/10 px-1.5 py-0.5 font-mono text-[10px] text-loss">
+                      ⚠ อาจซ้ำ ({dup} ออเดอร์ เบอร์/บัญชีเดียวกัน)
+                    </span>
                   )}
                 </div>
                 <div className="text-right">
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดโอน</span>
-                  <p className="font-display text-2xl font-black tabular-nums text-soul">{fmt(o.total, o.currency)}</p>
+                  <button
+                    type="button"
+                    onClick={() => copy(String(o.total ?? ""), `amt-${o.id}`)}
+                    title="คัดลอกยอด"
+                    className="block font-display text-2xl font-black tabular-nums text-soul transition-colors hover:text-glow"
+                  >
+                    {fmt(o.total, o.currency)}
+                    {copied === `amt-${o.id}` && <span className="ml-1 align-middle font-mono text-[10px] text-win">คัดลอกแล้ว</span>}
+                  </button>
                 </div>
               </div>
 
@@ -230,8 +450,11 @@ export default function OrdersEditor() {
                 </span>
               </div>
 
-              {/* date/time of the last change (transfer / status update) */}
-              <p className="font-mono text-[11px] text-ash">{fmtDate(orderTime(o))}</p>
+              {/* time of the last change — relative first, exact below */}
+              <p className="font-mono text-[11px] text-ash">
+                <span className="text-spectre">{timeAgo(orderTime(o))}</span>
+                <span className="text-ash-dim"> · {fmtDate(orderTime(o))}</span>
+              </p>
 
               {o.slip_url && (
                 <a
@@ -246,6 +469,55 @@ export default function OrdersEditor() {
                 </a>
               )}
 
+              {/* shipping image the buyer will see (e.g. courier parcel number) */}
+              {showShipping && (
+                <div className="rounded-md border border-amethyst/30 bg-void/40 p-2.5">
+                  <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ash">รูปใบรับของ / เลขพัสดุ (ลูกค้าจะเห็น)</p>
+                  {o.shipping_image_url ? (
+                    <div className="flex items-center gap-3">
+                      <a href={o.shipping_image_url} target="_blank" rel="noreferrer" className="shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={o.shipping_image_url} alt="shipping" className="h-20 w-20 rounded border border-edge object-cover" />
+                      </a>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="cursor-pointer font-mono text-[11px] text-spectre underline transition-colors hover:text-soul">
+                          เปลี่ยนรูป
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={busy}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) uploadShipping(o.id, f);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        <button type="button" onClick={() => clearShipping(o.id)} disabled={busy} className="text-left font-mono text-[11px] text-ash-dim transition-colors hover:text-loss">
+                          ลบรูป
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="inline-flex min-h-[40px] cursor-pointer items-center justify-center rounded-md border border-dashed border-edge-bright bg-void/40 px-4 py-2 font-mono text-[11px] text-spectre transition-colors hover:border-amethyst hover:text-soul">
+                      {busy ? "กำลังอัปโหลด…" : "+ แนบรูปใบรับของ"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={busy}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) uploadShipping(o.id, f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+              )}
+
               {/* everything else folded into a dropdown */}
               <details className="group border-t border-edge pt-3">
                 <summary className="flex cursor-pointer list-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ash transition-colors hover:text-soul [&::-webkit-details-marker]:hidden">
@@ -254,8 +526,20 @@ export default function OrdersEditor() {
                 </summary>
                 <div className="mt-2.5 grid gap-1.5 font-mono text-[11px] text-spectre md:grid-cols-2">
                   <span>ชื่อ: {o.customer_name}</span>
-                  {o.user_email && <span className="keep-latin break-all">บัญชี: {o.user_email}</span>}
-                  <span>โทร: {o.phone}</span>
+                  {o.user_email && (
+                    <span className="keep-latin break-all">
+                      บัญชี: {o.user_email}
+                      <button type="button" onClick={() => copy(o.user_email || "", `em-${o.id}`)} className="ml-1.5 text-ash transition-colors hover:text-soul">
+                        {copied === `em-${o.id}` ? "✓" : "⧉"}
+                      </button>
+                    </span>
+                  )}
+                  <span className="keep-latin">
+                    โทร: <a href={`tel:${o.phone}`} className="text-glow underline transition-colors hover:text-soul">{o.phone}</a>
+                    <button type="button" onClick={() => copy(o.phone || "", `ph-${o.id}`)} className="ml-1.5 text-ash transition-colors hover:text-soul">
+                      {copied === `ph-${o.id}` ? "✓" : "⧉"}
+                    </button>
+                  </span>
                   <span>ขนส่ง: {o.courier}</span>
                   <span>แขวง: {o.province}</span>
                   <span>เมือง: {o.city}</span>
@@ -272,17 +556,38 @@ export default function OrdersEditor() {
                 )}
               </details>
 
-              <div className="flex flex-wrap gap-2 border-t border-edge pt-3">
-                {STATUS_OPTS.map((s) => (
+              {/* quick-advance to the next step */}
+              {next && (
+                <button
+                  type="button"
+                  onClick={() => setStatus(o.id, next.value)}
+                  disabled={busy}
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md border border-amethyst bg-amethyst/20 px-4 py-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-all hover:bg-amethyst/30 disabled:opacity-50"
+                >
+                  {busy ? "…" : `→ ${next.label}`}
+                </button>
+              )}
+
+              {/* manual status set + permanent delete */}
+              <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
+                {STATUS_OPTS.filter((s) => s.value !== "cancelled").map((s) => (
                   <Button
                     key={s.value}
                     variant={o.status === s.value ? "primary" : "ghost"}
                     onClick={() => setStatus(o.id, s.value)}
-                    disabled={busyId === o.id}
+                    disabled={busy}
                   >
                     {s.label}
                   </Button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => deleteOrder(o)}
+                  disabled={busy}
+                  className="ml-auto inline-flex min-h-[36px] items-center rounded-md border border-loss/50 bg-loss/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-loss transition-colors hover:bg-loss/20 disabled:opacity-50"
+                >
+                  ยกเลิก & ลบ
+                </button>
               </div>
             </Card>
           );

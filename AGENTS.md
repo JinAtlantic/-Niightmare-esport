@@ -235,6 +235,17 @@ Formspree → success tick → popup self-closes → My Orders tab. Payment is *
 Orders** with a live **24-hour countdown** + a **Pay now** button (reopens the popup for that
 order); past the window it's auto-removed from My Orders / displays as cancelled
 (`isOrderExpired` / `payWindowRemaining` in `lib/shop.ts`, `SHOP_PAYMENT_WINDOW_HOURS = 24`).
+My Orders is **account-scoped**: the localStorage key is `nm-shop-orders` for guests and
+`nm-shop-orders::<email>` when signed in (FanAuth), so a shared device keeps each Google
+account's list separate and signing out hides them — login is still NOT required.
+Because My Orders is otherwise localStorage-only, it now **syncs live status from the
+server** when the buyer opens the tab: `GET /api/shop/order/status?ids=<uuid,…>` (public,
+returns only `status` + `shippingImageUrl` by UUID) merges the latest into localStorage.
+This is what makes admin status changes visible to the buyer — badges map
+`paid_declared`→processing, `verified`→preparing, `shipped`→"shipped, please wait",
+and an id the server no longer returns (admin deleted it) flips the local copy to
+cancelled. Each My Orders card has a read-only **Order details** `<details>` (the data the
+buyer entered) and, once shipped/verified, shows the **shipping image** the team attached.
 /admin → Orders shows expired awaiting orders with a "หมดเวลา 24 ชม" tag. The cancel is a
 **display-only** computation on both sides (no cron); admin can still set status manually.
 
@@ -264,6 +275,16 @@ grouped by **day / month / year** (`SalesReport` in `OrdersEditor.tsx`). Each or
 admin status PATCH set `updated_at` **explicitly** in the update payload — keep doing that or
 the time will freeze at `created_at`.
 
+Admin Orders also has: a **search box** (matches ref code / name / email / phone) + a
+**newest⇄oldest sort** toggle; a **⚠ duplicate flag** when an order shares a phone or
+signed-in email with another; **tap-to-call (`tel:`) + copy** for phone/ref/amount/email; a
+relative **"x นาทีที่แล้ว" time**; a prominent **quick-advance** button (paid→verified→
+shipped); and on verified/shipped orders a **shipping-image uploader** (`PATCH` with a
+base64 `shippingImage` → uploaded to the `uploads` bucket `shop-shipping/` → stored in
+`shop_orders.shipping_image_url`, shown to the buyer). The red **"ยกเลิก & ลบ"** button is a
+**hard delete** (`DELETE /api/admin/orders`, `window.confirm` first) — used to purge junk /
+mismatched-transfer orders; the legacy `cancelled` status is no longer set from the UI.
+
 **QR framing:** the QR is drawn as a CSS background on a square so a long bank-app
 screenshot can be cropped to just the QR. `/admin → Shop` has zoom + X/Y position sliders
 with a live preview; values live in `shop.bank.qrZoom/qrX/qrY` (jsonb, no migration) and
@@ -272,7 +293,8 @@ both the admin preview and the shop popup share `qrFrameStyle()` in `lib/shop.ts
 Files: `lib/shop.ts` (config/types/`resolveShop`/`computeOrder`/`validateOrder`; also a
 leftover fit model used only by the unused viewer), `app/shop/page.tsx`,
 `components/shop/ShopClient.tsx`, `app/api/shop/order/route.ts`,
-`app/api/admin/orders/route.ts`, `components/admin/ShopEditor.tsx`,
+`app/api/admin/orders/route.ts` (GET/PATCH/DELETE), `app/api/shop/order/status/route.ts`
+(public buyer status sync), `components/admin/ShopEditor.tsx`,
 `components/admin/OrdersEditor.tsx` (+ tab wired in `AdminApp.tsx`). All shop *config*
 (price, sizes, stock, bank/QR, couriers, contact link, rights note) lives in the
 `site_settings.shop` jsonb blob and is edited in **/admin → Shop** — same editable-JSON
@@ -284,6 +306,7 @@ gracefully if optional columns haven't been added — run these in the Supabase 
 to persist them: `alter table public.shop_orders add column if not exists items jsonb;`
 `alter table public.shop_orders add column if not exists ref_code text;`
 `alter table public.shop_orders add column if not exists slip_url text;`
+`alter table public.shop_orders add column if not exists shipping_image_url text;`
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js
 preview.
