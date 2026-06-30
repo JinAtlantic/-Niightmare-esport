@@ -456,7 +456,16 @@ export default function ShopClient() {
   ];
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
+    <main className="relative mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
+      {/* ambient violet wash + faint scanline grain — decorative, no layout impact */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] bg-[radial-gradient(75%_60%_at_50%_0%,rgba(168,85,247,0.18),transparent_72%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 top-40 -z-10 h-72 w-72 rounded-full bg-glow/10 blur-[90px]"
+      />
       <header className="mb-6 text-center">
         <h1 className="font-display text-3xl font-bold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.3)] md:text-4xl">
           {pick(shop.productName)}
@@ -494,12 +503,15 @@ export default function ShopClient() {
         {/* ── ORDER ──────────────────────────────────────────────────── */}
         {tab === "order" && (
           <section id="order-form" className="space-y-5">
-            <div className="rounded-md border border-amethyst/35 bg-amethyst/[0.06] p-4">
-              <p className="mb-1 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
+            <div className="relative overflow-hidden rounded-md border border-amethyst/60 bg-gradient-to-br from-amethyst/[0.18] via-crypt/50 to-crypt/20 p-4 shadow-[0_0_30px_-6px_rgba(168,85,247,0.5)] ring-1 ring-inset ring-amethyst/10">
+              {/* decorative corner halo + accent blade — purely visual, no layout impact */}
+              <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-glow/25 blur-2xl" />
+              <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-amethyst via-glow to-amethyst shadow-[0_0_14px_rgba(199,125,255,0.7)]" />
+              <p className="relative mb-1.5 inline-flex items-center gap-2 rounded-full border border-glow/40 bg-amethyst/20 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-glow shadow-[0_0_16px_-2px_rgba(199,125,255,0.6)]">
                 <LockGlyph /> {pick(COPY.reserved)}
               </p>
-              <p className="text-[13px] leading-relaxed text-spectre/90">{pick(shop.rightsNote)}</p>
-              <p className="mt-2 font-display text-sm font-bold uppercase tracking-wide text-soul">
+              <p className="relative text-[13px] leading-relaxed text-spectre/90">{pick(shop.rightsNote)}</p>
+              <p className="relative mt-2 font-display text-sm font-bold uppercase tracking-wide text-soul [text-shadow:0_0_20px_rgba(168,85,247,0.55)]">
                 {shop.fixedJerseyName} · #{shop.fixedJerseyNumber}
               </p>
             </div>
@@ -509,12 +521,12 @@ export default function ShopClient() {
               <p className="mt-1 text-[13px] text-spectre/80">{pick(COPY.pickQuantities)}</p>
             </div>
 
-            <div className={`grid gap-2 rounded-md border p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
+            <div className={`grid gap-2 rounded-md border bg-void/30 p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
               {shop.sizes.map((s) => {
                 const price = sizePrice(shop, s);
                 const qty = quantities[s.id] ?? 0;
                 return (
-                  <div key={s.id} className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 ${qty > 0 ? "bg-amethyst/[0.07]" : ""}`}>
+                  <div key={s.id} className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 transition-colors ${qty > 0 ? "bg-amethyst/10 ring-1 ring-inset ring-amethyst/25" : ""}`}>
                     <div className="min-w-0">
                       <span className="font-display text-base font-bold uppercase tracking-wide text-soul">{s.label}</span>
                       <span className="ml-2 font-mono text-[11px] text-ash">
@@ -581,7 +593,8 @@ export default function ShopClient() {
               </Field>
             </div>
 
-            <div className="rounded-md border border-edge bg-crypt/60 p-5">
+            <div className="relative overflow-hidden rounded-md border border-edge-bright/60 bg-gradient-to-br from-crypt/80 via-crypt/50 to-void/40 p-5 shadow-[0_0_34px_-14px_rgba(168,85,247,0.45)]">
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/60 to-transparent" />
               <div className="flex items-end justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.total)}</p>
@@ -590,7 +603,7 @@ export default function ShopClient() {
                   )}
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-soul sm:text-3xl">{formatPrice(total, shop.currency)}</p>
+                  <p className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-soul [text-shadow:0_0_20px_rgba(168,85,247,0.45)] sm:text-3xl">{formatPrice(total, shop.currency)}</p>
                   <p className="font-mono text-[11px] text-ash">
                     {totalQty} {pick(COPY.pieces)}
                   </p>
@@ -602,7 +615,7 @@ export default function ShopClient() {
                 type="button"
                 onClick={startOrder}
                 disabled={reserving}
-                className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-soul transition-all hover:bg-amethyst/25 hover:shadow-[0_0_24px_rgba(168,85,247,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-gradient-to-r from-amethyst/30 via-amethyst/20 to-glow/20 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_22px_-6px_rgba(168,85,247,0.5)] transition-all hover:from-amethyst/40 hover:to-glow/30 hover:shadow-[0_0_30px_-2px_rgba(168,85,247,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {reserving ? pick(COPY.sending) : pick(COPY.placeOrder)}
               </button>
