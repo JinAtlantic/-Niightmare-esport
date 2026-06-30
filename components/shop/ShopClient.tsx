@@ -146,7 +146,7 @@ export default function ShopClient() {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as ShopOrderRecord[];
-      // Drop reservations that blew past the 7-day pay window.
+      // Drop reservations that blew past the 24-hour pay window.
       const kept = parsed.filter((o) => !isOrderExpired(o.createdAt, o.status));
       setMyOrders(kept);
       if (kept.length !== parsed.length) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(kept));
@@ -225,7 +225,7 @@ export default function ShopClient() {
   }
 
   // Validate, then reserve the order (status awaiting_payment) so it lands in
-  // /admin and My Orders with a 7-day countdown, then open the pay popup. No
+  // /admin and My Orders with a 24-hour countdown, then open the pay popup. No
   // sign-in required.
   async function startOrder() {
     const errs = validateOrder(currentInput());

@@ -88,7 +88,10 @@ export async function POST(request: Request) {
   res.cookies.set(COOKIE_NAME, makeToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    // "lax" (not "strict") so the session cookie is sent on a normal top-level
+    // navigation to /admin (a bookmark or a link from a chat app); "strict"
+    // withheld it on those, forcing a re-login every time.
+    sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE,
   });

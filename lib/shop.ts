@@ -129,8 +129,9 @@ export const SHOP_HEIGHT_MAX = 200;
 export const SHOP_HEIGHT_DEFAULT = 172;
 export const SHOP_QTY_MAX = 999;
 
-/** Days a buyer has to transfer before an unpaid (reserved) order auto-cancels. */
-export const SHOP_PAYMENT_WINDOW_DAYS = 7;
+/** Hours a buyer has to transfer before an unpaid (reserved) order auto-cancels. */
+export const SHOP_PAYMENT_WINDOW_HOURS = 24;
+const PAYMENT_WINDOW_MS = SHOP_PAYMENT_WINDOW_HOURS * 3600000;
 
 /** Order lifecycle status. `awaiting_payment` = reserved but not yet transferred;
  *  `paid_declared` = buyer attached a slip and declared the transfer. */
@@ -146,7 +147,7 @@ export function isOrderExpired(createdAt?: string, status?: string, nowMs = Date
   if (status !== "awaiting_payment" || !createdAt) return false;
   const created = new Date(createdAt).getTime();
   if (!Number.isFinite(created)) return false;
-  return nowMs - created > SHOP_PAYMENT_WINDOW_DAYS * 86400000;
+  return nowMs - created > PAYMENT_WINDOW_MS;
 }
 
 /** Milliseconds left to pay a reserved order (0 once expired). */
@@ -154,7 +155,7 @@ export function payWindowRemaining(createdAt?: string, nowMs = Date.now()): numb
   if (!createdAt) return 0;
   const created = new Date(createdAt).getTime();
   if (!Number.isFinite(created)) return 0;
-  return Math.max(0, created + SHOP_PAYMENT_WINDOW_DAYS * 86400000 - nowMs);
+  return Math.max(0, created + PAYMENT_WINDOW_MS - nowMs);
 }
 
 /** True when a courier value means "Other" (so the buyer types a custom name). */

@@ -226,7 +226,7 @@ export default function OrdersEditor() {
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-edge pt-2.5">
                 <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">{o.size} · {o.quantity} ตัว</span>
                 <span className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
-                  {expired ? "รอชำระ · หมดเวลา 7 วัน" : opt?.label ?? o.status}
+                  {expired ? "รอชำระ · หมดเวลา 24 ชม" : opt?.label ?? o.status}
                 </span>
               </div>
 

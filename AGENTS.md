@@ -229,11 +229,11 @@ Formspree → success tick → popup self-closes → My Orders tab. Payment is *
 (awaiting_payment → paid_declared → verified → shipped → cancelled).
 
 **Pay window / My Orders:** a reserved order shows in the buyer's `localStorage` **My
-Orders** with a live **7-day countdown** + a **Pay now** button (reopens the popup for that
-order); past 7 days it displays as cancelled (`isOrderExpired` / `payWindowRemaining` in
-`lib/shop.ts`, `SHOP_PAYMENT_WINDOW_DAYS = 7`). /admin → Orders shows the same with a
-"หมดเวลา 7 วัน" tag on expired awaiting orders. The 7-day cancel is a **display-only**
-computation on both sides (no cron); admin can still set status manually.
+Orders** with a live **24-hour countdown** + a **Pay now** button (reopens the popup for that
+order); past the window it's auto-removed from My Orders / displays as cancelled
+(`isOrderExpired` / `payWindowRemaining` in `lib/shop.ts`, `SHOP_PAYMENT_WINDOW_HOURS = 24`).
+/admin → Orders shows expired awaiting orders with a "หมดเวลา 24 ชม" tag. The cancel is a
+**display-only** computation on both sides (no cron); admin can still set status manually.
 
 **Manual-verification aids (no gateway):** the buyer transfers the **exact order total**
 (no amount tampering — an earlier random-kip scheme was dropped so customers never feel
