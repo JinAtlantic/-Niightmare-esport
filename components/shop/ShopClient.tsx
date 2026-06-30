@@ -15,6 +15,7 @@ import {
   isOtherCourier,
   isOrderExpired,
   payWindowRemaining,
+  qrFrameStyle,
   SHOP_QTY_MAX,
   type ShopContent,
   type ShopOrderItem,
@@ -71,13 +72,10 @@ const COPY = {
   goOrder: { en: "Start an order", lo: "ເລີ່ມສັ່ງຊື້" },
   statusAwaiting: { en: "Awaiting transfer", lo: "ລໍຖ້າການໂອນ" },
   statusPaid: { en: "Transferred · processing", lo: "ໂອນແລ້ວ · ກຳລັງດຳເນີນການ" },
-  statusExpired: { en: "Cancelled · not paid", lo: "ຍົກເລີກ · ບໍ່ໄດ້ໂອນ" },
-  expiredNote: {
-    en: "The 7-day payment window passed, so this order was cancelled.",
-    lo: "ໝົດກຳນົດຈ່າຍ 7 ມື້ ອໍເດີນີ້ຈຶ່ງຖືກຍົກເລີກ.",
-  },
   payNow: { en: "Pay now", lo: "ຈ່າຍເງິນ" },
   timeLeft: { en: "Time left to pay", lo: "ເຫຼືອເວລາຈ່າຍ" },
+  removeOrder: { en: "Remove", lo: "ລຶບ" },
+  removeConfirm: { en: "Remove this order from your list?", lo: "ລຶບອໍເດີນີ້ອອກຈາກລາຍການຂອງທ່ານບໍ?" },
   comingSoon: { en: "Store opening soon", lo: "ຮ້ານກຳລັງຈະເປີດ" },
   comingSoonBody: {
     en: "The NIIGHTMARE jersey store is being prepared. Check back shortly.",
@@ -141,15 +139,32 @@ export default function ShopClient() {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setMyOrders(JSON.parse(raw) as ShopOrderRecord[]);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as ShopOrderRecord[];
+      // Drop reservations that blew past the 7-day pay window.
+      const kept = parsed.filter((o) => !isOrderExpired(o.createdAt, o.status));
+      setMyOrders(kept);
+      if (kept.length !== parsed.length) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(kept));
     } catch {
       /* ignore */
     }
   }, []);
 
-  // Tick so the My Orders countdown stays live.
+  // Tick so the My Orders countdown stays live, and auto-remove expired ones.
   useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 30000);
+    const id = window.setInterval(() => {
+      setNow(Date.now());
+      setMyOrders((prev) => {
+        const kept = prev.filter((o) => !isOrderExpired(o.createdAt, o.status));
+        if (kept.length === prev.length) return prev;
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(kept));
+        } catch {
+          /* ignore */
+        }
+        return kept;
+      });
+    }, 30000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -174,6 +189,15 @@ export default function ShopClient() {
     } catch {
       /* ignore */
     }
+  }
+
+  function removeOrder(idx: number) {
+    if (!window.confirm(pick(COPY.removeConfirm))) return;
+    setMyOrders((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      persist(next);
+      return next;
+    });
   }
 
   function adjustQty(sizeId: string, delta: number) {
@@ -534,14 +558,10 @@ export default function ShopClient() {
                   const awaiting = o.status === "awaiting_payment";
                   const expired = isOrderExpired(o.createdAt, o.status, now);
                   const remaining = payWindowRemaining(o.createdAt, now);
-                  const badge = expired ? pick(COPY.statusExpired) : awaiting ? pick(COPY.statusAwaiting) : pick(COPY.statusPaid);
-                  const badgeCls = expired
-                    ? "border-loss/40 bg-loss/10 text-loss"
-                    : awaiting
-                    ? "border-spectre/40 bg-spectre/10 text-spectre"
-                    : "border-win/40 bg-win/10 text-win";
+                  const badge = awaiting ? pick(COPY.statusAwaiting) : pick(COPY.statusPaid);
+                  const badgeCls = awaiting ? "border-spectre/40 bg-spectre/10 text-spectre" : "border-win/40 bg-win/10 text-win";
                   return (
-                    <div key={(o.id ?? o.refCode ?? "") + i} className={`rounded-md border bg-void/50 p-4 ${expired ? "border-edge/60 opacity-70" : "border-edge"}`}>
+                    <div key={(o.id ?? o.refCode ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                         <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
                           {pick(shop.productName)} · {o.sizeSummary}
@@ -582,9 +602,15 @@ export default function ShopClient() {
                         </div>
                       )}
 
-                      {awaiting && expired && (
-                        <p className="mt-2 font-mono text-[11px] leading-relaxed text-loss">{pick(COPY.expiredNote)}</p>
-                      )}
+                      <div className="mt-3 flex justify-end border-t border-edge/60 pt-2.5">
+                        <button
+                          type="button"
+                          onClick={() => removeOrder(i)}
+                          className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim transition-colors hover:text-loss"
+                        >
+                          {pick(COPY.removeOrder)}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -624,13 +650,13 @@ export default function ShopClient() {
                     </button>
                   </div>
 
-                  {/* QR — shown at natural aspect ratio so tall screenshots aren't cropped */}
-                  <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-md border border-edge-bright bg-white p-3">
+                  {/* QR — framed (zoom/pan set in /admin) so a long screenshot shows
+                       only the QR, big enough to scan */}
+                  <div className="mx-auto aspect-square w-full max-w-[300px] overflow-hidden rounded-md border border-edge-bright bg-white">
                     {qrSrc ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={qrSrc} alt="Payment QR" className="mx-auto block h-auto w-full max-h-[56vh] object-contain" />
+                      <div className="h-full w-full" role="img" aria-label="Payment QR" style={qrFrameStyle(qrSrc, shop.bank)} />
                     ) : (
-                      <span className="grid aspect-square place-items-center px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>
+                      <span className="grid h-full place-items-center px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>
                     )}
                   </div>
                   <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>

@@ -32,6 +32,12 @@ export interface ShopBank {
   accountNumber: string;
   /** Path/URL to the bank QR image. */
   qrImage?: string;
+  /** QR display framing so a long screenshot can be zoomed/panned to show just
+   *  the QR. `qrZoom` = CSS background-size width % (100 = fit the frame width;
+   *  higher = zoom in); `qrX`/`qrY` = background-position % (50/50 = centred). */
+  qrZoom: number;
+  qrX: number;
+  qrY: number;
   note: Bilingual;
   /** Instruction asking the buyer to write the order reference code in the
    *  transfer note/slip, so the team can match a payment to an order. Editable. */
@@ -101,6 +107,9 @@ export const DEFAULT_SHOP: ShopContent = {
     accountName: "NIIGHTMARE ESPORTS",
     accountNumber: "000-00-00-00000000-000",
     qrImage: "",
+    qrZoom: 100,
+    qrX: 50,
+    qrY: 50,
     note: {
       en: "Scan the QR or transfer to the account above, then tap “I've transferred”.",
       lo: "ສະແກນ QR ຫຼື ໂອນເຂົ້າບັນຊີຂ້າງເທິງ ແລ້ວກົດ “ໂອນເງິນແລ້ວ”.",
@@ -209,6 +218,9 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
       accountName: raw?.bank?.accountName ?? DEFAULT_SHOP.bank.accountName,
       accountNumber: raw?.bank?.accountNumber ?? DEFAULT_SHOP.bank.accountNumber,
       qrImage: raw?.bank?.qrImage || undefined,
+      qrZoom: num(raw?.bank?.qrZoom, DEFAULT_SHOP.bank.qrZoom),
+      qrX: num(raw?.bank?.qrX, DEFAULT_SHOP.bank.qrX),
+      qrY: num(raw?.bank?.qrY, DEFAULT_SHOP.bank.qrY),
       note: mergeBi(DEFAULT_SHOP.bank.note, raw?.bank?.note),
       refNote: mergeBi(DEFAULT_SHOP.bank.refNote, raw?.bank?.refNote),
     },
@@ -226,6 +238,23 @@ export function sizePrice(content: ShopContent, size: ShopSize | undefined): num
 export function formatPrice(amount: number, currency: string): string {
   const rounded = Math.round(amount);
   return `${rounded.toLocaleString("en-US")} ${currency}`;
+}
+
+/** Inline CSS to frame the QR on a square element. Background-based so a long
+ *  screenshot can be zoomed/panned to show just the QR (see ShopBank.qrZoom). */
+export function qrFrameStyle(
+  src: string,
+  bank: Pick<ShopBank, "qrZoom" | "qrX" | "qrY">
+): { backgroundImage: string; backgroundRepeat: string; backgroundSize: string; backgroundPosition: string } {
+  const zoom = Number.isFinite(bank.qrZoom) ? bank.qrZoom : 100;
+  const x = Number.isFinite(bank.qrX) ? bank.qrX : 50;
+  const y = Number.isFinite(bank.qrY) ? bank.qrY : 50;
+  return {
+    backgroundImage: `url("${src}")`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: `${zoom}% auto`,
+    backgroundPosition: `${x}% ${y}%`,
+  };
 }
 
 /* ── Fit model (for the 3D viewer) ──────────────────────────────────────────

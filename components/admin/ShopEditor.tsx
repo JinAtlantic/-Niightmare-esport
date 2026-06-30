@@ -12,7 +12,8 @@ import {
   ImageField,
   Label,
 } from "@/components/admin/ui";
-import { resolveShop, type ShopContent, type ShopSize } from "@/lib/shop";
+import { resolveShop, qrFrameStyle, type ShopContent, type ShopSize } from "@/lib/shop";
+import { safeImageSrc } from "@/lib/safety";
 import type { Bilingual } from "@/lib/types";
 
 interface SiteFile {
@@ -38,6 +39,37 @@ function BilingualTextArea({
         <TextArea label="EN" value={value.en} rows={rows} onChange={(en) => onChange({ ...value, en })} />
         <TextArea label="ລາວ" value={value.lo} rows={rows} onChange={(lo) => onChange({ ...value, lo })} />
       </div>
+    </div>
+  );
+}
+
+function QrSlider({
+  label,
+  min,
+  max,
+  value,
+  onChange,
+}: {
+  label: string;
+  min: number;
+  max: number;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <Label>{label}</Label>
+        <span className="font-mono text-[11px] tabular-nums text-spectre">{Math.round(value)}%</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-amethyst"
+      />
     </div>
   );
 }
@@ -127,6 +159,28 @@ export default function ShopEditor() {
             folder="sponsors"
             onChange={(qrImage) => patchBank({ qrImage: qrImage || undefined })}
           />
+
+          {shop.bank.qrImage && (
+            <div>
+              <Label>ครอบ/ซูม QR (ให้เห็นเฉพาะ QR เต็มกรอบ)</Label>
+              <p className="mb-2 font-mono text-[10px] text-ash">
+                ถ้ารูปเป็นสกรีนช็อตยาว ปรับ “ซูม” แล้วเลื่อนแนวนอน/แนวตั้ง ให้เหลือแต่ตัว QR — กรอบสี่เหลี่ยมคือสิ่งที่ลูกค้าจะเห็น
+              </p>
+              <div className="grid items-start gap-4 sm:grid-cols-[160px_1fr]">
+                <div className="mx-auto aspect-square w-40 overflow-hidden rounded-md border border-edge-bright bg-white">
+                  <div className="h-full w-full" style={qrFrameStyle(safeImageSrc(shop.bank.qrImage), shop.bank)} />
+                </div>
+                <div className="space-y-3">
+                  <QrSlider label="ซูม" min={100} max={500} value={shop.bank.qrZoom} onChange={(qrZoom) => patchBank({ qrZoom })} />
+                  <QrSlider label="เลื่อนแนวนอน" min={0} max={100} value={shop.bank.qrX} onChange={(qrX) => patchBank({ qrX })} />
+                  <QrSlider label="เลื่อนแนวตั้ง" min={0} max={100} value={shop.bank.qrY} onChange={(qrY) => patchBank({ qrY })} />
+                  <Button variant="ghost" onClick={() => patchBank({ qrZoom: 100, qrX: 50, qrY: 50 })}>
+                    รีเซ็ตกรอบ
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <BilingualTextArea label="ข้อความใต้ QR" value={shop.bank.note} rows={2} onChange={(note) => patchBank({ note })} />
           <BilingualTextArea
             label="ข้อความแจ้งให้เขียนเลขออเดอร์ในสลิป"
