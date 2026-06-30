@@ -14,6 +14,7 @@ interface OrderLine {
 interface OrderRow {
   id: string;
   created_at: string;
+  updated_at: string | null;
   quantity: number;
   size: string;
   unit_price: number | null;
@@ -48,6 +49,8 @@ const TABS: { id: TabId; label: string; match: (s: string) => boolean }[] = [
 ];
 
 const fmt = (n: number, c: string) => `${Number(n || 0).toLocaleString("en-US")} ${c}`;
+/** Time of the order's last change (transfer / status update), falling back to created. */
+const orderTime = (o: OrderRow) => o.updated_at || o.created_at;
 const fmtDate = (iso: string) => {
   try {
     return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
@@ -91,7 +94,9 @@ export default function OrdersEditor() {
         body: JSON.stringify({ id, status }),
       });
       if (!res.ok) throw new Error();
-      setOrders((rows) => rows.map((r) => (r.id === id ? { ...r, status } : r)));
+      // Reflect the change time immediately (the DB trigger bumps updated_at too).
+      const nowIso = new Date().toISOString();
+      setOrders((rows) => rows.map((r) => (r.id === id ? { ...r, status, updated_at: nowIso } : r)));
     } catch {
       setError("อัปเดตสถานะไม่สำเร็จ");
     } finally {
@@ -108,7 +113,7 @@ export default function OrdersEditor() {
   const activeTab = TABS.find((t) => t.id === tab) ?? TABS[1];
   const visible = orders
     .filter((o) => activeTab.match(o.status))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    .sort((a, b) => new Date(orderTime(b)).getTime() - new Date(orderTime(a)).getTime());
 
   return (
     <div className="space-y-5">
@@ -172,15 +177,16 @@ export default function OrdersEditor() {
                 </div>
               </div>
 
+              {/* what was ordered + status */}
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-edge pt-2.5">
-                <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
-                  {o.customer_name} · {o.size} · x{o.quantity}
-                </span>
+                <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">{o.size} · {o.quantity} ตัว</span>
                 <span className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
                   {expired ? "รอชำระ · หมดเวลา 7 วัน" : opt?.label ?? o.status}
                 </span>
               </div>
-              <p className="font-mono text-[11px] text-ash">{fmtDate(o.created_at)}</p>
+
+              {/* date/time of the last change (transfer / status update) */}
+              <p className="font-mono text-[11px] text-ash">{fmtDate(orderTime(o))}</p>
 
               {o.slip_url && (
                 <a
@@ -195,24 +201,30 @@ export default function OrdersEditor() {
                 </a>
               )}
 
-              {Array.isArray(o.items) && o.items.length > 1 && (
-                <div className="border-t border-edge pt-3 font-mono text-[11px] text-spectre">
-                  {o.items.map((l, idx) => (
-                    <span key={idx} className="mr-3 inline-block">
-                      {l.label} × {l.quantity} = {fmt(l.lineTotal, o.currency)}
-                    </span>
-                  ))}
+              {/* everything else folded into a dropdown */}
+              <details className="group border-t border-edge pt-3">
+                <summary className="flex cursor-pointer list-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ash transition-colors hover:text-soul [&::-webkit-details-marker]:hidden">
+                  <span className="inline-block transition-transform group-open:rotate-90">▸</span>
+                  ข้อมูลลูกค้า / จัดส่ง
+                </summary>
+                <div className="mt-2.5 grid gap-1.5 font-mono text-[11px] text-spectre md:grid-cols-2">
+                  <span>ชื่อ: {o.customer_name}</span>
+                  <span>โทร: {o.phone}</span>
+                  <span>ขนส่ง: {o.courier}</span>
+                  <span>แขวง: {o.province}</span>
+                  <span>เมือง: {o.city}</span>
+                  <span>สาขา: {o.branch}</span>
                 </div>
-              )}
-
-              <div className="grid gap-1.5 border-t border-edge pt-3 font-mono text-[11px] text-spectre md:grid-cols-2">
-                <span>โทร: {o.phone}</span>
-                <span>ขนส่ง: {o.courier}</span>
-                <span>แขวง: {o.province}</span>
-                <span>เมือง: {o.city}</span>
-                <span>สาขา: {o.branch}</span>
-                <span>รวม: {o.quantity} ตัว</span>
-              </div>
+                {Array.isArray(o.items) && o.items.length > 1 && (
+                  <div className="mt-2.5 border-t border-edge/60 pt-2.5 font-mono text-[11px] text-spectre">
+                    {o.items.map((l, idx) => (
+                      <span key={idx} className="mr-3 inline-block">
+                        {l.label} × {l.quantity} = {fmt(l.lineTotal, o.currency)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </details>
 
               <div className="flex flex-wrap gap-2 border-t border-edge pt-3">
                 {STATUS_OPTS.map((s) => (
