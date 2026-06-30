@@ -17,7 +17,7 @@ interface OrderRow {
   size: string;
   unit_price: number | null;
   total: number;
-  payable: number | null;
+  ref_code: string | null;
   slip_url: string | null;
   currency: string;
   items: OrderLine[] | null;
@@ -128,14 +128,16 @@ export default function OrdersEditor() {
                   <p className="font-display text-base font-bold uppercase tracking-wide text-soul">
                     {o.customer_name} · {o.size} · x{o.quantity}
                   </p>
-                  <p className="mt-0.5 font-mono text-[11px] text-ash">{fmtDate(o.created_at)}</p>
+                  {o.ref_code && (
+                    <span className="mt-1 inline-block rounded border border-glow/40 bg-glow/10 px-2 py-0.5 font-mono text-[11px] font-bold tracking-[0.1em] text-glow">
+                      {o.ref_code}
+                    </span>
+                  )}
+                  <p className="mt-1 font-mono text-[11px] text-ash">{fmtDate(o.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  {/* the exact amount the customer should have transferred — match this in the bank app */}
-                  <p className="font-display text-lg font-bold text-soul">{fmt(o.payable ?? o.total, o.currency)}</p>
-                  {o.payable != null && o.payable !== o.total && (
-                    <p className="font-mono text-[10px] text-ash-dim">ฐาน {fmt(o.total, o.currency)}</p>
-                  )}
+                  {/* the amount the customer should have transferred — match this in the bank app */}
+                  <p className="font-display text-lg font-bold text-soul">{fmt(o.total, o.currency)}</p>
                   <p className={`font-mono text-[11px] ${opt?.tone ?? "text-ash"}`}>{opt?.label ?? o.status}</p>
                 </div>
               </div>

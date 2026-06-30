@@ -7,8 +7,7 @@ import {
   summariseLines,
   validateOrder,
   buildOrderMessage,
-  clampPayOffset,
-  formatPrice,
+  cleanRefCode,
   type ShopContent,
   type ShopOrderInput,
   type ShopOrderItem,
@@ -128,9 +127,9 @@ export async function POST(request: Request) {
   }
   const summary = summariseLines(lines);
 
-  // Exact transfer amount = total + a tiny per-order reference offset, so the
-  // team can match an incoming bank deposit to exactly one order by amount.
-  const payable = total + clampPayOffset(body.offset);
+  // Short reference code the buyer is asked to put in the transfer note, so the
+  // team can match a payment to one order (no amount tampering).
+  const refCode = cleanRefCode(body.ref);
 
   // Upload the customer's payment slip (best-effort; order still saves without it).
   const slipUrl = await uploadSlip(body.slip);
@@ -140,7 +139,7 @@ export async function POST(request: Request) {
     sizeSummary: summary,
     totalQty,
     total,
-    payable,
+    refCode,
     currency: shop.currency,
     customerName: input.customerName,
     phone: input.phone,
@@ -161,7 +160,7 @@ export async function POST(request: Request) {
       items: lines,
       unit_price: lines.length === 1 ? lines[0].unitPrice : null,
       total,
-      payable,
+      ref_code: refCode || null,
       currency: shop.currency,
       customer_name: input.customerName,
       phone: input.phone,
@@ -174,10 +173,10 @@ export async function POST(request: Request) {
     };
     let { data, error } = await db.from("shop_orders").insert(row).select("id").single();
     // Resilience: if an optional column hasn't been added to the table yet
-    // (items / payable / slip_url), drop it and retry instead of 500ing.
+    // (items / ref_code / slip_url), drop it and retry instead of 500ing.
     let guard = 0;
     while (error && guard < 3) {
-      const col = ["items", "payable", "slip_url"].find((c) => error!.message.includes(c));
+      const col = ["items", "ref_code", "slip_url"].find((c) => error!.message.includes(c));
       if (!col) break;
       delete row[col];
       guard++;
@@ -199,7 +198,7 @@ export async function POST(request: Request) {
           _subject: `NIIGHTMARE jersey order — ${input.customerName}`,
           message:
             buildOrderMessage(shop, record, "en") +
-            `\nExact transfer amount: ${formatPrice(payable, shop.currency)}` +
+            (refCode ? `\nOrder reference: ${refCode}` : "") +
             (slipUrl ? `\nPayment slip: ${slipUrl}` : `\nPayment slip: (not attached)`),
           name: input.customerName,
           phone: input.phone,
@@ -210,5 +209,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, id, order: { ...record, id, payable, slipUrl, status: "paid_declared" } });
+  return NextResponse.json({ ok: true, id, order: { ...record, id, refCode, slipUrl, status: "paid_declared" } });
 }

@@ -329,9 +329,9 @@ create table if not exists public.shop_orders (
 );
 -- Per-size breakdown for multi-size orders: [{ sizeId, label, quantity, unitPrice, lineTotal }, …]
 alter table public.shop_orders add column if not exists items jsonb;
--- Exact transfer amount = total + a tiny (1–99) per-order reference offset, so the
--- team can match a bank deposit to one order by amount (manual verification, no gateway).
-alter table public.shop_orders add column if not exists payable bigint;
+-- Short order reference code (e.g. "NM-7K3QX") the buyer is asked to put in the
+-- transfer note, so the team can match a payment to one order (manual, no gateway).
+alter table public.shop_orders add column if not exists ref_code text;
 -- Public URL of the customer-uploaded payment slip image (Vercel Blob).
 alter table public.shop_orders add column if not exists slip_url text;
 alter table public.shop_orders enable row level security;

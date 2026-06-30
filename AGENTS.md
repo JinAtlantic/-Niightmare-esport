@@ -214,15 +214,16 @@ jumps to the My Orders tab. Payment is **self-declared** (no gateway): orders la
 `status='paid_declared'`; the team verifies in **/admin → Orders** tab and advances
 status (paid_declared → verified → shipped → cancelled).
 
-**Manual-verification aids (no gateway):** the popup shows an **exact transfer amount =
-`total` + a per-order offset of 1–99 ກີບ** (random, generated client-side on open, sent
-as `offset` and clamped server-side; stored in `shop_orders.payable`). The odd kip makes
-each deposit near-unique so the boss can match a bank-app credit to one order by amount.
-The buyer must also **attach a payment slip** (required to enable "I've transferred"); the
-image is downscaled client-side, posted as a base64 data URL on `slip`, uploaded to Vercel
-Blob server-side (needs `BLOB_READ_WRITE_TOKEN`), and stored as `shop_orders.slip_url`.
-/admin → Orders floats `paid_declared` orders to the top and shows the payable amount +
-slip thumbnail next to the status buttons.
+**Manual-verification aids (no gateway):** the buyer transfers the **exact order total**
+(no amount tampering — an earlier random-kip scheme was dropped so customers never feel
+overcharged). Each order gets a short **reference code** (`NM-XXXXX`, generated client-side
+on popup open, sent as `ref`, sanitised by `cleanRefCode`, stored in `shop_orders.ref_code`)
+shown in the pay popup with a note to put it in the transfer's note field. The buyer must
+also **attach a payment slip** (required to enable "I've transferred"); the image is
+downscaled client-side, posted as a base64 data URL on `slip`, uploaded to Vercel Blob
+server-side (needs `BLOB_READ_WRITE_TOKEN`), and stored as `shop_orders.slip_url`. /admin →
+Orders floats `paid_declared` orders to the top and shows the ref code + total + slip
+thumbnail next to the status buttons, so the boss matches the slip/note and clicks verify.
 
 Files: `lib/shop.ts` (config/types/`resolveShop`/`computeOrder`/`validateOrder`; also a
 leftover fit model used only by the unused viewer), `app/shop/page.tsx`,
@@ -237,7 +238,7 @@ Owner setup still pending (placeholders shipped): upload the real bank **QR** + 
 + the "Ask for more info" contact link in /admin → Shop. The order route degrades
 gracefully if optional columns haven't been added — run these in the Supabase SQL editor
 to persist them: `alter table public.shop_orders add column if not exists items jsonb;`
-`alter table public.shop_orders add column if not exists payable bigint;`
+`alter table public.shop_orders add column if not exists ref_code text;`
 `alter table public.shop_orders add column if not exists slip_url text;`
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js

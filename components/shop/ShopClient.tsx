@@ -44,10 +44,11 @@ const COPY = {
   payTitle: { en: "Transfer to pay", lo: "ໂອນເງິນເພື່ອຈ່າຍ" },
   scan: { en: "Scan this QR with your banking app", lo: "ສະແກນ QR ນີ້ດ້ວຍແອັບທະນາຄານ" },
   amount: { en: "Amount", lo: "ຈຳນວນເງິນ" },
-  payExact: { en: "Transfer this exact amount", lo: "ໂອນຈຳນວນນີ້ໃຫ້ຖືກຕ້ອງ" },
-  payRefNote: {
-    en: "The last digits are a reference so we can verify your payment — please transfer the exact amount.",
-    lo: "ເລກທ້າຍແມ່ນລະຫັດອ້າງອີງເພື່ອໃຫ້ພວກເຮົາກວດສອບການຈ່າຍ — ກະລຸນາໂອນໃຫ້ຖືກຕ້ອງ.",
+  payExact: { en: "Amount to transfer", lo: "ຈຳນວນທີ່ຕ້ອງໂອນ" },
+  refCode: { en: "Order reference", lo: "ເລກອ້າງອີງອໍເດີ" },
+  refNote: {
+    en: "If your banking app has a note field, enter this code so we can match your payment.",
+    lo: "ຖ້າແອັບທະນາຄານມີຊ່ອງໝາຍເຫດ ໃຫ້ພິມລະຫັດນີ້ ເພື່ອໃຫ້ພວກເຮົາກວດສອບການຈ່າຍ.",
   },
   attachSlip: { en: "Attach payment slip", lo: "ແນບສະລິບການໂອນ" },
   slipPick: { en: "Tap to upload your slip", lo: "ກົດເພື່ອອັບໂຫລດສະລິບ" },
@@ -98,9 +99,9 @@ export default function ShopClient() {
   const [paySuccess, setPaySuccess] = useState(false);
   const [payError, setPayError] = useState("");
   const [myOrders, setMyOrders] = useState<ShopOrderRecord[]>([]);
-  // Per-order reference offset (1–99 kip) makes the exact transfer amount near-unique
-  // so the team can match a bank deposit to one order. Set when the popup opens.
-  const [payOffset, setPayOffset] = useState(1);
+  // Short per-order reference code the buyer is asked to put in the transfer note,
+  // so the team can match a payment to one order. Set when the popup opens.
+  const [payRef, setPayRef] = useState("");
   const [slip, setSlip] = useState("");
   const [slipName, setSlipName] = useState("");
 
@@ -146,7 +147,7 @@ export default function ShopClient() {
     }
     setPayError("");
     setPaySuccess(false);
-    setPayOffset(1 + Math.floor(Math.random() * 99));
+    setPayRef("NM-" + Math.random().toString(36).slice(2, 7).toUpperCase());
     setSlip("");
     setSlipName("");
     setPayOpen(true);
@@ -176,7 +177,7 @@ export default function ShopClient() {
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...currentInput(), offset: payOffset, slip }),
+        body: JSON.stringify({ ...currentInput(), ref: payRef, slip }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "save failed");
@@ -421,7 +422,7 @@ export default function ShopClient() {
                         {o.totalQty} {pick(COPY.pieces)}
                         {o.createdAt ? ` · ${new Date(o.createdAt).toLocaleDateString("en-GB")}` : ""}
                       </span>
-                      <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.payable ?? o.total, o.currency)}</span>
+                      <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.total, o.currency)}</span>
                     </div>
                   </div>
                 ))}
@@ -468,13 +469,17 @@ export default function ShopClient() {
                 </div>
                 <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
 
-                {/* exact amount to transfer — the odd kip is the verification reference */}
+                {/* exact amount to transfer + an order reference code for matching */}
                 <div className="mt-4 rounded-md border border-amethyst/45 bg-amethyst/10 p-4 text-center">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.payExact)}</p>
                   <p className="mt-1 break-words font-display text-2xl font-black tabular-nums text-soul sm:text-3xl">
-                    {formatPrice(total + payOffset, shop.currency)}
+                    {formatPrice(total, shop.currency)}
                   </p>
-                  <p className="mt-2 text-[11px] leading-relaxed text-spectre/80">{pick(COPY.payRefNote)}</p>
+                  <div className="mt-3 flex items-center justify-center gap-2 border-t border-amethyst/25 pt-3">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">{pick(COPY.refCode)}</span>
+                    <span className="keep-latin rounded border border-glow/50 bg-void/50 px-2 py-0.5 font-mono text-sm font-bold tracking-[0.12em] text-glow">{payRef}</span>
+                  </div>
+                  <p className="mt-2 text-[11px] leading-relaxed text-spectre/80">{pick(COPY.refNote)}</p>
                 </div>
 
                 <div className="mt-3 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">

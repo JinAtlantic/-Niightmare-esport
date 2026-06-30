@@ -291,9 +291,9 @@ export interface ShopOrderRecord {
   sizeSummary: string;
   totalQty: number;
   total: number;
-  /** Exact amount the buyer must transfer = total + a tiny per-order reference
-   * offset, so the team can match a bank deposit to one order without a gateway. */
-  payable?: number;
+  /** Short human reference code (e.g. "NM-7K3QX") the buyer is asked to put in
+   * the transfer note, so the team can match a payment to one order. */
+  refCode?: string;
   currency: string;
   customerName: string;
   phone: string;
@@ -307,14 +307,12 @@ export interface ShopOrderRecord {
   status?: string;
 }
 
-/** Largest kip added as a per-order payment reference (keeps the surcharge trivial). */
-export const SHOP_PAY_REF_MAX = 99;
-
-/** Clamp a client-supplied reference offset into [1, SHOP_PAY_REF_MAX]. */
-export function clampPayOffset(raw: unknown): number {
-  const v = Math.floor(Number(raw) || 0);
-  if (!Number.isFinite(v) || v < 1) return 1;
-  return Math.min(SHOP_PAY_REF_MAX, v);
+/** Normalise a client-supplied order reference code to a safe, short token. */
+export function cleanRefCode(raw: unknown): string {
+  return String(raw ?? "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]/g, "")
+    .slice(0, 16);
 }
 
 /** Resolve cart items against the live catalogue and compute authoritative totals. */
