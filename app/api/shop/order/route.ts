@@ -213,12 +213,18 @@ export async function POST(request: Request) {
   if (db) {
     let updated = false;
     if (orderId) {
+      // Set updated_at explicitly (the DB trigger isn't relied on) so the order's
+      // time reflects the transfer moment.
+      const changedAt = new Date().toISOString();
       let { error } = await db
         .from("shop_orders")
-        .update({ slip_url: slipUrl ?? null, status: "paid_declared" })
+        .update({ slip_url: slipUrl ?? null, status: "paid_declared", updated_at: changedAt })
         .eq("id", orderId);
       if (error && /slip_url/.test(error.message)) {
-        ({ error } = await db.from("shop_orders").update({ status: "paid_declared" }).eq("id", orderId));
+        ({ error } = await db
+          .from("shop_orders")
+          .update({ status: "paid_declared", updated_at: changedAt })
+          .eq("id", orderId));
       }
       updated = !error;
     }

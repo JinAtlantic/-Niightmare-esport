@@ -38,7 +38,12 @@ export async function PATCH(request: Request) {
   }
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
-  const { error } = await db.from("shop_orders").update({ status: body.status }).eq("id", body.id);
+  // Set updated_at explicitly so the order's displayed time tracks the last change
+  // (the DB trigger isn't relied on).
+  const { error } = await db
+    .from("shop_orders")
+    .update({ status: body.status, updated_at: new Date().toISOString() })
+    .eq("id", body.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
