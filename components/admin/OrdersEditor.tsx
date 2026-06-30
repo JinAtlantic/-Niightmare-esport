@@ -40,13 +40,53 @@ const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
   { value: "cancelled", label: "ยกเลิก", tone: "text-loss" },
 ];
 
-type TabId = "awaiting" | "checking" | "paid";
+type TabId = "awaiting" | "checking" | "paid" | "shipped";
 
 const TABS: { id: TabId; label: string; match: (s: string) => boolean }[] = [
   { id: "awaiting", label: "รอชำระ", match: (s) => s === "awaiting_payment" },
   { id: "checking", label: "กำลังตรวจ", match: (s) => s === "paid_declared" },
-  { id: "paid", label: "จ่ายแล้ว", match: (s) => s === "verified" || s === "shipped" || s === "cancelled" },
+  { id: "paid", label: "จ่ายแล้ว", match: (s) => s === "verified" || s === "cancelled" },
+  { id: "shipped", label: "ส่งแล้ว", match: (s) => s === "shipped" },
 ];
+
+const SIZE_ORDER = ["S", "M", "L", "XL", "XXL", "3XL", "4XL"];
+
+/** Per-size quantities for one order (from the structured items, or by parsing the
+ *  "M×2, L×1" summary for older single-column rows). */
+function sizeCounts(o: OrderRow): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (Array.isArray(o.items) && o.items.length) {
+    for (const l of o.items) out[l.label] = (out[l.label] ?? 0) + Number(l.quantity || 0);
+  } else if (o.size) {
+    for (const m of o.size.matchAll(/([^\s×,]+)\s*×\s*(\d+)/g)) out[m[1]] = (out[m[1]] ?? 0) + Number(m[2]);
+  }
+  return out;
+}
+
+function sortSizes(sizes: Record<string, number>): [string, number][] {
+  return Object.entries(sizes).sort((a, b) => {
+    const ia = SIZE_ORDER.indexOf(a[0]);
+    const ib = SIZE_ORDER.indexOf(b[0]);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+}
+
+function periodKey(iso: string, gran: "day" | "month" | "year"): string {
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  if (gran === "year") return `${y}`;
+  if (gran === "month") return `${y}-${m}`;
+  return `${y}-${m}-${day}`;
+}
+
+function periodLabel(iso: string, gran: "day" | "month" | "year"): string {
+  const d = new Date(iso);
+  if (gran === "year") return String(d.getFullYear());
+  if (gran === "month") return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
 
 const fmt = (n: number, c: string) => `${Number(n || 0).toLocaleString("en-US")} ${c}`;
 /** Time of the order's last change (transfer / status update), falling back to created. */
@@ -108,6 +148,7 @@ export default function OrdersEditor() {
     awaiting: orders.filter((o) => TABS[0].match(o.status)).length,
     checking: orders.filter((o) => TABS[1].match(o.status)).length,
     paid: orders.filter((o) => TABS[2].match(o.status)).length,
+    shipped: orders.filter((o) => TABS[3].match(o.status)).length,
   };
 
   const activeTab = TABS.find((t) => t.id === tab) ?? TABS[1];
@@ -124,11 +165,12 @@ export default function OrdersEditor() {
         </Button>
       </div>
 
-      {/* 3 sub-tabs so the boss checks one bucket at a time */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* sub-tabs so the boss checks one bucket at a time */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {TABS.map((t) => {
           const active = t.id === tab;
-          const tone = t.id === "awaiting" ? "text-spectre" : t.id === "checking" ? "text-glow" : "text-win";
+          const tone =
+            t.id === "awaiting" ? "text-spectre" : t.id === "checking" ? "text-glow" : t.id === "shipped" ? "text-amethyst" : "text-win";
           return (
             <button
               key={t.id}
@@ -148,6 +190,8 @@ export default function OrdersEditor() {
       </div>
 
       {error && <p className="font-mono text-[11px] text-loss">{error}</p>}
+
+      {tab === "shipped" && <SalesReport orders={visible} />}
 
       {!loading && visible.length === 0 && (
         <Card>
@@ -243,5 +287,104 @@ export default function OrdersEditor() {
         })}
       </div>
     </div>
+  );
+}
+
+/* ── Sales summary (ส่งแล้ว tab): revenue, units and per-size, by day/month/year ── */
+
+function SalesReport({ orders }: { orders: OrderRow[] }) {
+  const [gran, setGran] = useState<"day" | "month" | "year">("month");
+  const currency = orders[0]?.currency || "ກີບ";
+
+  const totalRevenue = orders.reduce((a, o) => a + Number(o.total || 0), 0);
+  const totalUnits = orders.reduce((a, o) => a + Number(o.quantity || 0), 0);
+  const totalSizes: Record<string, number> = {};
+  for (const o of orders) {
+    const sc = sizeCounts(o);
+    for (const k in sc) totalSizes[k] = (totalSizes[k] ?? 0) + sc[k];
+  }
+
+  const groups = new Map<string, { label: string; revenue: number; units: number; sizes: Record<string, number> }>();
+  for (const o of orders) {
+    const key = periodKey(o.created_at, gran);
+    let g = groups.get(key);
+    if (!g) {
+      g = { label: periodLabel(o.created_at, gran), revenue: 0, units: 0, sizes: {} };
+      groups.set(key, g);
+    }
+    g.revenue += Number(o.total || 0);
+    g.units += Number(o.quantity || 0);
+    const sc = sizeCounts(o);
+    for (const k in sc) g.sizes[k] = (g.sizes[k] ?? 0) + sc[k];
+  }
+  const rows = [...groups.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1)).map(([, g]) => g);
+
+  const GRANS: { id: "day" | "month" | "year"; label: string }[] = [
+    { id: "day", label: "รายวัน" },
+    { id: "month", label: "รายเดือน" },
+    { id: "year", label: "รายปี" },
+  ];
+
+  return (
+    <Card className="space-y-4 border-amethyst/30">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดขายรวม (ส่งแล้ว)</p>
+          <p className="font-display text-3xl font-black tabular-nums text-win">{fmt(totalRevenue, currency)}</p>
+          <p className="mt-0.5 font-mono text-[11px] text-spectre">
+            ขายได้ <span className="font-bold text-soul">{totalUnits}</span> ตัว · {orders.length} ออเดอร์
+          </p>
+        </div>
+        <div className="flex gap-1.5">
+          {GRANS.map((g) => (
+            <button
+              key={g.id}
+              type="button"
+              onClick={() => setGran(g.id)}
+              className={`rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
+                gran === g.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {sortSizes(totalSizes).length > 0 && (
+        <div className="flex flex-wrap gap-1.5 border-t border-edge pt-3">
+          {sortSizes(totalSizes).map(([label, qty]) => (
+            <span key={label} className="rounded border border-edge bg-void/50 px-2 py-1 font-mono text-[11px] text-spectre">
+              <span className="keep-latin font-bold text-soul">{label}</span> {qty}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <div className="space-y-1.5 border-t border-edge pt-3">
+          {rows.map((g) => (
+            <div key={g.label} className="rounded-md border border-edge bg-void/40 p-2.5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="keep-latin font-mono text-[12px] font-bold text-soul">{g.label}</span>
+                <span className="text-right">
+                  <span className="font-display text-base font-bold tabular-nums text-win">{fmt(g.revenue, currency)}</span>
+                  <span className="ml-2 font-mono text-[11px] text-ash">{g.units} ตัว</span>
+                </span>
+              </div>
+              {sortSizes(g.sizes).length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10px] text-spectre">
+                  {sortSizes(g.sizes).map(([label, qty]) => (
+                    <span key={label}>
+                      <span className="keep-latin font-bold text-soul">{label}</span> {qty}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   );
 }
