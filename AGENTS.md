@@ -324,6 +324,15 @@ baked at BUILD time → must be set before the deploy that should expose it):
 the site is added to the Home Screen (installed as a PWA); desktop Chrome/Edge/Firefox and
 Android Chrome work directly.
 
+**PWA / install prompt:** the home-screen app icon is the NIIGHTMARE logo (`app/icon.png`
+favicon, `app/apple-icon.png` for iOS, `public/icon-{192,512}.png` + `app/manifest.ts` for
+Android install). `components/ui/InstallPrompt.tsx` (mounted in the **public** branch of
+`Chrome.tsx`, so never on /admin) is a dismissible bottom banner that nudges fans to add the
+site: Android/desktop Chrome get a one-tap **Install** via the `beforeinstallprompt` event;
+iOS Safari gets the Share→"Add to Home Screen" instructions. It registers `sw.js` site-wide
+(its no-op `fetch` handler makes Chrome treat the site as installable), hides when already
+in standalone, and remembers a dismissal for 14 days (`nm-install-dismissed`).
+
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js
 preview.

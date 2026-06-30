@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LiveBanner from "@/components/layout/LiveBanner";
 import Preloader from "@/components/ui/Preloader";
+import InstallPrompt from "@/components/ui/InstallPrompt";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 /**
@@ -33,6 +34,7 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <Footer />
+      <InstallPrompt />
     </>
   );
 }

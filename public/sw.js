@@ -5,6 +5,10 @@
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
+// A no-op fetch handler (default network passthrough). Its mere presence lets
+// Chrome treat the site as installable so the Add-to-Home-Screen prompt fires.
+self.addEventListener("fetch", () => {});
+
 self.addEventListener("push", (event) => {
   let data = {};
   try {
