@@ -625,9 +625,10 @@ export default function ShopClient() {
         payOpen &&
         payingOrder &&
         createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
-            <button type="button" className="absolute inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={closePay} />
-            <div className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-md border border-edge-bright bg-crypt p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] md:p-6">
+          <div className="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
+            <button type="button" className="fixed inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={closePay} />
+            <div className="pointer-events-none relative flex min-h-full items-center justify-center p-4">
+              <div className="pointer-events-auto relative z-10 w-full max-w-md rounded-md border border-edge-bright bg-crypt p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] md:p-6">
               {paySuccess ? (
                 <div className="flex flex-col items-center gap-4 py-8 text-center">
                   <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-win bg-win/15 text-win shadow-[0_0_30px_rgba(52,211,153,0.5)]">
@@ -651,17 +652,21 @@ export default function ShopClient() {
                   </div>
 
                   {/* QR — framed (zoom/pan set in /admin) so a long screenshot shows
-                       only the QR, big enough to scan. The background is applied to the
-                       aspect-square box itself (a percentage-height child collapses to 0
-                       on mobile Safari when the parent is sized via aspect-ratio). */}
-                  <div
-                    className="mx-auto grid aspect-square w-full max-w-[300px] place-items-center overflow-hidden rounded-md border border-edge-bright bg-white"
-                    role="img"
-                    aria-label="Payment QR"
-                    style={qrSrc ? qrFrameStyle(qrSrc, shop.bank) : undefined}
-                  >
-                    {!qrSrc && <span className="px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>}
-                  </div>
+                       only the QR, big enough to scan. The square is made with the
+                       padding-bottom trick (NOT aspect-ratio, which older mobile Safari
+                       doesn't support) and the QR is the box's own background. */}
+                  {qrSrc ? (
+                    <div
+                      className="mx-auto w-full max-w-[300px] overflow-hidden rounded-md border border-edge-bright bg-white"
+                      role="img"
+                      aria-label="Payment QR"
+                      style={{ paddingBottom: "100%", ...qrFrameStyle(qrSrc, shop.bank) }}
+                    />
+                  ) : (
+                    <div className="mx-auto grid min-h-[220px] w-full max-w-[300px] place-items-center rounded-md border border-edge-bright bg-white px-4 text-center font-mono text-[11px] text-void/70">
+                      QR code — set it in /admin
+                    </div>
+                  )}
                   <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
 
                   {/* exact amount + a copyable order reference, plus the editable note */}
@@ -732,6 +737,7 @@ export default function ShopClient() {
                   </button>
                 </>
               )}
+              </div>
             </div>
           </div>,
           document.body

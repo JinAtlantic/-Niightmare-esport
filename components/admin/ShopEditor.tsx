@@ -168,8 +168,8 @@ export default function ShopEditor() {
               </p>
               <div className="grid items-start gap-4 sm:grid-cols-[160px_1fr]">
                 <div
-                  className="mx-auto aspect-square w-40 overflow-hidden rounded-md border border-edge-bright bg-white"
-                  style={qrFrameStyle(safeImageSrc(shop.bank.qrImage), shop.bank)}
+                  className="mx-auto w-40 overflow-hidden rounded-md border border-edge-bright bg-white"
+                  style={{ paddingBottom: "10rem", ...qrFrameStyle(safeImageSrc(shop.bank.qrImage), shop.bank) }}
                 />
                 <div className="space-y-3">
                   <QrSlider label="ซูม" min={100} max={500} value={shop.bank.qrZoom} onChange={(qrZoom) => patchBank({ qrZoom })} />
