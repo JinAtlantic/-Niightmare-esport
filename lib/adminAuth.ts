@@ -31,8 +31,10 @@ export const adminDisabled = (): boolean => {
   return !(securePw && secureSecret);
 };
 
-/** Session lifetime: keep admin sessions short enough for production use. */
-export const SESSION_MAX_AGE = 12 * 60 * 60;
+/** Session lifetime. Long-lived on purpose: once a device logs in, the owner
+ *  wants it to stay signed in (no re-entering the password each visit). The
+ *  cookie is httpOnly + signed; "Log out" still clears it on demand. */
+export const SESSION_MAX_AGE = 365 * 24 * 60 * 60;
 
 export function adminTotpEnabled(): boolean {
   return TOTP_SECRET.length > 0;
