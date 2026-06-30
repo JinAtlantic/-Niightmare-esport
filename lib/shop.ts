@@ -33,6 +33,9 @@ export interface ShopBank {
   /** Path/URL to the bank QR image. */
   qrImage?: string;
   note: Bilingual;
+  /** Instruction asking the buyer to write the order reference code in the
+   *  transfer note/slip, so the team can match a payment to an order. Editable. */
+  refNote: Bilingual;
 }
 
 export interface ShopContent {
@@ -102,6 +105,10 @@ export const DEFAULT_SHOP: ShopContent = {
       en: "Scan the QR or transfer to the account above, then tap “I've transferred”.",
       lo: "ສະແກນ QR ຫຼື ໂອນເຂົ້າບັນຊີຂ້າງເທິງ ແລ້ວກົດ “ໂອນເງິນແລ້ວ”.",
     },
+    refNote: {
+      en: "IMPORTANT: write your order reference below into the transfer note/message, so we can match your payment to this order.",
+      lo: "ສຳຄັນ: ກະລຸນາພິມເລກອ້າງອີງອໍເດີຂ້າງລຸ່ມລົງໃນໝາຍເຫດການໂອນ ເພື່ອໃຫ້ພວກເຮົາກວດສອບການຈ່າຍໃຫ້ກົງກັບອໍເດີນີ້.",
+    },
   },
   contactUrl: "https://m.me/niightmareesports",
   productImage: "",
@@ -112,6 +119,34 @@ export const SHOP_HEIGHT_MIN = 150;
 export const SHOP_HEIGHT_MAX = 200;
 export const SHOP_HEIGHT_DEFAULT = 172;
 export const SHOP_QTY_MAX = 999;
+
+/** Days a buyer has to transfer before an unpaid (reserved) order auto-cancels. */
+export const SHOP_PAYMENT_WINDOW_DAYS = 7;
+
+/** Order lifecycle status. `awaiting_payment` = reserved but not yet transferred;
+ *  `paid_declared` = buyer attached a slip and declared the transfer. */
+export type ShopOrderStatus =
+  | "awaiting_payment"
+  | "paid_declared"
+  | "verified"
+  | "shipped"
+  | "cancelled";
+
+/** Whether a reserved (awaiting_payment) order has passed its transfer window. */
+export function isOrderExpired(createdAt?: string, status?: string, nowMs = Date.now()): boolean {
+  if (status !== "awaiting_payment" || !createdAt) return false;
+  const created = new Date(createdAt).getTime();
+  if (!Number.isFinite(created)) return false;
+  return nowMs - created > SHOP_PAYMENT_WINDOW_DAYS * 86400000;
+}
+
+/** Milliseconds left to pay a reserved order (0 once expired). */
+export function payWindowRemaining(createdAt?: string, nowMs = Date.now()): number {
+  if (!createdAt) return 0;
+  const created = new Date(createdAt).getTime();
+  if (!Number.isFinite(created)) return 0;
+  return Math.max(0, created + SHOP_PAYMENT_WINDOW_DAYS * 86400000 - nowMs);
+}
 
 /** True when a courier value means "Other" (so the buyer types a custom name). */
 export function isOtherCourier(value: string): boolean {
@@ -175,6 +210,7 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
       accountNumber: raw?.bank?.accountNumber ?? DEFAULT_SHOP.bank.accountNumber,
       qrImage: raw?.bank?.qrImage || undefined,
       note: mergeBi(DEFAULT_SHOP.bank.note, raw?.bank?.note),
+      refNote: mergeBi(DEFAULT_SHOP.bank.refNote, raw?.bank?.refNote),
     },
     contactUrl: raw?.contactUrl ?? DEFAULT_SHOP.contactUrl,
     productImage: raw?.productImage || undefined,

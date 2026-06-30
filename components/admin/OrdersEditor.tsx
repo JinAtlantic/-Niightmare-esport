@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Card } from "@/components/admin/ui";
+import { isOrderExpired } from "@/lib/shop";
 
 interface OrderLine {
   label: string;
@@ -31,6 +32,7 @@ interface OrderRow {
 }
 
 const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
+  { value: "awaiting_payment", label: "รอชำระ", tone: "text-ash" },
   { value: "paid_declared", label: "รอตรวจสอบ", tone: "text-glow" },
   { value: "verified", label: "จ่ายแล้ว", tone: "text-win" },
   { value: "shipped", label: "ส่งแล้ว", tone: "text-spectre" },
@@ -89,6 +91,7 @@ export default function OrdersEditor() {
   }
 
   const pending = orders.filter((o) => o.status === "paid_declared").length;
+  const awaiting = orders.filter((o) => o.status === "awaiting_payment" && !isOrderExpired(o.created_at, o.status)).length;
   // Float orders awaiting verification to the top so the boss sees them first.
   const sorted = [...orders].sort((a, b) => {
     const aw = a.status === "paid_declared" ? 0 : 1;
@@ -102,7 +105,7 @@ export default function OrdersEditor() {
         <div>
           <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">ออเดอร์เสื้อ</h2>
           <p className="mt-0.5 font-mono text-[11px] text-ash">
-            ทั้งหมด {orders.length} รายการ · รอตรวจสอบ <span className="text-glow">{pending}</span>
+            ทั้งหมด {orders.length} รายการ · รอตรวจสอบ <span className="text-glow">{pending}</span> · รอชำระ <span className="text-spectre">{awaiting}</span>
           </p>
         </div>
         <Button onClick={load} disabled={loading}>
@@ -121,6 +124,7 @@ export default function OrdersEditor() {
       <div className="space-y-3">
         {sorted.map((o) => {
           const opt = STATUS_OPTS.find((s) => s.value === o.status);
+          const expired = isOrderExpired(o.created_at, o.status);
           return (
             <Card key={o.id} className="space-y-3">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -138,7 +142,9 @@ export default function OrdersEditor() {
                 <div className="text-right">
                   {/* the amount the customer should have transferred — match this in the bank app */}
                   <p className="font-display text-lg font-bold text-soul">{fmt(o.total, o.currency)}</p>
-                  <p className={`font-mono text-[11px] ${opt?.tone ?? "text-ash"}`}>{opt?.label ?? o.status}</p>
+                  <p className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
+                    {expired ? "รอชำระ · หมดเวลา 7 วัน" : opt?.label ?? o.status}
+                  </p>
                 </div>
               </div>
 

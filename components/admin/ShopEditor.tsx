@@ -128,6 +128,12 @@ export default function ShopEditor() {
             onChange={(qrImage) => patchBank({ qrImage: qrImage || undefined })}
           />
           <BilingualTextArea label="ข้อความใต้ QR" value={shop.bank.note} rows={2} onChange={(note) => patchBank({ note })} />
+          <BilingualTextArea
+            label="ข้อความแจ้งให้เขียนเลขออเดอร์ในสลิป"
+            value={shop.bank.refNote}
+            rows={3}
+            onChange={(refNote) => patchBank({ refNote })}
+          />
         </Card>
       </Section>
 

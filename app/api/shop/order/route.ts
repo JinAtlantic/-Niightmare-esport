@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { uploadToStorage } from "@/lib/supabaseStorage";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
@@ -53,6 +54,26 @@ async function uploadSlip(slip: unknown): Promise<string | undefined> {
   }
 }
 
+/** Insert an order row, dropping optional columns that may not exist yet
+ *  (items / ref_code / slip_url) instead of 500ing. */
+async function insertOrder(
+  db: SupabaseClient,
+  row: Record<string, unknown>
+): Promise<{ id?: string; createdAt?: string; error?: string }> {
+  const work = { ...row };
+  let { data, error } = await db.from("shop_orders").insert(work).select("id, created_at").single();
+  let guard = 0;
+  while (error && guard < 3) {
+    const col = ["items", "ref_code", "slip_url"].find((c) => error!.message.includes(c));
+    if (!col) break;
+    delete work[col];
+    guard++;
+    ({ data, error } = await db.from("shop_orders").insert(work).select("id, created_at").single());
+  }
+  if (error) return { error: error.message };
+  return { id: data?.id as string | undefined, createdAt: data?.created_at as string | undefined };
+}
+
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (rateLimited(ip)) {
@@ -65,6 +86,11 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  // "reserve" = create an unpaid order the buyer can pay within the window;
+  // "pay" = the buyer attached a slip and declared their transfer.
+  const intent = body.intent === "reserve" ? "reserve" : "pay";
+  const orderId = str(body.orderId, 64);
 
   const rawItems = Array.isArray(body.items) ? (body.items as unknown[]) : [];
   const items: ShopOrderItem[] = rawItems
@@ -122,8 +148,23 @@ export async function POST(request: Request) {
   // team can match a payment to one order (no amount tampering).
   const refCode = cleanRefCode(body.ref);
 
-  // Upload the customer's payment slip (best-effort; order still saves without it).
-  const slipUrl = await uploadSlip(body.slip);
+  const baseRow = (status: string, slipUrl: string | null): Record<string, unknown> => ({
+    quantity: totalQty,
+    size: summary,
+    items: lines,
+    unit_price: lines.length === 1 ? lines[0].unitPrice : null,
+    total,
+    ref_code: refCode || null,
+    currency: shop.currency,
+    customer_name: input.customerName,
+    phone: input.phone,
+    courier: input.courier,
+    province: input.province,
+    city: input.city,
+    branch: input.branch,
+    slip_url: slipUrl,
+    status,
+  });
 
   const record: ShopOrderRecord = {
     items: lines,
@@ -138,46 +179,54 @@ export async function POST(request: Request) {
     province: input.province,
     city: input.city,
     branch: input.branch,
-    slipUrl,
   };
 
-  // Persist to Supabase (source of truth for the admin Orders tab).
   const db = getSupabaseAdmin();
-  let id: string | undefined;
-  if (db) {
-    const row: Record<string, unknown> = {
-      quantity: totalQty,
-      size: summary,
-      items: lines,
-      unit_price: lines.length === 1 ? lines[0].unitPrice : null,
-      total,
-      ref_code: refCode || null,
-      currency: shop.currency,
-      customer_name: input.customerName,
-      phone: input.phone,
-      courier: input.courier,
-      province: input.province,
-      city: input.city,
-      branch: input.branch,
-      slip_url: slipUrl ?? null,
-      status: "paid_declared",
-    };
-    let { data, error } = await db.from("shop_orders").insert(row).select("id").single();
-    // Resilience: if an optional column hasn't been added to the table yet
-    // (items / ref_code / slip_url), drop it and retry instead of 500ing.
-    let guard = 0;
-    while (error && guard < 3) {
-      const col = ["items", "ref_code", "slip_url"].find((c) => error!.message.includes(c));
-      if (!col) break;
-      delete row[col];
-      guard++;
-      ({ data, error } = await db.from("shop_orders").insert(row).select("id").single());
+
+  // ── RESERVE ─────────────────────────────────────────────────────────────
+  // Save as awaiting_payment so it shows in /admin and the buyer's My Orders
+  // with a countdown; no slip, no email yet (no money has moved).
+  if (intent === "reserve") {
+    let id: string | undefined;
+    let createdAt: string | undefined;
+    if (db) {
+      const res = await insertOrder(db, baseRow("awaiting_payment", null));
+      if (res.error) return NextResponse.json({ error: res.error }, { status: 500 });
+      id = res.id;
+      createdAt = res.createdAt;
     }
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    id = data?.id as string | undefined;
+    return NextResponse.json({
+      ok: true,
+      id,
+      order: { ...record, id, createdAt, status: "awaiting_payment" },
+    });
   }
+
+  // ── PAY ─────────────────────────────────────────────────────────────────
+  // Buyer attached a slip and declared the transfer. Update the reserved order
+  // if we have its id, otherwise insert a fresh paid order so nothing is lost.
+  const slipUrl = await uploadSlip(body.slip);
+  let id: string | undefined = orderId || undefined;
+  if (db) {
+    let updated = false;
+    if (orderId) {
+      let { error } = await db
+        .from("shop_orders")
+        .update({ slip_url: slipUrl ?? null, status: "paid_declared" })
+        .eq("id", orderId);
+      if (error && /slip_url/.test(error.message)) {
+        ({ error } = await db.from("shop_orders").update({ status: "paid_declared" }).eq("id", orderId));
+      }
+      updated = !error;
+    }
+    if (!updated) {
+      const res = await insertOrder(db, baseRow("paid_declared", slipUrl ?? null));
+      if (res.error) return NextResponse.json({ error: res.error }, { status: 500 });
+      id = res.id;
+    }
+  }
+
+  const paidRecord: ShopOrderRecord = { ...record, slipUrl, status: "paid_declared" };
 
   // Notify the team by email (best-effort) through the existing Formspree endpoint.
   if (formspree) {
@@ -188,7 +237,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           _subject: `NIIGHTMARE jersey order — ${input.customerName}`,
           message:
-            buildOrderMessage(shop, record, "en") +
+            buildOrderMessage(shop, paidRecord, "en") +
             (refCode ? `\nOrder reference: ${refCode}` : "") +
             (slipUrl ? `\nPayment slip: ${slipUrl}` : `\nPayment slip: (not attached)`),
           name: input.customerName,
@@ -200,5 +249,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, id, order: { ...record, id, refCode, slipUrl, status: "paid_declared" } });
+  return NextResponse.json({ ok: true, id, order: { ...paidRecord, id } });
 }

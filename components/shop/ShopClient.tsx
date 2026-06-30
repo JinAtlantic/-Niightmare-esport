@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
+import type { Lang } from "@/lib/types";
 import {
   resolveShop,
   sizePrice,
@@ -11,6 +13,8 @@ import {
   computeOrder,
   validateOrder,
   isOtherCourier,
+  isOrderExpired,
+  payWindowRemaining,
   SHOP_QTY_MAX,
   type ShopContent,
   type ShopOrderItem,
@@ -43,13 +47,10 @@ const COPY = {
   askMore: { en: "Ask for more info", lo: "ສອບຖາມຂໍ້ມູນເພີ່ມເຕີມ" },
   payTitle: { en: "Transfer to pay", lo: "ໂອນເງິນເພື່ອຈ່າຍ" },
   scan: { en: "Scan this QR with your banking app", lo: "ສະແກນ QR ນີ້ດ້ວຍແອັບທະນາຄານ" },
-  amount: { en: "Amount", lo: "ຈຳນວນເງິນ" },
   payExact: { en: "Amount to transfer", lo: "ຈຳນວນທີ່ຕ້ອງໂອນ" },
   refCode: { en: "Order reference", lo: "ເລກອ້າງອີງອໍເດີ" },
-  refNote: {
-    en: "If your banking app has a note field, enter this code so we can match your payment.",
-    lo: "ຖ້າແອັບທະນາຄານມີຊ່ອງໝາຍເຫດ ໃຫ້ພິມລະຫັດນີ້ ເພື່ອໃຫ້ພວກເຮົາກວດສອບການຈ່າຍ.",
-  },
+  copyRef: { en: "Copy", lo: "ກັອບປີ້" },
+  copied: { en: "Copied!", lo: "ກັອບແລ້ວ!" },
   attachSlip: { en: "Attach payment slip", lo: "ແນບສະລິບການໂອນ" },
   slipPick: { en: "Tap to upload your slip", lo: "ກົດເພື່ອອັບໂຫລດສະລິບ" },
   slipChange: { en: "Change slip", lo: "ປ່ຽນສະລິບ" },
@@ -60,16 +61,23 @@ const COPY = {
   transferred: { en: "I've transferred", lo: "ໂອນເງິນແລ້ວ" },
   sending: { en: "Saving…", lo: "ກຳລັງບັນທຶກ…" },
   cancel: { en: "Cancel", lo: "ຍົກເລີກ" },
-  success: { en: "Order placed!", lo: "ສັ່ງຊື້ສຳເລັດ!" },
+  success: { en: "Payment submitted!", lo: "ສົ່ງການຈ່າຍສຳເລັດ!" },
   successBody: {
     en: "Thank you — our team will verify your payment and confirm shipping.",
     lo: "ຂອບໃຈ — ທີມງານຈະກວດສອບການຈ່າຍເງິນ ແລະ ຢືນຢັນການຈັດສົ່ງ.",
   },
   payError: { en: "Could not save the order. Please try again or contact us.", lo: "ບັນທຶກບໍ່ສຳເລັດ. ລອງໃໝ່ ຫຼື ຕິດຕໍ່ພວກເຮົາ." },
-  myOrders: { en: "Your orders", lo: "ອໍເດີຂອງທ່ານ" },
-  statusPending: { en: "Awaiting verification", lo: "ລໍຖ້າກວດສອບ" },
   noOrders: { en: "You have no orders yet.", lo: "ທ່ານຍັງບໍ່ມີອໍເດີ." },
   goOrder: { en: "Start an order", lo: "ເລີ່ມສັ່ງຊື້" },
+  statusAwaiting: { en: "Awaiting transfer", lo: "ລໍຖ້າການໂອນ" },
+  statusPaid: { en: "Transferred · processing", lo: "ໂອນແລ້ວ · ກຳລັງດຳເນີນການ" },
+  statusExpired: { en: "Cancelled · not paid", lo: "ຍົກເລີກ · ບໍ່ໄດ້ໂອນ" },
+  expiredNote: {
+    en: "The 7-day payment window passed, so this order was cancelled.",
+    lo: "ໝົດກຳນົດຈ່າຍ 7 ມື້ ອໍເດີນີ້ຈຶ່ງຖືກຍົກເລີກ.",
+  },
+  payNow: { en: "Pay now", lo: "ຈ່າຍເງິນ" },
+  timeLeft: { en: "Time left to pay", lo: "ເຫຼືອເວລາຈ່າຍ" },
   comingSoon: { en: "Store opening soon", lo: "ຮ້ານກຳລັງຈະເປີດ" },
   comingSoonBody: {
     en: "The NIIGHTMARE jersey store is being prepared. Check back shortly.",
@@ -77,8 +85,24 @@ const COPY = {
   },
 };
 
+/** Human countdown ("2d 3h" / "2 ມື້ 3 ຊມ") for the pay window. */
+function formatRemaining(ms: number, lang: Lang): string {
+  const totalMin = Math.max(0, Math.floor(ms / 60000));
+  const d = Math.floor(totalMin / 1440);
+  const h = Math.floor((totalMin % 1440) / 60);
+  const m = totalMin % 60;
+  if (lang === "lo") {
+    if (d > 0) return `${d} ມື້ ${h} ຊມ`;
+    if (h > 0) return `${h} ຊມ ${m} ນທ`;
+    return `${m} ນທ`;
+  }
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export default function ShopClient() {
-  const { pick } = useLanguage();
+  const { pick, lang } = useLanguage();
   const { site } = useContent();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
@@ -94,16 +118,25 @@ export default function ShopClient() {
   const [branch, setBranch] = useState("");
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [orderError, setOrderError] = useState("");
+  const [reserving, setReserving] = useState(false);
+
   const [payOpen, setPayOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [paySuccess, setPaySuccess] = useState(false);
   const [payError, setPayError] = useState("");
+  const [copied, setCopied] = useState(false);
   const [myOrders, setMyOrders] = useState<ShopOrderRecord[]>([]);
-  // Short per-order reference code the buyer is asked to put in the transfer note,
-  // so the team can match a payment to one order. Set when the popup opens.
-  const [payRef, setPayRef] = useState("");
+  // The order the payment popup is collecting a transfer for (freshly reserved
+  // or an existing "awaiting" order the buyer chose to pay now).
+  const [payingOrder, setPayingOrder] = useState<ShopOrderRecord | null>(null);
   const [slip, setSlip] = useState("");
   const [slipName, setSlipName] = useState("");
+
+  const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     try {
@@ -114,10 +147,34 @@ export default function ShopClient() {
     }
   }, []);
 
+  // Tick so the My Orders countdown stays live.
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Lock background scroll while the payment popup is open so it can't scroll away.
+  useEffect(() => {
+    if (!payOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [payOpen]);
+
   const orderItems: ShopOrderItem[] = Object.entries(quantities)
     .filter(([, q]) => q > 0)
     .map(([sizeId, quantity]) => ({ sizeId, quantity }));
   const { lines, totalQty, total } = computeOrder(shop, orderItems);
+
+  function persist(list: ShopOrderRecord[]) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch {
+      /* ignore */
+    }
+  }
 
   function adjustQty(sizeId: string, delta: number) {
     setQuantities((prev) => {
@@ -138,19 +195,57 @@ export default function ShopClient() {
     return { items: orderItems, customerName, phone, courier: effectiveCourier, province, city, branch };
   }
 
-  function startOrder() {
+  // Reserve the order (status awaiting_payment) so it lands in /admin and My
+  // Orders with a 7-day countdown, then open the pay popup.
+  async function startOrder() {
     const errs = validateOrder(currentInput());
     setErrors(errs as Record<string, boolean>);
     if (Object.keys(errs).length) {
       document.getElementById("order-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    setPayError("");
-    setPaySuccess(false);
-    setPayRef("NM-" + Math.random().toString(36).slice(2, 7).toUpperCase());
+    setOrderError("");
+    setReserving(true);
+    const ref = "NM-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    try {
+      const res = await fetch("/api/shop/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent: "reserve", ref, ...currentInput() }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "reserve failed");
+      const record: ShopOrderRecord = {
+        ...(json.order as ShopOrderRecord),
+        createdAt: json.order?.createdAt || new Date().toISOString(),
+        status: "awaiting_payment",
+      };
+      const next = [record, ...myOrders].slice(0, 12);
+      setMyOrders(next);
+      persist(next);
+      setQuantities({});
+      openPayFor(record);
+    } catch {
+      setOrderError(pick(COPY.payError));
+    } finally {
+      setReserving(false);
+    }
+  }
+
+  function openPayFor(order: ShopOrderRecord) {
+    setPayingOrder(order);
     setSlip("");
     setSlipName("");
+    setPayError("");
+    setPaySuccess(false);
+    setCopied(false);
     setPayOpen(true);
+  }
+
+  function closePay() {
+    if (submitting) return;
+    setPayOpen(false);
+    setPayingOrder(null);
   }
 
   async function onSlipPick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -166,7 +261,19 @@ export default function ShopClient() {
     }
   }
 
+  async function copyRef(code: string) {
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard unavailable — the code is still visible to type manually */
+    }
+  }
+
   async function confirmTransfer() {
+    if (!payingOrder) return;
     if (!slip) {
       setPayError(pick(COPY.slipRequired));
       return;
@@ -174,26 +281,40 @@ export default function ShopClient() {
     setSubmitting(true);
     setPayError("");
     try {
+      const payItems = (payingOrder.items ?? []).map((l) => ({ sizeId: l.sizeId, quantity: l.quantity }));
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...currentInput(), ref: payRef, slip }),
+        body: JSON.stringify({
+          intent: "pay",
+          orderId: payingOrder.id,
+          ref: payingOrder.refCode,
+          slip,
+          items: payItems,
+          customerName: payingOrder.customerName,
+          phone: payingOrder.phone,
+          courier: payingOrder.courier,
+          province: payingOrder.province,
+          city: payingOrder.city,
+          branch: payingOrder.branch,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "save failed");
-      const record: ShopOrderRecord = json.order;
+      const slipUrl: string | undefined = json.order?.slipUrl;
+      const serverId: string | undefined = json.order?.id ?? payingOrder.id;
+      const target = payingOrder;
       setPaySuccess(true);
-      const next = [{ ...record, createdAt: new Date().toISOString() }, ...myOrders].slice(0, 10);
+      const next = myOrders.map((o) => {
+        const same = target.id ? o.id === target.id : o.refCode === target.refCode && o.status === "awaiting_payment";
+        return same ? { ...o, status: "paid_declared", slipUrl, id: serverId } : o;
+      });
       setMyOrders(next);
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      setQuantities({});
+      persist(next);
       window.setTimeout(() => {
         setPayOpen(false);
         setPaySuccess(false);
+        setPayingOrder(null);
         setTab("myorders");
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 1900);
@@ -370,12 +491,14 @@ export default function ShopClient() {
                 </div>
               </div>
               {Object.keys(errors).length > 0 && <p className="mt-3 font-mono text-[11px] text-loss">{pick(COPY.fixErrors)}</p>}
+              {orderError && <p className="mt-3 font-mono text-[11px] text-loss">{orderError}</p>}
               <button
                 type="button"
                 onClick={startOrder}
-                className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-soul transition-all hover:bg-amethyst/25 hover:shadow-[0_0_24px_rgba(168,85,247,0.35)]"
+                disabled={reserving}
+                className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-soul transition-all hover:bg-amethyst/25 hover:shadow-[0_0_24px_rgba(168,85,247,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {pick(COPY.placeOrder)}
+                {reserving ? pick(COPY.sending) : pick(COPY.placeOrder)}
               </button>
               {contactHref && (
                 <a
@@ -407,126 +530,183 @@ export default function ShopClient() {
               </div>
             ) : (
               <div className="grid gap-2.5">
-                {myOrders.map((o, i) => (
-                  <div key={(o.id ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                      <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
-                        {pick(shop.productName)} · {o.sizeSummary}
-                      </span>
-                      <span className="rounded-full border border-glow/40 bg-glow/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-glow">
-                        {pick(COPY.statusPending)}
-                      </span>
+                {myOrders.map((o, i) => {
+                  const awaiting = o.status === "awaiting_payment";
+                  const expired = isOrderExpired(o.createdAt, o.status, now);
+                  const remaining = payWindowRemaining(o.createdAt, now);
+                  const badge = expired ? pick(COPY.statusExpired) : awaiting ? pick(COPY.statusAwaiting) : pick(COPY.statusPaid);
+                  const badgeCls = expired
+                    ? "border-loss/40 bg-loss/10 text-loss"
+                    : awaiting
+                    ? "border-spectre/40 bg-spectre/10 text-spectre"
+                    : "border-win/40 bg-win/10 text-win";
+                  return (
+                    <div key={(o.id ?? o.refCode ?? "") + i} className={`rounded-md border bg-void/50 p-4 ${expired ? "border-edge/60 opacity-70" : "border-edge"}`}>
+                      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                        <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
+                          {pick(shop.productName)} · {o.sizeSummary}
+                        </span>
+                        <span className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] ${badgeCls}`}>{badge}</span>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between gap-3 font-mono text-[11px] text-ash">
+                        <span>
+                          {o.totalQty} {pick(COPY.pieces)}
+                          {o.createdAt ? ` · ${new Date(o.createdAt).toLocaleDateString("en-GB")}` : ""}
+                        </span>
+                        <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.total, o.currency)}</span>
+                      </div>
+
+                      {awaiting && !expired && (
+                        <div className="mt-3 space-y-2.5 border-t border-edge pt-3">
+                          <div className="flex items-center justify-between gap-3 font-mono text-[11px]">
+                            <span className="text-ash">{pick(COPY.refCode)}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyRef(o.refCode || "")}
+                              className="keep-latin rounded border border-glow/50 bg-void/50 px-2 py-0.5 font-bold tracking-[0.12em] text-glow transition-colors hover:bg-glow/10"
+                            >
+                              {o.refCode} ⧉
+                            </button>
+                          </div>
+                          <div className="flex items-center justify-between gap-3 font-mono text-[11px]">
+                            <span className="text-ash">{pick(COPY.timeLeft)}</span>
+                            <span className="tabular-nums text-spectre">{formatRemaining(remaining, lang)}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openPayFor(o)}
+                            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md border border-win/60 bg-win/15 px-4 py-2 font-display text-sm font-bold uppercase tracking-[0.16em] text-win transition-all hover:bg-win/25"
+                          >
+                            {pick(COPY.payNow)}
+                          </button>
+                        </div>
+                      )}
+
+                      {awaiting && expired && (
+                        <p className="mt-2 font-mono text-[11px] leading-relaxed text-loss">{pick(COPY.expiredNote)}</p>
+                      )}
                     </div>
-                    <div className="mt-2 flex items-center justify-between gap-3 font-mono text-[11px] text-ash">
-                      <span>
-                        {o.totalQty} {pick(COPY.pieces)}
-                        {o.createdAt ? ` · ${new Date(o.createdAt).toLocaleDateString("en-GB")}` : ""}
-                      </span>
-                      <span className="font-display text-base font-bold tabular-nums text-soul">{formatPrice(o.total, o.currency)}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
         )}
       </div>
 
-      {/* ── payment popup ─────────────────────────────────────────────── */}
-      {payOpen && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
-          <button type="button" className="absolute inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={() => !submitting && setPayOpen(false)} />
-          <div className="relative z-10 flex max-h-[88vh] w-full max-w-md flex-col overflow-y-auto rounded-md border border-edge-bright bg-crypt p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] md:p-6">
-            {paySuccess ? (
-              <div className="flex flex-col items-center gap-4 py-8 text-center">
-                <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-win bg-win/15 text-win shadow-[0_0_30px_rgba(52,211,153,0.5)]">
-                  <CheckGlyph />
-                </span>
-                <h3 className="font-display text-2xl font-black uppercase tracking-wide text-soul">{pick(COPY.success)}</h3>
-                <p className="max-w-xs text-sm leading-relaxed text-spectre/90">{pick(COPY.successBody)}</p>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h3 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul">{pick(COPY.payTitle)}</h3>
+      {/* ── payment popup (portaled to body so it always centres in the viewport) ── */}
+      {mounted &&
+        payOpen &&
+        payingOrder &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
+            <button type="button" className="absolute inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={closePay} />
+            <div className="relative z-10 flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-md border border-edge-bright bg-crypt p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] md:p-6">
+              {paySuccess ? (
+                <div className="flex flex-col items-center gap-4 py-8 text-center">
+                  <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-win bg-win/15 text-win shadow-[0_0_30px_rgba(52,211,153,0.5)]">
+                    <CheckGlyph />
+                  </span>
+                  <h3 className="font-display text-2xl font-black uppercase tracking-wide text-soul">{pick(COPY.success)}</h3>
+                  <p className="max-w-xs text-sm leading-relaxed text-spectre/90">{pick(COPY.successBody)}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <h3 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul">{pick(COPY.payTitle)}</h3>
+                    <button
+                      type="button"
+                      onClick={closePay}
+                      aria-label={pick(COPY.cancel)}
+                      className="grid h-9 w-9 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* QR — shown at natural aspect ratio so tall screenshots aren't cropped */}
+                  <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-md border border-edge-bright bg-white p-3">
+                    {qrSrc ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={qrSrc} alt="Payment QR" className="mx-auto block h-auto w-full max-h-[56vh] object-contain" />
+                    ) : (
+                      <span className="grid aspect-square place-items-center px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>
+                    )}
+                  </div>
+                  <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
+
+                  {/* exact amount + a copyable order reference, plus the editable note */}
+                  <div className="mt-4 rounded-md border border-amethyst/45 bg-amethyst/10 p-4 text-center">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.payExact)}</p>
+                    <p className="mt-1 break-words font-display text-2xl font-black tabular-nums text-soul sm:text-3xl">
+                      {formatPrice(payingOrder.total, payingOrder.currency)}
+                    </p>
+
+                    <div className="mt-3 border-t border-amethyst/25 pt-3">
+                      <p className="text-sm font-semibold leading-relaxed text-soul">{pick(shop.bank.refNote)}</p>
+                      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ash">{pick(COPY.refCode)}</p>
+                      <div className="mt-1.5 flex items-center justify-center gap-2">
+                        <span className="keep-latin rounded border border-glow/60 bg-void/60 px-3 py-1.5 font-mono text-xl font-black tracking-[0.18em] text-glow">
+                          {payingOrder.refCode}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyRef(payingOrder.refCode || "")}
+                          className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-glow/50 bg-glow/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-glow transition-colors hover:bg-glow/20"
+                        >
+                          {copied ? pick(COPY.copied) : pick(COPY.copyRef)}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">
+                    <Row label={pick(COPY.items)} value={(payingOrder.items ?? []).map((l) => `${l.label}×${l.quantity}`).join(", ")} />
+                    <Row label={pick(COPY.bank)} value={shop.bank.bankName} />
+                    <Row label={pick(COPY.accName)} value={shop.bank.accountName} />
+                    <Row label={pick(COPY.accNo)} value={shop.bank.accountNumber} />
+                  </div>
+                  <p className="mt-3 text-center text-[12px] leading-relaxed text-spectre/80">{pick(shop.bank.note)}</p>
+
+                  {/* attach payment slip (required) — the team verifies against this */}
+                  <div className="mt-4">
+                    <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.attachSlip)}</p>
+                    <label className="block cursor-pointer">
+                      <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onSlipPick} />
+                      {slip ? (
+                        <span className="flex items-center gap-3 rounded-md border border-win/50 bg-win/10 p-2.5">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={slip} alt="slip preview" className="h-16 w-16 shrink-0 rounded object-cover" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-mono text-[11px] text-soul">{slipName}</span>
+                            <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-win">{pick(COPY.slipChange)}</span>
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="flex min-h-[56px] items-center justify-center gap-2 rounded-md border border-dashed border-edge-bright bg-void/40 px-3 font-mono text-[11px] uppercase tracking-[0.14em] text-ash transition-colors hover:border-amethyst hover:text-soul">
+                          {pick(COPY.slipPick)}
+                        </span>
+                      )}
+                    </label>
+                    {!slip && <p className="mt-2 font-mono text-[10px] leading-relaxed text-ash-dim">{pick(COPY.slipRequired)}</p>}
+                  </div>
+
+                  {payError && <p className="mt-3 text-center font-mono text-[11px] text-loss">{payError}</p>}
+
                   <button
                     type="button"
-                    onClick={() => !submitting && setPayOpen(false)}
-                    aria-label={pick(COPY.cancel)}
-                    className="grid h-9 w-9 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
+                    onClick={confirmTransfer}
+                    disabled={submitting || !slip}
+                    className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-win/60 bg-win/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-win transition-all hover:bg-win/25 hover:shadow-[0_0_24px_rgba(52,211,153,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    ✕
+                    {submitting ? pick(COPY.sending) : pick(COPY.transferred)}
                   </button>
-                </div>
-
-                <div className="mx-auto grid aspect-square w-full max-w-[260px] place-items-center overflow-hidden rounded-md border border-edge-bright bg-white p-2">
-                  {qrSrc ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={qrSrc} alt="Payment QR" className="h-full w-full object-contain" />
-                  ) : (
-                    <span className="px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>
-                  )}
-                </div>
-                <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
-
-                {/* exact amount to transfer + an order reference code for matching */}
-                <div className="mt-4 rounded-md border border-amethyst/45 bg-amethyst/10 p-4 text-center">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.payExact)}</p>
-                  <p className="mt-1 break-words font-display text-2xl font-black tabular-nums text-soul sm:text-3xl">
-                    {formatPrice(total, shop.currency)}
-                  </p>
-                  <div className="mt-3 flex items-center justify-center gap-2 border-t border-amethyst/25 pt-3">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">{pick(COPY.refCode)}</span>
-                    <span className="keep-latin rounded border border-glow/50 bg-void/50 px-2 py-0.5 font-mono text-sm font-bold tracking-[0.12em] text-glow">{payRef}</span>
-                  </div>
-                  <p className="mt-2 text-[11px] leading-relaxed text-spectre/80">{pick(COPY.refNote)}</p>
-                </div>
-
-                <div className="mt-3 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">
-                  <Row label={pick(COPY.items)} value={lines.map((l) => `${l.label}×${l.quantity}`).join(", ")} />
-                  <Row label={pick(COPY.bank)} value={shop.bank.bankName} />
-                  <Row label={pick(COPY.accName)} value={shop.bank.accountName} />
-                  <Row label={pick(COPY.accNo)} value={shop.bank.accountNumber} />
-                </div>
-                <p className="mt-3 text-center text-[12px] leading-relaxed text-spectre/80">{pick(shop.bank.note)}</p>
-
-                {/* attach payment slip (required) — the team verifies against this */}
-                <div className="mt-4">
-                  <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ash">{pick(COPY.attachSlip)}</p>
-                  <label className="block cursor-pointer">
-                    <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onSlipPick} />
-                    {slip ? (
-                      <span className="flex items-center gap-3 rounded-md border border-win/50 bg-win/10 p-2.5">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={slip} alt="slip preview" className="h-16 w-16 shrink-0 rounded object-cover" />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate font-mono text-[11px] text-soul">{slipName}</span>
-                          <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-win">{pick(COPY.slipChange)}</span>
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="flex min-h-[56px] items-center justify-center gap-2 rounded-md border border-dashed border-edge-bright bg-void/40 px-3 font-mono text-[11px] uppercase tracking-[0.14em] text-ash transition-colors hover:border-amethyst hover:text-soul">
-                        {pick(COPY.slipPick)}
-                      </span>
-                    )}
-                  </label>
-                </div>
-
-                {payError && <p className="mt-3 text-center font-mono text-[11px] text-loss">{payError}</p>}
-
-                <button
-                  type="button"
-                  onClick={confirmTransfer}
-                  disabled={submitting || !slip}
-                  className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-win/60 bg-win/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-win transition-all hover:bg-win/25 hover:shadow-[0_0_24px_rgba(52,211,153,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting ? pick(COPY.sending) : pick(COPY.transferred)}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                </>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </main>
   );
 }

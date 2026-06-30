@@ -6,7 +6,7 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const STATUSES = new Set(["paid_declared", "verified", "shipped", "cancelled"]);
+const STATUSES = new Set(["awaiting_payment", "paid_declared", "verified", "shipped", "cancelled"]);
 
 async function authed(): Promise<boolean> {
   return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
