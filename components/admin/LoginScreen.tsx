@@ -5,6 +5,7 @@ import { Button } from "@/components/admin/ui";
 
 export default function LoginScreen() {
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [totp, setTotp] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -49,14 +50,25 @@ export default function LoginScreen() {
           <span className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
             Password
           </span>
-          <input
-            type="password"
-            autoFocus
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-sm text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              type={showPw ? "text" : "password"}
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-edge bg-void/60 px-3 py-2 pr-12 font-mono text-sm text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw((v) => !v)}
+              aria-label={showPw ? "Hide password" : "Show password"}
+              aria-pressed={showPw}
+              className="absolute inset-y-0 right-0 grid w-11 place-items-center text-ash transition-colors hover:text-soul"
+            >
+              {showPw ? <EyeOffGlyph /> : <EyeGlyph />}
+            </button>
+          </div>
         </label>
 
         <label className="mt-4 block">
@@ -85,5 +97,24 @@ export default function LoginScreen() {
         </Button>
       </form>
     </div>
+  );
+}
+
+function EyeGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function EyeOffGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M10.6 6.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3 3.8M6.3 6.3A18 18 0 0 0 2 12s3.5 7 10 7a10.6 10.6 0 0 0 4.2-.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
   );
 }
