@@ -167,9 +167,10 @@ export default function ShopEditor() {
                 ถ้ารูปเป็นสกรีนช็อตยาว ปรับ “ซูม” แล้วเลื่อนแนวนอน/แนวตั้ง ให้เหลือแต่ตัว QR — กรอบสี่เหลี่ยมคือสิ่งที่ลูกค้าจะเห็น
               </p>
               <div className="grid items-start gap-4 sm:grid-cols-[160px_1fr]">
-                <div className="mx-auto aspect-square w-40 overflow-hidden rounded-md border border-edge-bright bg-white">
-                  <div className="h-full w-full" style={qrFrameStyle(safeImageSrc(shop.bank.qrImage), shop.bank)} />
-                </div>
+                <div
+                  className="mx-auto aspect-square w-40 overflow-hidden rounded-md border border-edge-bright bg-white"
+                  style={qrFrameStyle(safeImageSrc(shop.bank.qrImage), shop.bank)}
+                />
                 <div className="space-y-3">
                   <QrSlider label="ซูม" min={100} max={500} value={shop.bank.qrZoom} onChange={(qrZoom) => patchBank({ qrZoom })} />
                   <QrSlider label="เลื่อนแนวนอน" min={0} max={100} value={shop.bank.qrX} onChange={(qrX) => patchBank({ qrX })} />

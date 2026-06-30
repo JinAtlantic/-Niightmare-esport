@@ -651,13 +651,16 @@ export default function ShopClient() {
                   </div>
 
                   {/* QR — framed (zoom/pan set in /admin) so a long screenshot shows
-                       only the QR, big enough to scan */}
-                  <div className="mx-auto aspect-square w-full max-w-[300px] overflow-hidden rounded-md border border-edge-bright bg-white">
-                    {qrSrc ? (
-                      <div className="h-full w-full" role="img" aria-label="Payment QR" style={qrFrameStyle(qrSrc, shop.bank)} />
-                    ) : (
-                      <span className="grid h-full place-items-center px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>
-                    )}
+                       only the QR, big enough to scan. The background is applied to the
+                       aspect-square box itself (a percentage-height child collapses to 0
+                       on mobile Safari when the parent is sized via aspect-ratio). */}
+                  <div
+                    className="mx-auto grid aspect-square w-full max-w-[300px] place-items-center overflow-hidden rounded-md border border-edge-bright bg-white"
+                    role="img"
+                    aria-label="Payment QR"
+                    style={qrSrc ? qrFrameStyle(qrSrc, shop.bank) : undefined}
+                  >
+                    {!qrSrc && <span className="px-4 text-center font-mono text-[11px] text-void/70">QR code — set it in /admin</span>}
                   </div>
                   <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ash">{pick(COPY.scan)}</p>
 
