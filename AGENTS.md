@@ -331,7 +331,8 @@ Android install). `components/ui/InstallPrompt.tsx` (mounted in the **public** b
 site: Android/desktop Chrome get a one-tap **Install** via the `beforeinstallprompt` event;
 iOS Safari gets the Share→"Add to Home Screen" instructions. It registers `sw.js` site-wide
 (its no-op `fetch` handler makes Chrome treat the site as installable), hides when already
-in standalone, and remembers a dismissal for 14 days (`nm-install-dismissed`).
+in standalone, shows on every visit while ignored, and stays quiet for 3 days after an
+explicit ✕ dismissal (`nm-install-dismissed`).
 
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js

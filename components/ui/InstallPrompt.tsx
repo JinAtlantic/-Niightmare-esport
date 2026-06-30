@@ -4,7 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 
 const DISMISS_KEY = "nm-install-dismissed";
-const DISMISS_DAYS = 14;
+// Balanced: shows on every visit while ignored; an explicit ✕ stays quiet this
+// many days; once installed (standalone) it never shows again.
+const DISMISS_DAYS = 3;
 
 /** Chrome's beforeinstallprompt event (not in the standard lib types). */
 interface BeforeInstallPromptEvent extends Event {
