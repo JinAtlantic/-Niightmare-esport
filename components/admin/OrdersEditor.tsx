@@ -543,7 +543,7 @@ export default function OrdersEditor() {
                   <span className="inline-block transition-transform group-open:rotate-90">▸</span>
                   ข้อมูลลูกค้า / จัดส่ง
                 </summary>
-                <div className="mt-2.5 grid gap-1.5 font-mono text-[11px] text-spectre md:grid-cols-2">
+                <div className="mt-2.5 grid gap-2 font-mono text-[13px] leading-relaxed text-spectre md:grid-cols-2">
                   <span>ชื่อ: {o.customer_name}</span>
                   {o.user_email && (
                     <span className="keep-latin break-all">

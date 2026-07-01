@@ -694,6 +694,18 @@ export default function ShopClient() {
                         </span>
                         <span className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] ${badgeCls}`}>{badge}</span>
                       </div>
+
+                      {/* order number — prominent so the buyer can quote it fast */}
+                      {o.refCode && (
+                        <div className="mt-3 flex items-center gap-2.5">
+                          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ash">
+                            {pick(COPY.refCode)}
+                          </span>
+                          <span className="keep-latin rounded border border-glow/50 bg-glow/10 px-3 py-1 font-display text-lg font-black tracking-[0.18em] text-glow shadow-[0_0_16px_-2px_rgba(199,125,255,0.45)]">
+                            {o.refCode}
+                          </span>
+                        </div>
+                      )}
                       <div className="mt-2 flex items-center justify-between gap-3 font-mono text-[11px] text-ash">
                         <span>
                           {o.totalQty} {pick(COPY.pieces)}
@@ -751,14 +763,13 @@ export default function ShopClient() {
                           <span className="inline-block transition-transform group-open:rotate-90">▸</span>
                           {pick(COPY.orderDetails)}
                         </summary>
-                        <div className="mt-2.5 grid gap-1.5 font-mono text-[11px] text-spectre">
-                          <span>{pick(COPY.fullName)}: {o.customerName}</span>
-                          <span className="keep-latin">{pick(COPY.phone)}: {o.phone}</span>
-                          <span>{pick(COPY.courier)}: {o.courier}</span>
-                          <span>{pick(COPY.province)}: {o.province}</span>
-                          <span>{pick(COPY.city)}: {o.city}</span>
-                          <span>{pick(COPY.branch)}: {o.branch}</span>
-                          {o.refCode && <span className="keep-latin">{pick(COPY.refCode)}: {o.refCode}</span>}
+                        <div className="mt-2.5 grid gap-2 font-mono text-[13px] leading-relaxed text-spectre sm:grid-cols-2">
+                          <span><span className="text-ash">{pick(COPY.fullName)}:</span> {o.customerName}</span>
+                          <span className="keep-latin"><span className="text-ash">{pick(COPY.phone)}:</span> {o.phone}</span>
+                          <span><span className="text-ash">{pick(COPY.courier)}:</span> {o.courier}</span>
+                          <span><span className="text-ash">{pick(COPY.province)}:</span> {o.province}</span>
+                          <span><span className="text-ash">{pick(COPY.city)}:</span> {o.city}</span>
+                          <span><span className="text-ash">{pick(COPY.branch)}:</span> {o.branch}</span>
                         </div>
                         {Array.isArray(o.items) && o.items.length > 0 && (
                           <div className="mt-2.5 border-t border-edge/60 pt-2.5 font-mono text-[11px] text-spectre">

@@ -239,7 +239,7 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
       </div>
 
       <div className="relative mt-6 overflow-x-auto border border-edge bg-void/35">
-        <div className="grid grid-cols-[minmax(60px,1.1fr)_repeat(5,minmax(38px,1fr))] border-b border-edge bg-crypt/60 px-3 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-ash md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)]">
+        <div className="grid grid-cols-[minmax(58px,1fr)_repeat(5,minmax(46px,1fr))] border-b border-edge bg-crypt/60 px-3 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ash md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:text-[11px]">
           <span>Tier</span>
           <span className="text-right text-gold">1st</span>
           <span className="text-right text-silver">2nd</span>
@@ -253,18 +253,18 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
               return (
                 <div
                   key={row.tier}
-                  className={`grid grid-cols-[minmax(60px,1.1fr)_repeat(5,minmax(38px,1fr))] items-center px-3 py-3 font-mono text-xs tabular-nums md:grid-cols-[minmax(160px,1fr)_repeat(5,88px)] ${row.tier === "Total" ? "bg-amethyst/10" : ""}`}
+                  className={`grid grid-cols-[minmax(58px,1fr)_repeat(5,minmax(46px,1fr))] items-center px-3 py-3.5 font-mono text-lg tabular-nums md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:text-xl ${row.tier === "Total" ? "bg-amethyst/10" : ""}`}
                 >
                   <div className="min-w-0">
                     <span className={`inline-flex border ${tone.border} ${tone.bg} px-2 py-1 font-display text-xs font-black uppercase tracking-[0.12em] ${tone.text} ${tone.glow}`}>
                       {row.tier === "Total" ? "Total" : `${row.tier}-Tier`}
                     </span>
                   </div>
-                  <span className="text-right font-bold text-gold">{row.first}</span>
-                  <span className="text-right font-bold text-silver">{row.second}</span>
-                  <span className="text-right font-bold text-bronze">{row.third}</span>
-                  <span className="text-right font-bold text-amethyst">{row.top3}</span>
-                  <span className="text-right font-bold text-soul">{row.all}</span>
+                  <span className="text-right font-extrabold text-gold">{row.first}</span>
+                  <span className="text-right font-extrabold text-silver">{row.second}</span>
+                  <span className="text-right font-extrabold text-bronze">{row.third}</span>
+                  <span className="text-right font-extrabold text-amethyst">{row.top3}</span>
+                  <span className="text-right font-extrabold text-soul">{row.all}</span>
                 </div>
               );
           })}
