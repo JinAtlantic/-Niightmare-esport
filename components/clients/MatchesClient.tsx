@@ -8,7 +8,7 @@ import OpponentLogo from "@/components/cards/OpponentLogo";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
 import RoadmapModal from "@/components/sections/RoadmapModal";
-import { PlayIcon } from "@/components/ui/Icons";
+import { PlayIcon, SearchIcon, CloseIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { tournamentTier, type Tier } from "@/lib/tiers";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
@@ -142,10 +142,6 @@ const TIER_VALUE: Record<Tier, string> = {
 
 const MATCH_LOGO_SIZE = 64;
 const MOBILE_MATCH_LOGO_SIZE = 72;
-const GAME_LABEL: Record<GameId, string> = {
-  mlbb: "MOBILE LEGENDS: BANG BANG",
-  efootball: "eFOOTBALL",
-};
 
 interface TournamentMatchGroup {
   key: string;
@@ -627,20 +623,14 @@ function TournamentRecordGroup({
             <h2 className="mt-3 max-w-4xl break-words font-display text-2xl font-extrabold uppercase leading-[0.98] tracking-[0.02em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-4xl">
               {pick(group.name)}
             </h2>
-            <div className={`mt-4 grid max-w-lg grid-cols-3 border bg-void/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${softBorder}`}>
+            <div className={`mt-4 grid max-w-xs grid-cols-2 border bg-void/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${softBorder}`}>
               <div className={`border-r px-3 py-2 md:px-4 md:py-2.5 ${softBorder}`}>
                 <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.wins)}</p>
                 <p className="mt-1 font-display text-xl font-bold leading-none text-win md:text-2xl">{wins}</p>
               </div>
-              <div className={`border-r px-3 py-2 md:px-4 md:py-2.5 ${softBorder}`}>
+              <div className="px-3 py-2 md:px-4 md:py-2.5">
                 <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.losses)}</p>
                 <p className="mt-1 font-display text-xl font-bold leading-none text-loss md:text-2xl">{losses}</p>
-              </div>
-              <div className="px-3 py-2 md:px-4 md:py-2.5">
-                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.winrate)}</p>
-                <p className={`mt-1 font-display text-xl font-bold leading-none md:text-2xl ${valueTone}`}>
-                  {Math.round((wins / Math.max(1, wins + losses)) * 100)}%
-                </p>
               </div>
             </div>
           </div>
@@ -724,18 +714,23 @@ function GameTournamentSection({
             : "bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent"
         }`}
       />
-      <div className="mb-4 flex flex-col gap-2 border border-edge bg-crypt/55 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-amethyst">
-            Game Division
-          </p>
-          <h2 className="keep-latin mt-2 font-display text-3xl font-bold uppercase leading-none tracking-[0.04em] text-soul [text-shadow:0_0_24px_rgba(199,125,255,0.28)] md:text-5xl">
-            {GAME_LABEL[game]}
-          </h2>
-        </div>
-        <p className="border border-edge bg-void/45 px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-spectre">
-          {groups.length} {groups.length === 1 ? "Tournament" : "Tournaments"}
-        </p>
+      {/* tournament count — a slim, premium counter (the Game Division heading
+          was removed; the game is still signalled by the top accent bar). */}
+      <div className="mb-4 flex items-center justify-center gap-3.5 border border-edge bg-crypt/45 px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:justify-start">
+        <span
+          aria-hidden
+          className={`h-9 w-1.5 ${
+            game === "mlbb"
+              ? "bg-gradient-to-b from-amethyst to-glow shadow-[0_0_12px_rgba(168,85,247,0.6)]"
+              : "bg-gradient-to-b from-[#22D3EE] to-[#7DD3FC] shadow-[0_0_12px_rgba(34,211,238,0.55)]"
+          }`}
+        />
+        <span className="font-display text-3xl font-black leading-none tabular-nums text-soul [text-shadow:0_0_20px_rgba(199,125,255,0.3)] md:text-4xl">
+          {groups.length}
+        </span>
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-spectre">
+          {groups.length === 1 ? "Tournament" : "Tournaments"}
+        </span>
       </div>
       <div className="grid gap-4">
         {groups.map((group, i) => (
@@ -795,6 +790,7 @@ export default function MatchesClient() {
   // stagger below is capped so the long list still appears quickly.
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedTournament, setSelectedTournament] = useState<string>("all");
+  const [search, setSearch] = useState<string>("");
   const activeYear = selectedYear || "all";
 
   const gameYearMatches = useMemo(() => {
@@ -870,14 +866,21 @@ export default function MatchesClient() {
     [filtered, data.tournaments, page.unknownTournament, sortOrder]
   );
   const groupsByGame = useMemo(() => {
+    const q = normalizeValue(search);
     const groups = tournamentGroups.filter(
       (group) =>
         group.game === selectedGame &&
         (selectedTournament === "all" ||
-          baseTournamentKey(group.game, group.name) === selectedTournament)
+          baseTournamentKey(group.game, group.name) === selectedTournament) &&
+        // free-text search matches the tournament name (either language) or any
+        // opponent team played in that tournament.
+        (!q ||
+          normalizeValue(group.name.en || group.name.lo).includes(q) ||
+          normalizeValue(group.name.lo || "").includes(q) ||
+          group.matches.some((m) => normalizeValue(m.opponent).includes(q)))
     );
     return [{ game: selectedGame, groups }];
-  }, [selectedGame, selectedTournament, tournamentGroups]);
+  }, [selectedGame, selectedTournament, tournamentGroups, search]);
 
   return (
     <>
@@ -902,6 +905,31 @@ export default function MatchesClient() {
             <div>
               <StatsStrip {...stats} page={page} />
             </div>
+
+            {/* search — jump straight to a tournament or an opponent team by name */}
+            <label className="relative mt-5 block">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ash">
+                <SearchIcon size={16} />
+              </span>
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={pick({ en: "Search tournament or team…", lo: "ຄົ້ນຫາລາຍການ ຫຼື ທີມ…" })}
+                className="h-12 w-full min-w-0 border border-edge bg-void/70 pl-10 pr-11 font-mono text-sm text-soul outline-none transition-colors placeholder:text-ash-dim hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-glow"
+                >
+                  <CloseIcon size={14} />
+                </button>
+              )}
+            </label>
+
             {/* filters — each with a visible label so the control is obvious.
                 Row 1: scope (Game / Year / Result / Sort); Tournament gets its
                 own full-width row so long names stay readable. */}
