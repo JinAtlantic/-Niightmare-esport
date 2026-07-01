@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { CloseIcon, EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
@@ -206,6 +207,12 @@ function ScheduleModal({
   pick: (value: { en: string; lo: string }) => string;
   onClose: () => void;
 }) {
+  // Portal to <body> only after mount so the fixed overlay anchors to the
+  // viewport (a transformed ancestor of this section would otherwise capture
+  // the `fixed` positioning and the popup would sit down-page, needing a scroll).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -219,7 +226,9 @@ function ScheduleModal({
     };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
       <button type="button" className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
       <div className="relative z-10 flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-md border border-edge-bright bg-crypt shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)]">
@@ -301,7 +310,8 @@ function ScheduleModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
