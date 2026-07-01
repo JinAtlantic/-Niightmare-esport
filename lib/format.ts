@@ -28,6 +28,7 @@ export function formatDateTime(iso: string, lang: Lang): string {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
     }).format(d);
   } catch {
     return d.toISOString();

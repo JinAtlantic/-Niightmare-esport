@@ -188,6 +188,7 @@ function scheduleParts(entry: MatchScheduleEntry, lang: Lang): { date: string; t
       time = new Intl.DateTimeFormat(lang === "lo" ? "lo-LA" : "en-US", {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
       }).format(d);
     } catch {
       time = entry.time;

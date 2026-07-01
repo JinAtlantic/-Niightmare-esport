@@ -198,7 +198,7 @@ export default function TeamCommentModal({
                       <div className="min-w-0">
                         <p className="truncate text-sm font-bold text-soul">{name}</p>
                         <p className="keep-latin font-mono text-[10px] text-ash-dim">
-                          {new Date(comment.created_at).toLocaleString(lang === "lo" ? "lo-LA" : "en-US")}
+                          {new Date(comment.created_at).toLocaleString(lang === "lo" ? "lo-LA" : "en-US", { hour12: false })}
                         </p>
                       </div>
                     </div>
