@@ -388,18 +388,11 @@ export default function UpcomingMatch() {
           <span aria-hidden className="pointer-events-none absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-amethyst/35" />
           <span aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-amethyst/35" />
 
-          {/* eyebrow bar — game name (+ series format) + status, all centered */}
+          {/* eyebrow bar — game name + status, both centered */}
           <div className="flex flex-col items-center gap-3 border-b border-edge px-4 py-4 md:py-5">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <span className="font-display text-base font-bold uppercase tracking-[0.26em] text-spectre md:text-xl">
-                {gameName}
-              </span>
-              {bo && (
-                <span className="rounded-full border border-amethyst/45 bg-amethyst/10 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-glow shadow-[0_0_16px_rgba(168,85,247,0.2)]">
-                  {bo}
-                </span>
-              )}
-            </div>
+            <span className="font-display text-base font-bold uppercase tracking-[0.26em] text-spectre md:text-xl">
+              {gameName}
+            </span>
             <span
               className={`relative inline-flex items-center overflow-hidden rounded-full border bg-void/70 px-5 py-1.5 ${s.ring} ${s.glow}`}
             >
@@ -428,13 +421,18 @@ export default function UpcomingMatch() {
           <div className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch">
             <TeamSide logo="/logo.png" name="NIIGHTMARE" home />
 
-            {/* the blade seam + forged VS — the matchup's centerpiece */}
-            <div className="relative z-10 flex items-center justify-center px-1 py-0 md:px-2">
+            {/* the blade seam + BO tag + forged VS — the matchup's centerpiece */}
+            <div className="relative z-10 flex flex-col items-center justify-center gap-4 px-1 py-0 md:gap-6 md:px-2">
               {/* seam: a faint skewed blade through the matchup */}
               <span
                 aria-hidden
                 className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 -skew-x-[12deg] bg-gradient-to-b from-transparent via-amethyst/40 to-transparent"
               />
+              {bo && (
+                <span className="relative z-10 whitespace-nowrap rounded-full border border-amethyst/50 bg-void/75 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-glow shadow-[0_0_18px_rgba(168,85,247,0.28)] md:px-3.5 md:text-[13px] md:tracking-[0.28em]">
+                  {bo}
+                </span>
+              )}
               <div className="relative grid place-items-center">
                 <span
                   aria-hidden
