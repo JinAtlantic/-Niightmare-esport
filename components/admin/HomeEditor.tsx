@@ -492,7 +492,7 @@ export default function HomeEditor() {
                     placeholder="https://youtube.com/live/…"
                   />
                   <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
-                    เลือก “มีถ่ายทอดสด” แล้วการ์ดจะโชว์ป้าย “🔴 LIVE BROADCAST” ทันที (แม้ยังไม่ใส่ลิงก์).
+                    เลือก “มีถ่ายทอดสด” แล้วการ์ดจะโชว์ป้าย “🔴 LIVE STREAM” ทันที (แม้ยังไม่ใส่ลิงก์).
                     พอใส่ลิงก์ ป้ายจะกดไปดูช่องได้ และปุ่ม WATCH LIVE จะเด่นขึ้นเมื่อตั้งสถานะ = กำลังแข่ง
                   </p>
                 </div>

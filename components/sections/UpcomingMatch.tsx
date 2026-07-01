@@ -438,7 +438,7 @@ export default function UpcomingMatch() {
                       <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
                     </span>
-                    {pick({ en: "Live broadcast", lo: "ຖ່າຍທອດສົດ" })}
+                    {pick({ en: "Live stream", lo: "ມີຖ່າຍທອດສົດ" })}
                   </a>
                 ) : (
                   <span className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss">
@@ -446,13 +446,13 @@ export default function UpcomingMatch() {
                       <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
                     </span>
-                    {pick({ en: "Live broadcast", lo: "ຖ່າຍທອດສົດ" })}
+                    {pick({ en: "Live stream", lo: "ມີຖ່າຍທອດສົດ" })}
                   </span>
                 )
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-void/40 px-3.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ash-dim">
                   <span className="h-2 w-2 rounded-full bg-ash-dim/70" aria-hidden />
-                  {pick({ en: "No broadcast", lo: "ບໍ່ມີຖ່າຍທອດສົດ" })}
+                  {pick({ en: "No live stream", lo: "ບໍ່ມີຖ່າຍທອດສົດ" })}
                 </span>
               ))}
           </div>
