@@ -417,6 +417,24 @@ export default function UpcomingMatch() {
                 {t(s.key)}
               </span>
             </span>
+
+            {/* broadcast badge — this fixture will be streamed. Only for the
+                pre-live states; when it's actually live the WATCH LIVE button
+                below carries the call to action instead. */}
+            {streamHref && status !== "live" && (
+              <a
+                href={streamHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss transition-colors hover:border-loss hover:bg-loss/20"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
+                </span>
+                {pick({ en: "Live broadcast", lo: "ຖ່າຍທອດສົດ" })}
+              </a>
+            )}
           </div>
 
           {/* mobile-only: tournament headline sits above the clash so the event

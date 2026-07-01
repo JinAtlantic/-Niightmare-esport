@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
 import {
   Button,
@@ -239,6 +239,9 @@ function BilingualTextArea({
 export default function HomeEditor() {
   const { data, setData, loading, saving, error, savedAt, save } =
     useData<SiteFile>("site");
+  // Live toggle can be "on" before a link is pasted; the card only shows the
+  // broadcast badge once there's an actual URL to persist.
+  const [liveOn, setLiveOn] = useState(false);
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data)
@@ -272,6 +275,7 @@ export default function HomeEditor() {
     });
 
   const isPractice = m.status === "practice";
+  const hasLive = liveOn || Boolean(m.streamUrl && m.streamUrl.trim());
 
   return (
     <div className="space-y-8">
@@ -463,12 +467,40 @@ export default function HomeEditor() {
               />
             </div>
             <div className="md:col-span-2">
-              <TextField
-                label="ลิงก์ไลฟ์สด (YouTube/Facebook) — โชว์ปุ่ม WATCH LIVE เมื่อสถานะ = กำลังแข่ง"
-                value={m.streamUrl ?? ""}
-                onChange={(v) => patch({ streamUrl: v || undefined })}
-                placeholder="https://youtube.com/live/…"
-              />
+              <Label>🔴 ถ่ายทอดสด (Live)</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={hasLive ? "primary" : "ghost"}
+                  onClick={() => setLiveOn(true)}
+                  className="min-h-[36px]"
+                >
+                  มีถ่ายทอดสด
+                </Button>
+                <Button
+                  variant={!hasLive ? "primary" : "ghost"}
+                  onClick={() => {
+                    setLiveOn(false);
+                    patch({ streamUrl: undefined });
+                  }}
+                  className="min-h-[36px]"
+                >
+                  ไม่มี
+                </Button>
+              </div>
+              {hasLive && (
+                <div className="mt-2">
+                  <TextField
+                    label="ลิงก์ไลฟ์สด (YouTube/Facebook)"
+                    value={m.streamUrl ?? ""}
+                    onChange={(v) => patch({ streamUrl: v || undefined })}
+                    placeholder="https://youtube.com/live/…"
+                  />
+                  <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
+                    ใส่ลิงก์แล้วการ์ดจะโชว์ป้าย “🔴 ถ่ายทอดสด” ให้แฟนกดดูช่องได้ และปุ่ม
+                    WATCH LIVE จะเด่นขึ้นเมื่อตั้งสถานะ = กำลังแข่ง
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
