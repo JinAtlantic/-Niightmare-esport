@@ -267,6 +267,34 @@ html.lang-lo .keep-latin {
   filter: drop-shadow(0 0 14px rgba(199, 125, 255, 0.35));
 }
 
+/* Indeterminate loading bar — a violet light sweeping a thin rail. Used by the
+   route-level loading screen. */
+.loading-bar {
+  position: relative;
+  display: block;
+  height: 2px;
+  width: 150px;
+  overflow: hidden;
+  background: rgba(168, 85, 247, 0.16);
+}
+.loading-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, #c77dff, #a855f7, transparent);
+  box-shadow: 0 0 12px rgba(199, 125, 255, 0.7);
+  animation: loading-slide 1.1s ease-in-out infinite;
+}
+@keyframes loading-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 /* Thin violet scrollbar for the scrollable news digest rail */
 .news-scroll {
   scrollbar-width: thin;
