@@ -418,9 +418,9 @@ function MatchCard({
       />
 
       {/* header: date | round */}
-      <div className="relative flex items-center justify-between gap-3">
+      <div className="relative flex items-center justify-between gap-2">
         <time
-          className={`whitespace-nowrap border border-edge bg-void/35 font-mono tracking-wide text-ash ${
+          className={`shrink-0 whitespace-nowrap border border-edge bg-void/35 font-mono tracking-wide text-ash ${
             compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
           }`}
           dateTime={match.date}
@@ -428,10 +428,11 @@ function MatchCard({
           {formatDate(match.date, lang)}
         </time>
         {(round || bo) && (
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex min-w-0 items-center justify-end gap-1.5">
             {round && (
               <span
-                className={`border border-edge-bright bg-void/40 font-mono font-semibold uppercase tracking-[0.16em] text-spectre ${
+                title={round}
+                className={`min-w-0 truncate border border-edge-bright bg-void/40 font-mono font-semibold uppercase tracking-[0.16em] text-spectre ${
                   compact ? "px-2 py-0.5 text-[9px]" : "px-2.5 py-1 text-[10px]"
                 }`}
               >
@@ -440,7 +441,7 @@ function MatchCard({
             )}
             {bo && (
               <span
-                className={`border border-amethyst/40 bg-amethyst/10 font-mono font-bold uppercase tracking-[0.16em] text-glow ${
+                className={`shrink-0 whitespace-nowrap border border-amethyst/40 bg-amethyst/10 font-mono font-bold uppercase tracking-[0.16em] text-glow ${
                   compact ? "px-2 py-0.5 text-[9px]" : "px-2.5 py-1 text-[10px]"
                 }`}
               >
