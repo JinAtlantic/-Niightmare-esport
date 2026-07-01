@@ -37,9 +37,32 @@ export default function PushNotifications() {
       return;
     }
     try {
-      const reg = await navigator.serviceWorker.getRegistration();
+      // Read the subscription from the ACTIVE registration. getRegistration()
+      // can resolve before the SW controls the page on a fresh load, so its
+      // getSubscription() returns null and the toggle wrongly flips to "off"
+      // when you reopen /admin. serviceWorker.ready waits for an active worker;
+      // guard it with a timeout so it can never hang the panel.
+      const reg =
+        (await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise<ServiceWorkerRegistration | undefined>((resolve) =>
+            setTimeout(() => resolve(undefined), 5000)
+          ),
+        ])) ?? (await navigator.serviceWorker.getRegistration());
       const sub = reg ? await reg.pushManager.getSubscription() : null;
-      setState(sub ? "on" : "off");
+      if (sub) {
+        setState("on");
+        // Re-sync the live subscription so the server never drifts out of step
+        // (e.g. after it pruned a transient failure) — keeps alerts flowing.
+        const json = sub.toJSON();
+        fetch("/api/admin/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, userAgent: navigator.userAgent }),
+        }).catch(() => {});
+      } else {
+        setState("off");
+      }
     } catch {
       setState("off");
     }

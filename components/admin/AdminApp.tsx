@@ -15,18 +15,19 @@ import PushNotifications from "@/components/admin/PushNotifications";
 type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "orders" | "community";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "orders", label: "Orders" },
   { id: "home", label: "Home" },
   { id: "matches", label: "Matches" },
   { id: "achievements", label: "Achievements" },
   { id: "roster", label: "Roster" },
   { id: "sponsors", label: "Sponsors" },
   { id: "shop", label: "Shop" },
-  { id: "orders", label: "Orders" },
   { id: "community", label: "Community" },
 ];
 
 export default function AdminApp() {
-  const [tab, setTab] = useState<Tab>("home");
+  // Land on Orders — it's the day-to-day actionable screen (new paid orders).
+  const [tab, setTab] = useState<Tab>("orders");
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
