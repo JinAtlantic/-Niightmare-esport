@@ -422,18 +422,20 @@ export default function UpcomingMatch() {
             <TeamSide logo="/logo.png" name="NIIGHTMARE" home />
 
             {/* the blade seam + BO tag + forged VS — the matchup's centerpiece */}
-            <div className="relative z-10 flex flex-col items-center justify-center gap-4 px-1 py-0 md:gap-6 md:px-2">
+            <div className="relative z-10 flex items-center justify-center px-1 py-0 md:px-2">
               {/* seam: a faint skewed blade through the matchup */}
               <span
                 aria-hidden
                 className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 -skew-x-[12deg] bg-gradient-to-b from-transparent via-amethyst/40 to-transparent"
               />
-              {bo && (
-                <span className="relative z-10 whitespace-nowrap rounded-full border border-amethyst/50 bg-void/75 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-glow shadow-[0_0_18px_rgba(168,85,247,0.28)] md:px-3.5 md:text-[13px] md:tracking-[0.28em]">
-                  {bo}
-                </span>
-              )}
               <div className="relative grid place-items-center">
+                {/* BO tag floats above the VS — absolute so the VS stays centred
+                    on the crest line instead of being pushed down */}
+                {bo && (
+                  <span className="absolute bottom-full left-1/2 z-10 mb-4 -translate-x-1/2 whitespace-nowrap rounded-full border border-amethyst/50 bg-void/75 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-glow shadow-[0_0_18px_rgba(168,85,247,0.28)] md:mb-6 md:px-3.5 md:text-[13px] md:tracking-[0.28em]">
+                    {bo}
+                  </span>
+                )}
                 <span
                   aria-hidden
                   className="absolute inset-0 -z-10 blur-2xl"
