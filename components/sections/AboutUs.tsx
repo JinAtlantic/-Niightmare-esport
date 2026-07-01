@@ -45,7 +45,10 @@ export default function AboutUs() {
         </Reveal>
 
         <Reveal delay={60}>
-          <p className="mt-7 font-display text-2xl font-extrabold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.25)] sm:text-3xl md:text-4xl">
+          {/* nowrap + a viewport-scaled clamp so each manifesto line stays on a
+              single row on mobile (EN and Lao alike) instead of wrapping, and
+              still caps at the desktop 4xl size. Tuned to the widest line. */}
+          <p className="mt-7 whitespace-nowrap font-display text-[clamp(14px,4.8vw,36px)] font-extrabold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.25)]">
             <span className="block">{pick(about.headLine1)}</span>
             <span className="mt-1 block">
               <span>{pick(about.headPre)}</span>
