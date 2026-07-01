@@ -452,18 +452,14 @@ export default function MatchesEditor() {
             </div>
             <BilingualField label="Round / Stage" value={m.round ?? emptyText} onChange={(v) => patchMatch(i, { round: v })} />
           </div>
-          <TextField
-            label="Opponent"
-            value={m.opponent}
-            onChange={(v) => patchMatch(i, { opponent: v })}
-            placeholder="Dragon Force"
-          />
-          <TextField
-            label="Opponent abbr (3 ตัว — โชว์เมื่อไม่มีโลโก้)"
-            value={m.opponentAbbr ?? ""}
-            onChange={(v) => patchMatch(i, { opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined })}
-            placeholder="DRG"
-          />
+          <div className="md:col-span-2">
+            <TextField
+              label="Opponent"
+              value={m.opponent}
+              onChange={(v) => patchMatch(i, { opponent: v })}
+              placeholder="Dragon Force"
+            />
+          </div>
           <TextField label="Score" value={m.score} onChange={(v) => patchMatch(i, { score: v })} placeholder="3-1" />
           <SelectField
             label="Result"
@@ -477,76 +473,92 @@ export default function MatchesEditor() {
             onChange={(v) => patchMatch(i, { bo: v || undefined })}
             options={BO_SELECT_OPTIONS}
           />
-          <div className="md:col-span-2">
-            <div className="border border-edge bg-crypt/50 p-2">
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
-                    VOD links
-                  </p>
-                  <p className="mt-1 font-mono text-[10px] text-ash-dim">
-                    Use Full Match when one video covers the whole series. Use Game for Game 1 / Game 2 / Game 3.
-                  </p>
-                </div>
-                <Button onClick={() => addVod(i)} className="min-h-[30px] px-2 py-1 text-[10px]">
-                  Add VOD
-                </Button>
+
+          {/* Advanced — media/aliases you rarely touch. Collapsed so the daily
+              essentials above stay quick to scan and edit. */}
+          <details className="md:col-span-2 border border-edge bg-void/30">
+            <summary className="cursor-pointer px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
+              ขั้นสูง — โลโก้ / ชื่อย่อ / VOD
+            </summary>
+            <div className="grid gap-2 border-t border-edge p-2 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <ImageField
+                  label="Opponent logo"
+                  value={m.opponentLogo}
+                  folder="teams"
+                  onChange={(p) => patchMatch(i, { opponentLogo: p || undefined })}
+                />
               </div>
               <TextField
-                label="Legacy VOD fallback"
-                value={m.vod ?? ""}
-                onChange={(v) => patchMatch(i, { vod: v.trim() ? v.trim() : null })}
-                placeholder="Kept for old data. New links should be added below."
+                label="Opponent abbr (3 ตัว — โชว์เมื่อไม่มีโลโก้)"
+                value={m.opponentAbbr ?? ""}
+                onChange={(v) => patchMatch(i, { opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined })}
+                placeholder="DRG"
               />
-              <div className="mt-2 space-y-2">
-                {draftMatchVods(m.vods).map((vod, vodIndex) => (
-                  <div key={`${vod.url}-${vodIndex}`} className="grid gap-2 border border-edge bg-void/45 p-2 md:grid-cols-[180px_90px_minmax(0,1fr)_auto]">
-                    <SelectField
-                      label="Type"
-                      value={vod.type}
-                      onChange={(v) => patchVod(i, vodIndex, { type: v as MatchVod["type"] })}
-                      options={VOD_TYPE_OPTS}
-                    />
-                    <TextField
-                      label="Game"
-                      type="number"
-                      value={vod.game ? String(vod.game) : ""}
-                      onChange={(v) => patchVod(i, vodIndex, { game: Number(v) || undefined })}
-                      placeholder="1"
-                    />
-                    <TextField
-                      label="URL"
-                      value={vod.url}
-                      onChange={(v) => patchVod(i, vodIndex, { url: v })}
-                      placeholder="https://youtube.com/..."
-                    />
-                    <div className="flex items-end">
-                      <Button
-                        variant="danger"
-                        onClick={() => removeVod(i, vodIndex)}
-                        className="min-h-[36px] px-2 py-1 text-[10px]"
-                      >
-                        Remove
-                      </Button>
+              <div className="md:col-span-2">
+                <div className="border border-edge bg-crypt/50 p-2">
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
+                        VOD links
+                      </p>
+                      <p className="mt-1 font-mono text-[10px] text-ash-dim">
+                        Use Full Match when one video covers the whole series. Use Game for Game 1 / Game 2 / Game 3.
+                      </p>
                     </div>
+                    <Button onClick={() => addVod(i)} className="min-h-[30px] px-2 py-1 text-[10px]">
+                      Add VOD
+                    </Button>
                   </div>
-                ))}
-                {!draftMatchVods(m.vods).length && (
-                  <p className="border border-dashed border-edge px-3 py-2 font-mono text-[10px] text-ash-dim">
-                    No multi-VOD links yet.
-                  </p>
-                )}
+                  <TextField
+                    label="Legacy VOD fallback"
+                    value={m.vod ?? ""}
+                    onChange={(v) => patchMatch(i, { vod: v.trim() ? v.trim() : null })}
+                    placeholder="Kept for old data. New links should be added below."
+                  />
+                  <div className="mt-2 space-y-2">
+                    {draftMatchVods(m.vods).map((vod, vodIndex) => (
+                      <div key={`${vod.url}-${vodIndex}`} className="grid gap-2 border border-edge bg-void/45 p-2 md:grid-cols-[180px_90px_minmax(0,1fr)_auto]">
+                        <SelectField
+                          label="Type"
+                          value={vod.type}
+                          onChange={(v) => patchVod(i, vodIndex, { type: v as MatchVod["type"] })}
+                          options={VOD_TYPE_OPTS}
+                        />
+                        <TextField
+                          label="Game"
+                          type="number"
+                          value={vod.game ? String(vod.game) : ""}
+                          onChange={(v) => patchVod(i, vodIndex, { game: Number(v) || undefined })}
+                          placeholder="1"
+                        />
+                        <TextField
+                          label="URL"
+                          value={vod.url}
+                          onChange={(v) => patchVod(i, vodIndex, { url: v })}
+                          placeholder="https://youtube.com/..."
+                        />
+                        <div className="flex items-end">
+                          <Button
+                            variant="danger"
+                            onClick={() => removeVod(i, vodIndex)}
+                            className="min-h-[36px] px-2 py-1 text-[10px]"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {!draftMatchVods(m.vods).length && (
+                      <p className="border border-dashed border-edge px-3 py-2 font-mono text-[10px] text-ash-dim">
+                        No multi-VOD links yet.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="md:col-span-2">
-            <ImageField
-              label="Opponent logo"
-              value={m.opponentLogo}
-              folder="teams"
-              onChange={(p) => patchMatch(i, { opponentLogo: p || undefined })}
-            />
-          </div>
+          </details>
         </div>
       </div>
     );
@@ -721,7 +733,12 @@ export default function MatchesEditor() {
 
       {view === "page" && (
         <section className="space-y-4">
-          <Section title="ข้อความหน้า Matches" hint="ป้ายกำกับบนหน้า /matches">
+          <Section title="ข้อความหน้า Matches" hint="ป้ายกำกับบนหน้า /matches — ตั้งครั้งเดียว แทบไม่แก้">
+            <details className="border border-edge bg-void/30">
+              <summary className="cursor-pointer px-3 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
+                กดเพื่อแก้ไขข้อความหน้าเว็บ (พับไว้)
+              </summary>
+              <div className="border-t border-edge p-2">
             <Card>
             <div className="grid gap-3">
               <BilingualField label="Hero kicker" value={page.kicker} onChange={(v) => patchPage({ kicker: v })} />
@@ -751,9 +768,16 @@ export default function MatchesEditor() {
               />
             </div>
             </Card>
+              </div>
+            </details>
           </Section>
 
-          <Section title="ฟิลเตอร์ สถิติ ผลแข่ง (labels)" hint="ป้ายกำกับสาธารณะ">
+          <Section title="ฟิลเตอร์ สถิติ ผลแข่ง (labels)" hint="ป้ายกำกับสาธารณะ — ตั้งครั้งเดียว แทบไม่แก้">
+            <details className="border border-edge bg-void/30">
+              <summary className="cursor-pointer px-3 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
+                กดเพื่อแก้ไข label ฟิลเตอร์/สถิติ/ผล (พับไว้)
+              </summary>
+              <div className="border-t border-edge p-2">
             <Card>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="border border-edge bg-void/40 p-4">
@@ -810,6 +834,8 @@ export default function MatchesEditor() {
               </div>
             </div>
             </Card>
+              </div>
+            </details>
           </Section>
         </section>
       )}
