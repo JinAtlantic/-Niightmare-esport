@@ -30,6 +30,41 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// Browsers periodically rotate / invalidate the push subscription and fire this
+// event. Without re-subscribing here the old subscription silently dies and the
+// admin toggle flips itself to "off" (alerts stop). Recreate it with the SAME
+// VAPID key — read off the expiring subscription so we don't need env here — and
+// re-register it with the server (the admin session cookie rides along on this
+// same-origin request, so the upsert is authorized).
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const oldSub = event.oldSubscription;
+        const applicationServerKey =
+          (oldSub && oldSub.options && oldSub.options.applicationServerKey) || undefined;
+        let sub = event.newSubscription || null;
+        if (!sub) {
+          sub = await self.registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey,
+          });
+        }
+        if (!sub) return;
+        const json = sub.toJSON();
+        await fetch("/api/admin/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, userAgent: "sw-resubscribe" }),
+        });
+      } catch (e) {
+        /* best effort — nothing we can do if the browser refuses to re-subscribe */
+      }
+    })()
+  );
+});
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = (event.notification.data && event.notification.data.url) || "/admin";
