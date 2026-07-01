@@ -49,11 +49,25 @@ export default function PushNotifications() {
             setTimeout(() => resolve(undefined), 5000)
           ),
         ])) ?? (await navigator.serviceWorker.getRegistration());
-      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      let sub = reg ? await reg.pushManager.getSubscription() : null;
+      // Android frequently drops the subscription after the app is swiped away
+      // from recents. If permission is still granted we can re-subscribe
+      // SILENTLY (no prompt) so the toggle stays "on" across cold starts and
+      // alerts keep arriving, instead of flipping itself to "off".
+      if (!sub && reg && Notification.permission === "granted") {
+        try {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          });
+        } catch {
+          /* couldn't re-subscribe — fall through to "off" */
+        }
+      }
       if (sub) {
         setState("on");
-        // Re-sync the live subscription so the server never drifts out of step
-        // (e.g. after it pruned a transient failure) — keeps alerts flowing.
+        // Re-sync the live subscription so the server always has the current
+        // endpoint (a re-subscribe mints a new one) — keeps alerts flowing.
         const json = sub.toJSON();
         fetch("/api/admin/push/subscribe", {
           method: "POST",
