@@ -21,6 +21,9 @@ export default function PushNotifications() {
   const [state, setState] = useState<State>("loading");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  // Small diagnostic code shown in the bar — lets us tell WHY the toggle is
+  // "off" on a device we can't debug directly (e.g. Android after an app kill).
+  const [reason, setReason] = useState("");
 
   const refresh = useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -36,34 +39,40 @@ export default function PushNotifications() {
       setState("denied");
       return;
     }
+    let why = "";
     try {
       // Read the subscription from the ACTIVE registration. getRegistration()
       // can resolve before the SW controls the page on a fresh load, so its
-      // getSubscription() returns null and the toggle wrongly flips to "off"
-      // when you reopen /admin. serviceWorker.ready waits for an active worker;
-      // guard it with a timeout so it can never hang the panel.
+      // getSubscription() returns null. serviceWorker.ready waits for an active
+      // worker; guard it with a timeout so it can never hang the panel.
       const reg =
         (await Promise.race([
           navigator.serviceWorker.ready,
           new Promise<ServiceWorkerRegistration | undefined>((resolve) =>
-            setTimeout(() => resolve(undefined), 5000)
+            setTimeout(() => resolve(undefined), 6000)
           ),
         ])) ?? (await navigator.serviceWorker.getRegistration());
       let sub = reg ? await reg.pushManager.getSubscription() : null;
-      // Android frequently drops the subscription after the app is swiped away
-      // from recents. If permission is still granted we can re-subscribe
-      // SILENTLY (no prompt) so the toggle stays "on" across cold starts and
-      // alerts keep arriving, instead of flipping itself to "off".
+      if (sub) why = "had-sub";
+      // Android drops the subscription when the app is swiped away from recents.
+      // If permission is still granted we can re-subscribe SILENTLY (no prompt)
+      // so the toggle stays "on" across cold starts. Retry once — the push
+      // service can be cold for a moment right after the app reopens.
       if (!sub && reg && Notification.permission === "granted") {
-        try {
-          sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-          });
-        } catch {
-          /* couldn't re-subscribe — fall through to "off" */
+        for (let attempt = 0; attempt < 2 && !sub; attempt++) {
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 1200));
+          try {
+            sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            });
+            why = "resubscribed";
+          } catch (e) {
+            why = `resub-fail:${e instanceof Error ? e.name : "?"}`;
+          }
         }
       }
+      if (!sub && !why) why = reg ? `perm:${Notification.permission}` : "no-reg";
       if (sub) {
         setState("on");
         // Re-sync the live subscription so the server always has the current
@@ -77,9 +86,11 @@ export default function PushNotifications() {
       } else {
         setState("off");
       }
-    } catch {
+    } catch (e) {
+      why = `err:${e instanceof Error ? e.name : "?"}`;
       setState("off");
     }
+    setReason(why);
   }, []);
 
   useEffect(() => {
@@ -93,6 +104,20 @@ export default function PushNotifications() {
       }
       refresh();
     })();
+  }, [refresh]);
+
+  // Re-check (and silently re-subscribe) every time the app comes back to the
+  // foreground — this is when Android has usually dropped the subscription.
+  useEffect(() => {
+    const recheck = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", recheck);
+    window.addEventListener("focus", recheck);
+    return () => {
+      document.removeEventListener("visibilitychange", recheck);
+      window.removeEventListener("focus", recheck);
+    };
   }, [refresh]);
 
   async function enable() {
@@ -197,6 +222,7 @@ export default function PushNotifications() {
       )}
 
       {msg && <span className="text-ash">{msg}</span>}
+      {reason && <span className="text-ash-dim/70">· {reason}</span>}
     </div>
   );
 }
