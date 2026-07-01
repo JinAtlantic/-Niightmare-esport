@@ -10,6 +10,11 @@
   --void: #0b0710;
   --amethyst: #a855f7;
   --glow: #c77dff;
+  /* Lighting-only accents (not new UI colours) — a magenta counter-light and a
+     deep-indigo shadow give the monochrome violet some dimension. Magenta is
+     the brand's long-standing accent (#C244C4 family). */
+  --magenta: #c24bc9;
+  --indigo: #3a1d6e;
 }
 
 html {
@@ -21,11 +26,31 @@ html {
 }
 
 body {
-  background-color: #0b0710;
+  /* "Aurora Void" — the flat black void becomes a deep, lit atmosphere: an
+     amethyst key light from the upper-left, a magenta counter-light from the
+     upper-right, and a cool indigo pool rising from the bottom. Asymmetric on
+     purpose (breaks the symmetric, AI-looking wash). Fixed so it reads as a
+     stable light field while the content scrolls over it. */
+  background-color: #0a0611;
+  background-image:
+    radial-gradient(62% 46% at 12% -6%, rgba(168, 85, 247, 0.12), transparent 60%),
+    radial-gradient(56% 44% at 104% 6%, rgba(194, 75, 201, 0.1), transparent 60%),
+    radial-gradient(96% 70% at 50% 116%, rgba(58, 29, 110, 0.22), transparent 62%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: #ece7f2;
   font-family: var(--font-barlow);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+/* `background-attachment: fixed` gives desktop a stable light field, but it is a
+   known cause of scroll jank on mobile — pin it to scroll on small screens
+   (protects the mobile Speed Index; the aurora still reads). */
+@media (max-width: 767px) {
+  body {
+    background-attachment: scroll;
+  }
 }
 
 h1,
@@ -174,6 +199,32 @@ html.lang-lo .keep-latin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #a855f7 30%, #c77dff 60%, transparent);
   transform: skewX(-24deg);
+}
+
+/* ----------------------------------------------------------------
+   AURORA BAND — the premium two-tone lighting for content bands that
+   were previously flat black (Recent Results, About). An amethyst wash
+   from the upper-left, a magenta counter-wash from the lower-right, a
+   soft vignette to seat the content, and a whisper of film grain so the
+   gradients never band. Content inside must sit at z-index >= 1 (the
+   existing `.relative z-[1]` wrappers already do).
+------------------------------------------------------------------ */
+.aurora-band {
+  position: relative;
+  background-color: #0a0611;
+  background-image:
+    radial-gradient(78% 120% at 8% -14%, rgba(168, 85, 247, 0.14), transparent 56%),
+    radial-gradient(74% 118% at 98% 118%, rgba(194, 75, 201, 0.12), transparent 56%),
+    radial-gradient(120% 92% at 50% 46%, transparent 60%, rgba(0, 0, 0, 0.5));
+}
+.aurora-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* Thin violet scrollbar for the scrollable news digest rail */
@@ -677,7 +728,9 @@ html.lang-lo .home-hero-tagline {
   height: 40vh;
   right: -14vw;
   bottom: 10%;
-  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.13), transparent 70%);
+  /* magenta counter-light — pairs with the violet fog on the left so the hero
+     is lit from two hues instead of one flat violet (adds depth). */
+  background: radial-gradient(ellipse at center, rgba(194, 75, 201, 0.15), transparent 70%);
   animation: fog-drift-2 34s ease-in-out infinite;
 }
 /* premium violet dust: tiny suspended particles over the first viewport. */
@@ -1055,12 +1108,16 @@ html.lang-lo .home-hero-tagline {
   height: 120%;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(124, 47, 214, 0.22) 0%,
-    rgba(124, 47, 214, 0.08) 40%,
-    transparent 70%
-  );
+  /* violet key light rising from below, with a magenta counter-glow off to the
+     right so inner-page headers share the home page's two-tone lighting. */
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(124, 47, 214, 0.22) 0%,
+      rgba(124, 47, 214, 0.08) 40%,
+      transparent 70%
+    ),
+    radial-gradient(38% 60% at 82% 30%, rgba(194, 75, 201, 0.12), transparent 72%);
 }
 .page-header::after {
   content: "";

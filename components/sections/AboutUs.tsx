@@ -26,12 +26,16 @@ export default function AboutUs() {
   const primaryHref = safeHref(about.primaryCta.href, "/contact");
 
   return (
-    <section className="relative overflow-hidden border-t border-edge bg-void px-4 py-20 md:px-6 md:py-24">
+    <section className="aurora-band relative overflow-hidden border-t border-edge px-4 py-20 md:px-6 md:py-24">
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
-      {/* centred halo, matching the bands above/below */}
+      {/* two-tone halo — amethyst key + magenta accent, matching Recent Results */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-12 h-64 w-[min(820px,90vw)] -translate-x-1/2 bg-amethyst/10 blur-3xl"
+        className="pointer-events-none absolute left-[40%] top-10 h-64 w-[min(720px,86vw)] -translate-x-1/2 bg-amethyst/12 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-[62%] top-24 h-52 w-[min(520px,70vw)] -translate-x-1/2 bg-magenta/10 blur-3xl"
       />
 
       <div className="relative z-[1] mx-auto flex max-w-3xl flex-col items-center text-center">

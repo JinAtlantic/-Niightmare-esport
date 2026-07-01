@@ -20,6 +20,8 @@ const config: Config = {
         "amethyst-deep": "#7C2FD6", // deep violet (CTA fill base, gradients)
         glow: "#C77DFF", // lighter violet — hover / glow
         spectre: "#C9B4F6", // pale violet — ghost echo, data accents
+        magenta: "#C24BC9", // counter-light accent (two-tone depth)
+        "indigo-deep": "#3A1D6E", // cool shadow / counter-light base
         soul: "#ECE7F2", // primary text
         ash: "#8B8298", // muted text
         "ash-dim": "#5A5366", // dimmest text / units

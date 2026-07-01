@@ -76,6 +76,12 @@ function ResultCard({ match }: { match: Match }) {
     <article
       className={`group relative h-[78px] overflow-hidden border ${s.border} bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void transition-all duration-300 sm:h-full ${s.glow}`}
     >
+      {/* glass top sheen — a faint lit edge so the surface catches light and
+          reads as a raised panel rather than a flat rectangle. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+      />
       {/* ── MOBILE: compact horizontal row — easy to scan in a single column ── */}
       <div className="flex h-full items-stretch sm:hidden">
         <div
@@ -184,11 +190,16 @@ export default function RecentResults() {
   const shown = group.slice(0, 8);
 
   return (
-    <section className="relative overflow-hidden border-t border-edge bg-void px-4 py-20 md:px-6 md:py-24">
+    <section className="aurora-band relative overflow-hidden border-t border-edge px-4 py-20 md:px-6 md:py-24">
       <div className="scythe-line absolute inset-x-0 top-0 h-[2px]" aria-hidden />
+      {/* two-tone halo behind the title — amethyst key + magenta accent */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-12 h-64 w-[min(900px,92vw)] -translate-x-1/2 bg-amethyst/10 blur-3xl"
+        className="pointer-events-none absolute left-[38%] top-10 h-64 w-[min(760px,88vw)] -translate-x-1/2 bg-amethyst/12 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-[64%] top-20 h-56 w-[min(560px,72vw)] -translate-x-1/2 bg-magenta/10 blur-3xl"
       />
       <div className="relative z-[1] mx-auto max-w-7xl">
         <Reveal>
