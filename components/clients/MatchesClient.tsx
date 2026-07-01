@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
@@ -543,12 +543,19 @@ function MatchCard({
 function TournamentRecordGroup({
   group,
   page,
+  forceOpen = false,
 }: {
   group: TournamentMatchGroup;
   page: MatchesPageCopy;
+  forceOpen?: boolean;
 }) {
   const { pick, lang } = useLanguage();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(forceOpen);
+  // Expand automatically while a search is active so the matching matches (and
+  // their VODs) are visible without an extra click.
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
   const tournament = group.tournament;
   const matchCount = group.matches.length;
   const tier = tournamentTier(group.name.en || group.name.lo);
@@ -699,10 +706,12 @@ function GameTournamentSection({
   game,
   groups,
   page,
+  forceOpen = false,
 }: {
   game: GameId;
   groups: TournamentMatchGroup[];
   page: MatchesPageCopy;
+  forceOpen?: boolean;
 }) {
   return (
     <section className="relative overflow-hidden border border-edge bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.13),transparent_32%),linear-gradient(180deg,rgba(28,20,40,0.62),rgba(11,7,16,0.82))] p-3 shadow-[0_0_28px_rgba(168,85,247,0.12)] md:p-5">
@@ -737,7 +746,7 @@ function GameTournamentSection({
           // Cap the stagger so deep groups never wait on a long index-based
           // delay (All Years can have 20+ groups).
           <Reveal key={group.key} delay={Math.min(i, 4) * 55}>
-            <TournamentRecordGroup group={group} page={page} />
+            <TournamentRecordGroup group={group} page={page} forceOpen={forceOpen} />
           </Reveal>
         ))}
       </div>
@@ -867,20 +876,38 @@ export default function MatchesClient() {
   );
   const groupsByGame = useMemo(() => {
     const q = normalizeValue(search);
-    const groups = tournamentGroups.filter(
-      (group) =>
-        group.game === selectedGame &&
-        (selectedTournament === "all" ||
-          baseTournamentKey(group.game, group.name) === selectedTournament) &&
-        // free-text search matches the tournament name (either language) or any
-        // opponent team played in that tournament.
-        (!q ||
+    const groups = tournamentGroups
+      .filter(
+        (group) =>
+          group.game === selectedGame &&
+          (selectedTournament === "all" ||
+            baseTournamentKey(group.game, group.name) === selectedTournament)
+      )
+      .map((group): TournamentMatchGroup | null => {
+        if (!q) return group;
+        const nameMatches =
           normalizeValue(group.name.en || group.name.lo).includes(q) ||
-          normalizeValue(group.name.lo || "").includes(q) ||
-          group.matches.some((m) => normalizeValue(m.opponent).includes(q)))
-    );
+          normalizeValue(group.name.lo || "").includes(q);
+        // Tournament search → show the whole tournament (all opponents).
+        if (nameMatches) return group;
+        // Team search → keep only the matches against the searched opponent, so
+        // other teams' matches don't show. The card otherwise stays a full
+        // tournament view (placement / prize / VODs).
+        const teamMatches = group.matches.filter((m) => normalizeValue(m.opponent).includes(q));
+        if (teamMatches.length === 0) return null;
+        const dates = teamMatches.map((m) => m.date ?? "").filter(Boolean);
+        return {
+          ...group,
+          matches: teamMatches,
+          latestDate: dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : group.latestDate,
+          earliestDate: dates.length ? dates.reduce((a, b) => (a < b ? a : b)) : group.earliestDate,
+        };
+      })
+      .filter((group): group is TournamentMatchGroup => group !== null);
     return [{ game: selectedGame, groups }];
   }, [selectedGame, selectedTournament, tournamentGroups, search]);
+
+  const searchActive = normalizeValue(search).length > 0;
 
   return (
     <>
@@ -1045,7 +1072,7 @@ export default function MatchesClient() {
             // met on a section taller than ~6× the viewport — so nothing showed on
             // mobile. Each tournament group reveals itself instead.
             groupsByGame.map(({ game, groups }) => (
-              <GameTournamentSection key={game} game={game} groups={groups} page={page} />
+              <GameTournamentSection key={game} game={game} groups={groups} page={page} forceOpen={searchActive} />
             ))
           ) : (
             <p className="border border-edge bg-crypt p-8 text-center font-mono text-sm text-ash">
