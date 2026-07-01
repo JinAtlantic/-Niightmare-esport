@@ -95,6 +95,10 @@ const config: Config = {
             transform: "scale(1.03)",
           },
         },
+        logoGlow: {
+          "0%, 100%": { filter: "drop-shadow(0 0 12px rgba(168,85,247,0.45))", transform: "scale(1)" },
+          "50%": { filter: "drop-shadow(0 0 28px rgba(199,125,255,0.7))", transform: "scale(1.045)" },
+        },
         fadeInUp: {
           "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
@@ -114,6 +118,7 @@ const config: Config = {
       },
       animation: {
         pulseGlow: "pulseGlow 3s ease-in-out infinite",
+        logoGlow: "logoGlow 3s ease-in-out infinite",
         fadeInUp: "fadeInUp 0.6s ease-out forwards",
         fadeIn: "fadeIn 0.5s ease-out forwards",
         rise: "rise 0.8s ease-out forwards",

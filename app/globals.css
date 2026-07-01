@@ -1221,6 +1221,29 @@ html.lang-lo .home-hero-tagline {
 }
 
 /* ----------------------------------------------------------------
+   Route loader — the Suspense fallback (app/loading.tsx) starts hidden
+   and fades in only after a short beat, so fast navigations never flash
+   the loader; only genuinely slow routes reveal it. Reads much smoother
+   than the loader popping in on every click.
+------------------------------------------------------------------ */
+.route-loader {
+  animation: route-loader-in 0.3s ease 0.14s both;
+}
+@keyframes route-loader-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-loader {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------------
    Scroll-reveal — below-the-fold content rises in as it enters view
    (paired with <Reveal>). animation-delay drives the stagger.
 ------------------------------------------------------------------ */
