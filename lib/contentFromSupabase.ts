@@ -210,6 +210,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
             opponentLogo: val(u.opponent_logo),
             opponentAbbr: val(u.opponent_abbr),
             streamUrl: val(u.stream_url),
+            hasLive: Boolean(u.has_live),
           }
         : undefined,
     };

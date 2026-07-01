@@ -332,6 +332,10 @@ export default function UpcomingMatch() {
   const roundLabel = round ? pick(round) : null;
   const bo = cleanBo(match.bo);
   const gameName = match.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang";
+  // A fixture counts as "will be broadcast" from the admin toggle (hasLive) OR
+  // simply having a stream link — so the badge shows even before a link is set,
+  // and becomes clickable once one is.
+  const hasLiveIntent = Boolean(match.hasLive) || Boolean(streamHref);
 
   // Countdown renders client-side only to avoid time-zone hydration mismatch.
   const [cd, setCd] = useState<Countdown | null>(null);
@@ -422,19 +426,29 @@ export default function UpcomingMatch() {
                 Only for pre-live states; when it's actually live the WATCH LIVE
                 button below carries the call to action instead. */}
             {status !== "live" &&
-              (streamHref ? (
-                <a
-                  href={streamHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss transition-colors hover:border-loss hover:bg-loss/20"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
+              (hasLiveIntent ? (
+                streamHref ? (
+                  <a
+                    href={streamHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss transition-colors hover:border-loss hover:bg-loss/20"
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
+                    </span>
+                    {pick({ en: "Live broadcast", lo: "ຖ່າຍທອດສົດ" })}
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
+                    </span>
+                    {pick({ en: "Live broadcast", lo: "ຖ່າຍທອດສົດ" })}
                   </span>
-                  {pick({ en: "Live broadcast", lo: "ຖ່າຍທອດສົດ" })}
-                </a>
+                )
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-void/40 px-3.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ash-dim">
                   <span className="h-2 w-2 rounded-full bg-ash-dim/70" aria-hidden />

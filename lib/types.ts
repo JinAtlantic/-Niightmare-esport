@@ -144,6 +144,9 @@ export interface UpcomingMatch {
   /** Optional live-stream URL (YouTube/Facebook). When set + status "live",
    *  the home hero shows a WATCH LIVE button. */
   streamUrl?: string;
+  /** Whether this fixture will be broadcast live. Drives the "Live broadcast"
+   *  badge on the card even before a stream link is added. */
+  hasLive?: boolean;
 }
 
 export interface Match {

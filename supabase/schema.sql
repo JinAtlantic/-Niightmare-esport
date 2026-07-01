@@ -297,6 +297,9 @@ alter table public.matches add column if not exists vods jsonb default '[]'::jso
 -- Optional best-of / series format label (e.g. "BO3") for a fixture / record.
 alter table public.matches add column if not exists bo text;
 alter table public.upcoming_match add column if not exists bo text;
+-- Whether the upcoming fixture will be broadcast live (drives the card badge
+-- even before a stream link is set).
+alter table public.upcoming_match add column if not exists has_live boolean default false;
 -- Home "About Us" band copy (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists about_us jsonb;
 -- Matches-page "Niightmare Roadmap" popup (admin-editable), stored as one JSON blob.

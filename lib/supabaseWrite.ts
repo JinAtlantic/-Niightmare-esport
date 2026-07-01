@@ -152,9 +152,10 @@ export async function writeSectionToSupabase(
           opponent_abbr: s(um.opponentAbbr),
           stream_url: s(um.streamUrl),
         };
-        // Only send `bo` when the column exists — an upsert with an unknown
+        // Only send optional columns when they exist — an upsert with an unknown
         // column fails wholesale, unlike the graceful drop used for matches.
         if (await hasColumns(db, "upcoming_match", "bo")) upRow.bo = s(um.bo);
+        if (await hasColumns(db, "upcoming_match", "has_live")) upRow.has_live = !!um.hasLive;
         const { error } = await db.from("upcoming_match").upsert(upRow);
         if (error) throw new Error(`upcoming_match: ${error.message}`);
       }
