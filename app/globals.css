@@ -267,18 +267,6 @@ html.lang-lo .keep-latin {
   filter: drop-shadow(0 0 14px rgba(199, 125, 255, 0.35));
 }
 
-/* Cursor spotlight — a two-tone light that follows the pointer (see
-   CursorSpotlight.tsx). mix-blend:screen lightens only, so text stays crisp. */
-.cursor-spotlight {
-  mix-blend-mode: screen;
-  background: radial-gradient(
-    360px circle at var(--sx, 50%) var(--sy, 50%),
-    rgba(168, 85, 247, 0.1),
-    rgba(194, 75, 201, 0.05) 42%,
-    transparent 66%
-  );
-}
-
 /* Thin violet scrollbar for the scrollable news digest rail */
 .news-scroll {
   scrollbar-width: thin;

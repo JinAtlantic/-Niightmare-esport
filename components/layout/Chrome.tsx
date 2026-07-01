@@ -7,7 +7,6 @@ import Footer from "@/components/layout/Footer";
 import LiveBanner from "@/components/layout/LiveBanner";
 import Preloader from "@/components/ui/Preloader";
 import InstallPrompt from "@/components/ui/InstallPrompt";
-import CursorSpotlight from "@/components/ui/CursorSpotlight";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 /**
@@ -29,7 +28,6 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
     <>
       <GoogleAnalytics />
       <Preloader />
-      <CursorSpotlight />
       <Navbar />
       <main className="min-h-screen pt-16">
         <LiveBanner />

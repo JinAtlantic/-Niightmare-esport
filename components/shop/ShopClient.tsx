@@ -605,7 +605,7 @@ export default function ShopClient() {
               </Field>
             </div>
 
-            <div className="relative overflow-hidden rounded-md border border-edge-bright/60 bg-gradient-to-br from-crypt/80 via-crypt/50 to-void/40 p-5 shadow-[0_0_34px_-14px_rgba(168,85,247,0.45)]">
+            <div className="relative overflow-hidden rounded-md border border-edge-bright/60 bg-gradient-to-br from-crypt/80 via-crypt/50 to-void/40 p-5 shadow-elev-2">
               <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/60 to-transparent" />
               <div className="flex items-end justify-between gap-3">
                 <div className="min-w-0">
@@ -615,7 +615,7 @@ export default function ShopClient() {
                   )}
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-soul [text-shadow:0_0_20px_rgba(168,85,247,0.45)] sm:text-3xl">{formatPrice(total, shop.currency)}</p>
+                  <p className="stat-num whitespace-nowrap font-display text-2xl font-bold sm:text-3xl">{formatPrice(total, shop.currency)}</p>
                   <p className="font-mono text-[11px] text-ash">
                     {totalQty} {pick(COPY.pieces)}
                   </p>
@@ -687,7 +687,7 @@ export default function ShopClient() {
                             ? "border-loss/40 bg-loss/10 text-loss"
                             : "border-win/40 bg-win/10 text-win";
                   return (
-                    <div key={(o.id ?? o.refCode ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4">
+                    <div key={(o.id ?? o.refCode ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4 shadow-elev-1">
                       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                         <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
                           {pick(shop.productName)} · {o.sizeSummary}
@@ -797,7 +797,7 @@ export default function ShopClient() {
           <div className="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
             <button type="button" className="fixed inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={closePay} />
             <div className="pointer-events-none relative flex min-h-full items-center justify-center p-4">
-              <div className="pointer-events-auto relative z-10 w-full max-w-md rounded-md border border-edge-bright bg-crypt p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)] md:p-6">
+              <div className="pointer-events-auto relative z-10 w-full max-w-md rounded-md border border-edge-bright bg-crypt p-5 shadow-elev-3 md:p-6">
               {paySuccess ? (
                 <div className="flex flex-col items-center gap-4 py-8 text-center">
                   <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-win bg-win/15 text-win shadow-[0_0_30px_rgba(52,211,153,0.5)]">
@@ -841,7 +841,7 @@ export default function ShopClient() {
                   {/* exact amount to transfer */}
                   <div className="mt-4 rounded-md border border-amethyst/45 bg-amethyst/10 p-4 text-center">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.payExact)}</p>
-                    <p className="mt-1 break-words font-display text-2xl font-black tabular-nums text-soul sm:text-3xl">
+                    <p className="stat-num mt-1 break-words font-display text-2xl font-black sm:text-3xl">
                       {formatPrice(payingOrder.total, payingOrder.currency)}
                     </p>
                   </div>

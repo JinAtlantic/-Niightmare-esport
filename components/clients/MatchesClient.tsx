@@ -396,7 +396,7 @@ function MatchCard({
 
   return (
     <article
-      className={`hover-glow group relative overflow-hidden border shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${
+      className={`hover-glow group relative overflow-hidden border shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_12px_28px_-16px_rgba(0,0,0,0.6)] ${
         compact ? "p-3 pl-4 md:p-3 md:pl-4" : "p-5 pl-6 md:p-6 md:pl-7"
       } ${border} ${surface}`}
     >
