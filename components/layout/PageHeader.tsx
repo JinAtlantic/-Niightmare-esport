@@ -30,7 +30,7 @@ export default function PageHeader({ title, subtitle, kicker, subtitleClassName 
         )}
 
         <h1
-          className="fx-rise font-display text-4xl font-bold uppercase tracking-[0.05em] text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.35)] md:text-5xl"
+          className="balance fx-rise font-display text-4xl font-bold uppercase tracking-[0.05em] text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.35)] md:text-5xl"
           style={{ animationDelay: "0.08s" }}
         >
           {title}

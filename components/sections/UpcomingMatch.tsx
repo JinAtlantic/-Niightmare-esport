@@ -147,7 +147,7 @@ function CountdownBlock({ cd }: { cd: Countdown }) {
           aria-hidden
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent"
         />
-        <span className="font-mono text-[clamp(24px,6vw,42px)] font-bold tabular-nums leading-none text-soul [text-shadow:0_0_18px_rgba(199,125,255,0.5)]">
+        <span className="stat-num font-mono text-[clamp(24px,6vw,42px)] font-bold leading-none">
           {v}
         </span>
       </div>
@@ -366,7 +366,7 @@ export default function UpcomingMatch() {
         </div>
 
         {/* ── the fixture card: one premium broadcast frame ───────────────── */}
-        <div className="relative overflow-hidden rounded-md border border-edge-bright bg-gradient-to-b from-crypt/85 to-void/85 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8),0_0_60px_-10px_rgba(168,85,247,0.18)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-md border border-edge-bright bg-gradient-to-b from-crypt/85 to-void/85 shadow-elev-3 backdrop-blur-xl">
           {/* top blade edge + HUD corner ticks */}
           <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
           <span aria-hidden className="pointer-events-none absolute left-0 top-0 h-4 w-4 border-l-2 border-t-2 border-amethyst/55" />

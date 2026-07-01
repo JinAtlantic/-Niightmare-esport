@@ -50,7 +50,7 @@ export default function PlayerCard({ player }: { player: Player }) {
         <div
           ref={cardRef}
           onPointerMove={onMove}
-          className="card-spotlight clip-esports relative aspect-[3/4] overflow-hidden border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.9),rgba(11,7,16,1))] transition-colors duration-300 group-hover:border-amethyst/70"
+          className="card-spotlight clip-esports relative aspect-[3/4] overflow-hidden border border-edge bg-[linear-gradient(180deg,rgba(28,20,40,0.9),rgba(11,7,16,1))] shadow-elev-2 transition-colors duration-300 group-hover:border-amethyst/70"
         >
           {/* photo, or a monogram placeholder when no photo is set */}
           {player.photo ? (
