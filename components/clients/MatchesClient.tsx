@@ -627,7 +627,7 @@ function TournamentRecordGroup({
                 </span>
               )}
             </div>
-            <h2 className="mt-3 max-w-4xl break-words font-display text-2xl font-extrabold uppercase leading-[0.98] tracking-[0.02em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-4xl">
+            <h2 className="balance mt-3 max-w-4xl break-words font-display text-2xl font-extrabold uppercase leading-[0.98] tracking-[0.02em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-4xl">
               {pick(group.name)}
             </h2>
             <div className={`mt-4 grid max-w-xs grid-cols-2 border bg-void/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${softBorder}`}>
@@ -734,7 +734,7 @@ function GameTournamentSection({
               : "bg-gradient-to-b from-[#22D3EE] to-[#7DD3FC] shadow-[0_0_12px_rgba(34,211,238,0.55)]"
           }`}
         />
-        <span className="font-display text-3xl font-black leading-none tabular-nums text-soul [text-shadow:0_0_20px_rgba(199,125,255,0.3)] md:text-4xl">
+        <span className="stat-num font-display text-3xl font-black leading-none md:text-4xl">
           {groups.length}
         </span>
         <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-spectre">
@@ -918,7 +918,7 @@ export default function MatchesClient() {
 
       <section className="mx-auto max-w-7xl overflow-hidden px-3 py-12 sm:px-4 md:px-6 md:py-16">
         <Reveal>
-          <div className="max-w-full overflow-hidden border border-edge bg-crypt/35 p-3 shadow-glow-soft sm:p-4 md:p-6">
+          <div className="glass glass-sheen max-w-full overflow-hidden p-3 shadow-elev-2 sm:p-4 md:p-6">
             <button
               type="button"
               onClick={() => setRoadmapOpen(true)}

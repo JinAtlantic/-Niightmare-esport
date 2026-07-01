@@ -75,6 +75,14 @@ const config: Config = {
         "glow-accent": "0 0 22px rgba(199, 125, 255, 0.6)",
         "glow-soft": "0 0 12px rgba(168, 85, 247, 0.35)",
         "glow-gold": "0 0 20px rgba(245, 196, 81, 0.4)",
+        // Elevation ramp — a layered dark drop + a faint violet rim + a soft
+        // glow, so panels read as physically raised (premium depth) instead of
+        // a flat outline. elev-1 subtle → elev-3 flagship.
+        "elev-1": "0 1px 2px rgba(0,0,0,0.45), 0 4px 14px -6px rgba(0,0,0,0.5)",
+        "elev-2":
+          "0 8px 24px -10px rgba(0,0,0,0.65), 0 0 0 1px rgba(168,85,247,0.07), 0 0 28px -10px rgba(168,85,247,0.28)",
+        "elev-3":
+          "0 30px 70px -24px rgba(0,0,0,0.82), 0 0 0 1px rgba(168,85,247,0.09), 0 0 56px -14px rgba(168,85,247,0.32)",
       },
       keyframes: {
         pulseGlow: {

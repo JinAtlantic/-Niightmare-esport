@@ -74,7 +74,7 @@ function ResultCard({ match }: { match: Match }) {
 
   return (
     <article
-      className={`group relative h-[78px] overflow-hidden border ${s.border} bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void transition-all duration-300 sm:h-full ${s.glow}`}
+      className={`group relative h-[78px] overflow-hidden border shadow-elev-1 ${s.border} bg-gradient-to-br from-crypt2/85 via-crypt/70 to-void transition-all duration-300 sm:h-full ${s.glow}`}
     >
       {/* glass top sheen — a faint lit edge so the surface catches light and
           reads as a raised panel rather than a flat rectangle. */}
