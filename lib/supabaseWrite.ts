@@ -112,7 +112,14 @@ export async function writeSectionToSupabase(
       if (!matchesHaveVodColumns && hasAnyValue(rows, ["vods"])) {
         throw new Error("Supabase matches.vods column is missing. Run supabase/schema.sql before saving multiple VOD links.");
       }
-      await replaceTable(db, "matches", matchesHaveVodColumns ? rows : omitKeys(rows, ["vods"]));
+      // `bo` degrades silently: if the column hasn't been added yet, drop it so
+      // the rest of the match still saves instead of 500-ing the whole editor.
+      const matchesHaveBo = await hasColumns(db, "matches", "bo");
+      const matchDropKeys = [
+        ...(matchesHaveVodColumns ? [] : ["vods"]),
+        ...(matchesHaveBo ? [] : ["bo"]),
+      ];
+      await replaceTable(db, "matches", matchDropKeys.length ? omitKeys(rows, matchDropKeys) : rows);
       await replaceTable(db, "tournaments", tournamentRows(m.tournaments ?? []));
     } else if (key === "news") {
       const n = value as { articles?: NewsArticle[] };
@@ -131,7 +138,7 @@ export async function writeSectionToSupabase(
       const site = value as SiteShape;
       const um = site.upcomingMatch;
       if (um) {
-        const { error } = await db.from("upcoming_match").upsert({
+        const upRow: Record<string, unknown> = {
           id: 1,
           status: s(um.status),
           match_date: s(um.date),
@@ -144,7 +151,11 @@ export async function writeSectionToSupabase(
           opponent_logo: s(um.opponentLogo),
           opponent_abbr: s(um.opponentAbbr),
           stream_url: s(um.streamUrl),
-        });
+        };
+        // Only send `bo` when the column exists — an upsert with an unknown
+        // column fails wholesale, unlike the graceful drop used for matches.
+        if (await hasColumns(db, "upcoming_match", "bo")) upRow.bo = s(um.bo);
+        const { error } = await db.from("upcoming_match").upsert(upRow);
         if (error) throw new Error(`upcoming_match: ${error.message}`);
       }
       const c = site.contact ?? {};

@@ -1,4 +1,5 @@
 import type { Bilingual } from "@/lib/types";
+import { cleanBo } from "@/lib/bestOf";
 
 export interface MatchScheduleEntry {
   id: string;
@@ -6,6 +7,8 @@ export interface MatchScheduleEntry {
   date: string;
   time: string;
   round: Bilingual;
+  /** Optional series format label ("BO1" | "BO3" | "BO5" …). Empty = not shown. */
+  bo?: string;
 }
 
 export interface MatchScheduleContent {
@@ -48,6 +51,7 @@ function cleanEntry(entry: Partial<MatchScheduleEntry>, index: number): MatchSch
       en: entry.round?.en ?? "",
       lo: entry.round?.lo ?? "",
     },
+    bo: cleanBo(entry.bo),
   };
 }
 

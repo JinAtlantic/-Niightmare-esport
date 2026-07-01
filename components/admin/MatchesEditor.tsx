@@ -14,6 +14,7 @@ import {
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import matchesSeed from "@/data/matches.json";
 import { cleanMatchVods } from "@/lib/matchVods";
+import { BO_SELECT_OPTIONS } from "@/lib/bestOf";
 import type { Bilingual, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
@@ -469,6 +470,12 @@ export default function MatchesEditor() {
             value={m.result}
             onChange={(v) => patchMatch(i, { result: v as Match["result"] })}
             options={RESULT_OPTS}
+          />
+          <SelectField
+            label="Best-of (BO) — เว้นว่างได้"
+            value={m.bo ?? ""}
+            onChange={(v) => patchMatch(i, { bo: v || undefined })}
+            options={BO_SELECT_OPTIONS}
           />
           <div className="md:col-span-2">
             <div className="border border-edge bg-crypt/50 p-2">

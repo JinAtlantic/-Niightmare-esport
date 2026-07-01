@@ -8,6 +8,7 @@ import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
+import { cleanBo } from "@/lib/bestOf";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import type { Lang, MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
@@ -105,7 +106,7 @@ function TeamSide({
   home?: boolean;
 }) {
   return (
-    <div className="group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-2 overflow-hidden px-1.5 py-6 sm:px-2 md:gap-5 md:px-5 md:py-14 lg:py-16">
+    <div className="group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden px-1.5 py-7 sm:px-2 md:gap-5 md:px-5 md:py-14 lg:py-16">
       {/* directional wash — softly fading toward the centre seam */}
       <span
         aria-hidden
@@ -124,11 +125,11 @@ function TeamSide({
             ? "drop-shadow-[0_0_26px_rgba(168,85,247,0.55)]"
             : "drop-shadow-[0_0_18px_rgba(0,0,0,0.65)]"
         }
-        boxClass="h-[58px] w-[58px] shrink-0 transition-transform duration-300 group-hover:scale-[1.06] sm:h-[68px] sm:w-[68px] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
-        monoClass="text-lg sm:text-xl md:text-5xl"
+        boxClass="h-[88px] w-[88px] shrink-0 transition-transform duration-300 group-hover:scale-[1.06] sm:h-[104px] sm:w-[104px] md:h-[156px] md:w-[156px] lg:h-[184px] lg:w-[184px]"
+        monoClass="text-2xl sm:text-3xl md:text-5xl"
       />
       <span
-        className={`keep-latin relative max-w-full break-words text-center font-display text-[0.78rem] font-bold uppercase leading-tight tracking-[0.02em] sm:text-[0.95rem] sm:tracking-[0.04em] md:text-3xl md:tracking-[0.07em] lg:text-4xl ${
+        className={`keep-latin relative max-w-full break-words text-center font-display text-sm font-bold uppercase leading-tight tracking-[0.02em] sm:text-lg sm:tracking-[0.04em] md:text-3xl md:tracking-[0.07em] lg:text-4xl ${
           home ? "text-soul" : "text-spectre"
         }`}
       >
@@ -251,6 +252,7 @@ function ScheduleModal({
             <ul className="space-y-2.5 py-5">
               {schedule.entries.map((entry) => {
                 const { date, time } = scheduleParts(entry, lang);
+                const entryBo = cleanBo(entry.bo);
                 return (
                   <li
                     key={entry.id}
@@ -275,10 +277,19 @@ function ScheduleModal({
                       <p className="keep-latin break-words font-display text-base font-bold uppercase leading-tight tracking-[0.03em] text-soul">
                         NIIGHTMARE <span className="text-glow">vs</span> {entry.opponent || "TBA"}
                       </p>
-                      {pick(entry.round) && (
-                        <span className="inline-flex w-fit items-center rounded-sm border border-edge bg-void/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
-                          {pick(entry.round)}
-                        </span>
+                      {(pick(entry.round) || entryBo) && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {pick(entry.round) && (
+                            <span className="inline-flex w-fit items-center rounded-sm border border-edge bg-void/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                              {pick(entry.round)}
+                            </span>
+                          )}
+                          {entryBo && (
+                            <span className="inline-flex w-fit items-center rounded-sm border border-amethyst/40 bg-amethyst/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-glow">
+                              {entryBo}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </li>
@@ -307,6 +318,9 @@ export default function UpcomingMatch() {
 
   const hasOpponent = Boolean(match.opponent && match.opponent.trim());
   const round = match.round && (match.round.en || match.round.lo) ? match.round : null;
+  const roundLabel = round ? pick(round) : null;
+  const bo = cleanBo(match.bo);
+  const gameName = match.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang";
 
   // Countdown renders client-side only to avoid time-zone hydration mismatch.
   const [cd, setCd] = useState<Countdown | null>(null);
@@ -374,11 +388,18 @@ export default function UpcomingMatch() {
           <span aria-hidden className="pointer-events-none absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-amethyst/35" />
           <span aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-amethyst/35" />
 
-          {/* eyebrow bar — game name + status, both centered */}
+          {/* eyebrow bar — game name (+ series format) + status, all centered */}
           <div className="flex flex-col items-center gap-3 border-b border-edge px-4 py-4 md:py-5">
-            <span className="font-display text-base font-bold uppercase tracking-[0.26em] text-spectre md:text-xl">
-              {match.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang"}
-            </span>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span className="font-display text-base font-bold uppercase tracking-[0.26em] text-spectre md:text-xl">
+                {gameName}
+              </span>
+              {bo && (
+                <span className="rounded-full border border-amethyst/45 bg-amethyst/10 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-glow shadow-[0_0_16px_rgba(168,85,247,0.2)]">
+                  {bo}
+                </span>
+              )}
+            </div>
             <span
               className={`relative inline-flex items-center overflow-hidden rounded-full border bg-void/70 px-5 py-1.5 ${s.ring} ${s.glow}`}
             >
@@ -392,6 +413,15 @@ export default function UpcomingMatch() {
                 {t(s.key)}
               </span>
             </span>
+          </div>
+
+          {/* mobile-only: tournament headline sits above the clash so the event
+              reads first, then the matchup, then the countdown (Arena order). */}
+          <div className="border-b border-edge px-4 py-3.5 text-center md:hidden">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-amethyst">Tournament</p>
+            <p className="balance mt-1.5 font-display text-lg font-bold uppercase leading-tight tracking-[0.03em] text-soul">
+              {pick(match.tournament)}
+            </p>
           </div>
 
           {/* ── the clash: split arena ─────────────────────────────────────── */}
@@ -413,13 +443,13 @@ export default function UpcomingMatch() {
                 />
                 <span
                   aria-hidden
-                  className="absolute h-[52px] w-[52px] rotate-45 rounded-sm border border-amethyst/55 bg-gradient-to-br from-crypt2 to-void shadow-[0_0_26px_rgba(168,85,247,0.4)] md:h-[92px] md:w-[92px] lg:h-[108px] lg:w-[108px]"
+                  className="absolute h-[60px] w-[60px] rotate-45 rounded-sm border border-amethyst/55 bg-gradient-to-br from-crypt2 to-void shadow-[0_0_26px_rgba(168,85,247,0.4)] md:h-[92px] md:w-[92px] lg:h-[108px] lg:w-[108px]"
                 />
                 <span
                   aria-hidden
-                  className="absolute h-[42px] w-[42px] rotate-45 rounded-sm border border-amethyst/25 md:h-[74px] md:w-[74px] lg:h-[88px] lg:w-[88px]"
+                  className="absolute h-[48px] w-[48px] rotate-45 rounded-sm border border-amethyst/25 md:h-[74px] md:w-[74px] lg:h-[88px] lg:w-[88px]"
                 />
-                <span className="relative inline-grid h-[52px] w-[52px] place-items-center font-display text-2xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl lg:h-[108px] lg:w-[108px] lg:text-7xl">
+                <span className="relative inline-grid h-[60px] w-[60px] place-items-center font-display text-3xl font-bold uppercase leading-none tracking-normal text-glow [text-shadow:0_0_30px_rgba(199,125,255,0.75)] md:h-[92px] md:w-[92px] md:text-6xl lg:h-[108px] lg:w-[108px] lg:text-7xl">
                   VS
                 </span>
               </div>
@@ -428,22 +458,72 @@ export default function UpcomingMatch() {
             {hasOpponent ? (
               <TeamSide logo={match.opponentLogo} name={match.opponent} abbr={match.opponentAbbr} />
             ) : (
-              <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-2.5 overflow-hidden px-1.5 py-6 sm:px-2 md:gap-3.5 md:px-5 md:py-10">
+              <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden px-1.5 py-7 sm:px-2 md:gap-3.5 md:px-5 md:py-10">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-ash-dim">
                   {t("sections.upcoming_status_practice")}
                 </span>
-                <div className="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-full border-2 border-dashed border-edge-bright bg-void/40 sm:h-[76px] sm:w-[76px] md:h-[120px] md:w-[120px]">
-                  <GameIcon size={34} className="text-ash md:size-[42px]" />
+                <div className="grid h-[88px] w-[88px] shrink-0 place-items-center rounded-full border-2 border-dashed border-edge-bright bg-void/40 sm:h-[104px] sm:w-[104px] md:h-[120px] md:w-[120px]">
+                  <GameIcon size={40} className="text-ash md:size-[42px]" />
                 </div>
-                <span className="text-center font-display text-[0.78rem] font-bold uppercase leading-tight tracking-[0.04em] text-spectre sm:text-lg md:text-2xl md:tracking-[0.07em]">
+                <span className="text-center font-display text-sm font-bold uppercase leading-tight tracking-[0.04em] text-spectre sm:text-lg md:text-2xl md:tracking-[0.07em]">
                   {t("sections.upcoming_practice_label")}
                 </span>
               </div>
             )}
           </div>
 
-          {/* ── tale of the tape: tournament · round · kickoff, cleanly divided ── */}
-          <dl className="grid grid-cols-1 divide-y divide-edge border-t border-edge md:grid-cols-3 md:divide-x md:divide-y-0">
+          {/* ── mobile-only (Arena): countdown/live first, then round · kickoff ── */}
+          <div className="md:hidden">
+            {showCountdown && cd && (
+              <div className="flex flex-col items-center gap-4 border-t border-edge bg-white/[0.015] px-4 py-6">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-soul/80">
+                  Starts in
+                </span>
+                <CountdownBlock cd={cd} />
+              </div>
+            )}
+
+            {status === "live" && (
+              <div className="flex flex-col items-center gap-4 border-t border-edge bg-white/[0.015] px-4 py-6">
+                <span className="inline-flex items-center gap-2.5 font-display text-lg font-bold uppercase tracking-[0.18em] text-loss">
+                  <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-loss" />
+                  </span>
+                  {t("sections.upcoming_status_live")}
+                </span>
+                {streamHref && (
+                  <a
+                    href={streamHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex w-full max-w-sm items-center justify-center gap-2.5 rounded-md border border-loss/60 bg-gradient-to-b from-loss/25 to-loss/10 px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.2em] text-soul shadow-[0_0_30px_rgba(251,113,133,0.5)] transition-all duration-300 hover:from-loss/35 hover:to-loss/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-loss focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+                  >
+                    <PlayIcon size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                    {t("sections.watch_live")}
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* context strip — round · kickoff (BO already shown in the eyebrow) */}
+            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 border-t border-edge px-4 py-3.5 text-center">
+              {roundLabel && (
+                <>
+                  <span className="font-display text-sm font-bold uppercase tracking-[0.04em] text-soul">
+                    {roundLabel}
+                  </span>
+                  <span aria-hidden className="text-amethyst/50">·</span>
+                </>
+              )}
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-spectre">
+                {cd ? formatDateTime(match.date, lang) : "—"}
+              </span>
+            </div>
+          </div>
+
+          {/* ── tale of the tape (desktop): tournament · round · kickoff ─────── */}
+          <dl className="hidden divide-y divide-edge border-t border-edge md:grid md:grid-cols-3 md:divide-x md:divide-y-0">
             <div className="flex items-baseline justify-between gap-4 px-5 py-4 text-left md:flex-col md:items-center md:gap-2 md:px-4 md:py-6 md:text-center">
               <dt className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-amethyst md:text-sm">Tournament</dt>
               <dd className="min-w-0 text-right font-display text-base font-bold uppercase tracking-[0.03em] text-soul md:text-center md:text-2xl">
@@ -464,9 +544,9 @@ export default function UpcomingMatch() {
             </div>
           </dl>
 
-          {/* ── footer band: countdown (upcoming) or live + watch CTA ─────────── */}
+          {/* ── footer band (desktop): countdown (upcoming) or live + watch CTA ── */}
           {(showCountdown || status === "live") && (
-            <div className="flex flex-col items-center gap-5 border-t border-edge bg-white/[0.015] px-4 py-7 md:gap-6 md:px-6 md:py-9">
+            <div className="hidden flex-col items-center gap-5 border-t border-edge bg-white/[0.015] px-4 py-7 md:flex md:gap-6 md:px-6 md:py-9">
               {showCountdown && cd && (
                 <>
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-soul/80">

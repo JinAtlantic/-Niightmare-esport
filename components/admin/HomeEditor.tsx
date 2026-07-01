@@ -33,6 +33,7 @@ import {
   type MatchScheduleContent,
   type MatchScheduleEntry,
 } from "@/lib/matchSchedule";
+import { BO_SELECT_OPTIONS } from "@/lib/bestOf";
 
 interface Contact {
   email?: string;
@@ -433,6 +434,12 @@ export default function HomeEditor() {
                 onChange={(v) => patch({ round: v })}
               />
             </div>
+            <SelectField
+              label="รูปแบบ Best-of (BO) — เว้นว่างได้"
+              value={m.bo ?? ""}
+              onChange={(v) => patch({ bo: v || undefined })}
+              options={BO_SELECT_OPTIONS}
+            />
             <TextField
               label={isPractice ? "ทีมที่ซ้อมด้วย (เว้นว่างได้)" : "ทีมคู่แข่ง"}
               value={m.opponent}
@@ -553,6 +560,12 @@ export default function HomeEditor() {
                     type="time"
                     value={entry.time}
                     onChange={(time) => patchScheduleEntry(entry.id, { time })}
+                  />
+                  <SelectField
+                    label="Best-of (BO)"
+                    value={entry.bo ?? ""}
+                    onChange={(bo) => patchScheduleEntry(entry.id, { bo })}
+                    options={BO_SELECT_OPTIONS}
                   />
                 </div>
               </div>

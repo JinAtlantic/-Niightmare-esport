@@ -13,6 +13,7 @@ import { formatDate } from "@/lib/format";
 import { tournamentTier, type Tier } from "@/lib/tiers";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
 import { matchVods } from "@/lib/matchVods";
+import { cleanBo } from "@/lib/bestOf";
 import { safeHref } from "@/lib/safety";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
@@ -381,6 +382,7 @@ function MatchCard({
   const compact = !showTournament;
   const accent = RESULT_ACCENT[match.result];
   const round = match.round && pick(match.round).trim() ? pick(match.round) : null;
+  const bo = cleanBo(match.bo);
   const tournamentName = pick(match.tournament).trim() || pick(page.unknownTournament);
   const opponentName = match.opponent.trim() || pick(page.unknownOpponent);
   // Blade colour by the tournament's tier (violet when it isn't a main family).
@@ -425,14 +427,27 @@ function MatchCard({
         >
           {formatDate(match.date, lang)}
         </time>
-        {round && (
-          <span
-            className={`shrink-0 border border-edge-bright bg-void/40 font-mono font-semibold uppercase tracking-[0.16em] text-spectre ${
-              compact ? "px-2 py-0.5 text-[9px]" : "px-2.5 py-1 text-[10px]"
-            }`}
-          >
-            {round}
-          </span>
+        {(round || bo) && (
+          <div className="flex shrink-0 items-center gap-1.5">
+            {round && (
+              <span
+                className={`border border-edge-bright bg-void/40 font-mono font-semibold uppercase tracking-[0.16em] text-spectre ${
+                  compact ? "px-2 py-0.5 text-[9px]" : "px-2.5 py-1 text-[10px]"
+                }`}
+              >
+                {round}
+              </span>
+            )}
+            {bo && (
+              <span
+                className={`border border-amethyst/40 bg-amethyst/10 font-mono font-bold uppercase tracking-[0.16em] text-glow ${
+                  compact ? "px-2 py-0.5 text-[9px]" : "px-2.5 py-1 text-[10px]"
+                }`}
+              >
+                {bo}
+              </span>
+            )}
+          </div>
         )}
       </div>
 

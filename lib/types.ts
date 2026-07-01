@@ -133,6 +133,8 @@ export interface UpcomingMatch {
   tournament: Bilingual;
   /** Optional stage/round (e.g. Semi Final). */
   round?: Bilingual;
+  /** Optional series format label ("BO1" | "BO3" | "BO5" …). Empty = not shown. */
+  bo?: string;
   opponent: string;
   /** Optional opponent logo (e.g. "/teams/vipers.png"); falls back to a monogram. */
   opponentLogo?: string;
@@ -151,6 +153,8 @@ export interface Match {
   tournament: Bilingual;
   /** Optional stage/round within the tournament (e.g. Group Stage, Grand Final). */
   round?: Bilingual;
+  /** Optional series format label ("BO1" | "BO3" | "BO5" …). Empty = not shown. */
+  bo?: string;
   opponent: string;
   /** Optional path/URL to the opponent's logo (e.g. "/teams/dragon-force.png").
    *  When absent the row falls back to an initials monogram. */
