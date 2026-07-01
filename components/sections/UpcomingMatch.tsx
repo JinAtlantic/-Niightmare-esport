@@ -487,7 +487,7 @@ export default function UpcomingMatch() {
           <div className="md:hidden">
             {showCountdown && cd && (
               <div className="flex flex-col items-center gap-4 border-t border-edge bg-white/[0.015] px-4 py-6">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-soul/80">
+                <span className="font-mono text-xs font-bold uppercase tracking-[0.34em] text-spectre [text-shadow:0_0_18px_rgba(199,125,255,0.45)] md:text-sm">
                   Starts in
                 </span>
                 <CountdownBlock cd={cd} />
