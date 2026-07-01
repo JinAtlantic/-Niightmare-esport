@@ -161,6 +161,12 @@ export default function OrdersEditor() {
   const [query, setQuery] = useState("");
   const [sortDir, setSortDir] = useState<"new" | "old">("new");
   const [copied, setCopied] = useState("");
+  // ส่งแล้ว tab — narrow both the sales summary and the order list to one
+  // day / month / year (or all).
+  const [shipGran, setShipGran] = useState<"all" | "day" | "month" | "year">("all");
+  const [shipDay, setShipDay] = useState("");
+  const [shipMonth, setShipMonth] = useState("");
+  const [shipYear, setShipYear] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -297,8 +303,34 @@ export default function OrdersEditor() {
   const activeTab = TABS.find((t) => t.id === tab) ?? TABS[1];
   const q = query.trim().toLowerCase();
   const qDigits = normPhone(query);
+
+  // ── ส่งแล้ว period filter — default the picker to the newest shipped order so
+  //    switching to วัน/เดือน/ปี immediately shows something meaningful. ──
+  const shippedTimes = orders.filter((o) => o.status === "shipped").map(orderTime);
+  const newestShip = shippedTimes.reduce((acc, t) => (t > acc ? t : acc), "");
+  const effDay = shipDay || (newestShip ? periodKey(newestShip, "day") : "");
+  const effMonth = shipMonth || (newestShip ? periodKey(newestShip, "month") : "");
+  const effYear = shipYear || (newestShip ? periodKey(newestShip, "year") : "");
+  const shipYearOpts = [...new Set(shippedTimes.map((t) => periodKey(t, "year")))].sort((a, b) => (a < b ? 1 : -1));
+  const inShipPeriod = (o: OrderRow) => {
+    if (shipGran === "all") return true;
+    const t = orderTime(o);
+    if (shipGran === "day") return !effDay || periodKey(t, "day") === effDay;
+    if (shipGran === "month") return !effMonth || periodKey(t, "month") === effMonth;
+    return !effYear || periodKey(t, "year") === effYear;
+  };
+  const periodLabelText =
+    shipGran === "all"
+      ? "ทั้งหมด"
+      : shipGran === "day"
+      ? effDay ? periodLabel(effDay, "day") : "—"
+      : shipGran === "month"
+      ? effMonth ? periodLabel(`${effMonth}-01`, "month") : "—"
+      : effYear || "—";
+
   const visible = orders
     .filter((o) => activeTab.match(o.status))
+    .filter((o) => (tab === "shipped" ? inShipPeriod(o) : true))
     .filter((o) => {
       if (!q) return true;
       return (
@@ -387,7 +419,65 @@ export default function OrdersEditor() {
 
       {error && <p className="font-mono text-[11px] text-loss">{error}</p>}
 
-      {tab === "shipped" && <SalesReport orders={visible} />}
+      {tab === "shipped" && (
+        <div className="space-y-3">
+          {/* pick a day / month / year (or all) — filters BOTH the report and
+              the order list below, so what you see always matches the summary */}
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-edge bg-void/40 p-2.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">ดูช่วง</span>
+            <div className="flex flex-wrap gap-1.5">
+              {([
+                { id: "all", label: "ทั้งหมด" },
+                { id: "day", label: "รายวัน" },
+                { id: "month", label: "รายเดือน" },
+                { id: "year", label: "รายปี" },
+              ] as const).map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => setShipGran(g.id)}
+                  className={`rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
+                    shipGran === g.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+            {shipGran === "day" && (
+              <input
+                type="date"
+                value={effDay}
+                onChange={(e) => setShipDay(e.target.value)}
+                className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul [color-scheme:dark] focus:border-amethyst focus:outline-none"
+              />
+            )}
+            {shipGran === "month" && (
+              <input
+                type="month"
+                value={effMonth}
+                onChange={(e) => setShipMonth(e.target.value)}
+                className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul [color-scheme:dark] focus:border-amethyst focus:outline-none"
+              />
+            )}
+            {shipGran === "year" && (
+              <select
+                value={effYear}
+                onChange={(e) => setShipYear(e.target.value)}
+                className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul focus:border-amethyst focus:outline-none"
+              >
+                {shipYearOpts.length === 0 && <option value="">—</option>}
+                {shipYearOpts.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          <SalesReport orders={visible} gran={shipGran} periodLabelText={periodLabelText} />
+        </div>
+      )}
 
       {!loading && visible.length === 0 && (
         <Card>
@@ -623,94 +713,53 @@ export default function OrdersEditor() {
 
 /* ── Sales summary (ส่งแล้ว tab): revenue, units and per-size, by day/month/year ── */
 
-function SalesReport({ orders }: { orders: OrderRow[] }) {
-  const [gran, setGran] = useState<"day" | "month" | "year">("month");
-  const [period, setPeriod] = useState("all");
+function SalesReport({
+  orders,
+  gran,
+  periodLabelText,
+}: {
+  orders: OrderRow[];
+  gran: "all" | "day" | "month" | "year";
+  periodLabelText: string;
+}) {
   const currency = orders[0]?.currency || "ກີບ";
-
-  // Every period available at this granularity, for the picker.
-  const keyLabels = new Map<string, string>();
-  for (const o of orders) keyLabels.set(periodKey(o.created_at, gran), periodLabel(o.created_at, gran));
-  const periodOpts = [...keyLabels.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
-  // When the granularity changes the old key may not exist → fall back to "all".
-  const effective = keyLabels.has(period) ? period : "all";
-
-  const shown = effective === "all" ? orders : orders.filter((o) => periodKey(o.created_at, gran) === effective);
-
-  const totalRevenue = shown.reduce((a, o) => a + Number(o.total || 0), 0);
-  const totalUnits = shown.reduce((a, o) => a + Number(o.quantity || 0), 0);
+  const totalRevenue = orders.reduce((a, o) => a + Number(o.total || 0), 0);
+  const totalUnits = orders.reduce((a, o) => a + Number(o.quantity || 0), 0);
   const totalSizes: Record<string, number> = {};
-  for (const o of shown) {
+  for (const o of orders) {
     const sc = sizeCounts(o);
     for (const k in sc) totalSizes[k] = (totalSizes[k] ?? 0) + sc[k];
   }
 
+  // With no specific period selected, break the total down month-by-month so
+  // the whole history stays readable at a glance.
+  const showBreakdown = gran === "all";
   const groups = new Map<string, { label: string; revenue: number; units: number; sizes: Record<string, number> }>();
-  for (const o of shown) {
-    const key = periodKey(o.created_at, gran);
-    let g = groups.get(key);
-    if (!g) {
-      g = { label: periodLabel(o.created_at, gran), revenue: 0, units: 0, sizes: {} };
-      groups.set(key, g);
+  if (showBreakdown) {
+    for (const o of orders) {
+      const key = periodKey(orderTime(o), "month");
+      let g = groups.get(key);
+      if (!g) {
+        g = { label: periodLabel(orderTime(o), "month"), revenue: 0, units: 0, sizes: {} };
+        groups.set(key, g);
+      }
+      g.revenue += Number(o.total || 0);
+      g.units += Number(o.quantity || 0);
+      const sc = sizeCounts(o);
+      for (const k in sc) g.sizes[k] = (g.sizes[k] ?? 0) + sc[k];
     }
-    g.revenue += Number(o.total || 0);
-    g.units += Number(o.quantity || 0);
-    const sc = sizeCounts(o);
-    for (const k in sc) g.sizes[k] = (g.sizes[k] ?? 0) + sc[k];
   }
   const rows = [...groups.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1)).map(([, g]) => g);
 
-  const GRANS: { id: "day" | "month" | "year"; label: string }[] = [
-    { id: "day", label: "รายวัน" },
-    { id: "month", label: "รายเดือน" },
-    { id: "year", label: "รายปี" },
-  ];
-
   return (
     <Card className="space-y-4 border-amethyst/30">
-      {/* summary first */}
+      {/* summary for the selected period */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
-          ยอดขายรวม (ส่งแล้ว) · {effective === "all" ? "ทั้งหมด" : keyLabels.get(effective)}
-        </p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดขายรวม (ส่งแล้ว) · {periodLabelText}</p>
         <p className="font-display text-3xl font-black tabular-nums text-win">{fmt(totalRevenue, currency)}</p>
         <p className="mt-0.5 font-mono text-[11px] text-spectre">
-          ขายได้ <span className="font-bold text-soul">{totalUnits}</span> ตัว · {shown.length} ออเดอร์
+          ขายได้ <span className="font-bold text-soul">{totalUnits}</span> ตัว · {orders.length} ออเดอร์
         </p>
-      </div>
-
-      {/* sort / period controls — below the summary */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
-        <div className="flex gap-1.5">
-          {GRANS.map((g) => (
-            <button
-              key={g.id}
-              type="button"
-              onClick={() => {
-                setGran(g.id);
-                setPeriod("all");
-              }}
-              className={`rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
-                gran === g.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
-              }`}
-            >
-              {g.label}
-            </button>
-          ))}
-        </div>
-        {/* pick a specific day / month / year, or all */}
-        <select
-          value={effective}
-          onChange={(e) => setPeriod(e.target.value)}
-          className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[11px] text-soul focus:border-amethyst focus:outline-none"
-        >
-          <option value="all">ทั้งหมด</option>
-          {periodOpts.map(([k, label]) => (
-            <option key={k} value={k}>
-              {label}
-            </option>
-          ))}
-        </select>
       </div>
 
       {sortSizes(totalSizes).length > 0 && (
@@ -723,8 +772,9 @@ function SalesReport({ orders }: { orders: OrderRow[] }) {
         </div>
       )}
 
-      {effective === "all" && rows.length > 0 && (
+      {showBreakdown && rows.length > 0 && (
         <div className="space-y-1.5 border-t border-edge pt-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">แยกรายเดือน</p>
           {rows.map((g) => (
             <div key={g.label} className="rounded-md border border-edge bg-void/40 p-2.5">
               <div className="flex items-center justify-between gap-3">
