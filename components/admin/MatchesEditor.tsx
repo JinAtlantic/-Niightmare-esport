@@ -1046,7 +1046,22 @@ export default function MatchesEditor() {
                             <Button
                               variant="danger"
                               onClick={() => {
-                                setTournaments(tournaments.filter((_, idx) => idx !== tournamentIndex));
+                                // Remove the tournament AND its matches in one update — the
+                                // public /matches groups by matches, so leaving the matches
+                                // behind would keep the tournament showing there.
+                                const belonging = matches.filter((mt) => matchBelongsToTournament(mt, tournament));
+                                const name = tournament.name.en || tournament.name.lo || "ทัวร์นาเมนต์นี้";
+                                const ok = window.confirm(
+                                  belonging.length > 0
+                                    ? `ลบทัวร์นาเมนต์ “${name}” และผลแมตช์ในทัวร์นาเมนต์นี้ ${belonging.length} รายการ?\nผลแมตช์จะหายจากหน้า /matches ด้วย (กู้คืนไม่ได้)`
+                                    : `ลบทัวร์นาเมนต์ “${name}”?`
+                                );
+                                if (!ok) return;
+                                setData({
+                                  ...data,
+                                  tournaments: tournaments.filter((_, idx) => idx !== tournamentIndex),
+                                  matches: matches.filter((mt) => !matchBelongsToTournament(mt, tournament)),
+                                });
                                 if (openTournamentId === tournament.id) setOpenTournamentId(null);
                               }}
                               className="min-h-[34px] px-3 py-1"
