@@ -20,6 +20,11 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Keep shop payment alerts off Formspree by default. Admin Web Push + /admin
+// Orders are the source of truth; email can be re-enabled later as a secondary
+// channel without making paid-order declarations consume Formspree's free quota.
+const ORDER_EMAIL_ENABLED = process.env.SHOP_ORDER_EMAIL_NOTIFICATIONS === "true";
+
 // Light in-memory rate limit: max 6 orders / 10 min per IP (best-effort; resets
 // on cold start). Stops casual spam without a datastore.
 const HITS = new Map<string, number[]>();
@@ -148,7 +153,7 @@ export async function POST(request: Request) {
   // Short reference code the buyer is asked to put in the transfer note, so the
   // team can match a payment to one order (no amount tampering).
   const refCode = cleanRefCode(body.ref);
-  // Signed-in buyer's email (buying requires sign-in). Stored for the team's reference.
+  // Signed-in buyer's email (optional). Stored for the team's reference when present.
   const userEmail = str(body.userEmail, 200);
 
   const baseRow = (status: string, slipUrl: string | null): Record<string, unknown> => ({
@@ -252,8 +257,10 @@ export async function POST(request: Request) {
     /* push is best-effort — the order is already stored */
   }
 
-  // Notify the team by email (best-effort) through the existing Formspree endpoint.
-  if (formspree) {
+  // Optional secondary email notification. Disabled by default so fake slips or
+  // high order volume cannot exhaust Formspree's free monthly submissions; push
+  // + /admin Orders remain the primary unlimited-ish alert path.
+  if (ORDER_EMAIL_ENABLED && formspree) {
     try {
       await fetch(formspree, {
         method: "POST",

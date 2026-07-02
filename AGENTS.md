@@ -226,9 +226,11 @@ Order flow is **reserve → pay** (two `POST /api/shop/order` calls, distinguish
 popup is **portaled to `document.body`** with background scroll locked so it always
 centres in the viewport (a transformed ancestor used to capture the `fixed` positioning).
 Attaching a slip + "I've transferred" (`intent:"pay"`, sends the reserved `orderId`)
-updates that row to `status='paid_declared'`, uploads the slip, and emails the team via
-Formspree → success tick → popup self-closes → My Orders tab. Payment is **self-declared**
-(no gateway). The team verifies in **/admin → Orders** and advances status
+updates that row to `status='paid_declared'`, uploads the slip, fires Admin Web Push
+alerts, and then shows the success tick → popup self-closes → My Orders tab. Payment is **self-declared**
+(no gateway). Formspree email for shop paid-order declarations is **disabled by default**
+so fake slips / high order volume do not consume the free Formspree quota; only enable it
+as a secondary channel with `SHOP_ORDER_EMAIL_NOTIFICATIONS=true`. The team verifies in **/admin → Orders** and advances status
 (awaiting_payment → paid_declared → verified → shipped → cancelled).
 
 **Pay window / My Orders:** a reserved order shows in the buyer's `localStorage` **My
@@ -327,6 +329,10 @@ baked at BUILD time → must be set before the deploy that should expose it):
 "ยังไม่ได้ตั้งค่า VAPID keys" if unset. **iOS caveat:** Safari only delivers Web Push when
 the site is added to the Home Screen (installed as a PWA); desktop Chrome/Edge/Firefox and
 Android Chrome work directly.
+Shop paid-order email notifications through the site's Formspree endpoint are optional
+and off by default (`SHOP_ORDER_EMAIL_NOTIFICATIONS=false` / unset). Keep them off unless
+the team intentionally wants email as a paid/secondary channel; Admin Web Push + `/admin`
+Orders are the primary path and are not subject to Formspree's monthly submission limit.
 
 **PWA / install prompt:** icons are driven via **`metadata.icons` (config-based), not the
 `app/icon.png` file convention** — the files live in `public/` (`icon.png`, `apple-icon.png`,
