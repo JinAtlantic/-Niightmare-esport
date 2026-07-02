@@ -23,6 +23,13 @@ interface AdminComment {
   };
 }
 
+interface PendingAvatar {
+  id: string;
+  display_name?: string | null;
+  avatar_url?: string | null;
+  pending_avatar_url?: string | null;
+}
+
 const STATUS_OPTIONS: { value: CommentStatus; label: string }[] = [
   { value: "review", label: "Review Queue" },
   { value: "visible", label: "Visible" },
@@ -58,6 +65,8 @@ export default function CommunityModeration() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState("");
   const [error, setError] = useState("");
+  const [avatars, setAvatars] = useState<PendingAvatar[]>([]);
+  const [avatarBusyId, setAvatarBusyId] = useState("");
 
   const counts = useMemo(() => {
     return comments.reduce(
@@ -88,6 +97,40 @@ export default function CommunityModeration() {
     load(status);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
+
+  async function loadAvatars() {
+    try {
+      const res = await fetch("/api/admin/fan-avatars", { cache: "no-store" });
+      const json = (await res.json()) as { profiles?: PendingAvatar[] };
+      setAvatars(json.profiles ?? []);
+    } catch {
+      setAvatars([]);
+    }
+  }
+
+  useEffect(() => {
+    loadAvatars();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function reviewAvatar(id: string, action: "approve" | "reject") {
+    setAvatarBusyId(id);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/fan-avatars", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(json.error || "Could not update photo.");
+      await loadAvatars();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not update photo.");
+    } finally {
+      setAvatarBusyId("");
+    }
+  }
 
   async function updateStatus(comment: AdminComment, nextStatus: "visible" | "review" | "hidden") {
     setSavingId(`${comment.target ?? "player"}:${comment.id}`);
@@ -136,6 +179,42 @@ export default function CommunityModeration() {
       </Section>
 
       {error && <p className="border border-loss/40 bg-loss/10 px-4 py-3 font-mono text-xs text-loss">{error}</p>}
+
+      {avatars.length > 0 && (
+        <Section
+          title={`Pending profile photos (${avatars.length})`}
+          hint="Fan-uploaded avatars awaiting review. Approve to show publicly, or reject to discard."
+          defaultOpen
+          collapsible={false}
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            {avatars.map((av) => (
+              <Card key={av.id} className="bg-crypt/70">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-amethyst/40 bg-void/60">
+                    {av.pending_avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={av.pending_avatar_url} alt="" className="h-full w-full object-cover" />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-soul">{publicFanName(av.display_name)}</p>
+                    <p className="font-mono text-[10px] text-ash-dim">new photo pending</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button variant="primary" onClick={() => reviewAvatar(av.id, "approve")} disabled={avatarBusyId === av.id}>
+                    Approve
+                  </Button>
+                  <Button variant="danger" onClick={() => reviewAvatar(av.id, "reject")} disabled={avatarBusyId === av.id}>
+                    Reject
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <div className="space-y-3">
         {loading ? (

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { LogIn, LogOut, UserCircle } from "lucide-react";
+import { LogIn, UserCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useFanAuth } from "@/components/context/FanAuthContext";
@@ -28,7 +28,7 @@ const AUTH_COPY = {
 
 export default function Navbar() {
   const { t, pick } = useLanguage();
-  const { session, openSignIn, signOut } = useFanAuth();
+  const { session, profile, openSignIn, openProfile } = useFanAuth();
   const { site } = useContent();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -104,12 +104,12 @@ export default function Navbar() {
             {session ? (
               <button
                 type="button"
-                onClick={signOut}
-                className="inline-flex min-h-[42px] items-center gap-2 border border-edge bg-crypt/70 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em] text-spectre transition-all duration-200 hover:border-loss/60 hover:bg-loss/10 hover:text-loss"
+                onClick={openProfile}
+                title={pick(AUTH_COPY.profile)}
+                className="inline-flex min-h-[42px] items-center gap-2 border border-edge bg-crypt/70 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em] text-spectre transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15 hover:text-soul"
               >
                 <UserCircle size={15} />
-                <span className="max-w-[130px] truncate">{publicFanName(session.user.user_metadata?.full_name || session.user.user_metadata?.name) || pick(AUTH_COPY.profile)}</span>
-                <LogOut size={14} />
+                <span className="max-w-[130px] truncate">{publicFanName(profile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name) || pick(AUTH_COPY.profile)}</span>
               </button>
             ) : (
               <button
@@ -203,12 +203,11 @@ export default function Navbar() {
             {session ? (
               <button
                 type="button"
-                onClick={signOut}
-                className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 border border-edge bg-void/45 px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-spectre transition-all duration-200 hover:border-loss/60 hover:bg-loss/10 hover:text-loss"
+                onClick={openProfile}
+                className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 border border-edge bg-void/45 px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-spectre transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15 hover:text-soul"
               >
                 <UserCircle size={15} />
-                <span className="min-w-0 truncate">{publicFanName(session.user.user_metadata?.full_name || session.user.user_metadata?.name) || pick(AUTH_COPY.profile)}</span>
-                <LogOut size={14} />
+                <span className="min-w-0 truncate">{publicFanName(profile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name) || pick(AUTH_COPY.profile)}</span>
               </button>
             ) : (
               <button

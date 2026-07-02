@@ -210,6 +210,11 @@ create table if not exists public.fan_profiles (
   updated_at      timestamptz default now()
 );
 
+-- A fan-uploaded profile photo waiting for admin review. `avatar_url` only ever
+-- holds an APPROVED (or Google-default) photo, so public reads never surface an
+-- unreviewed image. See /api/community/profile and /api/admin/fan-avatars.
+alter table public.fan_profiles add column if not exists pending_avatar_url text;
+
 create table if not exists public.player_likes (
   id              uuid primary key default gen_random_uuid(),
   player_id       uuid not null references public.players(id) on delete cascade,
@@ -454,8 +459,10 @@ drop policy if exists "public read fan_profiles" on public.fan_profiles;
 create policy "public read fan_profiles" on public.fan_profiles for select using (true);
 drop policy if exists "fans insert own profile" on public.fan_profiles;
 create policy "fans insert own profile" on public.fan_profiles for insert with check (auth.uid() = id);
+-- Profile edits (display name / avatar) are moderated server-side and written
+-- with the service role, so fans may NOT update their own row directly — that
+-- would let them bypass the name filter and the avatar review queue.
 drop policy if exists "fans update own profile" on public.fan_profiles;
-create policy "fans update own profile" on public.fan_profiles for update using (auth.uid() = id) with check (auth.uid() = id);
 drop trigger if exists set_fan_profiles_updated_at on public.fan_profiles;
 create trigger set_fan_profiles_updated_at before update on public.fan_profiles for each row execute function public.set_updated_at();
 

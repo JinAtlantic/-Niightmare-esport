@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { analyzeCommentModeration } from "@/lib/commentModeration";
 import { checkCommentRateLimit } from "@/lib/communityRateLimit";
 import { getSupabaseAdmin, supabaseAdminEnabled } from "@/lib/supabaseAdmin";
-import { publicFanAvatar, publicFanName } from "@/lib/safety";
+import { ensureFanProfileRow } from "@/lib/fanProfile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,16 +11,6 @@ function bearerToken(request: Request) {
   const header = request.headers.get("authorization") ?? "";
   const match = header.match(/^Bearer\s+(.+)$/i);
   return match?.[1] ?? "";
-}
-
-function displayName(user: { user_metadata?: Record<string, unknown>; email?: string }) {
-  const metadata = user.user_metadata ?? {};
-  return publicFanName(metadata.full_name || metadata.name || metadata.preferred_username);
-}
-
-function avatarUrl(user: { user_metadata?: Record<string, unknown> }) {
-  const metadata = user.user_metadata ?? {};
-  return publicFanAvatar(metadata.avatar_url || metadata.picture);
 }
 
 export async function POST(request: Request) {
@@ -55,13 +45,9 @@ export async function POST(request: Request) {
 
   const moderation = analyzeCommentModeration(body);
 
-  const { error: profileError } = await db.from("fan_profiles").upsert({
-    id: user.id,
-    display_name: displayName(user),
-    avatar_url: avatarUrl(user),
-    provider: user.app_metadata?.provider ?? null,
-  });
-  if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 });
+  // Create the profile row on first interaction, but never overwrite a fan's
+  // customized name/photo (insert-only). See lib/fanProfile.
+  await ensureFanProfileRow(db, user);
 
   const { error: insertError } = await db.from("team_comments").insert({
     user_id: user.id,

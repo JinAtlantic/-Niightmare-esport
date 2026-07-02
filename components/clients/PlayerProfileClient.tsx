@@ -93,12 +93,16 @@ function gaEvent(name: string, params: Record<string, string | number | boolean>
 }
 
 async function upsertFanProfile(db: SupabaseClient, user: User) {
-  await db.from("fan_profiles").upsert({
-    id: user.id,
-    display_name: displayName(user),
-    avatar_url: avatarUrl(user),
-    provider: user.app_metadata?.provider ?? null,
-  });
+  // Insert-only: never overwrite a fan's customized name/photo (see FanAuthContext).
+  await db.from("fan_profiles").upsert(
+    {
+      id: user.id,
+      display_name: displayName(user),
+      avatar_url: avatarUrl(user),
+      provider: user.app_metadata?.provider ?? null,
+    },
+    { onConflict: "id", ignoreDuplicates: true }
+  );
 }
 
 export default function PlayerProfileClient({ player }: { player: Player }) {
