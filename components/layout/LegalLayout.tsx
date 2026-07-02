@@ -114,17 +114,8 @@ export default function LegalLayout({
           <Section key={i} data={s} index={i} />
         ))}
 
-        {/* foot of the document — contact + back link */}
-        <div className="mt-14 flex flex-col gap-4 border-t border-edge pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-ash">
-            {t("legal.questions")}{" "}
-            <Link
-              href="/contact"
-              className="font-semibold text-glow underline-offset-4 transition-colors hover:text-amethyst hover:underline"
-            >
-              {t("legal.contact_cta")}
-            </Link>
-          </p>
+        {/* foot of the document — back link */}
+        <div className="mt-14 flex flex-col gap-4 border-t border-edge pt-8 sm:flex-row sm:items-center sm:justify-end">
           <Link
             href="/"
             className="group inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-ash transition-colors hover:text-glow"

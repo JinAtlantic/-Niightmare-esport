@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { href: "/achievements", key: "nav.achievements" },
   { href: "/shop", key: "nav.shop" },
   { href: "/sponsors", key: "nav.sponsors" },
-  { href: "/contact", key: "nav.contact" },
 ];
 
 const LIQUIPEDIA_URL = "https://liquipedia.net/mobilelegends/Niightmare_Esports";

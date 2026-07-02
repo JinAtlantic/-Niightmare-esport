@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -147,7 +146,15 @@ function InfoBlock({ label, body }: { label: string; body: string }) {
   );
 }
 
-function SponsorModal({ sponsor, onClose }: { sponsor: Sponsor | null; onClose: () => void }) {
+function SponsorModal({
+  sponsor,
+  onClose,
+  contactEmail,
+}: {
+  sponsor: Sponsor | null;
+  onClose: () => void;
+  contactEmail: string;
+}) {
   const { pick } = useLanguage();
   const linked = isExternalLink(sponsor?.url);
 
@@ -226,14 +233,14 @@ function SponsorModal({ sponsor, onClose }: { sponsor: Sponsor | null; onClose: 
                   {pick(COPY.noLink)}
                 </span>
               )}
-              <Link
-                href="/contact"
+              <a
+                href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
                 className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/50 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
                 onClick={onClose}
               >
                 {pick(FALLBACK_PAGE.ctaPrimary.label)}
                 <ArrowRightIcon size={16} />
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -353,13 +360,17 @@ export default function SponsorsClient() {
             {pick(page.ctaBody)}
           </p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              href={safeHref(page.ctaPrimary.href, "/contact")}
+            <a
+              href={
+                page.ctaPrimary.href && page.ctaPrimary.href !== "/contact"
+                  ? safeHref(page.ctaPrimary.href)
+                  : safeMailto(contactEmail, "mailto:contact@niightmare.gg")
+              }
               className="inline-flex min-h-[50px] items-center justify-center gap-2 border border-amethyst bg-amethyst/20 px-7 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.28)] transition-colors hover:bg-amethyst/30"
             >
               {pick(page.ctaPrimary.label)}
               <ArrowRightIcon size={16} />
-            </Link>
+            </a>
             <a
               href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
               className="inline-flex min-h-[50px] items-center justify-center border border-edge-bright bg-void/45 px-7 py-3 font-mono text-xs font-bold tracking-[0.12em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
@@ -370,7 +381,7 @@ export default function SponsorsClient() {
         </div>
       </section>
 
-      <SponsorModal sponsor={activeSponsor} onClose={() => setActiveSponsor(null)} />
+      <SponsorModal sponsor={activeSponsor} onClose={() => setActiveSponsor(null)} contactEmail={contactEmail} />
     </>
   );
 }

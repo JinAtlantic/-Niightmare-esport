@@ -23,7 +23,7 @@ export default function AboutUs() {
   const about: AboutUsContent = resolveAbout(
     (site as { aboutUs?: Partial<AboutUsContent> }).aboutUs
   );
-  const primaryHref = safeHref(about.primaryCta.href, "/contact");
+  const primaryHref = safeHref(about.primaryCta.href, "/achievements");
 
   return (
     <section className="aurora-band relative overflow-hidden border-t border-edge px-4 py-20 md:px-6 md:py-24">

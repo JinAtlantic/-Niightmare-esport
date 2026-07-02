@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 
 // Public, indexable routes. /admin is intentionally excluded.
-const ROUTES = ["", "/roster", "/matches", "/sponsors", "/contact"];
+const ROUTES = ["", "/roster", "/matches", "/sponsors"];
 // Legal pages — indexable but low priority / rarely change.
 const LEGAL_ROUTES = ["/privacy", "/terms"];
 

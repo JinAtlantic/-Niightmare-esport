@@ -19,7 +19,6 @@ const NAV_ITEMS = [
   { href: "/achievements", key: "nav.achievements" },
   { href: "/shop", key: "nav.shop" },
   { href: "/sponsors", key: "nav.sponsors" },
-  { href: "/contact", key: "nav.contact" },
 ];
 
 const AUTH_COPY = {
