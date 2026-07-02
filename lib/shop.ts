@@ -139,6 +139,7 @@ export type ShopOrderStatus =
   | "awaiting_payment"
   | "paid_declared"
   | "verified"
+  | "packing"
   | "shipped"
   | "cancelled";
 

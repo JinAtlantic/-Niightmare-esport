@@ -7,7 +7,7 @@ import { uploadToStorage } from "@/lib/supabaseStorage";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const STATUSES = new Set(["awaiting_payment", "paid_declared", "verified", "shipped", "cancelled"]);
+const STATUSES = new Set(["awaiting_payment", "paid_declared", "verified", "packing", "shipped", "cancelled"]);
 const IMAGE_MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 
 async function authed(): Promise<boolean> {

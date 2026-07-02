@@ -75,6 +75,7 @@ const COPY = {
   statusAwaiting: { en: "Awaiting transfer", lo: "ລໍຖ້າການໂອນ" },
   statusPaid: { en: "Transferred · processing", lo: "ໂອນແລ້ວ · ກຳລັງດຳເນີນການ" },
   statusVerified: { en: "Payment confirmed · preparing", lo: "ຢືນຢັນການຈ່າຍ · ກຳລັງກຽມຈັດສົ່ງ" },
+  statusPacking: { en: "Packing your order", lo: "ກຳລັງແພັກເຄື່ອງ" },
   statusShipped: { en: "Shipped — please wait for delivery", lo: "ຈັດສົ່ງແລ້ວ — ກະລຸນາລໍຖ້າຮັບເຄື່ອງ" },
   statusCancelled: { en: "Cancelled", lo: "ຍົກເລີກ" },
   orderDetails: { en: "Order details", lo: "ລາຍລະອຽດອໍເດີ" },
@@ -671,21 +672,25 @@ export default function ShopClient() {
                       ? pick(COPY.statusAwaiting)
                       : st === "verified"
                         ? pick(COPY.statusVerified)
-                        : st === "shipped"
-                          ? pick(COPY.statusShipped)
-                          : st === "cancelled"
-                            ? pick(COPY.statusCancelled)
-                            : pick(COPY.statusPaid);
+                        : st === "packing"
+                          ? pick(COPY.statusPacking)
+                          : st === "shipped"
+                            ? pick(COPY.statusShipped)
+                            : st === "cancelled"
+                              ? pick(COPY.statusCancelled)
+                              : pick(COPY.statusPaid);
                   const badgeCls =
                     st === "awaiting_payment"
                       ? "border-spectre/40 bg-spectre/10 text-spectre"
                       : st === "verified"
                         ? "border-glow/40 bg-glow/10 text-glow"
-                        : st === "shipped"
+                        : st === "packing"
                           ? "border-amethyst/50 bg-amethyst/15 text-glow"
-                          : st === "cancelled"
-                            ? "border-loss/40 bg-loss/10 text-loss"
-                            : "border-win/40 bg-win/10 text-win";
+                          : st === "shipped"
+                            ? "border-amethyst/50 bg-amethyst/15 text-glow"
+                            : st === "cancelled"
+                              ? "border-loss/40 bg-loss/10 text-loss"
+                              : "border-win/40 bg-win/10 text-win";
                   return (
                     <div key={(o.id ?? o.refCode ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4 shadow-elev-1">
                       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -741,7 +746,7 @@ export default function ShopClient() {
                       )}
 
                       {/* shipping image the team attached (e.g. courier parcel number) */}
-                      {o.shippingImageUrl && (st === "shipped" || st === "verified") && (
+                      {o.shippingImageUrl && (st === "shipped" || st === "verified" || st === "packing") && (
                         <div className="mt-3 border-t border-edge pt-3">
                           <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ash">{pick(COPY.shipImageLabel)}</p>
                           <a

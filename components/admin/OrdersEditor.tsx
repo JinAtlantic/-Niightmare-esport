@@ -38,6 +38,7 @@ const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
   { value: "awaiting_payment", label: "รอชำระ", tone: "text-ash" },
   { value: "paid_declared", label: "รอตรวจสอบ", tone: "text-glow" },
   { value: "verified", label: "จ่ายแล้ว", tone: "text-win" },
+  { value: "packing", label: "กำลังแพ็กของ", tone: "text-amethyst" },
   { value: "shipped", label: "ส่งแล้ว", tone: "text-spectre" },
   { value: "cancelled", label: "ยกเลิก", tone: "text-loss" },
 ];
@@ -46,7 +47,8 @@ const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
 const NEXT_STEP: Record<string, { value: string; label: string } | undefined> = {
   awaiting_payment: { value: "paid_declared", label: "แจ้งว่าโอนแล้ว" },
   paid_declared: { value: "verified", label: "ยืนยันการจ่าย" },
-  verified: { value: "shipped", label: "ทำเครื่องหมายส่งแล้ว" },
+  verified: { value: "packing", label: "เริ่มแพ็กของ" },
+  packing: { value: "shipped", label: "ทำเครื่องหมายส่งแล้ว" },
 };
 
 const normPhone = (p: string) => (p || "").replace(/\D/g, "");
@@ -93,14 +95,21 @@ async function fileToDownscaledDataUrl(file: File, max = 1400): Promise<string> 
   return canvas.toDataURL("image/jpeg", 0.85);
 }
 
-type TabId = "awaiting" | "checking" | "paid" | "shipped";
+type TabId = "awaiting" | "checking" | "paid" | "packing" | "shipped";
 
 const TABS: { id: TabId; label: string; match: (s: string) => boolean }[] = [
   { id: "awaiting", label: "รอชำระ", match: (s) => s === "awaiting_payment" },
   { id: "checking", label: "กำลังตรวจ", match: (s) => s === "paid_declared" },
   { id: "paid", label: "จ่ายแล้ว", match: (s) => s === "verified" || s === "cancelled" },
+  { id: "packing", label: "กำลังแพ็กของ", match: (s) => s === "packing" },
   { id: "shipped", label: "ส่งแล้ว", match: (s) => s === "shipped" },
 ];
+
+// Bulk-advance: which status to move FROM and TO for the "move all shown" button.
+const BULK_ADVANCE: Partial<Record<TabId, { from: string; to: string; toLabel: string }>> = {
+  paid: { from: "verified", to: "packing", toLabel: "กำลังแพ็กของ" },
+  packing: { from: "packing", to: "shipped", toLabel: "ส่งแล้ว" },
+};
 
 const SIZE_ORDER = ["S", "M", "L", "XL", "XXL", "3XL", "4XL"];
 
@@ -157,6 +166,7 @@ export default function OrdersEditor() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string>("");
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [tab, setTab] = useState<TabId>("checking");
   const [query, setQuery] = useState("");
   const [sortDir, setSortDir] = useState<"new" | "old">("new");
@@ -266,6 +276,38 @@ export default function OrdersEditor() {
     }
   }
 
+  // Move every currently-shown order in one bucket to the next status at once
+  // (จ่ายแล้ว → กำลังแพ็กของ, กำลังแพ็กของ → ส่งแล้ว). Respects the active
+  // search/filter — only the orders visible in the list are moved.
+  async function bulkAdvance(targets: OrderRow[], to: string, toLabel: string) {
+    if (targets.length === 0 || bulkBusy) return;
+    if (!window.confirm(`ย้าย ${targets.length} ออเดอร์ที่แสดงอยู่ไปเป็น “${toLabel}” ทั้งหมด?`)) return;
+    setBulkBusy(true);
+    setError("");
+    const ids = targets.map((o) => o.id);
+    try {
+      const nowIso = new Date().toISOString();
+      const results = await Promise.allSettled(
+        ids.map((id) =>
+          fetch("/api/admin/orders", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status: to }),
+          }).then((r) => {
+            if (!r.ok) throw new Error();
+          })
+        )
+      );
+      const okIds = new Set(ids.filter((_, i) => results[i].status === "fulfilled"));
+      setOrders((rows) => rows.map((r) => (okIds.has(r.id) ? { ...r, status: to, updated_at: nowIso } : r)));
+      if (okIds.size < ids.length) setError(`ย้ายสำเร็จ ${okIds.size}/${ids.length} ออเดอร์ (บางรายการไม่สำเร็จ)`);
+    } catch {
+      setError("ย้ายออเดอร์ไม่สำเร็จ");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
   async function copy(text: string, key: string) {
     if (!text) return;
     try {
@@ -281,7 +323,8 @@ export default function OrdersEditor() {
     awaiting: orders.filter((o) => TABS[0].match(o.status)).length,
     checking: orders.filter((o) => TABS[1].match(o.status)).length,
     paid: orders.filter((o) => TABS[2].match(o.status)).length,
-    shipped: orders.filter((o) => TABS[3].match(o.status)).length,
+    packing: orders.filter((o) => TABS[3].match(o.status)).length,
+    shipped: orders.filter((o) => TABS[4].match(o.status)).length,
   };
 
   // Flag orders that share a phone or signed-in email with another order — a hint
@@ -355,11 +398,19 @@ export default function OrdersEditor() {
       </div>
 
       {/* sub-tabs so the boss checks one bucket at a time */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
         {TABS.map((t) => {
           const active = t.id === tab;
           const tone =
-            t.id === "awaiting" ? "text-spectre" : t.id === "checking" ? "text-glow" : t.id === "shipped" ? "text-amethyst" : "text-win";
+            t.id === "awaiting"
+              ? "text-spectre"
+              : t.id === "checking"
+                ? "text-glow"
+                : t.id === "packing"
+                  ? "text-amethyst"
+                  : t.id === "shipped"
+                    ? "text-amethyst"
+                    : "text-win";
           return (
             <button
               key={t.id}
@@ -479,6 +530,23 @@ export default function OrdersEditor() {
         </div>
       )}
 
+      {/* one-tap: move every shown order in this bucket to the next step */}
+      {BULK_ADVANCE[tab] && (() => {
+        const cfg = BULK_ADVANCE[tab]!;
+        const targets = visible.filter((o) => o.status === cfg.from);
+        if (targets.length === 0) return null;
+        return (
+          <button
+            type="button"
+            onClick={() => bulkAdvance(targets, cfg.to, cfg.toLabel)}
+            disabled={bulkBusy}
+            className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-md border border-amethyst bg-amethyst/20 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-all hover:bg-amethyst/30 disabled:opacity-50"
+          >
+            {bulkBusy ? "กำลังย้าย…" : `⇉ ย้ายทั้งหมดที่แสดง (${targets.length}) → ${cfg.toLabel}`}
+          </button>
+        );
+      })()}
+
       {!loading && visible.length === 0 && (
         <Card>
           <p className="text-center font-mono text-[11px] text-ash">ไม่มีออเดอร์ในหมวดนี้</p>
@@ -491,7 +559,7 @@ export default function OrdersEditor() {
           const expired = isOrderExpired(o.created_at, o.status);
           const dup = dupCount(o);
           const next = NEXT_STEP[o.status];
-          const showShipping = o.status === "verified" || o.status === "shipped";
+          const showShipping = o.status === "verified" || o.status === "packing" || o.status === "shipped";
           const busy = busyId === o.id;
           return (
             <Card key={o.id} className="space-y-3">
