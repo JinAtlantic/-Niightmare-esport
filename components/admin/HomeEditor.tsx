@@ -201,9 +201,63 @@ const STATUS_TH: Record<string, string> = {
   practice: "ช่วงซ้อมทีม",
 };
 
-// stored ISO "2025-06-20T19:00:00+07:00" ↔ datetime-local "2025-06-20T19:00"
-const toLocalInput = (iso: string) => (iso || "").slice(0, 16);
-const fromLocalInput = (v: string) => (v ? `${v}:00+07:00` : "");
+// Fixtures are entered as Lao/Thai (+07:00) wall-clock. `match_date` is a
+// timestamptz, so Supabase returns it in UTC — naively slicing the string shifted
+// the time by 7h on every save (the "time changes by itself" bug). These helpers
+// convert the stored instant to/from +07:00 wall-clock date + 24-hour time parts.
+const BKK_OFFSET_MS = 7 * 60 * 60_000;
+function isoToBkkParts(iso: string): { date: string; time: string } {
+  if (!iso) return { date: "", time: "" };
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    const s = iso.slice(0, 16);
+    return { date: s.slice(0, 10), time: s.slice(11, 16) };
+  }
+  const w = new Date(d.getTime() + BKK_OFFSET_MS).toISOString();
+  return { date: w.slice(0, 10), time: w.slice(11, 16) };
+}
+function bkkPartsToIso(date: string, time: string): string {
+  if (!date) return "";
+  const t = /^\d{1,2}:\d{2}$/.test(time) ? time.padStart(5, "0") : "00:00";
+  return `${date}T${t}:00+07:00`;
+}
+/** Keep a time string as 24-hour HH:MM as the user types (digits only, auto colon). */
+function normalizeTime24(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  let hh = digits.slice(0, 2);
+  let mm = digits.slice(2);
+  if (Number(hh) > 23) hh = "23";
+  if (mm.length === 2 && Number(mm) > 59) mm = "59";
+  return `${hh}:${mm}`;
+}
+
+/** 24-hour time input (text, HH:MM) — native time/datetime pickers can't be
+ *  forced to 24h across browsers, so we use an explicit 24-hour field. */
+function TimeField24({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={value}
+        maxLength={5}
+        placeholder="HH:MM (เช่น 19:30)"
+        onChange={(e) => onChange(normalizeTime24(e.target.value))}
+        className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs tabular-nums text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst"
+      />
+    </div>
+  );
+}
 
 const newScheduleEntry = (): MatchScheduleEntry => ({
   id: `schedule-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
@@ -284,6 +338,8 @@ export default function HomeEditor() {
 
   const isPractice = m.status === "practice";
   const isFinished = m.status === "finished";
+  // +07:00 wall-clock date/time parts for the headline fixture's editors.
+  const bkk = isoToBkkParts(m.date);
 
   // One-tap advance: pull the first row of the schedule popup up into the home
   // headline card (replacing the finished/current fixture) and drop it from the
@@ -303,7 +359,7 @@ export default function HomeEditor() {
         const matchesData = (await res.json()) as { matches?: Match[] } & Record<string, unknown>;
         const finishedMatch: Match = {
           id: `m-${Date.now().toString(36)}`,
-          date: (m.date || "").slice(0, 10),
+          date: isoToBkkParts(m.date).date,
           game: m.game,
           tournament: m.tournament,
           round: m.round ?? { en: "", lo: "" },
@@ -501,14 +557,17 @@ export default function HomeEditor() {
               onChange={(v) => patch({ game: v as UpcomingMatch["game"] })}
               options={GAME_OPTS}
             />
-            <div className="md:col-span-2">
-              <TextField
-                label="วันและเวลาแข่ง (เวลาลาว/ไทย +07:00)"
-                type="datetime-local"
-                value={toLocalInput(m.date)}
-                onChange={(v) => patch({ date: fromLocalInput(v) })}
-              />
-            </div>
+            <TextField
+              label="วันที่แข่ง (เวลาลาว/ไทย +07:00)"
+              type="date"
+              value={bkk.date}
+              onChange={(v) => patch({ date: bkkPartsToIso(v, bkk.time) })}
+            />
+            <TimeField24
+              label="เวลาแข่ง (24 ชม.)"
+              value={bkk.time}
+              onChange={(t) => patch({ date: bkkPartsToIso(bkk.date, t) })}
+            />
             <div className="md:col-span-2">
               <BilingualField
                 label="งาน / ทัวร์นาเมนต์"
@@ -718,9 +777,8 @@ export default function HomeEditor() {
                     value={entry.date}
                     onChange={(date) => patchScheduleEntry(entry.id, { date })}
                   />
-                  <TextField
-                    label="Time"
-                    type="time"
+                  <TimeField24
+                    label="เวลา (24 ชม.)"
                     value={entry.time}
                     onChange={(time) => patchScheduleEntry(entry.id, { time })}
                   />

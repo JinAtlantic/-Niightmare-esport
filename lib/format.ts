@@ -17,7 +17,9 @@ export function formatDate(iso: string, lang: Lang): string {
   }
 }
 
-/** Format an ISO datetime including time-of-day. */
+/** Format an ISO datetime including time-of-day. Fixtures are Lao/Thai (+07:00)
+ *  events, so the time is always rendered in Asia/Bangkok, 24-hour — the entered
+ *  kickoff shows the same for every visitor regardless of their own time zone. */
 export function formatDateTime(iso: string, lang: Lang): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
@@ -29,6 +31,7 @@ export function formatDateTime(iso: string, lang: Lang): string {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
+      timeZone: "Asia/Bangkok",
     }).format(d);
   } catch {
     return d.toISOString();
