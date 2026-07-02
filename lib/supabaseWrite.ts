@@ -184,6 +184,11 @@ export async function writeSectionToSupabase(
       if (hasMatchSchedulePayload(site.matchSchedule)) {
         siteSettingsRow.match_schedule = site.matchSchedule ?? null;
       }
+      // Guarded: the column may not exist yet — writing an unknown column fails
+      // the whole upsert, so only send it once the column is present.
+      if (await hasColumns(db, "site_settings", "last_result")) {
+        siteSettingsRow.last_result = site.lastResult ?? null;
+      }
       const { error } = await db.from("site_settings").upsert(siteSettingsRow);
       if (error) throw new Error(`site_settings: ${error.message}`);
     }

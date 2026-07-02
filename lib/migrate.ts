@@ -165,6 +165,8 @@ export interface SiteShape {
   formspreeEndpoint?: string;
   mediaKitUrl?: string;
   upcomingMatch?: UpcomingMatch;
+  /** Most-recent finished fixture (shown faded once the headline advances). */
+  lastResult?: UpcomingMatch;
   aboutUs?: AboutUsContent;
   roadmap?: RoadmapContent;
   matchSchedule?: MatchScheduleContent;
@@ -269,6 +271,7 @@ export async function migrateAll(): Promise<MigrateResult> {
       about_us: site.aboutUs ?? null,
       roadmap: site.roadmap ?? null,
       match_schedule: site.matchSchedule ?? null,
+      last_result: site.lastResult ?? null,
       shop: site.shop ?? null,
       achievements: achievements ?? null,
     };

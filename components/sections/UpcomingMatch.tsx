@@ -205,15 +205,27 @@ function scheduleParts(entry: MatchScheduleEntry, lang: Lang): { date: string; t
 
 function ScheduleModal({
   schedule,
+  lastResult,
   lang,
   pick,
   onClose,
 }: {
   schedule: MatchScheduleContent;
+  lastResult?: UpcomingMatchData;
   lang: Lang;
   pick: (value: { en: string; lo: string }) => string;
   onClose: () => void;
 }) {
+  const lrResult = lastResult?.result;
+  const lrTone = lrResult === "win" ? "text-win" : lrResult === "loss" ? "text-loss" : "text-spectre";
+  const lrRail =
+    lrResult === "win" ? "bg-win/70" : lrResult === "loss" ? "bg-loss/70" : "bg-spectre/60";
+  const lrLabel =
+    lrResult === "loss"
+      ? lang === "lo" ? "ແພ້" : "LOSS"
+      : lrResult === "draw"
+        ? lang === "lo" ? "ເສີມກັນ" : "DRAW"
+        : lang === "lo" ? "ຊະນະ" : "WIN";
   // Portal to <body> only after mount so the fixed overlay anchors to the
   // viewport (a transformed ancestor of this section would otherwise capture
   // the `fixed` positioning and the popup would sit down-page, needing a scroll).
@@ -273,6 +285,36 @@ function ScheduleModal({
 
         {/* one card per fixture — a framed date/time panel beside the matchup */}
         <div className="modal-scroll overflow-y-auto px-6 md:px-8">
+          {/* faded "latest result" — the just-finished fixture, kept for context */}
+          {lastResult && (
+            <div className="pt-6">
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-spectre">
+                {lang === "lo" ? "ຜົນຫຼ້າສຸດ" : "Latest result"}
+              </p>
+              <div className="relative flex items-stretch overflow-hidden rounded-md border border-edge bg-void/40 opacity-60">
+                <span aria-hidden className={`absolute inset-y-0 left-0 w-[3px] ${lrRail}`} />
+                <div className="flex w-[92px] shrink-0 flex-col items-center justify-center gap-0.5 border-r border-edge/70 bg-crypt/50 px-2.5 py-3 text-center sm:w-[108px]">
+                  <span className={`font-display text-2xl font-black tabular-nums leading-none ${lrTone}`}>
+                    {(lastResult.score ?? "").trim() || "—"}
+                  </span>
+                  <span className={`font-mono text-[10px] font-bold uppercase tracking-[0.14em] ${lrTone}`}>{lrLabel}</span>
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-4 py-3">
+                  {lastResult.tournament && pick(lastResult.tournament) && (
+                    <p className="keep-latin break-words font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
+                      {pick(lastResult.tournament)}
+                    </p>
+                  )}
+                  <p className="keep-latin break-words font-display text-base font-bold uppercase leading-tight tracking-[0.03em] text-soul">
+                    NIIGHTMARE <span className="text-glow">vs</span> {lastResult.opponent || "TBA"}
+                  </p>
+                  <span className="w-fit rounded-sm border border-edge bg-void/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ash">
+                    {lang === "lo" ? "ຈົບແລ້ວ" : "Finished"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           {schedule.entries.length ? (
             <ul className="grid gap-3 py-6 sm:grid-cols-2">
               {schedule.entries.map((entry) => {
@@ -340,6 +382,7 @@ export default function UpcomingMatch() {
   const { t, pick, lang } = useLanguage();
   const { site } = useContent();
   const match = site.upcomingMatch as UpcomingMatchData;
+  const lastResult = (site as { lastResult?: UpcomingMatchData }).lastResult;
   const schedule = resolveMatchSchedule((site as { matchSchedule?: Partial<MatchScheduleContent> }).matchSchedule);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const status: MatchStatus = match.status ?? "next";
@@ -696,7 +739,7 @@ export default function UpcomingMatch() {
         </div>
       </div>
       {schedule.enabled && scheduleOpen && (
-        <ScheduleModal schedule={schedule} lang={lang} pick={pick} onClose={() => setScheduleOpen(false)} />
+        <ScheduleModal schedule={schedule} lastResult={lastResult} lang={lang} pick={pick} onClose={() => setScheduleOpen(false)} />
       )}
     </section>
   );

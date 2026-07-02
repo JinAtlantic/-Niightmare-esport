@@ -196,6 +196,8 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
       // Matches-page Niightmare Roadmap popup (jsonb). Null/absent → defaults.
       roadmap: (c.roadmap as Record<string, unknown> | null) ?? undefined,
       matchSchedule: (c.match_schedule as Record<string, unknown> | null) ?? undefined,
+      // Most-recent finished fixture (shown faded on the schedule popup + results).
+      lastResult: (c.last_result as Record<string, unknown> | null) ?? undefined,
       // Shop / 3D jersey config (jsonb). Null/absent → DEFAULT_SHOP.
       shop: (c.shop as Record<string, unknown> | null) ?? undefined,
       upcomingMatch: u

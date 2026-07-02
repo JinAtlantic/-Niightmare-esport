@@ -24,7 +24,7 @@ import {
   DiscordIcon,
 } from "@/components/ui/Icons";
 import RoadmapEditor from "@/components/admin/RoadmapEditor";
-import type { UpcomingMatch } from "@/lib/types";
+import type { Match, UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
@@ -73,6 +73,8 @@ interface ContactPageCopy {
 /** site.json — we edit `upcomingMatch` and `contact`; everything else is preserved. */
 interface SiteFile {
   upcomingMatch: UpcomingMatch;
+  /** Most-recent finished fixture, captured when advancing to the next match. */
+  lastResult?: UpcomingMatch;
   contact?: Contact;
   aboutUs?: AboutUsContent;
   roadmap?: RoadmapContent;
@@ -287,14 +289,54 @@ export default function HomeEditor() {
   // headline card (replacing the finished/current fixture) and drop it from the
   // schedule list. Entries carry game/tournament so the promoted card is complete.
   const nextEntry = matchSchedule.entries[0];
-  const promoteNext = () => {
+  const promoteNext = async () => {
     if (!nextEntry) return;
     if (!window.confirm(`ดึงแมตช์ถัดไป (${nextEntry.opponent || "TBA"}) ขึ้นมาแสดงแทนการ์ดปัจจุบัน?`)) return;
+
+    // If the current headline is a finished match, append it to the real matches
+    // list so it shows normally on Home "Recent Results" + /matches (grouped in
+    // its tournament, W/L colour, VOD slot) — like every other result. This
+    // saves immediately via the matches content API (separate from the site save).
+    if (m.status === "finished") {
+      try {
+        const res = await fetch("/api/admin/data?file=matches");
+        const matchesData = (await res.json()) as { matches?: Match[] } & Record<string, unknown>;
+        const finishedMatch: Match = {
+          id: `m-${Date.now().toString(36)}`,
+          date: (m.date || "").slice(0, 10),
+          game: m.game,
+          tournament: m.tournament,
+          round: m.round ?? { en: "", lo: "" },
+          bo: m.bo,
+          opponent: m.opponent || "",
+          opponentLogo: m.opponentLogo,
+          opponentAbbr: m.opponentAbbr,
+          score: m.score || "",
+          result: m.result ?? "win",
+          vod: null,
+          vods: [],
+        };
+        const put = await fetch("/api/admin/data?file=matches", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...matchesData, matches: [finishedMatch, ...(matchesData.matches ?? [])] }),
+        });
+        if (!put.ok) throw new Error();
+      } catch {
+        window.alert("เพิ่มผลแมตช์เข้าหน้า Match ไม่สำเร็จ — ลองใหม่ หรือเพิ่มเองในเมนู Matches");
+        return; // don't advance if the result wasn't recorded
+      }
+    }
+
     const iso = nextEntry.time
       ? `${nextEntry.date}T${nextEntry.time}:00+07:00`
       : nextEntry.date || "";
+    // Keep the just-finished fixture as the faded "last result" shown at the top
+    // of the schedule popup, until the next one finishes.
+    const lastResult = m.status === "finished" ? { ...m, status: "finished" as const } : data.lastResult;
     setData({
       ...data,
+      lastResult,
       upcomingMatch: {
         status: "next",
         date: iso,
@@ -502,7 +544,8 @@ export default function HomeEditor() {
                   placeholder="2-1"
                 />
                 <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
-                  สถานะ “จบแล้ว”: การ์ดหน้าแรกจะโชว์ผล ชนะ/แพ้ + สกอร์ พอพร้อมแข่งนัดถัดไป กดปุ่ม “⬇ ดึงแมตช์ถัดไป” ด้านล่าง (ในหัวข้อ Upcoming schedule)
+                  สถานะ “จบแล้ว”: การ์ดหน้าแรกจะโชว์ผล ชนะ/แพ้ + สกอร์ พอพร้อมแข่งนัดถัดไป กดปุ่ม “⬇ ดึงแมตช์ถัดไป” ด้านล่าง —
+                  ระบบจะ<span className="text-win"> เพิ่มผลแมตช์นี้เข้าหน้า Match ให้อัตโนมัติ</span> (โผล่ปกติเหมือนแมตช์อื่นๆ ทั้งหน้าแรกและ /matches) แล้วดึงแมตช์ถัดไปขึ้นแทน
                 </p>
               </>
             )}
@@ -609,7 +652,24 @@ export default function HomeEditor() {
             <Button variant="primary" onClick={promoteNext} disabled={!nextEntry}>
               ⬇ ดึงแมตช์ถัดไป (แถวที่ 1) ขึ้นหน้าแรก
             </Button>
+            {data.lastResult && (
+              <Button
+                variant="danger"
+                onClick={() => {
+                  if (window.confirm("ล้าง “ผลล่าสุด” (การ์ดสีจางๆ) ออกจากเว็บ?")) {
+                    setData({ ...data, lastResult: undefined });
+                  }
+                }}
+              >
+                ล้างผลล่าสุด
+              </Button>
+            )}
           </div>
+          {data.lastResult && (
+            <p className="font-mono text-[11px] leading-relaxed text-win">
+              ผลล่าสุดที่โชว์จางๆ: <span className="keep-latin text-soul">NIIGHTMARE {data.lastResult.score || ""} {data.lastResult.opponent || ""}</span> ({STATUS_TH.finished})
+            </p>
+          )}
           {nextEntry ? (
             <p className="font-mono text-[11px] leading-relaxed text-ash">
               กด “ดึงแมตช์ถัดไป” เพื่อเอา <span className="text-spectre">แถวที่ 1 ({nextEntry.opponent || "TBA"})</span> ขึ้นเป็นการ์ด “นัดต่อไป” หน้าแรก แล้วลบออกจากตารางนี้ให้อัตโนมัติ — อย่าลืมกดบันทึก

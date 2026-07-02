@@ -311,6 +311,9 @@ alter table public.site_settings add column if not exists roadmap jsonb;
 alter table public.site_settings add column if not exists achievements jsonb;
 -- Home upcoming-match schedule popup (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists match_schedule jsonb;
+-- Most-recent finished fixture (shown faded on the schedule popup + results),
+-- captured when the admin advances the headline to the next match.
+alter table public.site_settings add column if not exists last_result jsonb;
 -- Shop / 3D jersey config (admin-editable): price, stock, size chart, order links.
 alter table public.site_settings add column if not exists shop jsonb;
 
