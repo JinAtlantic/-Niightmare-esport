@@ -48,6 +48,12 @@ const STATUS: Record<MatchStatus, { key: string; text: string; ring: string; glo
     ring: "border-spectre/50",
     glow: "shadow-[0_0_20px_rgba(201,180,246,0.45)]",
   },
+  finished: {
+    key: "sections.upcoming_status_finished",
+    text: "text-spectre",
+    ring: "border-spectre/45",
+    glow: "shadow-[0_0_20px_rgba(201,180,246,0.35)]",
+  },
 };
 
 /** A team crest that survives a dead logo URL: if the image fails to load
@@ -232,17 +238,26 @@ function ScheduleModal({
   return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
       <button type="button" className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-md border border-edge-bright bg-crypt shadow-[0_30px_80px_-20px_rgba(0,0,0,0.85)]">
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-edge-bright bg-gradient-to-b from-crypt to-void shadow-[0_40px_120px_-24px_rgba(0,0,0,0.9)]">
         {/* a hairline of amethyst across the top — the site's signature seam */}
-        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent" />
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amethyst to-transparent" />
+        {/* HUD corner ticks — premium broadcast frame */}
+        <span aria-hidden className="pointer-events-none absolute left-0 top-0 h-5 w-5 border-l-2 border-t-2 border-amethyst/55" />
+        <span aria-hidden className="pointer-events-none absolute right-0 top-0 h-5 w-5 border-r-2 border-t-2 border-amethyst/55" />
+        {/* ambient glow */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-40"
+          style={{ background: "radial-gradient(70% 100% at 50% 0%, rgba(168,85,247,0.16), transparent 70%)" }}
+        />
 
         {/* header — kicker + title + close */}
-        <div className="flex items-start justify-between gap-4 border-b border-edge px-5 py-4">
+        <div className="relative flex items-start justify-between gap-4 border-b border-edge px-6 py-5 md:px-8 md:py-6">
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-amethyst">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-amethyst">
               {schedule.entries.length} {schedule.entries.length === 1 ? (lang === "lo" ? "ນັດ" : "Fixture") : lang === "lo" ? "ນັດ" : "Fixtures"}
             </p>
-            <h3 className="mt-1.5 font-display text-lg font-bold uppercase leading-tight tracking-[0.08em] text-soul md:text-xl">
+            <h3 className="mt-2 font-display text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] text-soul [text-shadow:0_0_28px_rgba(168,85,247,0.4)] md:text-3xl">
               {pick(schedule.title)}
             </h3>
           </div>
@@ -250,16 +265,16 @@ function ScheduleModal({
             type="button"
             onClick={onClose}
             aria-label="Close schedule"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
           >
-            <CloseIcon size={16} />
+            <CloseIcon size={18} />
           </button>
         </div>
 
         {/* one card per fixture — a framed date/time panel beside the matchup */}
-        <div className="modal-scroll overflow-y-auto px-5">
+        <div className="modal-scroll overflow-y-auto px-6 md:px-8">
           {schedule.entries.length ? (
-            <ul className="space-y-2.5 py-5">
+            <ul className="grid gap-3 py-6 sm:grid-cols-2">
               {schedule.entries.map((entry) => {
                 const { date, time } = scheduleParts(entry, lang);
                 const entryBo = cleanBo(entry.bo);
@@ -284,6 +299,11 @@ function ScheduleModal({
 
                     {/* matchup zone */}
                     <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 px-4 py-3">
+                      {entry.tournament && pick(entry.tournament) && (
+                        <p className="keep-latin break-words font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amethyst">
+                          {pick(entry.tournament)}
+                        </p>
+                      )}
                       <p className="keep-latin break-words font-display text-base font-bold uppercase leading-tight tracking-[0.03em] text-soul">
                         NIIGHTMARE <span className="text-glow">vs</span> {entry.opponent || "TBA"}
                       </p>
@@ -349,6 +369,20 @@ export default function UpcomingMatch() {
   }, [match.date]);
 
   const showCountdown = status === "next" && cd != null && !cd.done;
+
+  // Finished fixture: show the result + final score instead of a countdown.
+  const showFinished = status === "finished";
+  const result = match.result;
+  const score = (match.score ?? "").trim();
+  const resultKey =
+    result === "loss" ? "sections.result_loss" : result === "draw" ? "sections.result_draw" : "sections.result_win";
+  const resultBadge =
+    result === "win"
+      ? "border-win/50 bg-win/10 text-win"
+      : result === "loss"
+        ? "border-loss/50 bg-loss/10 text-loss"
+        : "border-spectre/50 bg-spectre/10 text-spectre";
+  const scoreTone = result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-spectre";
 
   return (
     <section className="relative overflow-hidden border-y border-edge bg-[#0b0813]">
@@ -425,7 +459,7 @@ export default function UpcomingMatch() {
             {/* broadcast badge — says whether this fixture will be streamed.
                 Only for pre-live states; when it's actually live the WATCH LIVE
                 button below carries the call to action instead. */}
-            {status !== "live" &&
+            {status !== "live" && status !== "finished" &&
               (hasLiveIntent ? (
                 streamHref ? (
                   <a
@@ -627,6 +661,23 @@ export default function UpcomingMatch() {
                     </a>
                   )}
                 </>
+              )}
+            </div>
+          )}
+
+          {/* ── finished: result + final score (all breakpoints) ───────────── */}
+          {showFinished && (
+            <div className="flex flex-col items-center gap-4 border-t border-edge bg-white/[0.02] px-4 py-7 md:py-10">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-soul/70">
+                {t("sections.upcoming_final_score")}
+              </span>
+              <span className={`font-display text-5xl font-black tabular-nums leading-none md:text-7xl ${scoreTone} [text-shadow:0_0_34px_currentColor]`}>
+                {score || "—"}
+              </span>
+              {result && (
+                <span className={`inline-flex items-center rounded-full border px-5 py-1.5 font-display text-sm font-bold uppercase tracking-[0.26em] ${resultBadge}`}>
+                  {t(resultKey)}
+                </span>
               )}
             </div>
           )}

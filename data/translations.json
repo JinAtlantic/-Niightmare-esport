@@ -45,6 +45,11 @@
     "upcoming_status_next": { "en": "UP NEXT", "lo": "ການແຂ່ງຕໍ່ໄປ" },
     "upcoming_status_live": { "en": "LIVE NOW", "lo": "ກຳລັງແຂ່ງ" },
     "upcoming_status_practice": { "en": "IN SCRIMS", "lo": "ຊ່ວງຊ້ອມທີມ" },
+    "upcoming_status_finished": { "en": "FINISHED", "lo": "ຈົບແລ້ວ" },
+    "upcoming_final_score": { "en": "FINAL SCORE", "lo": "ຜົນຄະແນນ" },
+    "result_win": { "en": "WIN", "lo": "ຊະນະ" },
+    "result_loss": { "en": "LOSS", "lo": "ແພ້" },
+    "result_draw": { "en": "DRAW", "lo": "ເສີມກັນ" },
     "upcoming_practice_label": { "en": "TEAM PRACTICE", "lo": "ການຊ້ອມຂອງທີມ" },
     "watch_live": { "en": "WATCH LIVE", "lo": "ເບິ່ງຖ່າຍທອດສົດ" },
     "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" }

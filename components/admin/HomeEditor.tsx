@@ -180,15 +180,22 @@ const CONTACT_FIELDS: {
 const STATUS_OPTS = [
   { value: "next", label: "นัดต่อไป (Next)" },
   { value: "live", label: "กำลังแข่ง (Live)" },
+  { value: "finished", label: "จบแล้ว (Finished)" },
   { value: "practice", label: "ช่วงซ้อมทีม (Practice)" },
 ];
 const GAME_OPTS = [
   { value: "mlbb", label: "MLBB" },
   { value: "efootball", label: "eFootball" },
 ];
+const RESULT_OPTS = [
+  { value: "win", label: "ชนะ (Win)" },
+  { value: "loss", label: "แพ้ (Loss)" },
+  { value: "draw", label: "เสมอ (Draw)" },
+];
 const STATUS_TH: Record<string, string> = {
   next: "นัดต่อไป",
   live: "กำลังแข่ง",
+  finished: "จบแล้ว",
   practice: "ช่วงซ้อมทีม",
 };
 
@@ -202,6 +209,8 @@ const newScheduleEntry = (): MatchScheduleEntry => ({
   date: "",
   time: "",
   round: { en: "", lo: "" },
+  game: "mlbb",
+  tournament: { en: "", lo: "" },
 });
 
 function BilingualTextArea({
@@ -272,6 +281,41 @@ export default function HomeEditor() {
     });
 
   const isPractice = m.status === "practice";
+  const isFinished = m.status === "finished";
+
+  // One-tap advance: pull the first row of the schedule popup up into the home
+  // headline card (replacing the finished/current fixture) and drop it from the
+  // schedule list. Entries carry game/tournament so the promoted card is complete.
+  const nextEntry = matchSchedule.entries[0];
+  const promoteNext = () => {
+    if (!nextEntry) return;
+    if (!window.confirm(`ดึงแมตช์ถัดไป (${nextEntry.opponent || "TBA"}) ขึ้นมาแสดงแทนการ์ดปัจจุบัน?`)) return;
+    const iso = nextEntry.time
+      ? `${nextEntry.date}T${nextEntry.time}:00+07:00`
+      : nextEntry.date || "";
+    setData({
+      ...data,
+      upcomingMatch: {
+        status: "next",
+        date: iso,
+        game: nextEntry.game ?? m.game,
+        tournament: nextEntry.tournament ?? { en: "", lo: "" },
+        round: nextEntry.round,
+        bo: nextEntry.bo || undefined,
+        opponent: nextEntry.opponent,
+        opponentAbbr: nextEntry.opponentAbbr,
+        opponentLogo: nextEntry.opponentLogo,
+        hasLive: false,
+        streamUrl: undefined,
+        result: undefined,
+        score: undefined,
+      },
+      matchSchedule: resolveMatchSchedule({
+        ...matchSchedule,
+        entries: matchSchedule.entries.slice(1),
+      }),
+    });
+  };
   // "Has live" is a persisted intent (m.hasLive); an existing stream link also
   // counts so older fixtures keep showing the badge without re-toggling.
   const hasLive = Boolean(m.hasLive) || Boolean(m.streamUrl && m.streamUrl.trim());
@@ -443,6 +487,25 @@ export default function HomeEditor() {
               onChange={(v) => patch({ bo: v || undefined })}
               options={BO_SELECT_OPTIONS}
             />
+            {isFinished && (
+              <>
+                <SelectField
+                  label="ผลการแข่งขัน"
+                  value={m.result ?? "win"}
+                  onChange={(v) => patch({ result: v as UpcomingMatch["result"] })}
+                  options={RESULT_OPTS}
+                />
+                <TextField
+                  label="สกอร์ (เช่น 2-1)"
+                  value={m.score ?? ""}
+                  onChange={(v) => patch({ score: v || undefined })}
+                  placeholder="2-1"
+                />
+                <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
+                  สถานะ “จบแล้ว”: การ์ดหน้าแรกจะโชว์ผล ชนะ/แพ้ + สกอร์ พอพร้อมแข่งนัดถัดไป กดปุ่ม “⬇ ดึงแมตช์ถัดไป” ด้านล่าง (ในหัวข้อ Upcoming schedule)
+                </p>
+              </>
+            )}
             <TextField
               label={isPractice ? "ทีมที่ซ้อมด้วย (เว้นว่างได้)" : "ทีมคู่แข่ง"}
               value={m.opponent}
@@ -543,7 +606,19 @@ export default function HomeEditor() {
             <Button onClick={() => patchMatchSchedule({ enabled: true, entries: [...matchSchedule.entries, newScheduleEntry()] })}>
               + Add row
             </Button>
+            <Button variant="primary" onClick={promoteNext} disabled={!nextEntry}>
+              ⬇ ดึงแมตช์ถัดไป (แถวที่ 1) ขึ้นหน้าแรก
+            </Button>
           </div>
+          {nextEntry ? (
+            <p className="font-mono text-[11px] leading-relaxed text-ash">
+              กด “ดึงแมตช์ถัดไป” เพื่อเอา <span className="text-spectre">แถวที่ 1 ({nextEntry.opponent || "TBA"})</span> ขึ้นเป็นการ์ด “นัดต่อไป” หน้าแรก แล้วลบออกจากตารางนี้ให้อัตโนมัติ — อย่าลืมกดบันทึก
+            </p>
+          ) : (
+            <p className="font-mono text-[11px] leading-relaxed text-ash">
+              เพิ่มแถวตารางแข่งไว้ล่วงหน้า แล้วปุ่ม “ดึงแมตช์ถัดไป” จะเลื่อนแถวแรกขึ้นการ์ดหน้าแรกได้ในคลิกเดียว
+            </p>
+          )}
 
           <div className="space-y-3">
             {matchSchedule.entries.length === 0 && (
@@ -595,6 +670,37 @@ export default function HomeEditor() {
                     onChange={(bo) => patchScheduleEntry(entry.id, { bo })}
                     options={BO_SELECT_OPTIONS}
                   />
+                  <SelectField
+                    label="เกม (ใช้ตอนดึงขึ้นหน้าแรก)"
+                    value={entry.game ?? "mlbb"}
+                    onChange={(game) => patchScheduleEntry(entry.id, { game: game as MatchScheduleEntry["game"] })}
+                    options={GAME_OPTS}
+                  />
+                  <TextField
+                    label="ชื่อย่อคู่แข่ง (3 ตัว)"
+                    value={entry.opponentAbbr ?? ""}
+                    onChange={(v) =>
+                      patchScheduleEntry(entry.id, {
+                        opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined,
+                      })
+                    }
+                    placeholder="VVP"
+                  />
+                  <div className="md:col-span-2">
+                    <BilingualField
+                      label="งาน / ทัวร์นาเมนต์ (โชว์ใน popup + ตอนดึงขึ้นหน้าแรก)"
+                      value={entry.tournament ?? { en: "", lo: "" }}
+                      onChange={(tournament) => patchScheduleEntry(entry.id, { tournament })}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <ImageField
+                      label="โลโก้คู่แข่ง (เว้นว่างได้)"
+                      value={entry.opponentLogo}
+                      folder="teams"
+                      onChange={(p) => patchScheduleEntry(entry.id, { opponentLogo: p || undefined })}
+                    />
+                  </div>
                 </div>
               </div>
             ))}

@@ -113,7 +113,7 @@ export type GameId = "mlbb" | "efootball";
 export type MatchResult = "win" | "loss" | "draw";
 
 /** State of the headline fixture shown on the home page. */
-export type MatchStatus = "next" | "live" | "practice";
+export type MatchStatus = "next" | "live" | "practice" | "finished";
 
 export interface MatchVod {
   /** "series" = one video covers the whole match/series, "game" = one game only. */
@@ -147,6 +147,10 @@ export interface UpcomingMatch {
   /** Whether this fixture will be broadcast live. Drives the "Live broadcast"
    *  badge on the card even before a stream link is added. */
   hasLive?: boolean;
+  /** When status is "finished": the result of the match (win/loss/draw). */
+  result?: MatchResult;
+  /** When status is "finished": the final score, e.g. "2-1". */
+  score?: string;
 }
 
 export interface Match {

@@ -165,7 +165,7 @@ create table if not exists public.sponsors (
 -- ── UPCOMING MATCH (single row, home hero) ──────────────────────────────────
 create table if not exists public.upcoming_match (
   id              int primary key default 1 check (id = 1),
-  status          text,  -- 'next' | 'live' | 'practice'
+  status          text,  -- 'next' | 'live' | 'practice' | 'finished'
   match_date      timestamptz,
   game            text,
   tournament_en   text,
@@ -300,6 +300,9 @@ alter table public.upcoming_match add column if not exists bo text;
 -- Whether the upcoming fixture will be broadcast live (drives the card badge
 -- even before a stream link is set).
 alter table public.upcoming_match add column if not exists has_live boolean default false;
+-- Result + final score shown when the headline fixture is marked 'finished'.
+alter table public.upcoming_match add column if not exists result text;  -- 'win' | 'loss' | 'draw'
+alter table public.upcoming_match add column if not exists score text;   -- e.g. '2-1'
 -- Home "About Us" band copy (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists about_us jsonb;
 -- Matches-page "Niightmare Roadmap" popup (admin-editable), stored as one JSON blob.

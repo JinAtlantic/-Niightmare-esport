@@ -156,6 +156,8 @@ export async function writeSectionToSupabase(
         // column fails wholesale, unlike the graceful drop used for matches.
         if (await hasColumns(db, "upcoming_match", "bo")) upRow.bo = s(um.bo);
         if (await hasColumns(db, "upcoming_match", "has_live")) upRow.has_live = !!um.hasLive;
+        if (await hasColumns(db, "upcoming_match", "result")) upRow.result = s(um.result);
+        if (await hasColumns(db, "upcoming_match", "score")) upRow.score = s(um.score);
         const { error } = await db.from("upcoming_match").upsert(upRow);
         if (error) throw new Error(`upcoming_match: ${error.message}`);
       }

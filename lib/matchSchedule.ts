@@ -1,4 +1,4 @@
-import type { Bilingual } from "@/lib/types";
+import type { Bilingual, GameId } from "@/lib/types";
 import { cleanBo } from "@/lib/bestOf";
 
 export interface MatchScheduleEntry {
@@ -9,6 +9,13 @@ export interface MatchScheduleEntry {
   round: Bilingual;
   /** Optional series format label ("BO1" | "BO3" | "BO5" …). Empty = not shown. */
   bo?: string;
+  /** Optional game — lets this fixture be promoted to the home headline card. */
+  game?: GameId;
+  /** Optional tournament/event name — carried over when promoted to headline. */
+  tournament?: Bilingual;
+  /** Optional opponent short code / logo — carried over when promoted. */
+  opponentAbbr?: string;
+  opponentLogo?: string;
 }
 
 export interface MatchScheduleContent {
@@ -42,6 +49,10 @@ export function hasMatchSchedulePayload(input?: Partial<MatchScheduleContent> | 
 }
 
 function cleanEntry(entry: Partial<MatchScheduleEntry>, index: number): MatchScheduleEntry {
+  const tournament =
+    entry.tournament && (entry.tournament.en || entry.tournament.lo)
+      ? { en: entry.tournament.en ?? "", lo: entry.tournament.lo ?? "" }
+      : undefined;
   return {
     id: entry.id || `schedule-${Date.now()}-${index}`,
     opponent: entry.opponent ?? "",
@@ -52,6 +63,10 @@ function cleanEntry(entry: Partial<MatchScheduleEntry>, index: number): MatchSch
       lo: entry.round?.lo ?? "",
     },
     bo: cleanBo(entry.bo),
+    game: entry.game === "efootball" ? "efootball" : entry.game === "mlbb" ? "mlbb" : undefined,
+    tournament,
+    opponentAbbr: entry.opponentAbbr?.trim() || undefined,
+    opponentLogo: entry.opponentLogo?.trim() || undefined,
   };
 }
 

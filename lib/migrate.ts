@@ -245,6 +245,8 @@ export async function migrateAll(): Promise<MigrateResult> {
         opponent_abbr: s(um.opponentAbbr),
         stream_url: s(um.streamUrl),
         has_live: !!um.hasLive,
+        result: s(um.result),
+        score: s(um.score),
       });
       if (error) throw new Error(`upcoming_match: ${error.message}`);
     }
