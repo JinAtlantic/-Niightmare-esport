@@ -12,7 +12,8 @@ interface OpponentLogoProps {
   /** Opponent team name — used for the monogram fallback and the alt text. */
   name: string;
   /** Optional explicit short code (e.g. "ONC"). When set it overrides the
-   *  name-derived initials. Trimmed and capped at 3 characters. */
+   *  name-derived initials. Trimmed and capped at 4 characters (manual codes);
+   *  the auto fallback derived from the name stays 3. */
   abbr?: string;
   /** Box size in pixels. The fixed size keeps every row's logo the same
    *  height; object-contain lets any aspect ratio sit inside it cleanly. */
@@ -28,10 +29,11 @@ function initials(name: string): string {
   return words.map((w) => w[0]).join("").slice(0, 3).toUpperCase();
 }
 
-/** Resolve the monogram text: explicit abbr wins, else derived initials. */
+/** Resolve the monogram text: explicit abbr wins (up to 4 chars), else derived
+ *  initials (3). */
 export function opponentMonogram(name: string, abbr?: string): string {
   const code = abbr?.trim();
-  if (code) return code.slice(0, 3).toUpperCase();
+  if (code) return code.slice(0, 4).toUpperCase();
   return initials(name);
 }
 
@@ -39,8 +41,8 @@ export default function OpponentLogo({ src, name, abbr, size = 28, className = "
   const dimension = { width: size, height: size, minWidth: size };
   const mono = opponentMonogram(name, abbr);
   const safeSrc = safeImageSrc(src);
-  // 3-char codes need a smaller glyph to sit inside the same fixed box.
-  const fontSize = size * (mono.length >= 3 ? 0.32 : 0.42);
+  // Longer codes need a smaller glyph to sit inside the same fixed box.
+  const fontSize = size * (mono.length >= 4 ? 0.26 : mono.length >= 3 ? 0.32 : 0.42);
 
   return (
     <span

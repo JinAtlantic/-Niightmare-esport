@@ -5,6 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import OpponentLogo from "@/components/cards/OpponentLogo";
+import OpponentFlag from "@/components/cards/OpponentFlag";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
 import RoadmapModal from "@/components/sections/RoadmapModal";
@@ -493,12 +494,15 @@ function MatchCard({
 
         <div className={`flex min-w-0 flex-col items-center text-center ${compact ? "gap-1" : "gap-2"}`}>
           <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={mobileLogoSize} />
-          <span
-            className={`keep-latin break-words font-display font-bold uppercase leading-tight text-soul ${
-              compact ? "max-w-[88px] text-[10px]" : "max-w-[104px] text-xs"
-            }`}
-          >
-            {opponentName}
+          <span className="flex items-center justify-center gap-1">
+            <OpponentFlag name={opponentName} width={14} />
+            <span
+              className={`keep-latin break-words font-display font-bold uppercase leading-tight text-soul ${
+                compact ? "max-w-[88px] text-[10px]" : "max-w-[104px] text-xs"
+              }`}
+            >
+              {opponentName}
+            </span>
           </span>
         </div>
       </div>
@@ -544,6 +548,7 @@ function MatchCard({
           <span className={`keep-latin truncate text-center font-display font-bold uppercase leading-tight text-soul md:text-right ${compact ? "text-base md:text-lg" : "text-base md:text-2xl"}`}>
             {opponentName}
           </span>
+          <OpponentFlag name={opponentName} width={22} />
           <OpponentLogo src={match.opponentLogo} name={opponentName} abbr={match.opponentAbbr} size={desktopLogoSize} />
         </div>
       </div>

@@ -655,10 +655,10 @@ export default function HomeEditor() {
               placeholder="เช่น Vientiane Vipers"
             />
             <TextField
-              label="ชื่อย่อคู่แข่ง (3 ตัว — โชว์เมื่อไม่มีโลโก้)"
+              label="ชื่อย่อคู่แข่ง (สูงสุด 4 ตัว — โชว์เมื่อไม่มีโลโก้)"
               value={m.opponentAbbr ?? ""}
               onChange={(v) =>
-                patch({ opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined })
+                patch({ opponentAbbr: v.trim() ? v.trim().slice(0, 4).toUpperCase() : undefined })
               }
               placeholder="VVP"
             />
@@ -835,11 +835,11 @@ export default function HomeEditor() {
                     options={GAME_OPTS}
                   />
                   <TextField
-                    label="ชื่อย่อคู่แข่ง (3 ตัว)"
+                    label="ชื่อย่อคู่แข่ง (สูงสุด 4 ตัว)"
                     value={entry.opponentAbbr ?? ""}
                     onChange={(v) =>
                       patchScheduleEntry(entry.id, {
-                        opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined,
+                        opponentAbbr: v.trim() ? v.trim().slice(0, 4).toUpperCase() : undefined,
                       })
                     }
                     placeholder="VVP"

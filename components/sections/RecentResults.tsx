@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import SectionLabel from "@/components/ui/SectionLabel";
 import OpponentLogo from "@/components/cards/OpponentLogo";
+import OpponentFlag from "@/components/cards/OpponentFlag";
 import Reveal from "@/components/ui/Reveal";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
@@ -98,7 +99,8 @@ function ResultCard({ match }: { match: Match }) {
               {match.score}
             </span>
             <OpponentLogo src={match.opponentLogo} name={opponent} abbr={match.opponentAbbr} size={30} />
-            <span className="keep-latin ml-1 min-w-0 flex-1 truncate font-display text-[13px] font-bold uppercase leading-tight text-soul">
+            <OpponentFlag name={opponent} width={14} className="ml-1" />
+            <span className="keep-latin min-w-0 flex-1 truncate font-display text-[13px] font-bold uppercase leading-tight text-soul">
               {opponent}
             </span>
           </div>
@@ -137,7 +139,8 @@ function ResultCard({ match }: { match: Match }) {
           </div>
           <p className="mt-3 truncate text-center font-display text-sm font-bold uppercase tracking-[0.03em] text-soul">
             <span className="text-ash-dim">{pick(COPY.vs)} </span>
-            <span className="keep-latin">{opponent}</span>
+            <OpponentFlag name={opponent} width={16} className="mr-1 align-middle" />
+            <span className="keep-latin align-middle">{opponent}</span>
           </p>
           {round && (
             <p className="mt-1 truncate text-center font-mono text-[10px] uppercase tracking-[0.12em] text-ash-dim">

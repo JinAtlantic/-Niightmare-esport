@@ -518,9 +518,9 @@ export default function MatchesEditor() {
                 />
               </div>
               <TextField
-                label="Opponent abbr (3 ตัว — โชว์เมื่อไม่มีโลโก้)"
+                label="Opponent abbr (สูงสุด 4 ตัว — โชว์เมื่อไม่มีโลโก้)"
                 value={m.opponentAbbr ?? ""}
-                onChange={(v) => patchMatch(i, { opponentAbbr: v.trim() ? v.trim().slice(0, 3).toUpperCase() : undefined })}
+                onChange={(v) => patchMatch(i, { opponentAbbr: v.trim() ? v.trim().slice(0, 4).toUpperCase() : undefined })}
                 placeholder="DRG"
               />
               <div className="md:col-span-2">

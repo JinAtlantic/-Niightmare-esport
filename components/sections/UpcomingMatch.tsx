@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { CloseIcon, EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
+import OpponentFlag from "@/components/cards/OpponentFlag";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
@@ -136,11 +137,12 @@ function TeamSide({
         monoClass="text-2xl sm:text-3xl md:text-5xl"
       />
       <span
-        className={`keep-latin relative max-w-full break-words text-center font-display text-sm font-bold uppercase leading-tight tracking-[0.02em] sm:text-lg sm:tracking-[0.04em] md:text-3xl md:tracking-[0.07em] lg:text-4xl ${
+        className={`keep-latin relative flex max-w-full flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-center font-display text-sm font-bold uppercase leading-tight tracking-[0.02em] sm:text-lg sm:tracking-[0.04em] md:text-3xl md:tracking-[0.07em] lg:text-4xl ${
           home ? "text-soul" : "text-spectre"
         }`}
       >
-        {name}
+        {!home && <OpponentFlag name={name} width={26} />}
+        <span className="break-words">{name}</span>
       </span>
     </div>
   );
