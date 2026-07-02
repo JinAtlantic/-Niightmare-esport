@@ -21,9 +21,6 @@ export default function PushNotifications() {
   const [state, setState] = useState<State>("loading");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
-  // Small diagnostic code shown in the bar — lets us tell WHY the toggle is
-  // "off" on a device we can't debug directly (e.g. Android after an app kill).
-  const [reason, setReason] = useState("");
 
   const refresh = useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -39,7 +36,6 @@ export default function PushNotifications() {
       setState("denied");
       return;
     }
-    let why = "";
     try {
       // Read the subscription from the ACTIVE registration. getRegistration()
       // can resolve before the SW controls the page on a fresh load, so its
@@ -53,11 +49,10 @@ export default function PushNotifications() {
           ),
         ])) ?? (await navigator.serviceWorker.getRegistration());
       let sub = reg ? await reg.pushManager.getSubscription() : null;
-      if (sub) why = "had-sub";
-      // Android drops the subscription when the app is swiped away from recents.
-      // If permission is still granted we can re-subscribe SILENTLY (no prompt)
-      // so the toggle stays "on" across cold starts. Retry once — the push
-      // service can be cold for a moment right after the app reopens.
+      // Android/Samsung drop the subscription when the app is swiped away from
+      // recents. If permission is still granted we re-subscribe SILENTLY (no
+      // prompt) so the toggle stays "on" across cold starts. Retry once — the
+      // push service can be cold for a moment right after the app reopens.
       if (!sub && reg && Notification.permission === "granted") {
         for (let attempt = 0; attempt < 2 && !sub; attempt++) {
           if (attempt > 0) await new Promise((r) => setTimeout(r, 1200));
@@ -66,13 +61,11 @@ export default function PushNotifications() {
               userVisibleOnly: true,
               applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
             });
-            why = "resubscribed";
-          } catch (e) {
-            why = `resub-fail:${e instanceof Error ? e.name : "?"}`;
+          } catch {
+            /* couldn't re-subscribe this attempt */
           }
         }
       }
-      if (!sub && !why) why = reg ? `perm:${Notification.permission}` : "no-reg";
       if (sub) {
         setState("on");
         // Re-sync the live subscription so the server always has the current
@@ -86,11 +79,9 @@ export default function PushNotifications() {
       } else {
         setState("off");
       }
-    } catch (e) {
-      why = `err:${e instanceof Error ? e.name : "?"}`;
+    } catch {
       setState("off");
     }
-    setReason(why);
   }, []);
 
   useEffect(() => {
@@ -222,7 +213,6 @@ export default function PushNotifications() {
       )}
 
       {msg && <span className="text-ash">{msg}</span>}
-      {reason && <span className="text-ash-dim/70">· {reason}</span>}
     </div>
   );
 }
