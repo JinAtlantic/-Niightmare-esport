@@ -111,6 +111,12 @@ const BULK_ADVANCE: Partial<Record<TabId, { from: string; to: string; toLabel: s
   packing: { from: "packing", to: "shipped", toLabel: "ส่งแล้ว" },
 };
 
+// Tabs where grouping orders by courier helps packing/dispatch.
+const GROUP_TABS = new Set<TabId>(["paid", "packing", "shipped"]);
+
+/** Group key for an order's courier (blank couriers fold into "—"). */
+const courierKey = (o: OrderRow): string => (o.courier || "").trim() || "—";
+
 const SIZE_ORDER = ["S", "M", "L", "XL", "XXL", "3XL", "4XL"];
 
 /** Per-size quantities for one order (from the structured items, or by parsing the
@@ -168,6 +174,7 @@ export default function OrdersEditor() {
   const [busyId, setBusyId] = useState<string>("");
   const [bulkBusy, setBulkBusy] = useState(false);
   const [tab, setTab] = useState<TabId>("checking");
+  const [groupCourier, setGroupCourier] = useState(true);
   const [query, setQuery] = useState("");
   const [sortDir, setSortDir] = useState<"new" | "old">("new");
   const [copied, setCopied] = useState("");
@@ -388,6 +395,26 @@ export default function OrdersEditor() {
       return sortDir === "new" ? diff : -diff;
     });
 
+  // Courier grouping (จ่ายแล้ว / กำลังแพ็กของ / ส่งแล้ว): sort by courier so same-
+  // courier orders sit together, keeping the newest/oldest order within each group.
+  const grouping = groupCourier && GROUP_TABS.has(tab);
+  const ordered = grouping
+    ? [...visible].sort((a, b) => {
+        const t = new Date(orderTime(b)).getTime() - new Date(orderTime(a)).getTime();
+        return courierKey(a).localeCompare(courierKey(b)) || (sortDir === "new" ? t : -t);
+      })
+    : visible;
+  // Per-courier order + unit counts for the group headers.
+  const courierCount = new Map<string, number>();
+  const courierUnits = new Map<string, number>();
+  if (grouping) {
+    for (const o of ordered) {
+      const k = courierKey(o);
+      courierCount.set(k, (courierCount.get(k) ?? 0) + 1);
+      courierUnits.set(k, (courierUnits.get(k) ?? 0) + Number(o.quantity || 0));
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
@@ -466,6 +493,18 @@ export default function OrdersEditor() {
             </button>
           ))}
         </div>
+        {GROUP_TABS.has(tab) && (
+          <button
+            type="button"
+            onClick={() => setGroupCourier((v) => !v)}
+            title="จัดกลุ่มออเดอร์ตามบริษัทขนส่ง เพื่อแพ็กทีละเจ้า"
+            className={`rounded-md border px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
+              groupCourier ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+            }`}
+          >
+            {groupCourier ? "▦ จัดกลุ่มขนส่ง" : "จัดกลุ่มขนส่ง"}
+          </button>
+        )}
       </div>
 
       {error && <p className="font-mono text-[11px] text-loss">{error}</p>}
@@ -554,15 +593,27 @@ export default function OrdersEditor() {
       )}
 
       <div className="space-y-3">
-        {visible.map((o) => {
+        {ordered.map((o, idx) => {
           const opt = STATUS_OPTS.find((s) => s.value === o.status);
           const expired = isOrderExpired(o.created_at, o.status);
           const dup = dupCount(o);
           const next = NEXT_STEP[o.status];
           const showShipping = o.status === "verified" || o.status === "packing" || o.status === "shipped";
           const busy = busyId === o.id;
+          // First card of each courier group gets a header (count + total units).
+          const ck = courierKey(o);
+          const firstOfGroup = grouping && (idx === 0 || courierKey(ordered[idx - 1]) !== ck);
           return (
-            <Card key={o.id} className="space-y-3">
+            <React.Fragment key={o.id}>
+              {firstOfGroup && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amethyst/40 bg-amethyst/10 px-3 py-2">
+                  <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">🚚 {ck}</span>
+                  <span className="font-mono text-[11px] text-spectre">
+                    {courierCount.get(ck) ?? 0} ออเดอร์ · <span className="font-bold text-soul">{courierUnits.get(ck) ?? 0}</span> ตัว
+                  </span>
+                </div>
+              )}
+              <Card className="space-y-3">
               {/* Order ref + amount — the two fields the boss matches against the slip */}
               <div className="flex flex-wrap items-stretch justify-between gap-3">
                 <div className="min-w-0">
@@ -771,7 +822,8 @@ export default function OrdersEditor() {
                   ยกเลิก & ลบ
                 </button>
               </div>
-            </Card>
+              </Card>
+            </React.Fragment>
           );
         })}
       </div>
