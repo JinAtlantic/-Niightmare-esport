@@ -357,6 +357,34 @@ export default function MatchesEditor() {
     return matchesGame && matchesYear && matchesQuery;
   });
 
+  // Tournaments that exist only as matches (no metadata row) — e.g. results
+  // auto-added by "advance to next match", or tournaments whose metadata was
+  // deleted earlier. They still group as a tournament on the public /matches
+  // page but land in "Unassigned" here, so give each a one-click group delete.
+  const keyOfMatch = (mt: Match) => `${mt.game}:${norm(mt.tournament.en || mt.tournament.lo)}`;
+  const phantomTournamentGroups = (() => {
+    const map = new Map<string, { key: string; name: Bilingual; indexes: number[] }>();
+    for (const ref of unassignedMatches) {
+      if (!norm(ref.match.tournament.en || ref.match.tournament.lo)) continue; // truly standalone
+      const key = keyOfMatch(ref.match);
+      const g = map.get(key) ?? { key, name: ref.match.tournament, indexes: [] };
+      g.indexes.push(ref.index);
+      map.set(key, g);
+    }
+    const visibleKeys = new Set(
+      filteredUnassignedMatches
+        .filter((r) => norm(r.match.tournament.en || r.match.tournament.lo))
+        .map((r) => keyOfMatch(r.match))
+    );
+    return [...map.values()].filter((g) => visibleKeys.has(g.key));
+  })();
+  const deleteUnassignedTournament = (g: { name: Bilingual; indexes: number[] }) => {
+    const name = g.name.en || g.name.lo || "ทัวร์นาเมนต์นี้";
+    if (!window.confirm(`ลบทัวร์นาเมนต์ “${name}” และผลแมตช์ ${g.indexes.length} รายการ?\nจะหายจากหน้า /matches ด้วย (กู้คืนไม่ได้)`)) return;
+    const drop = new Set(g.indexes);
+    setMatches(matches.filter((_, i) => !drop.has(i)));
+  };
+
   const renderMatchEditor = (ref: MatchRef, options?: { compact?: boolean; showTournament?: boolean }) => {
     const { match: m, index: i } = ref;
     const compact = options?.compact ?? false;
@@ -1092,6 +1120,25 @@ export default function MatchesEditor() {
 
               {unassignedOpen && (
                 <div className="mt-4 space-y-3 border-t border-edge pt-4">
+                  {phantomTournamentGroups.length > 0 && (
+                    <div className="space-y-2 border border-loss/30 bg-loss/5 p-3">
+                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-loss">
+                        ทัวร์นาเมนต์ที่ยังโชว์บน /matches (ไม่มีข้อมูลกำกับ) — ลบทั้งกลุ่มได้เลย
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {phantomTournamentGroups.map((g) => (
+                          <Button
+                            key={g.key}
+                            variant="danger"
+                            onClick={() => deleteUnassignedTournament(g)}
+                            className="min-h-[32px] px-3 py-1 text-[11px]"
+                          >
+                            ลบ “{g.name.en || g.name.lo || "ไม่มีชื่อ"}” ({g.indexes.length})
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {filteredUnassignedMatches.length > 0 ? (
                     filteredUnassignedMatches.map((ref) => renderMatchEditor(ref, { showTournament: true }))
                   ) : (
