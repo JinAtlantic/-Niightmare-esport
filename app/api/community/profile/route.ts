@@ -23,10 +23,11 @@ function bearerToken(request: Request) {
 
 /**
  * Fan edits their own profile: display name + avatar. The name is filtered for
- * profanity (reused comment moderation); a new photo goes into pending_avatar_url
- * and is only shown publicly after an admin approves it (/api/admin/fan-avatars).
- * Removing a photo is instant. Runs with the service role, so RLS blocks fans
- * from writing fan_profiles directly and this is the only edit path.
+ * profanity (reused comment moderation). The avatar is gated in the browser by
+ * nsfwjs before it ever reaches here (see lib/nsfwCheck), so a photo that gets
+ * uploaded is published immediately — no admin approval step. Runs with the
+ * service role, so RLS blocks fans from writing fan_profiles directly and this
+ * is the only edit path.
  */
 export async function POST(request: Request) {
   if (!supabaseAdminEnabled) {
@@ -56,7 +57,6 @@ export async function POST(request: Request) {
   const file = form.get("avatar");
 
   const update: Record<string, unknown> = {};
-  let pendingReview = false;
 
   if (typeof displayNameRaw === "string") {
     const name = displayNameRaw.trim().replace(/\s+/g, " ");
@@ -84,9 +84,10 @@ export async function POST(request: Request) {
         bytes,
         file.type
       );
-      // Held for admin review — never written straight to the public avatar_url.
-      update.pending_avatar_url = url;
-      pendingReview = true;
+      // Already passed the browser NSFW gate — publish immediately, and clear any
+      // leftover pending photo from the old review flow.
+      update.avatar_url = url;
+      update.pending_avatar_url = null;
     } catch {
       return NextResponse.json({ error: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง" }, { status: 500 });
     }
@@ -109,5 +110,5 @@ export async function POST(request: Request) {
 
   const { data: profile } = await db.from("fan_profiles").select("*").eq("id", user.id).maybeSingle();
 
-  return NextResponse.json({ ok: true, pendingReview, profile: profile ?? null });
+  return NextResponse.json({ ok: true, profile: profile ?? null });
 }

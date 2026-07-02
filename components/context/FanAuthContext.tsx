@@ -6,6 +6,7 @@ import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { getSupabase } from "@/lib/supabase";
 import { publicFanAvatar, publicFanName } from "@/lib/safety";
+import { checkImageSafe } from "@/lib/nsfwCheck";
 
 export interface FanProfile {
   display_name: string | null;
@@ -54,16 +55,13 @@ const COPY = {
   save: { en: "Save profile", lo: "ບັນທຶກໂປຣໄຟລ໌" },
   saving: { en: "Saving...", lo: "ກຳລັງບັນທຶກ..." },
   signOut: { en: "Sign out", lo: "ອອກຈາກລະບົບ" },
-  pendingNote: {
-    en: "New photo is waiting for admin review — your current photo stays until it is approved.",
-    lo: "ຮູບໃໝ່ກຳລັງລໍຖ້າແອດມິນກວດ — ຮູບເກົ່າຍັງໃຊ້ຢູ່ຈົນກວ່າຈະຜ່ານ.",
+  checking: { en: "Checking image...", lo: "ກຳລັງກວດຮູບ..." },
+  unsafePhoto: {
+    en: "This image can't be used (it looks explicit). Please pick another.",
+    lo: "ຮູບນີ້ໃຊ້ບໍ່ໄດ້ (ອາດມີເນື້ອຫາບໍ່ເໝາະສົມ). ກະລຸນາເລືອກຮູບອື່ນ.",
   },
   noChange: { en: "No changes to save.", lo: "ບໍ່ມີການປ່ຽນແປງ." },
   savedName: { en: "Profile saved.", lo: "ບັນທຶກໂປຣໄຟລ໌ແລ້ວ." },
-  savedPending: {
-    en: "Saved. Your new photo is pending admin review.",
-    lo: "ບັນທຶກແລ້ວ. ຮູບໃໝ່ກຳລັງລໍຖ້າແອດມິນອະນຸມັດ.",
-  },
 };
 
 const FanAuthContext = createContext<FanAuthContextValue | null>(null);
@@ -99,6 +97,7 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removePhoto, setRemovePhoto] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [checkingImage, setCheckingImage] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [profileNotice, setProfileNotice] = useState("");
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -290,12 +289,30 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const onPickAvatar = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onPickAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = ""; // let the same file be re-picked after a rejection
     if (!file) return;
-    setAvatarFile(file);
-    setRemovePhoto(false);
-    setAvatarPreview(URL.createObjectURL(file));
+    setProfileError("");
+    setProfileNotice("");
+    setCheckingImage(true);
+    try {
+      const verdict = await checkImageSafe(file);
+      if (!verdict.safe) {
+        setProfileError(pick(COPY.unsafePhoto));
+        return;
+      }
+      setAvatarFile(file);
+      setRemovePhoto(false);
+      setAvatarPreview(URL.createObjectURL(file));
+    } catch {
+      // Model failed to load (offline/unsupported) — fail open so uploads still work.
+      setAvatarFile(file);
+      setRemovePhoto(false);
+      setAvatarPreview(URL.createObjectURL(file));
+    } finally {
+      setCheckingImage(false);
+    }
   };
 
   const saveProfile = async () => {
@@ -321,13 +338,13 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: form,
       });
-      const result = (await res.json().catch(() => ({}))) as { error?: string; pendingReview?: boolean };
+      const result = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(result.error || "Could not save profile.");
       await loadProfile(session.user.id);
       setAvatarFile(null);
       setAvatarPreview("");
       setRemovePhoto(false);
-      setProfileNotice(result.pendingReview ? pick(COPY.savedPending) : pick(COPY.savedName));
+      setProfileNotice(pick(COPY.savedName));
     } catch (e) {
       setProfileError(e instanceof Error ? e.message : "Could not save profile.");
     } finally {
@@ -467,9 +484,10 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="inline-flex min-h-[38px] items-center justify-center gap-2 border border-edge bg-void/60 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:border-amethyst"
+                  disabled={checkingImage}
+                  className="inline-flex min-h-[38px] items-center justify-center gap-2 border border-edge bg-void/60 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:border-amethyst disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Camera size={14} /> {pick(COPY.changePhoto)}
+                  <Camera size={14} /> {checkingImage ? pick(COPY.checking) : pick(COPY.changePhoto)}
                 </button>
                 {(previewAvatar || profile?.avatar_url) && (
                   <button
@@ -487,12 +505,6 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
               </div>
             </div>
 
-            {profile?.pending_avatar_url && (
-              <p className="mt-3 border border-amethyst/40 bg-amethyst/10 px-3 py-2 font-mono text-[10px] leading-relaxed text-glow">
-                {pick(COPY.pendingNote)}
-              </p>
-            )}
-
             <label className="mt-5 block font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-amethyst">
               {pick(COPY.nameLabel)}
             </label>
@@ -507,7 +519,7 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={saveProfile}
-              disabled={savingProfile}
+              disabled={savingProfile || checkingImage}
               className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:bg-amethyst/25 disabled:cursor-not-allowed disabled:opacity-45"
             >
               {savingProfile ? pick(COPY.saving) : pick(COPY.save)}
