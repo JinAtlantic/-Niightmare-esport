@@ -24,7 +24,7 @@ import {
   DiscordIcon,
 } from "@/components/ui/Icons";
 import RoadmapEditor from "@/components/admin/RoadmapEditor";
-import type { Match, UpcomingMatch } from "@/lib/types";
+import type { Match, Tournament, UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
 import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
@@ -356,10 +356,14 @@ export default function HomeEditor() {
     if (m.status === "finished") {
       try {
         const res = await fetch("/api/admin/data?file=matches");
-        const matchesData = (await res.json()) as { matches?: Match[] } & Record<string, unknown>;
+        const matchesData = (await res.json()) as {
+          matches?: Match[];
+          tournaments?: Tournament[];
+        } & Record<string, unknown>;
+        const matchDate = isoToBkkParts(m.date).date;
         const finishedMatch: Match = {
           id: `m-${Date.now().toString(36)}`,
-          date: isoToBkkParts(m.date).date,
+          date: matchDate,
           game: m.game,
           tournament: m.tournament,
           round: m.round ?? { en: "", lo: "" },
@@ -372,10 +376,46 @@ export default function HomeEditor() {
           vod: null,
           vods: [],
         };
+
+        // Make sure the finished match groups under its tournament in the admin
+        // Records view instead of falling into "Unassigned": that grouping is
+        // driven by the `tournaments` metadata rows (game + name). If none matches
+        // this fixture's tournament yet, create one and prepend it so the group
+        // shows at the very top with the match inside it.
+        const norm = (s?: string) => (s ?? "").trim().toLowerCase();
+        const tEn = norm(m.tournament?.en);
+        const tLo = norm(m.tournament?.lo);
+        const hasName = Boolean(tEn || tLo);
+        const existingTournaments = Array.isArray(matchesData.tournaments) ? matchesData.tournaments : [];
+        const tournamentExists = existingTournaments.some((t) => {
+          if (t.game !== m.game) return false;
+          const nEn = norm(t.name?.en);
+          const nLo = norm(t.name?.lo);
+          return Boolean((tEn && nEn && tEn === nEn) || (tLo && nLo && tLo === nLo));
+        });
+        const nextTournaments =
+          hasName && !tournamentExists
+            ? [
+                {
+                  id: `t-${Date.now().toString(36)}`,
+                  name: { en: m.tournament?.en ?? "", lo: m.tournament?.lo ?? "" },
+                  game: m.game,
+                  placement: { en: "", lo: "" },
+                  prize: "",
+                  season: matchDate.slice(0, 4) || String(new Date().getFullYear()),
+                } as Tournament,
+                ...existingTournaments,
+              ]
+            : existingTournaments;
+
         const put = await fetch("/api/admin/data?file=matches", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...matchesData, matches: [finishedMatch, ...(matchesData.matches ?? [])] }),
+          body: JSON.stringify({
+            ...matchesData,
+            tournaments: nextTournaments,
+            matches: [finishedMatch, ...(matchesData.matches ?? [])],
+          }),
         });
         if (!put.ok) throw new Error();
       } catch {

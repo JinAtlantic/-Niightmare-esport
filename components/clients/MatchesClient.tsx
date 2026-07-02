@@ -586,6 +586,11 @@ function TournamentRecordGroup({
   const wins = group.matches.filter((match) => match.result === "win").length;
   const losses = group.matches.filter((match) => match.result === "loss").length;
   const latestDate = group.latestDate ? formatDate(group.latestDate, lang) : "";
+  // Only show the placement/prize block when there is real content — auto-added
+  // results (and freshly created tournaments) have empty placement/prize, and an
+  // empty "PLACEMENT" box with no value looks broken.
+  const showPlacement = Boolean(tournament && (tournament.placement.en || tournament.placement.lo || "").trim());
+  const showPrize = Boolean(tournament && tournament.prize && tournament.prize.trim());
 
   return (
     <section
@@ -659,8 +664,9 @@ function TournamentRecordGroup({
           </div>
 
           <div className="flex min-w-0 flex-col gap-2 lg:items-end">
-            {tournament && (
+            {tournament && (showPlacement || showPrize) && (
               <div className="grid w-full min-w-0 gap-2 sm:grid-cols-2 lg:min-w-[390px]">
+                {showPlacement && (
                 <div className={`border bg-void/75 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-4 ${softBorder}`}>
                   <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash">
                     {pick(page.tournamentLabels.placement)}
@@ -669,7 +675,8 @@ function TournamentRecordGroup({
                     {pick(tournament.placement)}
                   </p>
                 </div>
-                {tournament.prize && tournament.prize.trim() && (
+                )}
+                {showPrize && (
                   <div className={`border bg-void/75 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-4 ${softBorder}`}>
                     <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash">
                       {pick(page.tournamentLabels.prize)}
