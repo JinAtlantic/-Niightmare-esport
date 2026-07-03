@@ -51,6 +51,17 @@ const NEXT_STEP: Record<string, { value: string; label: string } | undefined> = 
   packing: { value: "shipped", label: "ทำเครื่องหมายส่งแล้ว" },
 };
 
+// Coloured left blade per status — the at-a-glance scan signal down a column of
+// cards (! wins over the Card's flat edge border). Mirrors STATUS_OPTS tones.
+const STATUS_SPINE: Record<string, string> = {
+  awaiting_payment: "!border-l-ash",
+  paid_declared: "!border-l-glow",
+  verified: "!border-l-win",
+  packing: "!border-l-amethyst",
+  shipped: "!border-l-spectre",
+  cancelled: "!border-l-loss",
+};
+
 const normPhone = (p: string) => (p || "").replace(/\D/g, "");
 
 /** Human "x นาทีที่แล้ว" relative time (computed at render; admin refreshes to update). */
@@ -600,6 +611,9 @@ export default function OrdersEditor() {
           const next = NEXT_STEP[o.status];
           const showShipping = o.status === "verified" || o.status === "packing" || o.status === "shipped";
           const busy = busyId === o.id;
+          const spine = expired ? "!border-l-loss" : STATUS_SPINE[o.status] ?? "!border-l-edge-bright";
+          const statusTone = expired ? "text-loss" : opt?.tone ?? "text-ash";
+          const statusText = expired ? "หมดเวลา 24 ชม" : opt?.label ?? o.status;
           // First card of each courier group gets a header (count + total units).
           const ck = courierKey(o);
           const firstOfGroup = grouping && (idx === 0 || courierKey(ordered[idx - 1]) !== ck);
@@ -633,64 +647,68 @@ export default function OrdersEditor() {
                   </div>
                 );
               })()}
-              <Card className="space-y-3">
-              {/* Order ref + amount — the two fields the boss matches against the slip */}
-              <div className="flex flex-wrap items-stretch justify-between gap-3">
-                <div className="min-w-0">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">เลขออเดอร์</span>
+              <Card className={`space-y-3 !border-l-[3px] ${spine}`}>
+              {/* Eyebrow — status + recency, the first things scanned */}
+              <div className="flex items-center justify-between gap-3">
+                <span className={`inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] ${statusTone}`}>
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-current" />
+                  {statusText}
+                </span>
+                <span className="shrink-0 font-mono text-[11px] text-ash">{timeAgo(orderTime(o))}</span>
+              </div>
+
+              {/* Match keys — the two fields checked against the slip, each on its
+                  own full-width row so a long amount never wraps or clips. Tap to copy. */}
+              <div className="space-y-2.5">
+                <div>
+                  <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-ash">เลขออเดอร์</span>
                   {o.ref_code ? (
                     <button
                       type="button"
                       onClick={() => copy(o.ref_code || "", `ref-${o.id}`)}
                       title="คัดลอกเลขออเดอร์"
-                      className="keep-latin block font-display text-2xl font-black tracking-[0.12em] text-glow transition-colors hover:text-soul"
+                      className="keep-latin flex w-full items-baseline gap-2 font-display text-2xl font-black leading-tight tracking-[0.1em] text-glow transition-colors hover:text-soul"
                     >
-                      {o.ref_code} <span className="align-middle text-sm">⧉</span>
-                      {copied === `ref-${o.id}` && <span className="ml-1 align-middle font-mono text-[10px] text-win">คัดลอกแล้ว</span>}
+                      <span className="min-w-0 break-all text-left">{o.ref_code}</span>
+                      <span className="shrink-0 text-sm text-ash">⧉</span>
+                      {copied === `ref-${o.id}` && <span className="shrink-0 font-mono text-[10px] text-win">คัดลอกแล้ว</span>}
                     </button>
                   ) : (
                     <p className="font-mono text-sm text-ash-dim">—</p>
                   )}
-                  {dup > 1 && (
-                    <span className="mt-1 inline-block rounded border border-loss/50 bg-loss/10 px-1.5 py-0.5 font-mono text-[10px] text-loss">
-                      ⚠ อาจซ้ำ ({dup} ออเดอร์ เบอร์/บัญชีเดียวกัน)
-                    </span>
-                  )}
                 </div>
-                <div className="text-right">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดโอน</span>
+                <div className="border-t border-edge/70 pt-2.5">
+                  <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดโอน (ตรงกับสลิป)</span>
                   <button
                     type="button"
                     onClick={() => copy(String(o.total ?? ""), `amt-${o.id}`)}
                     title="คัดลอกยอด"
-                    className="block font-display text-2xl font-black tabular-nums text-soul transition-colors hover:text-glow"
+                    className="flex w-full items-baseline gap-2 font-display text-3xl font-black leading-tight tabular-nums tracking-tight text-soul transition-colors hover:text-glow"
                   >
-                    {fmt(o.total, o.currency)}
-                    {copied === `amt-${o.id}` && <span className="ml-1 align-middle font-mono text-[10px] text-win">คัดลอกแล้ว</span>}
+                    <span className="min-w-0 whitespace-nowrap text-left">{fmt(o.total, o.currency)}</span>
+                    <span className="shrink-0 text-sm text-ash">⧉</span>
+                    {copied === `amt-${o.id}` && <span className="shrink-0 font-mono text-[10px] text-win">คัดลอกแล้ว</span>}
                   </button>
                 </div>
+                {dup > 1 && (
+                  <span className="inline-flex items-center gap-1 rounded border border-loss/50 bg-loss/10 px-1.5 py-0.5 font-mono text-[10px] text-loss">
+                    ⚠ อาจซ้ำ · {dup} ออเดอร์ เบอร์/บัญชีเดียวกัน
+                  </span>
+                )}
               </div>
 
-              {/* what sizes were ordered + status */}
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-edge pt-2.5">
-                <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">{o.size}</span>
-                <span className={`font-mono text-[11px] ${expired ? "text-loss" : opt?.tone ?? "text-ash"}`}>
-                  {expired ? "รอชำระ · หมดเวลา 24 ชม" : opt?.label ?? o.status}
-                </span>
-              </div>
-
-              {/* total quantity on its own row (kept clear of the size list) */}
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">รวมการซื้อทั้งหมด</span>
-                <span className="font-display text-base font-bold text-soul">{o.quantity} ตัว</span>
-              </div>
-
-              {/* time of the last change — big and prominent */}
-              <div className="rounded-md border border-edge bg-void/40 px-3 py-2">
-                <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-ash">วันเวลา</span>
-                <span className="font-display text-lg font-bold tracking-wide text-soul">{fmtDate(orderTime(o))}</span>
-                <span className="ml-2 font-mono text-[11px] text-spectre">({timeAgo(orderTime(o))})</span>
-              </div>
+              {/* Fact ledger — fixed label gutter so every row reads straight down
+                  the value column and nothing falls out of line */}
+              <dl className="grid grid-cols-[4.75rem_1fr] items-baseline gap-x-3 gap-y-2 border-t border-edge pt-3 font-mono text-[13px]">
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-ash">ไซส์</dt>
+                <dd className="keep-latin font-bold text-soul">{o.size}</dd>
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-ash">รวม</dt>
+                <dd className="text-spectre">
+                  <span className="font-display text-base font-bold text-soul">{o.quantity}</span> ตัว
+                </dd>
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-ash">เวลาโอน</dt>
+                <dd className="text-soul">{fmtDate(orderTime(o))}</dd>
+              </dl>
 
               {/* payment slip — collapsed by default to keep the list short */}
               {o.slip_url && (
@@ -816,15 +834,17 @@ export default function OrdersEditor() {
                 </button>
               )}
 
-              {/* manual status set (dropdown — back or forward to any state) + permanent delete */}
-              <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
-                <label className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ash">
-                  เปลี่ยนสถานะ
+              {/* manual status set (dropdown — back or forward to any state) + permanent delete.
+                  Fixed 1fr|auto grid so the select + delete stay on one line, never ตกแถว. */}
+              <div className="border-t border-edge pt-3">
+                <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-ash">เปลี่ยนสถานะเอง</span>
+                <div className="grid grid-cols-[1fr_auto] items-center gap-2">
                   <select
                     value={o.status}
                     onChange={(e) => setStatus(o.id, e.target.value)}
                     disabled={busy}
-                    className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul focus:border-amethyst focus:outline-none disabled:opacity-50"
+                    aria-label="เปลี่ยนสถานะ"
+                    className="w-full rounded-md border border-edge bg-void/60 px-2.5 py-2 font-mono text-[12px] text-soul focus:border-amethyst focus:outline-none disabled:opacity-50"
                   >
                     {STATUS_OPTS.filter((s) => s.value !== "cancelled" || o.status === "cancelled").map((s) => (
                       <option key={s.value} value={s.value}>
@@ -832,15 +852,15 @@ export default function OrdersEditor() {
                       </option>
                     ))}
                   </select>
-                </label>
-                <button
-                  type="button"
-                  onClick={() => deleteOrder(o)}
-                  disabled={busy}
-                  className="ml-auto inline-flex min-h-[36px] items-center rounded-md border border-loss/50 bg-loss/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-loss transition-colors hover:bg-loss/20 disabled:opacity-50"
-                >
-                  ยกเลิก & ลบ
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteOrder(o)}
+                    disabled={busy}
+                    className="inline-flex min-h-[38px] shrink-0 items-center rounded-md border border-loss/50 bg-loss/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-loss transition-colors hover:bg-loss/20 disabled:opacity-50"
+                  >
+                    ยกเลิก & ลบ
+                  </button>
+                </div>
               </div>
               </Card>
             </React.Fragment>
