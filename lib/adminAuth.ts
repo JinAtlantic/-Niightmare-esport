@@ -1,3 +1,4 @@
+import "server-only";
 import crypto from "crypto";
 
 // These defaults ship in the public repo, so they must never guard a live
