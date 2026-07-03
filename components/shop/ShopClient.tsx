@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
+import ShopPushToggle from "@/components/shop/ShopPushToggle";
 import type { Lang } from "@/lib/types";
 import {
   resolveShop,
@@ -651,6 +652,9 @@ export default function ShopClient() {
         {/* ── MY ORDERS ──────────────────────────────────────────────── */}
         {tab === "myorders" && (
           <section>
+            {myOrders.length > 0 && (
+              <ShopPushToggle orderIds={myOrders.map((o) => o.id).filter((x): x is string => Boolean(x))} />
+            )}
             {myOrders.length === 0 ? (
               <div className="rounded-md border border-edge bg-crypt/40 p-10 text-center">
                 <p className="text-sm text-ash">{pick(COPY.noOrders)}</p>

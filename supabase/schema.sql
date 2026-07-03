@@ -305,6 +305,23 @@ create table if not exists public.push_subscriptions (
 );
 alter table public.push_subscriptions enable row level security;
 
+-- Buyer push subscriptions (no login): a device opts in to alerts for the order
+-- UUIDs it holds locally. Service-role only; the unguessable order id is the
+-- capability (same model as the public status endpoint). order_ids is refreshed
+-- whenever the buyer's My Orders list changes; lang picks the message language.
+create table if not exists public.shop_push_subscriptions (
+  id          uuid primary key default gen_random_uuid(),
+  endpoint    text unique not null,
+  p256dh      text not null,
+  auth        text not null,
+  order_ids   jsonb not null default '[]'::jsonb,
+  lang        text default 'en',
+  user_agent  text,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+alter table public.shop_push_subscriptions enable row level security;
+
 -- ============================================================================
 -- Row Level Security: public read everywhere, writes only via service role.
 -- Plain per-table statements (re-runnable) — read each as: turn on RLS, allow

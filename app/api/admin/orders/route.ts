@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { uploadToStorage } from "@/lib/supabaseStorage";
+import { sendPushForOrder } from "@/lib/push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -87,6 +88,18 @@ export async function PATCH(request: Request) {
     }
   }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Notify the buyer's opted-in devices on a positive milestone (verified /
+  // packing / shipped) — fires even when their site is closed. Best-effort:
+  // a no-op unless they enabled notifications, and never blocks the response.
+  if (body.status) {
+    try {
+      await sendPushForOrder(body.id, body.status);
+    } catch {
+      /* push is best-effort */
+    }
+  }
+
   return NextResponse.json({ ok: true, shippingImageUrl: shippingImageUrl ?? null });
 }
 

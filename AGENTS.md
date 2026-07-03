@@ -368,9 +368,27 @@ while the buyer has the site open. "Seen" is tracked in its own key
 across reloads; baseline falls back to the locally-stored status so a first run
 never re-announces history. The toast links to `/shop?view=orders`, which
 ShopClient reads on mount to open the **My Orders** tab. To change which statuses
-notify, edit the `NOTIFY` map. If background delivery (site closed) is ever wanted,
-upgrade this to real Web Push reusing the admin `lib/push.ts` infra (works on
-Android/desktop without install; iOS still needs Add-to-Home-Screen).
+notify, edit the `NOTIFY` map.
+
+**Buyer order notifications (real Web Push, site closed):** on top of the in-site
+toast, buyers can opt into OS push that fires even when the site is closed.
+`components/shop/ShopPushToggle.tsx` (mounted at the top of the **My Orders** tab in
+`ShopClient`, only when they have ≥1 order) registers `sw.js`, requests permission,
+subscribes with the shared VAPID key, and POSTs the subscription + the device's
+order UUIDs + lang to **`/api/shop/push/subscribe`** (public — the unguessable
+order id is the capability, same model as the status endpoint; upserts the
+**`shop_push_subscriptions`** table keyed on endpoint). When the admin PATCHes an
+order to a milestone, `app/api/admin/orders/route.ts` calls **`sendPushForOrder()`**
+(`lib/push.ts`) which pushes `verified`/`packing`/`shipped` copy (per-subscription
+`lang`) to every device that opted in for that order id, pruning dead endpoints.
+The toggle re-syncs `order_ids` whenever the buyer's My Orders list changes so a
+new order is covered. Reuses the **same VAPID keys + `public/sw.js`** as admin push
+(its `notificationclick` now routes by the payload `url`, so buyer alerts open
+`/shop?view=orders`). **No install needed on Android/desktop; iPhone must Add-to-Home-
+Screen first** (iOS Web Push limitation) — the toggle detects this and shows the
+instructions. Run its migration in Supabase (routes degrade to a 503 until then):
+`create table` for `shop_push_subscriptions` in `schema.sql`. To change the copy or
+which statuses push, edit `SHOP_NOTIFY` in `lib/push.ts`.
 
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js

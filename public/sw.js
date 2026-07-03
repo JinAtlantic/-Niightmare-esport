@@ -67,11 +67,23 @@ self.addEventListener("pushsubscriptionchange", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || "/admin";
+  // The payload carries the destination (admin alerts → /admin, buyer order
+  // alerts → /shop?view=orders). Prefer an already-open tab on that path; else
+  // reuse any tab; else open a new one.
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  const base = url.split("?")[0];
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-      for (const client of clients) {
-        if (client.url.includes("/admin") && "focus" in client) return client.focus();
+      const match = clients.find((c) => c.url.includes(base)) || clients[0];
+      if (match && "focus" in match) {
+        if ("navigate" in match && match.url.indexOf(url) === -1) {
+          try {
+            match.navigate(url);
+          } catch (e) {
+            /* cross-origin / not controllable — just focus */
+          }
+        }
+        return match.focus();
       }
       if (self.clients.openWindow) return self.clients.openWindow(url);
     })

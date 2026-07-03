@@ -69,3 +69,74 @@ export async function sendPushToAll(payload: PushPayload): Promise<{ sent: numbe
   if (dead.length) await db.from("push_subscriptions").delete().in("id", dead);
   return { sent, pruned: dead.length };
 }
+
+/* ── Buyer (shop) push ─────────────────────────────────────────────────────
+ * Sends order-milestone alerts to the buyers' devices (keyed on the order ids a
+ * device opted in for). Independent of the admin subscriptions above. */
+
+export type ShopMilestone = "verified" | "packing" | "shipped";
+
+const SHOP_NOTIFY: Record<ShopMilestone, { en: PushPayload; lo: PushPayload }> = {
+  verified: {
+    en: { title: "Payment confirmed ✓", body: "We're preparing your order for shipping." },
+    lo: { title: "ຢືນຢັນການຈ່າຍແລ້ວ ✓", body: "ພວກເຮົາກຳລັງກຽມຈັດສົ່ງອໍເດີຂອງທ່ານ." },
+  },
+  packing: {
+    en: { title: "Packing your order 📦", body: "We're packing your jersey — shipping soon." },
+    lo: { title: "ກຳລັງແພັກເຄື່ອງ 📦", body: "ພວກເຮົາກຳລັງແພັກເສື້ອ — ໃກ້ຈັດສົ່ງແລ້ວ." },
+  },
+  shipped: {
+    en: { title: "Your order shipped 🚚", body: "It's on the way — tap to see the parcel details." },
+    lo: { title: "ອໍເດີຂອງທ່ານຈັດສົ່ງແລ້ວ 🚚", body: "ກຳລັງຈັດສົ່ງ — ກົດເບິ່ງລາຍລະອຽດພັດສະດຸ." },
+  },
+};
+
+interface ShopSubRow {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  lang: string | null;
+}
+
+/** Push an order milestone to every device that opted in for this order id, in
+ *  each device's chosen language. Best-effort; prunes dead endpoints; never
+ *  throws (a missing table just yields 0/0). */
+export async function sendPushForOrder(
+  orderId: string,
+  status: string
+): Promise<{ sent: number; pruned: number }> {
+  const milestone = status as ShopMilestone;
+  if (!pushEnabled || !SHOP_NOTIFY[milestone] || !orderId) return { sent: 0, pruned: 0 };
+  const db = getSupabaseAdmin();
+  if (!db) return { sent: 0, pruned: 0 };
+  ensureConfigured();
+
+  const { data, error } = await db
+    .from("shop_push_subscriptions")
+    .select("id, endpoint, p256dh, auth, lang")
+    .contains("order_ids", [orderId]);
+  if (error || !data?.length) return { sent: 0, pruned: 0 };
+
+  const dead: string[] = [];
+  let sent = 0;
+  await Promise.all(
+    (data as ShopSubRow[]).map(async (s) => {
+      const copy = SHOP_NOTIFY[milestone][s.lang === "lo" ? "lo" : "en"];
+      const body = JSON.stringify({ ...copy, url: "/shop?view=orders", tag: `nm-shop-${orderId}` });
+      try {
+        await webpush.sendNotification(
+          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+          body
+        );
+        sent++;
+      } catch (e) {
+        const code = (e as { statusCode?: number }).statusCode;
+        if (code === 404 || code === 410) dead.push(s.id);
+      }
+    })
+  );
+
+  if (dead.length) await db.from("shop_push_subscriptions").delete().in("id", dead);
+  return { sent, pruned: dead.length };
+}
