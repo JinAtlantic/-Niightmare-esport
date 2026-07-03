@@ -16,7 +16,13 @@ interface BeforeInstallPromptEvent extends Event {
 
 const COPY = {
   title: { en: "Add NIIGHTMARE to your home screen", lo: "ເພີ່ມ NIIGHTMARE ລົງໜ້າຈໍ" },
-  bodyAndroid: { en: "Install it for one-tap access — opens like an app.", lo: "ຕິດຕັ້ງເພື່ອເຂົ້າໄດ້ໄວ — ເປີດຄືກັນກັບແອັບ." },
+  benefitNews: { en: "News & live match results, instantly", lo: "ຂ່າວ & ຜົນແຂ່ງສົດ ທັນທີ" },
+  benefitShop: { en: "Order team jerseys in one tap", lo: "ສັ່ງເສື້ອທີມໄດ້ໃນແຕະດຽວ" },
+  safetyLead: { en: "100% safe.", lo: "ປອດໄພ 100%." },
+  safetyRest: {
+    en: "It's just a shortcut, not an installed app — no download, no access to your phone.",
+    lo: "ເປັນພຽງທາງລັດ ບໍ່ແມ່ນແອັບຕິດຕັ້ງ — ບໍ່ດາວໂຫລດ ບໍ່ຂໍສິດເຂົ້າເຄື່ອງ.",
+  },
   install: { en: "Install", lo: "ຕິດຕັ້ງ" },
   later: { en: "Not now", lo: "ບໍ່ຕອນນີ້" },
   iosLead: { en: "Tap", lo: "ກົດ" },
@@ -123,39 +129,56 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" role="dialog" aria-label={pick(COPY.title)}>
-      <div className="mx-auto flex max-w-md items-start gap-3 rounded-md border border-edge-bright bg-crypt/95 p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.85)] backdrop-blur">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icon-192.png" alt="" className="h-12 w-12 shrink-0 rounded-md border border-edge" />
-
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-sm font-bold uppercase tracking-wide text-soul">{pick(COPY.title)}</p>
-
-          {isIos ? (
-            <p className="mt-0.5 font-mono text-[11px] leading-snug text-spectre">
-              {pick(COPY.iosLead)} <ShareGlyph /> <span className="text-glow">{pick(COPY.iosShare)}</span> {pick(COPY.iosThen)}
-            </p>
-          ) : (
-            <>
-              <p className="mt-0.5 font-mono text-[11px] leading-snug text-spectre">{pick(COPY.bodyAndroid)}</p>
-              <button
-                type="button"
-                onClick={install}
-                className="mt-2 inline-flex min-h-[36px] items-center justify-center rounded-md border border-amethyst bg-amethyst/20 px-4 py-1.5 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-all hover:bg-amethyst/30"
-              >
-                {pick(COPY.install)}
-              </button>
-            </>
-          )}
+      <div className="mx-auto max-w-md rounded-md border border-edge-bright bg-crypt/95 p-3.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.85)] backdrop-blur">
+        {/* header: app icon + title + close */}
+        <div className="flex items-start gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon-192.png" alt="" className="h-11 w-11 shrink-0 rounded-md border border-edge" />
+          <p className="min-w-0 flex-1 font-display text-sm font-bold uppercase tracking-wide text-soul">{pick(COPY.title)}</p>
+          <button
+            type="button"
+            onClick={close}
+            aria-label={pick(COPY.later)}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
+          >
+            ✕
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={close}
-          aria-label={pick(COPY.later)}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst hover:text-soul"
-        >
-          ✕
-        </button>
+        {/* why add it — the two things fans actually want */}
+        <ul className="mt-3 space-y-1.5">
+          <li className="flex items-center gap-2 font-mono text-[12px] text-spectre">
+            <span aria-hidden className="w-4 shrink-0 text-center text-glow">⚡</span>
+            {pick(COPY.benefitNews)}
+          </li>
+          <li className="flex items-center gap-2 font-mono text-[12px] text-spectre">
+            <span aria-hidden className="w-4 shrink-0 text-center text-glow">👕</span>
+            {pick(COPY.benefitShop)}
+          </li>
+        </ul>
+
+        {/* safety reassurance — a real reason, not a hollow guarantee */}
+        <p className="mt-3 flex items-start gap-2 rounded-md border border-win/30 bg-win/10 px-2.5 py-2 font-mono text-[11px] leading-snug text-spectre">
+          <span aria-hidden className="shrink-0 text-win">🔒</span>
+          <span>
+            <span className="font-bold text-win">{pick(COPY.safetyLead)}</span> {pick(COPY.safetyRest)}
+          </span>
+        </p>
+
+        {/* CTA: one-tap install on Android/desktop; Share-sheet steps on iOS */}
+        {isIos ? (
+          <p className="mt-3 font-mono text-[11px] leading-snug text-spectre">
+            {pick(COPY.iosLead)} <ShareGlyph /> <span className="text-glow">{pick(COPY.iosShare)}</span> {pick(COPY.iosThen)}
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={install}
+            className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center rounded-md border border-amethyst bg-amethyst/20 px-4 py-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-all hover:bg-amethyst/30"
+          >
+            {pick(COPY.install)}
+          </button>
+        )}
       </div>
     </div>
   );
