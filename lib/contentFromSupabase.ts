@@ -25,6 +25,15 @@ const bi = (en?: string | null, lo?: string | null) => ({ en: en ?? "", lo: lo ?
 const optBi = (en?: string | null, lo?: string | null) =>
   en || lo ? { en: en ?? "", lo: lo ?? "" } : undefined;
 
+/** Parse a jsonb `{ en, lo }` column into a Bilingual, or undefined if empty. */
+const jsonBi = (v: unknown) => {
+  if (!v || typeof v !== "object") return undefined;
+  const o = v as { en?: unknown; lo?: unknown };
+  const en = typeof o.en === "string" ? o.en : "";
+  const lo = typeof o.lo === "string" ? o.lo : "";
+  return en || lo ? { en, lo } : undefined;
+};
+
 function socials(r: Record<string, unknown>): Socials {
   const out: Socials = {};
   for (const k of ["facebook", "instagram", "youtube", "tiktok", "whatsapp"] as const) {
@@ -161,6 +170,11 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
         name: (r.name as string) ?? "",
         url: (r.url as string) ?? "#",
         logo: val(r.logo),
+        category: jsonBi(r.category),
+        description: jsonBi(r.description),
+        socials: (r.socials && typeof r.socials === "object" ? r.socials : undefined) as
+          | Record<string, string>
+          | undefined,
       })),
       tiers: ((tiers.data ?? []) as Record<string, unknown>[]).map((r) => ({
         id: String(r.id),

@@ -173,6 +173,25 @@ a sub-editor in `HomeEditor`. The component reads `useContent().site.<key>` and 
 back to the default — so the block renders before anything is ever saved.
 
 ## Recently redesigned
+**Sponsors page (2026-07-03):** `components/clients/SponsorsClient.tsx` was rebuilt to be
+**logo-first** — a compact tile grid (2 cols mobile → 4 lg) where the logo is the hero and
+each tile clicks open a redesigned popup. The popup now shows **real per-sponsor data**: a
+category chip, an "About" description, and a **Connect** row of social/contact icons (only
+the filled ones render, like a player card) + a Visit Website button. The old identical
+`PARTNER_POINTS` boilerplate modal is gone; missing description falls back to a clean generic
+line so it never looks empty. The value-prop cards + CTA band were kept but made **compact**
+(less mobile scroll). `Sponsor` gained `category`/`description` (Bilingual) + `socials`
+(`facebook/instagram/tiktok/youtube/whatsapp/phone`; website = `Sponsor.url`) — persisted as
+**three new jsonb columns on `sponsors`** (`sponsorRows` in `lib/migrate.ts`, read in
+`lib/contentFromSupabase.ts` via `jsonBi`), edited in **/admin → Sponsors**. New icons
+`GlobeIcon`/`PhoneIcon` in `components/ui/Icons.tsx`. **Run before saving sponsors in admin**
+(else the save 500s on the missing column):
+`alter table public.sponsors add column if not exists category jsonb;`
+`alter table public.sponsors add column if not exists description jsonb;`
+`alter table public.sponsors add column if not exists socials jsonb;`
+Sample category/description copy is seeded in `data/sponsors.json` (fallback only — live reads
+Supabase, so per-sponsor copy shows once the owner fills it in /admin or it's pushed to the DB).
+
 `components/sections/UpcomingMatch.tsx` — the home "UPCOMING MATCH" fixture card was
 rebuilt as a split-arena broadcast card (mobile-first: stacked → side-by-side on `md`,
 glassmorphism team zones, forged diamond VS on a blade seam, divided tale-of-the-tape

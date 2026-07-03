@@ -154,6 +154,9 @@ export function sponsorRows(sponsors: Sponsor[]) {
     name: s(sp.name),
     url: s(sp.url),
     logo: s(sp.logo),
+    category: sp.category ?? null,
+    description: sp.description ?? null,
+    socials: sp.socials ?? null,
     sort_order: i,
   }));
 }

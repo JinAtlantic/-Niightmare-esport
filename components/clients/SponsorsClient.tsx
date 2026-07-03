@@ -5,7 +5,16 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import { useContent } from "@/components/context/ContentContext";
-import { ArrowRightIcon } from "@/components/ui/Icons";
+import {
+  ArrowRightIcon,
+  FacebookIcon,
+  GlobeIcon,
+  InstagramIcon,
+  PhoneIcon,
+  TiktokIcon,
+  WhatsappIcon,
+  YoutubeIcon,
+} from "@/components/ui/Icons";
 import sponsorsSeed from "@/data/sponsors.json";
 import { safeHref, safeImageSrc, safeMailto } from "@/lib/safety";
 import type { Bilingual, Sponsor } from "@/lib/types";
@@ -44,36 +53,20 @@ const COPY = {
     lo: "ແບຣນທີ່ຢືນຢູ່ຫຼັງ NIIGHTMARE",
   },
   wallIntro: {
-    en: "A clean partner wall built for visibility first: logo, name, and a focused story behind every supporter.",
-    lo: "ພື້ນທີ່ພາກສ່ວນທີ່ເນັ້ນໃຫ້ເຫັນໂລໂກ້ ຊື່ ແລະເລື່ອງລາວຂອງຜູ້ສະໜັບສະໜູນແຕ່ລະລາຍຢ່າງຊັດເຈນ.",
+    en: "Tap any logo to see who they are and how to reach them.",
+    lo: "ແຕະໂລໂກ້ໃດກໍ່ໄດ້ ເພື່ອເບິ່ງວ່າເປັນໃຜ ແລະຊ່ອງທາງຕິດຕໍ່.",
   },
-  open: { en: "View Partner", lo: "ເບິ່ງພາກສ່ວນ" },
+  open: { en: "View", lo: "ເບິ່ງ" },
   official: { en: "Official NIIGHTMARE Partner", lo: "ພາກສ່ວນທາງການຂອງ NIIGHTMARE" },
   modalIntro: {
-    en: "This partner helps power the club's competitive journey, content presence, and fan-facing moments across the season.",
-    lo: "ພາກສ່ວນນີ້ຊ່ວຍຜັກດັນເສັ້ນທາງແຂ່ງຂັນ ຄອນເທນ ແລະຊ່ວງເວລາສຳຄັນຂອງທີມຕະຫຼອດຊີຊັນ.",
+    en: "An official partner helping power the club's competitive journey, content, and fan moments across the season.",
+    lo: "ພາກສ່ວນທາງການທີ່ຊ່ວຍຜັກດັນເສັ້ນທາງແຂ່ງຂັນ ຄອນເທນ ແລະຊ່ວງເວລາຂອງແຟນຄັບຕະຫຼອດຊີຊັນ.",
   },
-  spotlight: { en: "Partner Spotlight", lo: "ຈຸດເດັ່ນຂອງພາກສ່ວນ" },
-  impact: { en: "How They Support", lo: "ສະໜັບສະໜູນຢ່າງໃດ" },
-  fans: { en: "Why Fans Should Care", lo: "ເປັນຫຍັງແຟນຄວນສົນໃຈ" },
-  visit: { en: "Visit Sponsor", lo: "ໄປທີ່ Sponsor" },
+  about: { en: "About", lo: "ກ່ຽວກັບ" },
+  connect: { en: "Connect", lo: "ຊ່ອງທາງຕິດຕໍ່" },
+  visit: { en: "Visit Website", lo: "ໄປທີ່ເວັບໄຊ" },
   close: { en: "Close", lo: "ປິດ" },
-  noLink: { en: "Website link not set yet", lo: "ຍັງບໍ່ໄດ້ໃສ່ລິງກ໌ເວັບໄຊ" },
-};
-
-const PARTNER_POINTS = {
-  spotlight: {
-    en: "A trusted brand presence placed beside NIIGHTMARE on match days, community posts, and premium club surfaces.",
-    lo: "ແບຣນທີ່ປະກົດຄູ່ກັບ NIIGHTMARE ໃນວັນແຂ່ງ ໂພສຊຸມຊົນ ແລະພື້ນທີ່ພຣີມຽມຂອງສະໂມສອນ.",
-  },
-  impact: {
-    en: "Their support strengthens team operations, tournament preparation, creator output, and fan engagement.",
-    lo: "ການສະໜັບສະໜູນຊ່ວຍເສີມການບໍລິຫານທີມ ການກຽມແຂ່ງ ຄອນເທນ ແລະການເຊື່ອມຕໍ່ກັບແຟນ.",
-  },
-  fans: {
-    en: "Fans can discover the brands that invest directly in Lao esports and help NIIGHTMARE chase bigger stages.",
-    lo: "ແຟນສາມາດຮູ້ຈັກແບຣນທີ່ລົງທຶນກັບອີສະປອດລາວໂດຍກົງ ແລະຊ່ວຍໃຫ້ NIIGHTMARE ໄປສູ່ເວທີໃຫຍ່ກວ່າເກົ່າ.",
-  },
+  partners: { en: "Partners", lo: "ພາກສ່ວນ" },
 };
 
 function sponsorInitials(name: string) {
@@ -90,58 +83,111 @@ function isExternalLink(url: string | undefined) {
 function SponsorLogo({ sponsor, className = "" }: { sponsor: Sponsor; className?: string }) {
   const initials = sponsorInitials(sponsor.name);
   return (
-    <div className={`grid place-items-center overflow-hidden bg-void/70 ${className}`}>
+    <div className={`grid place-items-center overflow-hidden ${className}`}>
       {safeImageSrc(sponsor.logo) ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={safeImageSrc(sponsor.logo)} alt={`${sponsor.name} logo`} className="max-h-full max-w-full object-contain" />
+        <img
+          src={safeImageSrc(sponsor.logo)}
+          alt={`${sponsor.name} logo`}
+          className="max-h-full max-w-full object-contain"
+        />
       ) : (
-        <span className="keep-latin font-display text-2xl font-black tracking-wide text-glow">{initials}</span>
+        <span className="keep-latin font-display text-3xl font-black tracking-wide text-glow/90">
+          {initials}
+        </span>
       )}
     </div>
   );
 }
 
+/** Build the ordered, filtered list of contact channels for a sponsor. */
+function sponsorChannels(sponsor: Sponsor) {
+  const s = sponsor.socials ?? {};
+  const clean = (v?: string) => (v && v.trim() && v.trim() !== "#" ? v.trim() : undefined);
+
+  const waHref = (v: string) => {
+    const link = safeHref(v);
+    if (link) return link;
+    const digits = v.replace(/[^\d]/g, "");
+    return digits ? `https://wa.me/${digits}` : undefined;
+  };
+
+  const items: { key: string; label: string; href?: string; Icon: typeof GlobeIcon }[] = [
+    { key: "website", label: "Website", href: safeHref(sponsor.url), Icon: GlobeIcon },
+    { key: "facebook", label: "Facebook", href: safeHref(clean(s.facebook)), Icon: FacebookIcon },
+    { key: "instagram", label: "Instagram", href: safeHref(clean(s.instagram)), Icon: InstagramIcon },
+    { key: "tiktok", label: "TikTok", href: safeHref(clean(s.tiktok)), Icon: TiktokIcon },
+    { key: "youtube", label: "YouTube", href: safeHref(clean(s.youtube)), Icon: YoutubeIcon },
+    {
+      key: "whatsapp",
+      label: "WhatsApp",
+      href: clean(s.whatsapp) ? waHref(clean(s.whatsapp)!) : undefined,
+      Icon: WhatsappIcon,
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      href: clean(s.phone) ? `tel:${clean(s.phone)!.replace(/\s+/g, "")}` : undefined,
+      Icon: PhoneIcon,
+    },
+  ];
+  return items.filter((it) => Boolean(it.href) && it.href !== "#");
+}
+
 function SponsorCard({
   sponsor,
-  index,
   onOpen,
 }: {
   sponsor: Sponsor;
-  index: number;
   onOpen: (sponsor: Sponsor) => void;
 }) {
   const { pick } = useLanguage();
+  const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
   return (
     <button
       type="button"
       onClick={() => onOpen(sponsor)}
-      className="group relative min-h-[160px] overflow-hidden border border-edge bg-[linear-gradient(145deg,rgba(28,20,40,0.7),rgba(11,7,16,0.98))] p-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-[border-color,transform,background-color] duration-300 hover:-translate-y-1 hover:border-amethyst/65 hover:bg-crypt2/70"
+      className="group relative flex flex-col overflow-hidden border border-edge bg-[linear-gradient(155deg,rgba(28,20,40,0.7),rgba(11,7,16,0.98))] p-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-amethyst/60 md:p-5"
     >
-      <span aria-hidden className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <span aria-hidden className="absolute -right-16 -top-16 h-36 w-36 bg-amethyst/10 blur-3xl transition-opacity group-hover:opacity-100" />
-      <div className="relative flex items-start justify-between gap-3">
-        <SponsorLogo sponsor={sponsor} className="h-20 w-28 border border-edge-bright/50 p-3" />
-        <span className="font-mono text-[10px] font-semibold text-ash-dim">
-          {String(index + 1).padStart(2, "0")}
-        </span>
+      <span aria-hidden className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 bg-amethyst/10 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="relative grid h-20 place-items-center rounded-sm bg-void/40 px-3 transition-colors group-hover:bg-void/60 md:h-24">
+        <SponsorLogo sponsor={sponsor} className="h-full w-full" />
       </div>
-      <div className="relative mt-4">
-        <h3 className="keep-latin line-clamp-2 font-display text-base font-bold uppercase tracking-[0.08em] text-soul">
-          {sponsor.name}
-        </h3>
-        <p className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-amethyst">
+      <h3 className="keep-latin mt-3 line-clamp-1 font-display text-sm font-bold uppercase tracking-[0.06em] text-soul md:text-[15px]">
+        {sponsor.name}
+      </h3>
+      {category ? (
+        <p className="mt-1 line-clamp-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash-dim">
+          {pick(sponsor.category!)}
+        </p>
+      ) : (
+        <p className="mt-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-amethyst opacity-0 transition-opacity group-hover:opacity-100">
           {pick(COPY.open)}
         </p>
-      </div>
+      )}
     </button>
   );
 }
 
-function InfoBlock({ label, body }: { label: string; body: string }) {
+function SponsorSocialRow({ sponsor }: { sponsor: Sponsor }) {
+  const channels = sponsorChannels(sponsor);
+  if (channels.length === 0) return null;
   return (
-    <div className="border-l-2 border-amethyst/70 bg-crypt/45 px-4 py-3">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-amethyst">{label}</p>
-      <p className="mt-2 text-sm leading-relaxed text-ash">{body}</p>
+    <div className="flex flex-wrap items-center gap-2">
+      {channels.map(({ key, label, href, Icon }) => (
+        <a
+          key={key}
+          href={href}
+          target={href?.startsWith("tel:") ? undefined : "_blank"}
+          rel="noopener noreferrer"
+          aria-label={label}
+          title={label}
+          className="hover-glow grid h-11 w-11 place-items-center border border-edge bg-void/60 text-ash transition-colors hover:border-amethyst/70 hover:text-glow"
+        >
+          <Icon size={18} />
+        </a>
+      ))}
     </div>
   );
 }
@@ -149,11 +195,9 @@ function InfoBlock({ label, body }: { label: string; body: string }) {
 function SponsorModal({
   sponsor,
   onClose,
-  contactEmail,
 }: {
   sponsor: Sponsor | null;
   onClose: () => void;
-  contactEmail: string;
 }) {
   const { pick } = useLanguage();
   const linked = isExternalLink(sponsor?.url);
@@ -174,17 +218,20 @@ function SponsorModal({
 
   if (!sponsor) return null;
 
+  const hasDescription = sponsor.description && (sponsor.description.en || sponsor.description.lo);
+  const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label={sponsor.name}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/78 px-4 py-6 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto border border-edge-bright bg-[linear-gradient(145deg,rgba(22,16,31,0.98),rgba(11,7,16,0.99))] shadow-[0_0_48px_rgba(168,85,247,0.22)]">
+      <div className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto border border-edge-bright bg-[linear-gradient(150deg,rgba(22,16,31,0.98),rgba(11,7,16,0.99))] shadow-[0_0_54px_rgba(168,85,247,0.24)]">
         <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
         <button
           type="button"
@@ -194,56 +241,63 @@ function SponsorModal({
           {pick(COPY.close)}
         </button>
 
-        <div className="grid gap-0 md:grid-cols-[240px_1fr]">
-          <div className="border-b border-edge bg-void/55 p-6 md:border-b-0 md:border-r">
-            <SponsorLogo sponsor={sponsor} className="h-36 w-full border border-edge-bright/60 p-5" />
-            <p className="mt-5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
+        {/* Header: logo + name */}
+        <div className="flex flex-col items-center gap-4 border-b border-edge bg-void/45 px-6 pb-6 pt-8 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
+          <div className="grid h-28 w-40 shrink-0 place-items-center border border-edge-bright/60 bg-void/60 p-4">
+            <SponsorLogo sponsor={sponsor} className="h-full w-full" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
               {pick(COPY.official)}
             </p>
-            <h2 className="keep-latin mt-2 break-words font-display text-3xl font-black uppercase leading-none tracking-wide text-soul">
+            <h2 className="keep-latin mt-2 break-words font-display text-3xl font-black uppercase leading-none tracking-wide text-soul md:text-4xl">
               {sponsor.name}
             </h2>
-          </div>
-
-          <div className="p-6 md:p-7">
-            <SectionLabel>{pick(COPY.spotlight)}</SectionLabel>
-            <p className="mt-4 text-base leading-relaxed text-spectre">
-              {pick(COPY.modalIntro)}
-            </p>
-
-            <div className="mt-6 grid gap-3">
-              <InfoBlock label={pick(COPY.spotlight)} body={pick(PARTNER_POINTS.spotlight)} />
-              <InfoBlock label={pick(COPY.impact)} body={pick(PARTNER_POINTS.impact)} />
-              <InfoBlock label={pick(COPY.fans)} body={pick(PARTNER_POINTS.fans)} />
-            </div>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              {linked ? (
-                <a
-                  href={safeHref(sponsor.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-soul shadow-[0_0_24px_rgba(168,85,247,0.2)] transition-colors hover:bg-amethyst/25"
-                >
-                  {pick(COPY.visit)}
-                  <ArrowRightIcon size={16} />
-                </a>
-              ) : (
-                <span className="inline-flex min-h-[46px] items-center justify-center border border-edge bg-void/50 px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ash-dim">
-                  {pick(COPY.noLink)}
-                </span>
-              )}
-              <a
-                href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
-                className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-edge-bright bg-void/50 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
-                onClick={onClose}
-              >
-                {pick(FALLBACK_PAGE.ctaPrimary.label)}
-                <ArrowRightIcon size={16} />
-              </a>
-            </div>
+            {category && (
+              <span className="mt-3 inline-block border border-edge bg-crypt/60 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre">
+                {pick(sponsor.category!)}
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Body: description + connect */}
+        <div className="space-y-6 p-6 md:p-7">
+          <div>
+            <SectionLabel>{pick(COPY.about)}</SectionLabel>
+            <p className="mt-3 text-[15px] leading-relaxed text-spectre">
+              {hasDescription ? pick(sponsor.description!) : pick(COPY.modalIntro)}
+            </p>
+          </div>
+
+          <SponsorConnect sponsor={sponsor} linked={linked} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SponsorConnect({ sponsor, linked }: { sponsor: Sponsor; linked: boolean }) {
+  const { pick } = useLanguage();
+  const channels = sponsorChannels(sponsor);
+  if (channels.length === 0 && !linked) return null;
+
+  return (
+    <div className="border-t border-edge pt-6">
+      <SectionLabel>{pick(COPY.connect)}</SectionLabel>
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <SponsorSocialRow sponsor={sponsor} />
+        {linked && (
+          <a
+            href={safeHref(sponsor.url)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[46px] items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul shadow-[0_0_24px_rgba(168,85,247,0.2)] transition-colors hover:bg-amethyst/25"
+          >
+            {pick(COPY.visit)}
+            <ArrowRightIcon size={16} />
+          </a>
+        )}
       </div>
     </div>
   );
@@ -252,19 +306,18 @@ function SponsorModal({
 function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number }) {
   const { pick } = useLanguage();
   return (
-    <div className="group relative min-h-[250px] overflow-hidden border border-edge bg-[linear-gradient(145deg,rgba(28,20,40,0.78),rgba(11,7,16,0.98))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-amethyst/70 hover:shadow-[0_0_34px_rgba(168,85,247,0.22)]">
-      <span aria-hidden className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/75 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <span aria-hidden className="absolute -right-14 -top-14 h-36 w-36 bg-amethyst/10 blur-3xl transition-opacity group-hover:bg-glow/15" />
-      <div className="relative flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
-          Benefit {String(index + 1).padStart(2, "0")}
+    <div className="group relative overflow-hidden border border-edge bg-[linear-gradient(150deg,rgba(28,20,40,0.78),rgba(11,7,16,0.98))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amethyst/60 md:p-5">
+      <span aria-hidden className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="relative flex items-center gap-2">
+        <span aria-hidden className="h-2 w-6 skew-x-[-18deg] bg-amethyst/70 transition-colors group-hover:bg-glow" />
+        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-amethyst">
+          {String(index + 1).padStart(2, "0")}
         </span>
-        <span aria-hidden className="h-2 w-8 skew-x-[-18deg] bg-amethyst/65 transition-colors group-hover:bg-glow" />
       </div>
-      <h3 className="relative mt-5 font-display text-xl font-black uppercase leading-tight tracking-[0.08em] text-soul transition-colors group-hover:text-glow">
+      <h3 className="relative mt-3 font-display text-base font-black uppercase leading-tight tracking-[0.06em] text-soul transition-colors group-hover:text-glow md:text-lg">
         {pick(item.title)}
       </h3>
-      <p className="relative mt-4 text-sm font-medium leading-relaxed text-ash md:text-[15px]">
+      <p className="relative mt-2 text-[13px] font-medium leading-relaxed text-ash">
         {pick(item.body)}
       </p>
     </div>
@@ -288,100 +341,79 @@ export default function SponsorsClient() {
     <>
       <PageHeader title={pick(page.heroTitle)} subtitle={pick(page.heroSubtitle)} />
 
-      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
-        <div className="relative overflow-hidden border border-edge bg-[linear-gradient(135deg,rgba(28,20,40,0.72),rgba(11,7,16,0.98))] p-5 shadow-glow-soft md:p-8">
-          <span aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-glow/70 to-transparent" />
-          <div className="relative grid gap-7 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
-            <div>
-              <SectionLabel>{pick(COPY.wallLabel)}</SectionLabel>
-              <h2 className="mt-4 font-display text-3xl font-black uppercase leading-none tracking-wide text-soul md:text-5xl">
-                {pick(COPY.wallTitle)}
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-spectre md:text-base">
-                {pick(COPY.wallIntro)}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 border border-edge bg-void/55">
-              <div className="border-r border-edge px-4 py-3">
-                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
-                  {pick(page.partnersLabel)}
-                </p>
-                <p className="mt-1 font-display text-2xl font-bold text-glow">{sponsorCount}</p>
-              </div>
-              <div className="px-4 py-3">
-                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ash-dim">
-                  {pick(COPY.official)}
-                </p>
-                <p className="mt-1 font-display text-lg font-bold uppercase text-spectre">
-                  NIIGHTMARE
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <SectionLabel>{pick(page.partnersLabel)}</SectionLabel>
-              <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
-                {pick(COPY.wallTitle)}
-              </h2>
-            </div>
-            <p className="max-w-md text-sm leading-relaxed text-ash md:text-right">
+      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
+        {/* Partner wall — logo first */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <SectionLabel>{pick(COPY.wallLabel)}</SectionLabel>
+            <h2 className="mt-3 font-display text-2xl font-black uppercase leading-none tracking-wide text-soul md:text-4xl">
+              {pick(COPY.wallTitle)}
+            </h2>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-ash">
               {pick(COPY.wallIntro)}
             </p>
           </div>
-          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {data.sponsors.map((sponsor, index) => (
-              <SponsorCard key={sponsor.id} sponsor={sponsor} index={index} onOpen={setActiveSponsor} />
-            ))}
-          </div>
+          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.18em] text-ash-dim">
+            <span className="font-display text-2xl font-bold text-glow">{sponsorCount}</span>{" "}
+            {pick(COPY.partners)}
+          </p>
         </div>
 
-        <div className="mt-16">
+        <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+          {data.sponsors.map((sponsor) => (
+            <SponsorCard key={sponsor.id} sponsor={sponsor} onOpen={setActiveSponsor} />
+          ))}
+        </div>
+
+        {/* Benefits — compact */}
+        <div className="mt-12 md:mt-16">
           <SectionLabel>{pick(page.valueLabel)}</SectionLabel>
-          <h2 className="mt-3 max-w-3xl font-display text-2xl font-black uppercase leading-tight tracking-[0.08em] text-soul md:text-4xl">
+          <h2 className="mt-3 max-w-3xl font-display text-xl font-black uppercase leading-tight tracking-[0.06em] text-soul md:text-3xl">
             {pick(page.ctaTitle)}
           </h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
             {valueProps.slice(0, 4).map((item, index) => (
               <ValuePropCard key={item.id} item={item} index={index} />
             ))}
           </div>
         </div>
 
-        <div className="relative mt-16 overflow-hidden border border-edge-bright bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(28,20,40,0.86)_38%,rgba(11,7,16,0.98))] p-6 text-center shadow-[0_0_32px_rgba(168,85,247,0.16)] md:p-10">
+        {/* CTA — compact */}
+        <div className="relative mt-12 overflow-hidden border border-edge-bright bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(28,20,40,0.88)_42%,rgba(11,7,16,0.98))] p-5 shadow-[0_0_32px_rgba(168,85,247,0.16)] md:mt-16 md:p-8">
           <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
-          <h2 className="font-display text-2xl font-bold uppercase tracking-[0.12em] text-soul md:text-4xl">
-            {pick(page.ctaTitle)}
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ash md:text-base">
-            {pick(page.ctaBody)}
-          </p>
-          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <a
-              href={
-                page.ctaPrimary.href && page.ctaPrimary.href !== "/contact"
-                  ? safeHref(page.ctaPrimary.href)
-                  : safeMailto(contactEmail, "mailto:contact@niightmare.gg")
-              }
-              className="inline-flex min-h-[50px] items-center justify-center gap-2 border border-amethyst bg-amethyst/20 px-7 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-soul shadow-[0_0_30px_rgba(168,85,247,0.28)] transition-colors hover:bg-amethyst/30"
-            >
-              {pick(page.ctaPrimary.label)}
-              <ArrowRightIcon size={16} />
-            </a>
-            <a
-              href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
-              className="inline-flex min-h-[50px] items-center justify-center border border-edge-bright bg-void/45 px-7 py-3 font-mono text-xs font-bold tracking-[0.12em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
-            >
-              {contactEmail}
-            </a>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8">
+            <div className="max-w-xl">
+              <h2 className="font-display text-xl font-bold uppercase tracking-[0.1em] text-soul md:text-3xl">
+                {pick(page.ctaTitle)}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-ash md:text-[15px]">
+                {pick(page.ctaBody)}
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row md:flex-col lg:flex-row">
+              <a
+                href={
+                  page.ctaPrimary.href && page.ctaPrimary.href !== "/contact"
+                    ? safeHref(page.ctaPrimary.href)
+                    : safeMailto(contactEmail, "mailto:contact@niightmare.gg")
+                }
+                className="inline-flex min-h-[48px] items-center justify-center gap-2 whitespace-nowrap border border-amethyst bg-amethyst/20 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.26)] transition-colors hover:bg-amethyst/30"
+              >
+                {pick(page.ctaPrimary.label)}
+                <ArrowRightIcon size={16} />
+              </a>
+              <a
+                href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
+                className="inline-flex min-h-[48px] items-center justify-center whitespace-nowrap border border-edge-bright bg-void/45 px-6 py-3 font-mono text-xs font-bold tracking-[0.1em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
+              >
+                {contactEmail}
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      <SponsorModal sponsor={activeSponsor} onClose={() => setActiveSponsor(null)} contactEmail={contactEmail} />
+      <SponsorModal sponsor={activeSponsor} onClose={() => setActiveSponsor(null)} />
     </>
   );
 }

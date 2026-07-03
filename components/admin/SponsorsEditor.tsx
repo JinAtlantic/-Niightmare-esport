@@ -4,7 +4,16 @@ import React from "react";
 import { useData } from "@/components/admin/useData";
 import { BilingualField, Button, Card, Collapsible, ImageField, Label, Section, TextArea, TextField } from "@/components/admin/ui";
 import sponsorsSeed from "@/data/sponsors.json";
-import type { Bilingual, Sponsor, SponsorTier } from "@/lib/types";
+import type { Bilingual, Sponsor, SponsorSocials, SponsorTier } from "@/lib/types";
+
+const SOCIAL_FIELDS: { key: keyof SponsorSocials; label: string; placeholder: string }[] = [
+  { key: "facebook", label: "Facebook", placeholder: "https://facebook.com/..." },
+  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/..." },
+  { key: "tiktok", label: "TikTok", placeholder: "https://tiktok.com/@..." },
+  { key: "youtube", label: "YouTube", placeholder: "https://youtube.com/@..." },
+  { key: "whatsapp", label: "WhatsApp", placeholder: "https://wa.me/856..." },
+  { key: "phone", label: "เบอร์โทร", placeholder: "+856 20 ..." },
+];
 
 interface SponsorsPageCopy {
   heroTitle: Bilingual;
@@ -299,11 +308,39 @@ export default function SponsorsEditor() {
                 onChange={(logo) => patchSponsor(i, { logo })}
               />
               <TextField
-                label="ลิงก์"
+                label="เว็บไซต์ (Website)"
                 value={sponsor.url}
                 onChange={(url) => patchSponsor(i, { url })}
                 placeholder="https://... หรือ #"
               />
+              <BilingualField
+                label="หมวดหมู่ / ประเภทธุรกิจ"
+                value={sponsor.category ?? { en: "", lo: "" }}
+                onChange={(category) => patchSponsor(i, { category })}
+              />
+              <BilingualTextArea
+                label="คำอธิบาย (โชว์ใน popup)"
+                value={sponsor.description ?? { en: "", lo: "" }}
+                rows={3}
+                onChange={(description) => patchSponsor(i, { description })}
+              />
+              <Collapsible title="ช่องทาง Social / ติดต่อ" hint="ใส่เฉพาะที่มี — ช่องว่างจะไม่โชว์">
+                <div className="grid gap-2 md:grid-cols-2">
+                  {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
+                    <TextField
+                      key={key}
+                      label={label}
+                      value={sponsor.socials?.[key] ?? ""}
+                      onChange={(v) =>
+                        patchSponsor(i, {
+                          socials: { ...(sponsor.socials ?? {}), [key]: v },
+                        })
+                      }
+                      placeholder={placeholder}
+                    />
+                  ))}
+                </div>
+              </Collapsible>
             </Card>
           ))}
         </div>

@@ -186,12 +186,30 @@ export interface Tournament {
   season: string;
 }
 
+/** Contact / social channels shown in a sponsor's popup. Website = Sponsor.url. */
+export interface SponsorSocials {
+  facebook?: string;
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+  whatsapp?: string;
+  /** Phone number (rendered as a tel: link). */
+  phone?: string;
+}
+
 export interface Sponsor {
   id: string;
   name: string;
+  /** Sponsor website (also acts as the "Website" social channel). */
   url: string;
   /** Optional sponsor logo URL uploaded from admin. */
   logo?: string;
+  /** Short industry / category label, e.g. "Telecom" (bilingual). */
+  category?: Bilingual;
+  /** What the sponsor does — shown in the popup (bilingual). */
+  description?: Bilingual;
+  /** Contact / social links shown in the popup. */
+  socials?: SponsorSocials;
 }
 
 export interface SponsorTier {

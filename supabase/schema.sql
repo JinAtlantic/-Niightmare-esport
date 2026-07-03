@@ -156,11 +156,18 @@ create table if not exists public.sponsors (
   name            text,
   url             text,
   logo            text,
+  category        jsonb,   -- { en, lo } short industry label
+  description     jsonb,   -- { en, lo } what the sponsor does (popup)
+  socials         jsonb,   -- { facebook, instagram, tiktok, youtube, whatsapp, phone }
   tier_id         uuid references public.sponsor_tiers(id) on delete set null,
   sort_order      int     default 0,
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
 );
+-- Backfill columns for sponsors created before the popup redesign.
+alter table public.sponsors add column if not exists category    jsonb;
+alter table public.sponsors add column if not exists description jsonb;
+alter table public.sponsors add column if not exists socials     jsonb;
 
 -- ── UPCOMING MATCH (single row, home hero) ──────────────────────────────────
 create table if not exists public.upcoming_match (
