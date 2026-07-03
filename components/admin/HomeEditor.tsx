@@ -94,6 +94,15 @@ const STATUS_TH: Record<string, string> = {
   practice: "ช่วงซ้อมทีม",
 };
 
+/** Big touch-friendly status pill: violet when selected, rose for the live one. */
+function statusBtnClass(active: boolean, value: string): string {
+  const base =
+    "min-h-[46px] rounded-md border px-2 py-2 text-center font-display text-[11px] font-bold uppercase leading-tight tracking-[0.06em] transition-colors sm:text-xs";
+  if (!active) return `${base} border-edge bg-void/60 text-ash hover:border-edge-bright hover:text-soul`;
+  if (value === "live") return `${base} border-loss bg-loss/15 text-loss shadow-[0_0_18px_rgba(251,113,133,0.4)]`;
+  return `${base} border-amethyst bg-amethyst/15 text-soul shadow-glow-soft`;
+}
+
 // Fixtures are entered as Lao/Thai (+07:00) wall-clock. `match_date` is a
 // timestamptz, so Supabase returns it in UTC — naively slicing the string shifted
 // the time by 7h on every save (the "time changes by itself" bug). These helpers
@@ -236,88 +245,118 @@ export default function HomeEditor() {
   // +07:00 wall-clock date/time parts for the headline fixture's editors.
   const bkk = isoToBkkParts(m.date);
 
-  // One-tap advance: pull the first row of the schedule popup up into the home
-  // headline card (replacing the finished/current fixture) and drop it from the
-  // schedule list. Entries carry game/tournament so the promoted card is complete.
+  // Append the current finished headline fixture to the real matches list so it
+  // shows normally on Home "Recent Results" + /matches (grouped in its tournament,
+  // W/L colour, VOD slot). Returns true on success. Shared by "advance to next"
+  // and the always-available "record this result" button.
+  const appendFinishedToMatches = async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/admin/data?file=matches");
+      const matchesData = (await res.json()) as {
+        matches?: Match[];
+        tournaments?: Tournament[];
+      } & Record<string, unknown>;
+      const matchDate = isoToBkkParts(m.date).date;
+      const finishedMatch: Match = {
+        id: `m-${Date.now().toString(36)}`,
+        date: matchDate,
+        game: m.game,
+        tournament: m.tournament,
+        round: m.round ?? { en: "", lo: "" },
+        bo: m.bo,
+        opponent: m.opponent || "",
+        opponentLogo: m.opponentLogo,
+        opponentAbbr: m.opponentAbbr,
+        score: m.score || "",
+        result: m.result ?? "win",
+        vod: null,
+        vods: [],
+      };
+
+      // Make sure the finished match groups under its tournament in the admin
+      // Records view instead of falling into "Unassigned": that grouping is
+      // driven by the `tournaments` metadata rows (game + name). If none matches
+      // this fixture's tournament yet, create one and prepend it so the group
+      // shows at the very top with the match inside it.
+      const norm = (s?: string) => (s ?? "").trim().toLowerCase();
+      const tEn = norm(m.tournament?.en);
+      const tLo = norm(m.tournament?.lo);
+      const hasName = Boolean(tEn || tLo);
+      const existingTournaments = Array.isArray(matchesData.tournaments) ? matchesData.tournaments : [];
+      const tournamentExists = existingTournaments.some((t) => {
+        if (t.game !== m.game) return false;
+        const nEn = norm(t.name?.en);
+        const nLo = norm(t.name?.lo);
+        return Boolean((tEn && nEn && tEn === nEn) || (tLo && nLo && tLo === nLo));
+      });
+      const nextTournaments =
+        hasName && !tournamentExists
+          ? [
+              {
+                id: `t-${Date.now().toString(36)}`,
+                name: { en: m.tournament?.en ?? "", lo: m.tournament?.lo ?? "" },
+                game: m.game,
+                placement: { en: "", lo: "" },
+                prize: "",
+                season: matchDate.slice(0, 4) || String(new Date().getFullYear()),
+              } as Tournament,
+              ...existingTournaments,
+            ]
+          : existingTournaments;
+
+      const put = await fetch("/api/admin/data?file=matches", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...matchesData,
+          tournaments: nextTournaments,
+          matches: [finishedMatch, ...(matchesData.matches ?? [])],
+        }),
+      });
+      if (!put.ok) throw new Error();
+      return true;
+    } catch {
+      window.alert("เพิ่มผลแมตช์เข้าหน้า Match ไม่สำเร็จ — ลองใหม่ หรือเพิ่มเองในเมนู Matches");
+      return false;
+    }
+  };
+
+  // Record the just-finished result to /matches, then clear the headline card
+  // back to a blank "next" fixture (kept as the faded "last result"). Works even
+  // with NO next match queued — this is how the LAST match of the day gets onto
+  // /matches without needing a schedule row to advance into.
+  const finishToMatches = async () => {
+    if (m.status !== "finished") return;
+    if (!window.confirm(`บันทึกผล ${m.opponent || "แมตช์นี้"} (${m.score || "—"}) ลงหน้า Match แล้วเคลียร์การ์ด?`)) return;
+    if (!(await appendFinishedToMatches())) return;
+    setData({
+      ...data,
+      lastResult: { ...m, status: "finished" as const },
+      upcomingMatch: {
+        status: "next",
+        date: "",
+        game: m.game,
+        tournament: { en: "", lo: "" },
+        round: { en: "", lo: "" },
+        bo: undefined,
+        opponent: "",
+        opponentAbbr: undefined,
+        opponentLogo: undefined,
+        hasLive: false,
+        streamUrl: undefined,
+        result: undefined,
+        score: undefined,
+      },
+    });
+  };
+
+  // One-tap advance: pull the first schedule row up into the headline card
+  // (recording the current finished result first) and drop it from the queue.
   const nextEntry = matchSchedule.entries[0];
   const promoteNext = async () => {
     if (!nextEntry) return;
     if (!window.confirm(`ดึงแมตช์ถัดไป (${nextEntry.opponent || "TBA"}) ขึ้นมาแสดงแทนการ์ดปัจจุบัน?`)) return;
-
-    // If the current headline is a finished match, append it to the real matches
-    // list so it shows normally on Home "Recent Results" + /matches (grouped in
-    // its tournament, W/L colour, VOD slot) — like every other result. This
-    // saves immediately via the matches content API (separate from the site save).
-    if (m.status === "finished") {
-      try {
-        const res = await fetch("/api/admin/data?file=matches");
-        const matchesData = (await res.json()) as {
-          matches?: Match[];
-          tournaments?: Tournament[];
-        } & Record<string, unknown>;
-        const matchDate = isoToBkkParts(m.date).date;
-        const finishedMatch: Match = {
-          id: `m-${Date.now().toString(36)}`,
-          date: matchDate,
-          game: m.game,
-          tournament: m.tournament,
-          round: m.round ?? { en: "", lo: "" },
-          bo: m.bo,
-          opponent: m.opponent || "",
-          opponentLogo: m.opponentLogo,
-          opponentAbbr: m.opponentAbbr,
-          score: m.score || "",
-          result: m.result ?? "win",
-          vod: null,
-          vods: [],
-        };
-
-        // Make sure the finished match groups under its tournament in the admin
-        // Records view instead of falling into "Unassigned": that grouping is
-        // driven by the `tournaments` metadata rows (game + name). If none matches
-        // this fixture's tournament yet, create one and prepend it so the group
-        // shows at the very top with the match inside it.
-        const norm = (s?: string) => (s ?? "").trim().toLowerCase();
-        const tEn = norm(m.tournament?.en);
-        const tLo = norm(m.tournament?.lo);
-        const hasName = Boolean(tEn || tLo);
-        const existingTournaments = Array.isArray(matchesData.tournaments) ? matchesData.tournaments : [];
-        const tournamentExists = existingTournaments.some((t) => {
-          if (t.game !== m.game) return false;
-          const nEn = norm(t.name?.en);
-          const nLo = norm(t.name?.lo);
-          return Boolean((tEn && nEn && tEn === nEn) || (tLo && nLo && tLo === nLo));
-        });
-        const nextTournaments =
-          hasName && !tournamentExists
-            ? [
-                {
-                  id: `t-${Date.now().toString(36)}`,
-                  name: { en: m.tournament?.en ?? "", lo: m.tournament?.lo ?? "" },
-                  game: m.game,
-                  placement: { en: "", lo: "" },
-                  prize: "",
-                  season: matchDate.slice(0, 4) || String(new Date().getFullYear()),
-                } as Tournament,
-                ...existingTournaments,
-              ]
-            : existingTournaments;
-
-        const put = await fetch("/api/admin/data?file=matches", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...matchesData,
-            tournaments: nextTournaments,
-            matches: [finishedMatch, ...(matchesData.matches ?? [])],
-          }),
-        });
-        if (!put.ok) throw new Error();
-      } catch {
-        window.alert("เพิ่มผลแมตช์เข้าหน้า Match ไม่สำเร็จ — ลองใหม่ หรือเพิ่มเองในเมนู Matches");
-        return; // don't advance if the result wasn't recorded
-      }
-    }
+    if (m.status === "finished" && !(await appendFinishedToMatches())) return;
 
     const iso = nextEntry.time
       ? `${nextEntry.date}T${nextEntry.time}:00+07:00`
@@ -466,11 +505,27 @@ export default function HomeEditor() {
 
       <Section
         title="นัดต่อไป (หน้า Home)"
-        hint="การ์ดการแข่งขันที่โชว์เด่นอยู่หน้าแรก"
+        hint="การ์ดที่โชว์เด่นหน้าแรก — เลือกสถานะก่อน แล้วกรอกเฉพาะกล่องที่ขึ้นให้"
       >
-        <Card>
+        {/* 1) STATUS — pick first, big touch targets */}
+        <Card className="space-y-4">
+          <div>
+            <Label>1. สถานะการ์ด (เลือกก่อน)</Label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {STATUS_OPTS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => patch({ status: opt.value as UpcomingMatch["status"] })}
+                  className={statusBtnClass(m.status === opt.value, opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
           {/* live preview line */}
-          <div className="mb-4 flex items-center gap-3 border-b border-edge pb-4">
+          <div className="flex items-center gap-3 border-t border-edge pt-4">
             <OpponentLogo src="/logo.png" name="NM" size={32} />
             <span className="font-mono text-xs text-ash-dim">vs</span>
             <OpponentLogo src={m.opponentLogo} name={m.opponent || "?"} abbr={m.opponentAbbr} size={32} />
@@ -478,80 +533,76 @@ export default function HomeEditor() {
               {m.opponent || (isPractice ? "ซ้อมทีม" : "—")}
             </span>
           </div>
+        </Card>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <SelectField
-              label="สถานะ"
-              value={m.status}
-              onChange={(v) => patch({ status: v as UpcomingMatch["status"] })}
-              options={STATUS_OPTS}
-            />
-            <SelectField
-              label="เกม (งาน)"
-              value={m.game}
-              onChange={(v) => patch({ game: v as UpcomingMatch["game"] })}
-              options={GAME_OPTS}
-            />
-            <TextField
-              label="วันที่แข่ง (เวลาลาว/ไทย +07:00)"
-              type="date"
-              value={bkk.date}
-              onChange={(v) => patch({ date: bkkPartsToIso(v, bkk.time) })}
-            />
-            <TimeField24
-              label="เวลาแข่ง (24 ชม.)"
-              value={bkk.time}
-              onChange={(t) => patch({ date: bkkPartsToIso(bkk.date || todayBkkDate(), t) })}
-            />
-            <div className="md:col-span-2">
-              <BilingualField
-                label="งาน / ทัวร์นาเมนต์"
-                value={m.tournament}
-                onChange={(v) => patch({ tournament: v })}
+        {/* 2) LIVE score — only while a match is in progress (used often on match day) */}
+        {isLive && (
+          <Card className="mt-4 space-y-3 border-loss/50 bg-loss/[0.06]">
+            <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-loss">
+              🔴 สกอร์สด (กำลังแข่ง)
+            </h3>
+            <div className="max-w-[200px]">
+              <TextField
+                label="สกอร์ตอนนี้ (เช่น 1-0)"
+                value={m.score ?? ""}
+                onChange={(v) => patch({ score: v || undefined })}
+                placeholder="1-0"
               />
             </div>
-            <div className="md:col-span-2">
-              <BilingualField
-                label="รอบการแข่งขัน (เช่น รอบรองชนะเลิศ — เว้นว่างได้)"
-                value={m.round ?? { en: "", lo: "" }}
-                onChange={(v) => patch({ round: v })}
-              />
-            </div>
-            <SelectField
-              label="รูปแบบ Best-of (BO) — เว้นว่างได้"
-              value={m.bo ?? ""}
-              onChange={(v) => patch({ bo: v || undefined })}
-              options={BO_SELECT_OPTIONS}
-            />
-            {isFinished && (
+            <p className="font-mono text-[11px] leading-relaxed text-ash">
+              กรอกสกอร์แล้วกด <span className="text-soul">“บันทึกการเปลี่ยนแปลง”</span> (ปุ่มบนสุด) —
+              การ์ดหน้าแรกจะ<span className="text-win">โชว์สกอร์สดให้แฟนๆเห็นทันที ไม่ต้องรอจบแมตช์</span>
+              (หน้าที่เปิดค้างไว้อัปเดตเองทุก ~25 วินาที). กรอกสกอร์ใหม่แล้วบันทึกได้เรื่อยๆ ระหว่างแข่ง.
+            </p>
+          </Card>
+        )}
+
+        {/* 3) RESULT + actions — only when finished (record to /matches, advance) */}
+        {isFinished && (
+          <Card className="mt-4 space-y-4">
+            <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+              🏁 ผลการแข่งขัน (จบแล้ว)
+            </h3>
+            <div className="grid gap-3 md:grid-cols-2">
               <SelectField
-                label="ผลการแข่งขัน"
+                label="ผล"
                 value={m.result ?? "win"}
                 onChange={(v) => patch({ result: v as UpcomingMatch["result"] })}
                 options={RESULT_OPTS}
               />
-            )}
-            {(isFinished || isLive) && (
               <TextField
-                label={isLive ? "สกอร์ปัจจุบัน (เช่น 1-0)" : "สกอร์ (เช่น 2-1)"}
+                label="สกอร์ (เช่น 2-1)"
                 value={m.score ?? ""}
                 onChange={(v) => patch({ score: v || undefined })}
-                placeholder={isLive ? "1-0" : "2-1"}
+                placeholder="2-1"
               />
-            )}
-            {isLive && (
-              <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
-                สถานะ “กำลังแข่ง”: กรอกสกอร์ตอนนี้ (เช่น BO3 → <span className="text-soul">1-0</span>) แล้วกด “บันทึกการเปลี่ยนแปลง” —
-                การ์ดหน้าแรกจะ<span className="text-win"> โชว์สกอร์สดให้แฟนๆเห็นทันที ไม่ต้องรอจบแมตช์</span> (หน้าที่เปิดค้างไว้จะอัปเดตเองทุก ~25 วินาที).
-                กรอกสกอร์ใหม่แล้วบันทึกได้เรื่อยๆ ระหว่างแข่ง.
-              </p>
-            )}
-            {isFinished && (
-              <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
-                สถานะ “จบแล้ว”: การ์ดหน้าแรกจะโชว์ผล ชนะ/แพ้ + สกอร์ พอพร้อมแข่งนัดถัดไป กดปุ่ม “⬇ ดึงแมตช์ถัดไป” ด้านล่าง —
-                ระบบจะ<span className="text-win"> เพิ่มผลแมตช์นี้เข้าหน้า Match ให้อัตโนมัติ</span> (โผล่ปกติเหมือนแมตช์อื่นๆ ทั้งหน้าแรกและ /matches) แล้วดึงแมตช์ถัดไปขึ้นแทน
-              </p>
-            )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="primary" onClick={finishToMatches}>
+                ✅ บันทึกผลลงหน้า Match
+              </Button>
+              {nextEntry && (
+                <Button variant="ghost" onClick={promoteNext}>
+                  ⬇ บันทึกผล + ดึงแมตช์ถัดไปขึ้น
+                </Button>
+              )}
+            </div>
+            <p className="font-mono text-[11px] leading-relaxed text-ash">
+              <span className="text-soul">“บันทึกผลลงหน้า Match”</span> ใช้ได้เสมอ (แม้ไม่มีคู่ถัดไป) —
+              ผลจะไปโผล่ในหน้า Match + Recent Results แล้วเคลียร์การ์ดให้พร้อมตั้งแมตช์ใหม่.
+              {nextEntry
+                ? " เพราะมีคู่ถัดไปในตารางคิว ปุ่มที่สองจะบันทึกผล + ดึงคู่ถัดไปขึ้นให้ในคลิกเดียว."
+                : " จบวันแข่งก็ใช้ปุ่มนี้ดึงทีมสุดท้ายลงหน้า Match ได้เลย."}
+            </p>
+          </Card>
+        )}
+
+        {/* 4) คู่แข่ง */}
+        <Card className="mt-4 space-y-3">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+            👥 คู่แข่ง
+          </h3>
+          <div className="grid gap-3 md:grid-cols-2">
             <TextField
               label={isPractice ? "ทีมที่ซ้อมด้วย (เว้นว่างได้)" : "ทีมคู่แข่ง"}
               value={m.opponent}
@@ -566,83 +617,134 @@ export default function HomeEditor() {
               }
               placeholder="VVP"
             />
-            <div className="md:col-span-2">
-              <ImageField
-                label="โลโก้คู่แข่ง"
-                value={m.opponentLogo}
-                folder="teams"
-                onChange={(p) => patch({ opponentLogo: p || undefined })}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Label>🔴 ถ่ายทอดสด (Live)</Label>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={hasLive ? "primary" : "ghost"}
-                  onClick={() => patch({ hasLive: true })}
-                  className="min-h-[36px]"
-                >
-                  มีถ่ายทอดสด
-                </Button>
-                <Button
-                  variant={!hasLive ? "primary" : "ghost"}
-                  onClick={() => patch({ hasLive: false, streamUrl: undefined })}
-                  className="min-h-[36px]"
-                >
-                  ไม่มี
-                </Button>
-              </div>
-              {hasLive && (
-                <div className="mt-2">
-                  <TextField
-                    label="ลิงก์ไลฟ์สด (YouTube/Facebook) — เว้นว่างได้"
-                    value={m.streamUrl ?? ""}
-                    onChange={(v) => patch({ streamUrl: v || undefined })}
-                    placeholder="https://youtube.com/live/…"
-                  />
-                  <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
-                    เลือก “มีถ่ายทอดสด” แล้วการ์ดจะโชว์ป้าย “🔴 LIVE STREAM” ทันที (แม้ยังไม่ใส่ลิงก์).
-                    พอใส่ลิงก์ ป้ายจะกดไปดูช่องได้ และปุ่ม WATCH LIVE จะเด่นขึ้นเมื่อตั้งสถานะ = กำลังแข่ง
-                  </p>
-                </div>
-              )}
-            </div>
           </div>
-
+          <ImageField
+            label="โลโก้คู่แข่ง (เว้นว่างได้)"
+            value={m.opponentLogo}
+            folder="teams"
+            onChange={(p) => patch({ opponentLogo: p || undefined })}
+          />
+          <p className="font-mono text-[11px] leading-relaxed text-ash">
+            🇲🇳 ระบบใส่<span className="text-soul">ธงชาติให้อัตโนมัติ</span>จากชื่อทีม (ถ้ารู้จัก) — ไม่ต้องทำเอง
+          </p>
           {isPractice && (
-            <p className="mt-4 font-mono text-[11px] leading-relaxed text-ash">
-              โหมด “ช่วงซ้อมทีม”: ถ้าเว้นชื่อทีมคู่แข่งไว้ การ์ดจะโชว์เป็น “TEAM
-              PRACTICE” แทนการ vs ทีมอื่น
+            <p className="font-mono text-[11px] leading-relaxed text-ash">
+              โหมด “ช่วงซ้อมทีม”: ถ้าเว้นชื่อทีมคู่แข่งไว้ การ์ดจะโชว์เป็น “TEAM PRACTICE” แทนการ vs ทีมอื่น
             </p>
           )}
         </Card>
 
+        {/* 5) งาน / รอบ */}
+        <Card className="mt-4 space-y-3">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+            🏆 งาน / รอบ
+          </h3>
+          <SelectField
+            label="เกม"
+            value={m.game}
+            onChange={(v) => patch({ game: v as UpcomingMatch["game"] })}
+            options={GAME_OPTS}
+          />
+          <BilingualField
+            label="งาน / ทัวร์นาเมนต์"
+            value={m.tournament}
+            onChange={(v) => patch({ tournament: v })}
+          />
+          <BilingualField
+            label="รอบการแข่งขัน (เช่น รอบรองชนะเลิศ — เว้นว่างได้)"
+            value={m.round ?? { en: "", lo: "" }}
+            onChange={(v) => patch({ round: v })}
+          />
+          <SelectField
+            label="รูปแบบ Best-of (BO) — เว้นว่างได้"
+            value={m.bo ?? ""}
+            onChange={(v) => patch({ bo: v || undefined })}
+            options={BO_SELECT_OPTIONS}
+          />
+        </Card>
+
+        {/* 6) วัน–เวลา */}
+        <Card className="mt-4 space-y-3">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
+            📅 วัน–เวลาแข่ง <span className="text-ash">(เวลาลาว/ไทย +07:00)</span>
+          </h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            <TextField
+              label="วันที่แข่ง"
+              type="date"
+              value={bkk.date}
+              onChange={(v) => patch({ date: bkkPartsToIso(v, bkk.time) })}
+            />
+            <TimeField24
+              label="เวลาแข่ง (24 ชม.)"
+              value={bkk.time}
+              onChange={(t) => patch({ date: bkkPartsToIso(bkk.date || todayBkkDate(), t) })}
+            />
+          </div>
+        </Card>
+
+        {/* 7) ถ่ายทอดสด (used often) */}
+        <Card className="mt-4 space-y-2">
+          <Label>🔴 ถ่ายทอดสด (Live)</Label>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={hasLive ? "primary" : "ghost"}
+              onClick={() => patch({ hasLive: true })}
+              className="min-h-[36px]"
+            >
+              มีถ่ายทอดสด
+            </Button>
+            <Button
+              variant={!hasLive ? "primary" : "ghost"}
+              onClick={() => patch({ hasLive: false, streamUrl: undefined })}
+              className="min-h-[36px]"
+            >
+              ไม่มี
+            </Button>
+          </div>
+          {hasLive && (
+            <div className="mt-2">
+              <TextField
+                label="ลิงก์ไลฟ์สด (YouTube/Facebook) — เว้นว่างได้"
+                value={m.streamUrl ?? ""}
+                onChange={(v) => patch({ streamUrl: v || undefined })}
+                placeholder="https://youtube.com/live/…"
+              />
+              <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
+                เลือก “มีถ่ายทอดสด” แล้วการ์ดจะโชว์ป้าย “🔴 LIVE STREAM” ทันที (แม้ยังไม่ใส่ลิงก์).
+                พอใส่ลิงก์ ป้ายจะกดไปดูช่องได้ และปุ่ม WATCH LIVE จะเด่นขึ้นเมื่อตั้งสถานะ = กำลังแข่ง
+              </p>
+            </div>
+          )}
+        </Card>
+
+        {/* 8) ตารางคิวแมตช์ถัดไป (popup) */}
         <Card className="mt-4 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                Upcoming schedule popup
+                🗓️ ตารางคิวแมตช์ถัดไป (Popup)
               </h3>
               <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
-                Add NIIGHTMARE schedule rows manually, then enable the popup when ready.
+                เพิ่มคิวแมตช์ล่วงหน้าไว้ที่นี่ — พอแมตช์ปัจจุบัน “จบแล้ว” ปุ่ม “ดึงแมตช์ถัดไป” ในกล่องผล (ด้านบน) จะดึงแถวแรกขึ้นการ์ดหน้าแรกให้อัตโนมัติ
               </p>
             </div>
             <Button
               onClick={() => patchMatchSchedule({ enabled: !matchSchedule.enabled })}
               variant={matchSchedule.enabled ? "primary" : "ghost"}
             >
-              {matchSchedule.enabled ? "Popup enabled" : "Popup disabled"}
+              {matchSchedule.enabled ? "เปิด Popup อยู่" : "ปิด Popup อยู่"}
             </Button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <BilingualField
-              label="Button label"
+              label="ข้อความปุ่มเปิด popup"
               value={matchSchedule.buttonLabel}
               onChange={(buttonLabel) => patchMatchSchedule({ buttonLabel })}
             />
             <BilingualField
-              label="Popup title"
+              label="หัวข้อ popup"
               value={matchSchedule.title}
               onChange={(title) => patchMatchSchedule({ title })}
             />
@@ -650,16 +752,13 @@ export default function HomeEditor() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={() => patchMatchSchedule({ enabled: true, entries: [...matchSchedule.entries, newScheduleEntry()] })}>
-              + Add row
-            </Button>
-            <Button variant="primary" onClick={promoteNext} disabled={!nextEntry}>
-              ⬇ ดึงแมตช์ถัดไป (แถวที่ 1) ขึ้นหน้าแรก
+              + เพิ่มแถวคิว
             </Button>
             {data.lastResult && (
               <Button
                 variant="danger"
                 onClick={() => {
-                  if (window.confirm("ล้าง “ผลล่าสุด” (การ์ดสีจางๆ) ออกจากเว็บ?")) {
+                  if (window.confirm("ล้าง “ผลล่าสุด” (การ์ดสีจางๆ ใน popup) ออกจากเว็บ?")) {
                     setData({ ...data, lastResult: undefined });
                   }
                 }}
@@ -670,30 +769,21 @@ export default function HomeEditor() {
           </div>
           {data.lastResult && (
             <p className="font-mono text-[11px] leading-relaxed text-win">
-              ผลล่าสุดที่โชว์จางๆ: <span className="keep-latin text-soul">NIIGHTMARE {data.lastResult.score || ""} {data.lastResult.opponent || ""}</span> ({STATUS_TH.finished})
-            </p>
-          )}
-          {nextEntry ? (
-            <p className="font-mono text-[11px] leading-relaxed text-ash">
-              กด “ดึงแมตช์ถัดไป” เพื่อเอา <span className="text-spectre">แถวที่ 1 ({nextEntry.opponent || "TBA"})</span> ขึ้นเป็นการ์ด “นัดต่อไป” หน้าแรก แล้วลบออกจากตารางนี้ให้อัตโนมัติ — อย่าลืมกดบันทึก
-            </p>
-          ) : (
-            <p className="font-mono text-[11px] leading-relaxed text-ash">
-              เพิ่มแถวตารางแข่งไว้ล่วงหน้า แล้วปุ่ม “ดึงแมตช์ถัดไป” จะเลื่อนแถวแรกขึ้นการ์ดหน้าแรกได้ในคลิกเดียว
+              ผลล่าสุดที่โชว์จางๆ ใน popup: <span className="keep-latin text-soul">NIIGHTMARE {data.lastResult.score || ""} {data.lastResult.opponent || ""}</span> ({STATUS_TH.finished})
             </p>
           )}
 
           <div className="space-y-3">
             {matchSchedule.entries.length === 0 && (
               <p className="border border-edge bg-void/50 p-4 font-mono text-[11px] text-ash">
-                No schedule rows yet.
+                ยังไม่มีคิวแมตช์ — กด “+ เพิ่มแถวคิว”
               </p>
             )}
             {matchSchedule.entries.map((entry, index) => (
               <div key={entry.id} className="border border-edge bg-void/50 p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-spectre">
-                    Row {index + 1}
+                    คิวที่ {index + 1}
                   </span>
                   <Button
                     variant="danger"
@@ -701,22 +791,22 @@ export default function HomeEditor() {
                       patchMatchSchedule({ entries: matchSchedule.entries.filter((item) => item.id !== entry.id) })
                     }
                   >
-                    Delete
+                    ลบ
                   </Button>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
                   <TextField
-                    label="Opponent"
+                    label="ทีมคู่แข่ง"
                     value={entry.opponent}
                     onChange={(opponent) => patchScheduleEntry(entry.id, { opponent })}
                   />
                   <BilingualField
-                    label="Round"
+                    label="รอบ"
                     value={entry.round}
                     onChange={(round) => patchScheduleEntry(entry.id, { round })}
                   />
                   <TextField
-                    label="Date"
+                    label="วันที่"
                     type="date"
                     value={entry.date}
                     onChange={(date) => patchScheduleEntry(entry.id, { date })}
@@ -727,7 +817,7 @@ export default function HomeEditor() {
                     onChange={(time) => patchScheduleEntry(entry.id, { time })}
                   />
                   <SelectField
-                    label="Best-of (BO)"
+                    label="รูปแบบ Best-of (BO)"
                     value={entry.bo ?? ""}
                     onChange={(bo) => patchScheduleEntry(entry.id, { bo })}
                     options={BO_SELECT_OPTIONS}
