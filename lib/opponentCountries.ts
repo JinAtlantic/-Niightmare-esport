@@ -30,6 +30,7 @@ const COUNTRY_BY_TEAM: Record<string, string> = {
   "fire flux esports": "TR",
   "ulfhednar": "TR",
   "the huns esport": "MN",
+  "the mongolz": "MN",
   "dianfengyaoguai": "CN",
 
   // ── Vietnam ────────────────────────────────────────────────────
