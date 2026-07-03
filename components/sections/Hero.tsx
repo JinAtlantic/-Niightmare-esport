@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
-import TeamSupport from "@/components/community/TeamSupport";
 import { ArrowRightIcon } from "@/components/ui/Icons";
 
 const COPY = {
@@ -88,9 +87,6 @@ export default function Hero() {
                   className="relative transition-transform duration-300 group-hover:translate-x-1.5"
                 />
               </Link>
-
-              {/* quiet support utility row — matches the Shop button width */}
-              <TeamSupport />
             </div>
           </div>
         </div>

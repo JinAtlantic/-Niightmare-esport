@@ -5,7 +5,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { LanguageProvider } from "@/components/context/LanguageContext";
 import { ContentProvider, type Content } from "@/components/context/ContentContext";
-import { FanAuthProvider } from "@/components/context/FanAuthContext";
 import Chrome from "@/components/layout/Chrome";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema, SITE_URL } from "@/lib/seo";
@@ -163,9 +162,7 @@ export default async function RootLayout({
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <LanguageProvider>
           <ContentProvider initial={initialContent}>
-            <FanAuthProvider>
-              <Chrome>{children}</Chrome>
-            </FanAuthProvider>
+            <Chrome>{children}</Chrome>
           </ContentProvider>
         </LanguageProvider>
         <Analytics />

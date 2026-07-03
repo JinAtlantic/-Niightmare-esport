@@ -213,12 +213,9 @@ phone/WhatsApp, courier dropdown with a free-text "Other", province/city/branch)
 **My Orders** (the buyer's saved orders from `localStorage`, with an empty state).
 Bilingual EN/Lao throughout.
 
-**Buying does NOT require sign-in** (decided against gating — manual slip verification is the
-real safeguard, so a login wall just costs conversions). Login is **optional**: if the visitor
-happens to be signed in via the app-wide **FanAuth** (`useFanAuth()` — Google + magic link,
-`FanAuthProvider` in `app/layout.tsx`), their email rides along as `userEmail` and is stored
-in `shop_orders.user_email` (order route drops it gracefully if the column is missing) and
-shown in /admin Orders under the card dropdown. Otherwise the field is just empty.
+**Buying does NOT require sign-in** — the site has **no user login at all** (manual slip
+verification is the real safeguard). "My Orders" is tracked locally in `localStorage` on the
+buyer's device under one base key; `shop_orders.user_email` is left empty.
 
 Order flow is **reserve → pay** (two `POST /api/shop/order` calls, distinguished by
 `body.intent`): **Order & pay** first prices server-side and inserts the order as
@@ -237,10 +234,8 @@ as a secondary channel with `SHOP_ORDER_EMAIL_NOTIFICATIONS=true`. The team veri
 Orders** with a live **24-hour countdown** + a **Pay now** button (reopens the popup for that
 order); past the window it's auto-removed from My Orders / displays as cancelled
 (`isOrderExpired` / `payWindowRemaining` in `lib/shop.ts`, `SHOP_PAYMENT_WINDOW_HOURS = 24`).
-My Orders is **account-scoped**: the localStorage key is `nm-shop-orders` for guests and
-`nm-shop-orders::<email>` when signed in (FanAuth), so a shared device keeps each Google
-account's list separate and signing out hides them — login is still NOT required.
-Because My Orders is otherwise localStorage-only, it now **syncs live status from the
+My Orders uses a single localStorage key `nm-shop-orders` on the device (no login, so it is
+not account-scoped). Because My Orders is otherwise localStorage-only, it now **syncs live status from the
 server** when the buyer opens the tab: `GET /api/shop/order/status?ids=<uuid,…>` (public,
 returns only `status` + `shippingImageUrl` by UUID) merges the latest into localStorage.
 This is what makes admin status changes visible to the buyer — badges map

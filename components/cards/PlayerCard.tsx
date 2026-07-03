@@ -4,7 +4,6 @@ import React, { useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/context/LanguageContext";
-import PlayerInteractions from "@/components/community/PlayerInteractions";
 import { countryFlagImageUrl } from "@/lib/personProfile";
 import type { Player } from "@/lib/types";
 
@@ -131,7 +130,6 @@ export default function PlayerCard({ player }: { player: Player }) {
             </p>
           </div>
         </div>
-        <PlayerInteractions player={player} />
       </article>
 
       {armed && (

@@ -60,20 +60,6 @@ const nextConfig = {
   // Don't advertise the framework.
   poweredByHeader: false,
   compress: true,
-  // TensorFlow.js + nsfwjs are huge and only run server-side (the avatar NSFW
-  // gate, lib/nsfwServer). They must NOT be bundled into the serverless function
-  // — webpack chokes on nsfwjs's default-model shards / the minifier crashes.
-  // Keep them as runtime requires from node_modules instead. (sharp is already
-  // externalised by Next automatically.)
-  serverExternalPackages: ["@tensorflow/tfjs", "nsfwjs"],
-  // The avatar NSFW gate (lib/nsfwServer) reads the model off disk with fs at
-  // runtime. Next's build tracer can't see a path built from process.cwd(), so
-  // without this the model files under public/nsfw-model would be left OUT of the
-  // serverless function bundle on Vercel and every avatar upload would 503. Force
-  // them into the /api/community/profile function's trace.
-  outputFileTracingIncludes: {
-    "/api/community/profile": ["./public/nsfw-model/**"],
-  },
   // Strip console.* in production builds (keep error/warn for observability).
   compiler: {
     removeConsole:

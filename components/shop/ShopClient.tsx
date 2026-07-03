@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
-import { useFanAuth } from "@/components/context/FanAuthContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import type { Lang } from "@/lib/types";
 import {
@@ -111,17 +110,11 @@ function formatRemaining(ms: number, lang: Lang): string {
 export default function ShopClient() {
   const { pick, lang } = useLanguage();
   const { site } = useContent();
-  // Login is optional — buying doesn't require it; if the visitor happens to be
-  // signed in (fan zone), we attach their email to the order for the team.
-  const { session } = useFanAuth();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
 
-  // My Orders are scoped to the signed-in account, so on a shared device each
-  // person keeps their own list: signed-in orders live under a per-email key,
-  // signed-out (guest) orders under the base key. Login is still optional —
-  // logging out hides an account's orders; logging back in restores them.
-  const accountEmail = (session?.user?.email ?? "").trim().toLowerCase();
-  const storageKey = accountEmail ? `${STORAGE_KEY}::${accountEmail}` : STORAGE_KEY;
+  // No sign-in: buying never requires an account. "My Orders" is tracked locally
+  // (localStorage) under one base key on this device.
+  const storageKey = STORAGE_KEY;
   // Latest key for the long-lived interval below (which keeps its mount-time closure).
   const storageKeyRef = useRef(storageKey);
   storageKeyRef.current = storageKey;
@@ -329,7 +322,7 @@ export default function ShopClient() {
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent: "reserve", ref, userEmail: session?.user?.email ?? "", ...currentInput() }),
+        body: JSON.stringify({ intent: "reserve", ref, ...currentInput() }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "reserve failed");
@@ -408,7 +401,6 @@ export default function ShopClient() {
           orderId: payingOrder.id,
           ref: payingOrder.refCode,
           slip,
-          userEmail: session?.user?.email ?? "",
           items: payItems,
           customerName: payingOrder.customerName,
           phone: payingOrder.phone,

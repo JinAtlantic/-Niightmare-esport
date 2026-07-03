@@ -1,15 +1,5 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function publicFanName(value: unknown): string {
-  const name = String(value ?? "").trim();
-  if (!name || EMAIL_RE.test(name)) return "NIIGHTMARE Fan";
-  return name.slice(0, 80);
-}
-
-export function publicFanAvatar(value: unknown): string {
-  return safeImageSrc(String(value ?? ""), "");
-}
-
 export function safeHref(value: unknown, fallback = ""): string {
   const raw = String(value ?? "").trim();
   if (!raw || raw === "#") return fallback;
