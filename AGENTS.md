@@ -149,6 +149,19 @@ reuse in `players`: `win_rate`→`fmvp`, `gear_device`→`tenures` (JSON),
 / `UpcomingMatch` when no opponent logo is set; `opponentMonogram()` in
 `components/cards/OpponentLogo.tsx` resolves it).
 
+**Writing prod content from a local script (no dev server, no redeploy):** the admin session
+token is a signed HMAC of `ADMIN_SECRET` (`lib/adminAuth.ts` `makeToken`) — a local node script
+can mint it and `PUT https://www.niightmareesport.com/api/admin/data?file=<matches|site|…>` with
+`Cookie: nm_admin=<token>`, which writes Supabase **and** revalidates the public pages instantly.
+The sandbox can reach the live host (apex 308→www). `matches` replaces the whole table (send the
+full list), `site` upserts many fields (GET the full object first, edit only what you need, PUT it
+back — else other fields get nulled). **`scripts/sync-results.mjs`** uses exactly this: it reads
+NIIGHTMARE's Liquipedia played matches (proper `User-Agent`), diffs against live matches (only
+results **newer than the latest already on the site** — never back-fills), and on `--apply`
+publishes the new results + per-game VOD links. Driven by the **`/sync-results`** slash command
+(`.claude/commands/`), which is confirm-first. The owner runs it on demand (stays manual — no
+scheduled/auto routine, by choice); opponent names/tournaments come from Liquipedia as-is.
+
 **Editable JSON blocks on the "site" section** (About Us, Niightmare Roadmap) live in
 single `jsonb` columns on `site_settings`: `about_us` and `roadmap`. Pattern for any
 new editable-content block: (1) `alter table site_settings add column if not exists
@@ -164,6 +177,20 @@ back to the default — so the block renders before anything is ever saved.
 rebuilt as a split-arena broadcast card (mobile-first: stacked → side-by-side on `md`,
 glassmorphism team zones, forged diamond VS on a blade seam, divided tale-of-the-tape
 strip). Keep edits to Tailwind classes + JSX layout; the data hooks/props are stable.
+
+**Live score (2026-07-03):** when `upcomingMatch.status === "live"` the card shows a rose
+"Live score" board from `upcomingMatch.score` (e.g. a BO3 at "1-0"), editable in /admin. An
+open fan page **polls `GET /api/content` every ~25s while live** so the tally climbs without a
+refresh, and reloads once when the admin flips the status away from "live" (match finished).
+No new columns — reuses the existing `score` field. The **/admin editor** (`HomeEditor.tsx`
+"นัดต่อไป") was reorganized to be **status-driven**: a big status picker up top, then only the
+relevant box shows (rose LIVE-SCORE box when live; RESULT box when finished), followed by
+grouped cards (คู่แข่ง / งาน–รอบ / วัน–เวลา / ถ่ายทอดสด) + the schedule-queue popup. The finished
+box has **two actions**: `finishToMatches()` ("✅ บันทึกผลลงหน้า Match" — appends the result to
+/matches then clears the card; **works even with no queued next row**, fixing the dead-end where
+the last match of the day couldn't be recorded) and `promoteNext()` (append + advance to the
+first schedule row; shown only when one exists). Both share `appendFinishedToMatches()`. The 24h
+time field defaults the date to today when a time is typed before a date (`todayBkkDate()`).
 
 `components/sections/AboutUs.tsx` — home "About Us" band below `RecentResults`: a
 single centred manifesto led by a large scythe-tick "WHO WE ARE" heading + an outlined
@@ -289,6 +316,12 @@ base64 `shippingImage` → uploaded to the `uploads` bucket `shop-shipping/` →
 `shop_orders.shipping_image_url`, shown to the buyer). The red **"ยกเลิก & ลบ"** button is a
 **hard delete** (`DELETE /api/admin/orders`, `window.confirm` first) — used to purge junk /
 mismatched-transfer orders; the legacy `cancelled` status is no longer set from the UI.
+**The DELETE route now also purges the order's uploaded images** (`slip_url` in `shop-slips/`
++ `shipping_image_url` in `shop-shipping/`) from the public `uploads` bucket via
+`deleteFromStorage()` (`lib/supabaseStorage.ts`, derives the in-bucket path from the public
+URL) — best-effort, never fails the delete. Before this, deleting a row orphaned its slip in
+Storage. A one-off orphan sweep (list `shop-slips/`+`shop-shipping/`, remove files no order's
+`slip_url`/`shipping_image_url` references) is the safe cleanup for pre-existing orphans.
 
 **QR framing:** the QR is drawn as a CSS background on a square so a long bank-app
 screenshot can be cropped to just the QR. `/admin → Shop` has zoom + X/Y position sliders
