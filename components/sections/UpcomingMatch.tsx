@@ -182,6 +182,22 @@ function CountdownBlock({ cd }: { cd: Countdown }) {
   );
 }
 
+/** Live scoreboard shown during a "live" fixture — the current score (e.g. a
+ *  BO3 at "1-0") in the rose live accent, so fans see the running tally without
+ *  waiting for the match to finish. */
+function LiveScoreBoard({ score, label }: { score: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.34em] text-loss/80">
+        {label}
+      </span>
+      <span className="font-display text-5xl font-black tabular-nums leading-none text-loss [text-shadow:0_0_30px_rgba(251,113,133,0.6)] md:text-6xl">
+        {score}
+      </span>
+    </div>
+  );
+}
+
 /** Split a schedule entry into a date label + an optional time label for the date panel. */
 function scheduleParts(entry: MatchScheduleEntry, lang: Lang): { date: string; time: string | null } {
   if (!entry.date && !entry.time) return { date: "TBA", time: null };
@@ -415,6 +431,49 @@ export default function UpcomingMatch() {
 
   const showCountdown = status === "next" && cd != null && !cd.done;
 
+  // While a fixture is LIVE, poll the public content feed so an already-open fan
+  // page sees the score climb (e.g. a BO3 going 1-0 → 2-1) without a manual
+  // refresh. Only the live score needs to stay fresh; once the admin flips the
+  // status away from "live" (match finished), reload once so the final result
+  // card renders. Polling stops entirely for every non-live state.
+  const [liveScore, setLiveScore] = useState<string | null>(null);
+  useEffect(() => {
+    if (status !== "live") {
+      setLiveScore(null);
+      return;
+    }
+    let active = true;
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/content", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { site?: { upcomingMatch?: UpcomingMatchData } };
+        const um = data.site?.upcomingMatch;
+        if (!active || !um) return;
+        if (um.status && um.status !== "live") {
+          window.location.reload();
+          return;
+        }
+        setLiveScore((um.score ?? "").trim() || null);
+      } catch {
+        /* transient network error — keep the last known score */
+      }
+    };
+    poll();
+    const id = window.setInterval(poll, 25000);
+    const onFocus = () => poll();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      active = false;
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [status]);
+  // Prefer the freshly-polled score; fall back to the server-rendered one.
+  const currentLiveScore =
+    status === "live" ? (liveScore ?? (match.score ?? "").trim()) : "";
+  const liveScoreLabel = pick({ en: "Live score", lo: "ສະກໍປັດຈຸບັນ" });
+
   // Finished fixture: show the result + final score instead of a countdown.
   const showFinished = status === "finished";
   const result = match.result;
@@ -620,6 +679,9 @@ export default function UpcomingMatch() {
                   </span>
                   {t("sections.upcoming_status_live")}
                 </span>
+                {currentLiveScore && (
+                  <LiveScoreBoard score={currentLiveScore} label={liveScoreLabel} />
+                )}
                 {streamHref && (
                   <a
                     href={streamHref}
@@ -693,6 +755,10 @@ export default function UpcomingMatch() {
                     </span>
                     {t("sections.upcoming_status_live")}
                   </span>
+
+                  {currentLiveScore && (
+                    <LiveScoreBoard score={currentLiveScore} label={liveScoreLabel} />
+                  )}
 
                   {streamHref && (
                     <a

@@ -114,6 +114,12 @@ function bkkPartsToIso(date: string, time: string): string {
   const t = /^\d{1,2}:\d{2}$/.test(time) ? time.padStart(5, "0") : "00:00";
   return `${date}T${t}:00+07:00`;
 }
+/** Today's +07:00 wall-clock date (YYYY-MM-DD) — used so a time can be entered
+ *  before a date is picked (otherwise `bkkPartsToIso` drops the time and the
+ *  field appears frozen). */
+function todayBkkDate(): string {
+  return new Date(Date.now() + BKK_OFFSET_MS).toISOString().slice(0, 10);
+}
 /** Keep a time string as 24-hour HH:MM as the user types (digits only, auto colon). */
 function normalizeTime24(raw: string): string {
   const digits = raw.replace(/\D/g, "").slice(0, 4);
@@ -226,6 +232,7 @@ export default function HomeEditor() {
 
   const isPractice = m.status === "practice";
   const isFinished = m.status === "finished";
+  const isLive = m.status === "live";
   // +07:00 wall-clock date/time parts for the headline fixture's editors.
   const bkk = isoToBkkParts(m.date);
 
@@ -494,7 +501,7 @@ export default function HomeEditor() {
             <TimeField24
               label="เวลาแข่ง (24 ชม.)"
               value={bkk.time}
-              onChange={(t) => patch({ date: bkkPartsToIso(bkk.date, t) })}
+              onChange={(t) => patch({ date: bkkPartsToIso(bkk.date || todayBkkDate(), t) })}
             />
             <div className="md:col-span-2">
               <BilingualField
@@ -517,24 +524,33 @@ export default function HomeEditor() {
               options={BO_SELECT_OPTIONS}
             />
             {isFinished && (
-              <>
-                <SelectField
-                  label="ผลการแข่งขัน"
-                  value={m.result ?? "win"}
-                  onChange={(v) => patch({ result: v as UpcomingMatch["result"] })}
-                  options={RESULT_OPTS}
-                />
-                <TextField
-                  label="สกอร์ (เช่น 2-1)"
-                  value={m.score ?? ""}
-                  onChange={(v) => patch({ score: v || undefined })}
-                  placeholder="2-1"
-                />
-                <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
-                  สถานะ “จบแล้ว”: การ์ดหน้าแรกจะโชว์ผล ชนะ/แพ้ + สกอร์ พอพร้อมแข่งนัดถัดไป กดปุ่ม “⬇ ดึงแมตช์ถัดไป” ด้านล่าง —
-                  ระบบจะ<span className="text-win"> เพิ่มผลแมตช์นี้เข้าหน้า Match ให้อัตโนมัติ</span> (โผล่ปกติเหมือนแมตช์อื่นๆ ทั้งหน้าแรกและ /matches) แล้วดึงแมตช์ถัดไปขึ้นแทน
-                </p>
-              </>
+              <SelectField
+                label="ผลการแข่งขัน"
+                value={m.result ?? "win"}
+                onChange={(v) => patch({ result: v as UpcomingMatch["result"] })}
+                options={RESULT_OPTS}
+              />
+            )}
+            {(isFinished || isLive) && (
+              <TextField
+                label={isLive ? "สกอร์ปัจจุบัน (เช่น 1-0)" : "สกอร์ (เช่น 2-1)"}
+                value={m.score ?? ""}
+                onChange={(v) => patch({ score: v || undefined })}
+                placeholder={isLive ? "1-0" : "2-1"}
+              />
+            )}
+            {isLive && (
+              <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
+                สถานะ “กำลังแข่ง”: กรอกสกอร์ตอนนี้ (เช่น BO3 → <span className="text-soul">1-0</span>) แล้วกด “บันทึกการเปลี่ยนแปลง” —
+                การ์ดหน้าแรกจะ<span className="text-win"> โชว์สกอร์สดให้แฟนๆเห็นทันที ไม่ต้องรอจบแมตช์</span> (หน้าที่เปิดค้างไว้จะอัปเดตเองทุก ~25 วินาที).
+                กรอกสกอร์ใหม่แล้วบันทึกได้เรื่อยๆ ระหว่างแข่ง.
+              </p>
+            )}
+            {isFinished && (
+              <p className="md:col-span-2 font-mono text-[11px] leading-relaxed text-ash">
+                สถานะ “จบแล้ว”: การ์ดหน้าแรกจะโชว์ผล ชนะ/แพ้ + สกอร์ พอพร้อมแข่งนัดถัดไป กดปุ่ม “⬇ ดึงแมตช์ถัดไป” ด้านล่าง —
+                ระบบจะ<span className="text-win"> เพิ่มผลแมตช์นี้เข้าหน้า Match ให้อัตโนมัติ</span> (โผล่ปกติเหมือนแมตช์อื่นๆ ทั้งหน้าแรกและ /matches) แล้วดึงแมตช์ถัดไปขึ้นแทน
+              </p>
             )}
             <TextField
               label={isPractice ? "ทีมที่ซ้อมด้วย (เว้นว่างได้)" : "ทีมคู่แข่ง"}
