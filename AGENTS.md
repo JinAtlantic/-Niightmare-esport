@@ -350,6 +350,24 @@ iOS Safari gets the Share→"Add to Home Screen" instructions. It registers `sw.
 in standalone, shows on every visit while ignored, and stays quiet for 3 days after an
 explicit ✕ dismissal (`nm-install-dismissed`).
 
+**Buyer order notifications (in-site, no login/push/install):**
+`components/shop/OrderStatusToast.tsx` is mounted globally in the **public**
+`Chrome.tsx` (never on /admin). On every public page it reads the buyer's local
+order ids (`nm-shop-orders`), polls the public `GET /api/shop/order/status`
+endpoint (settle + every 90s + on tab-focus, and only when this device actually
+has orders), and pops an in-page toast the moment an order reaches a **positive
+milestone the buyer hasn't seen yet** — currently `verified` ("payment confirmed")
+and `shipped`. Deliberately **no OS Web Push / no permission / no PWA install**
+(so it also works on iPhone Safari) — the trade-off is the toast only appears
+while the buyer has the site open. "Seen" is tracked in its own key
+(`nm-shop-status-seen`, id→last-notified status) so each status toasts once even
+across reloads; baseline falls back to the locally-stored status so a first run
+never re-announces history. The toast links to `/shop?view=orders`, which
+ShopClient reads on mount to open the **My Orders** tab. To change which statuses
+notify, edit the `NOTIFY` map. If background delivery (site closed) is ever wanted,
+upgrade this to real Web Push reusing the admin `lib/push.ts` infra (works on
+Android/desktop without install; iOS still needs Add-to-Home-Screen).
+
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js
 preview.

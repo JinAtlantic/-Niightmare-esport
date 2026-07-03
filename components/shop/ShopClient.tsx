@@ -151,6 +151,16 @@ export default function ShopClient() {
 
   useEffect(() => setMounted(true), []);
 
+  // Deep link from the in-site order notifier (/shop?view=orders) opens straight
+  // to My Orders so a status toast lands the buyer on their order.
+  useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("view") === "orders") setTab("myorders");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   // Reload whenever the account (storageKey) changes — sign in/out/switch swaps
   // which list is shown, and an empty/absent key must clear the previous one.
   useEffect(() => {
