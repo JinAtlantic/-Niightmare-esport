@@ -5,10 +5,13 @@
  * until it passes. TensorFlow + the model are dynamically imported so they only
  * load the first time someone actually picks a profile photo.
  *
- * This is a best-effort client gate (a determined user could bypass it by
- * calling the upload API directly), which the team accepted in exchange for no
- * admin approval step.
+ * This is a fast first-pass client gate for UX. It is NOT the last line of
+ * defence: a determined user can bypass it by calling the upload API directly,
+ * so the server re-runs the same model with the same thresholds before any
+ * avatar is published (see lib/nsfwServer + app/api/community/profile).
  */
+
+import { evaluateNsfw } from "./nsfwThreshold";
 
 type Prediction = { className: string; probability: number };
 type NsfwModel = { classify: (img: HTMLImageElement) => Promise<Prediction[]> };
@@ -59,19 +62,7 @@ export async function checkImageSafe(file: File): Promise<NsfwResult> {
     const byClass: Record<string, number> = {};
     for (const p of predictions) byClass[p.className] = p.probability;
 
-    const porn = byClass.Porn ?? 0;
-    const hentai = byClass.Hentai ?? 0;
-    const sexy = byClass.Sexy ?? 0;
-
-    const unsafe = porn >= 0.5 || hentai >= 0.5 || sexy >= 0.8 || porn + hentai >= 0.6;
-
-    const ranked: [string, number][] = [
-      ["Porn", porn],
-      ["Hentai", hentai],
-      ["Sexy", sexy],
-    ].sort((a, b) => (b[1] as number) - (a[1] as number)) as [string, number][];
-
-    return { safe: !unsafe, label: ranked[0][0], score: ranked[0][1] };
+    return evaluateNsfw(byClass);
   } finally {
     URL.revokeObjectURL(img.src);
   }

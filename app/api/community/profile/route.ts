@@ -3,9 +3,12 @@ import { analyzeCommentModeration } from "@/lib/commentModeration";
 import { getSupabaseAdmin, supabaseAdminEnabled } from "@/lib/supabaseAdmin";
 import { uploadToStorage } from "@/lib/supabaseStorage";
 import { ensureFanProfileRow } from "@/lib/fanProfile";
+import { checkAvatarBytesSafe } from "@/lib/nsfwServer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Give the first (cold) avatar upload room to load the NSFW model + classify.
+export const maxDuration = 30;
 
 const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 const EXT: Record<string, string> = {
@@ -14,6 +17,25 @@ const EXT: Record<string, string> = {
   "image/webp": "webp",
   "image/gif": "gif",
 };
+
+// Best-effort in-memory rate limit keyed by the signed-in fan (not IP, since the
+// request is authenticated). Serverless instances are ephemeral, so this resets
+// on cold start, but it meaningfully slows a single account spamming name/avatar
+// changes. Profile edits are rare, so the window is generous.
+const RL_WINDOW_MS = 10 * 60 * 1000;
+const RL_MAX = 10;
+const profileEdits = new Map<string, { count: number; resetAt: number }>();
+
+function rateLimited(userId: string): boolean {
+  const now = Date.now();
+  const rec = profileEdits.get(userId);
+  if (!rec || now > rec.resetAt) {
+    profileEdits.set(userId, { count: 1, resetAt: now + RL_WINDOW_MS });
+    return false;
+  }
+  rec.count += 1;
+  return rec.count > RL_MAX;
+}
 
 function bearerToken(request: Request) {
   const header = request.headers.get("authorization") ?? "";
@@ -50,6 +72,13 @@ export async function POST(request: Request) {
   if (authError || !authData.user) return NextResponse.json({ error: "Login expired." }, { status: 401 });
   const user = authData.user;
 
+  if (rateLimited(user.id)) {
+    return NextResponse.json(
+      { error: "แก้ไขโปรไฟล์บ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่" },
+      { status: 429 }
+    );
+  }
+
   await ensureFanProfileRow(db, user);
 
   const displayNameRaw = form.get("displayName");
@@ -77,15 +106,31 @@ export async function POST(request: Request) {
     const ext = EXT[file.type];
     if (!ext) return NextResponse.json({ error: "รองรับเฉพาะไฟล์รูป (PNG/JPG/WebP/GIF)" }, { status: 415 });
     if (file.size > MAX_BYTES) return NextResponse.json({ error: "รูปใหญ่เกินไป (สูงสุด 4 MB)" }, { status: 413 });
+
+    const bytes = Buffer.from(await file.arrayBuffer());
+
+    // Authoritative server-side NSFW gate. The browser check (lib/nsfwCheck) is a
+    // fast first pass, but a direct API call can bypass it — so re-run the same
+    // model here before publishing. Unsafe → reject; a classifier/infra failure
+    // also blocks the upload (fail closed) so no unverified photo goes live.
     try {
-      const bytes = Buffer.from(await file.arrayBuffer());
+      const verdict = await checkAvatarBytesSafe(bytes);
+      if (!verdict.safe) {
+        return NextResponse.json({ error: "รูปนี้ดูไม่เหมาะสม กรุณาเลือกรูปอื่น" }, { status: 422 });
+      }
+    } catch (err) {
+      console.error("avatar nsfw check failed", err);
+      return NextResponse.json({ error: "ตรวจสอบรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" }, { status: 503 });
+    }
+
+    try {
       const url = await uploadToStorage(
         `fan-avatars/${user.id}-${Date.now().toString(36)}.${ext}`,
         bytes,
         file.type
       );
-      // Already passed the browser NSFW gate — publish immediately, and clear any
-      // leftover pending photo from the old review flow.
+      // Passed both the browser and the server NSFW gate — publish immediately and
+      // clear any leftover pending photo from the old review flow.
       update.avatar_url = url;
       update.pending_avatar_url = null;
     } catch {
