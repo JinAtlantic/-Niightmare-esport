@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { uploadToStorage } from "@/lib/supabaseStorage";
+import { uploadToStorage, deleteFromStorage } from "@/lib/supabaseStorage";
 import { sendPushForOrder } from "@/lib/push";
 
 export const runtime = "nodejs";
@@ -114,7 +114,28 @@ export async function DELETE(request: Request) {
   if (!body.id) return NextResponse.json({ error: "Bad request" }, { status: 400 });
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+
+  // Read the order's uploaded image URLs first so we can purge them from Storage
+  // after the row is gone (deleting the row alone orphans the slip/shipping image
+  // in the `uploads` bucket). `select("*")` tolerates the optional columns
+  // (slip_url / shipping_image_url) not existing yet.
+  const { data: existing } = await db.from("shop_orders").select("*").eq("id", body.id).maybeSingle();
+
   const { error } = await db.from("shop_orders").delete().eq("id", body.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Best-effort cleanup — never fail the delete if storage removal doesn't land.
+  const imageUrls = [
+    (existing as { slip_url?: string | null } | null)?.slip_url,
+    (existing as { shipping_image_url?: string | null } | null)?.shipping_image_url,
+  ].filter((u): u is string => typeof u === "string" && u.length > 0);
+  for (const url of imageUrls) {
+    try {
+      await deleteFromStorage(url);
+    } catch {
+      /* storage cleanup is best-effort */
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
