@@ -15,6 +15,9 @@ interface OrderRow {
   id: string;
   created_at: string;
   updated_at: string | null;
+  /** Immutable moment the buyer declared their transfer (attached slip + tapped
+   *  "I've transferred"); unaffected by later admin status changes. */
+  paid_at: string | null;
   quantity: number;
   size: string;
   unit_price: number | null;
@@ -168,8 +171,11 @@ function periodLabel(iso: string, gran: "day" | "month" | "year"): string {
 }
 
 const fmt = (n: number, c: string) => `${Number(n || 0).toLocaleString("en-US")} ${c}`;
-/** Time of the order's last change (transfer / status update), falling back to created. */
-const orderTime = (o: OrderRow) => o.updated_at || o.created_at;
+/** The order's transfer time: the immutable moment the buyer declared payment
+ *  (`paid_at`). Falls back to updated_at/created_at for orders saved before the
+ *  column existed. This is what "เวลาโอน", sorting and the sales report use, so a
+ *  later status change can't move an order's time. */
+const orderTime = (o: OrderRow) => o.paid_at || o.updated_at || o.created_at;
 const fmtDate = (iso: string) => {
   try {
     return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });

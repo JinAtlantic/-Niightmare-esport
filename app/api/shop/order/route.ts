@@ -69,8 +69,8 @@ async function insertOrder(
   const work = { ...row };
   let { data, error } = await db.from("shop_orders").insert(work).select("id, created_at").single();
   let guard = 0;
-  while (error && guard < 4) {
-    const col = ["items", "ref_code", "slip_url", "user_email"].find((c) => error!.message.includes(c));
+  while (error && guard < 5) {
+    const col = ["items", "ref_code", "slip_url", "user_email", "paid_at"].find((c) => error!.message.includes(c));
     if (!col) break;
     delete work[col];
     guard++;
@@ -216,26 +216,35 @@ export async function POST(request: Request) {
   // if we have its id, otherwise insert a fresh paid order so nothing is lost.
   const slipUrl = await uploadSlip(body.slip);
   let id: string | undefined = orderId || undefined;
+  // The transfer-declaration moment — the immutable "paid at" time. Written once
+  // here and never touched by later admin status changes, so the order's shown
+  // transfer time can't drift when the team advances it (verified/packing/shipped).
+  const paidAt = new Date().toISOString();
   if (db) {
     let updated = false;
     if (orderId) {
-      // Set updated_at explicitly (the DB trigger isn't relied on) so the order's
-      // time reflects the transfer moment.
-      const changedAt = new Date().toISOString();
-      let { error } = await db
-        .from("shop_orders")
-        .update({ slip_url: slipUrl ?? null, status: "paid_declared", updated_at: changedAt })
-        .eq("id", orderId);
-      if (error && /slip_url/.test(error.message)) {
-        ({ error } = await db
-          .from("shop_orders")
-          .update({ status: "paid_declared", updated_at: changedAt })
-          .eq("id", orderId));
+      // Set updated_at + paid_at explicitly (the DB trigger isn't relied on).
+      const patch: Record<string, unknown> = {
+        slip_url: slipUrl ?? null,
+        status: "paid_declared",
+        updated_at: paidAt,
+        paid_at: paidAt,
+      };
+      let { error } = await db.from("shop_orders").update(patch).eq("id", orderId);
+      // Drop optional columns that may not exist yet (slip_url / paid_at) so the
+      // status change still lands instead of falling through to a duplicate insert.
+      let guard = 0;
+      while (error && guard < 4) {
+        const col = ["slip_url", "paid_at"].find((c) => error!.message.includes(c));
+        if (!col) break;
+        delete patch[col];
+        guard++;
+        ({ error } = await db.from("shop_orders").update(patch).eq("id", orderId));
       }
       updated = !error;
     }
     if (!updated) {
-      const res = await insertOrder(db, baseRow("paid_declared", slipUrl ?? null));
+      const res = await insertOrder(db, { ...baseRow("paid_declared", slipUrl ?? null), paid_at: paidAt });
       if (res.error) return NextResponse.json({ error: res.error }, { status: 500 });
       id = res.id;
     }

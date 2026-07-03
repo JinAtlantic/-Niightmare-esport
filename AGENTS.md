@@ -271,10 +271,14 @@ remains for the team.
 address fold into a `<details>` dropdown (plus the signed-in buyer's `user_email` if present).
 The **ส่งแล้ว tab leads with a sales report** — total revenue, units sold, and per-size,
 grouped by **day / month / year** (`SalesReport` in `OrdersEditor.tsx`). Each order's shown
-**time is `updated_at`** (the last change — the transfer time once paid). **NB: the
-`shop_orders.updated_at` DB trigger does NOT fire in the live DB**, so the pay route and the
-admin status PATCH set `updated_at` **explicitly** in the update payload — keep doing that or
-the time will freeze at `created_at`.
+**time ("เวลาโอน"), the list sort and the sales report all use `paid_at`** — the **immutable
+moment the buyer declared their transfer** (slip attached + "I've transferred"), set once by
+the PAY route and **never touched by admin status changes**, so advancing an order can't drift
+its time (`orderTime()` falls back to `updated_at`→`created_at` for rows saved before the
+column existed). **NB: the `shop_orders.updated_at` DB trigger does NOT fire in the live DB**,
+so the pay route and the admin status PATCH set `updated_at` (and the pay route `paid_at`)
+**explicitly** in the update payload. Run `alter table public.shop_orders add column if not
+exists paid_at timestamptz;` in Supabase — the routes degrade gracefully until then.
 
 Admin Orders also has: a **search box** (matches ref code / name / email / phone) + a
 **newest⇄oldest sort** toggle; a **⚠ duplicate flag** when an order shares a phone or
