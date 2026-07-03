@@ -109,10 +109,10 @@ export async function POST(request: Request) {
 
     const bytes = Buffer.from(await file.arrayBuffer());
 
-    // Authoritative server-side NSFW gate. The browser check (lib/nsfwCheck) is a
-    // fast first pass, but a direct API call can bypass it — so re-run the same
-    // model here before publishing. Unsafe → reject; a classifier/infra failure
-    // also blocks the upload (fail closed) so no unverified photo goes live.
+    // Authoritative server-side NSFW gate (the only one — there is no in-browser
+    // check, so this can't be bypassed by calling the API directly). Every avatar
+    // is classified here before publishing. Unsafe → reject; a classifier/infra
+    // failure also blocks the upload (fail closed) so no unverified photo goes live.
     try {
       const verdict = await checkAvatarBytesSafe(bytes);
       if (!verdict.safe) {

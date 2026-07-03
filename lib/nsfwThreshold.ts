@@ -1,9 +1,7 @@
 /**
- * Shared NSFW verdict logic. Kept framework-free (no tfjs/DOM imports) so BOTH
- * the browser gate (lib/nsfwCheck) and the authoritative server gate
- * (lib/nsfwServer) score an image with the exact same thresholds — a photo can
- * never pass one and fail the other. Thresholds are deliberately a bit strict
- * for avatars.
+ * Shared NSFW verdict logic used by the server-side avatar gate (lib/nsfwServer).
+ * Kept framework-free (no tfjs/DOM imports) so the thresholds live in one place,
+ * separate from the model plumbing. Deliberately a bit strict for avatars.
  */
 export interface NsfwVerdict {
   safe: boolean;

@@ -4,11 +4,11 @@ import { readFile } from "fs/promises";
 import { evaluateNsfw, type NsfwVerdict } from "./nsfwThreshold";
 
 /**
- * Authoritative server-side NSFW gate for fan avatars. The browser gate
- * (lib/nsfwCheck) is a fast first pass, but a determined user can bypass it by
- * calling /api/community/profile directly — so we re-run the SAME nsfwjs model
- * here with the SAME thresholds (lib/nsfwThreshold) before any photo is
- * published, and reject anything that looks unsafe.
+ * Authoritative (and only) NSFW gate for fan avatars. It runs on the server so
+ * it cannot be bypassed by calling /api/community/profile directly, and so the
+ * multi-MB TensorFlow model never has to ship to the browser. Every avatar is
+ * classified here (lib/nsfwThreshold) before it is published, and anything that
+ * looks unsafe is rejected.
  *
  * How it runs on a serverless function (no native tfjs-node, no browser):
  *   • the model (public/nsfw-model, a Keras layers model) is read straight off

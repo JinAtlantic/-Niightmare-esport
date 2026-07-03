@@ -6,7 +6,6 @@ import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { getSupabase } from "@/lib/supabase";
 import { publicFanAvatar, publicFanName } from "@/lib/safety";
-import { checkImageSafe } from "@/lib/nsfwCheck";
 
 export interface FanProfile {
   display_name: string | null;
@@ -97,7 +96,6 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removePhoto, setRemovePhoto] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [checkingImage, setCheckingImage] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [profileNotice, setProfileNotice] = useState("");
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -289,30 +287,17 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const onPickAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onPickAvatar = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = ""; // let the same file be re-picked after a rejection
     if (!file) return;
     setProfileError("");
     setProfileNotice("");
-    setCheckingImage(true);
-    try {
-      const verdict = await checkImageSafe(file);
-      if (!verdict.safe) {
-        setProfileError(pick(COPY.unsafePhoto));
-        return;
-      }
-      setAvatarFile(file);
-      setRemovePhoto(false);
-      setAvatarPreview(URL.createObjectURL(file));
-    } catch {
-      // Model failed to load (offline/unsupported) — fail open so uploads still work.
-      setAvatarFile(file);
-      setRemovePhoto(false);
-      setAvatarPreview(URL.createObjectURL(file));
-    } finally {
-      setCheckingImage(false);
-    }
+    // The avatar is screened by the server (lib/nsfwServer) on save — an unsafe
+    // photo is rejected there, so there is no heavy in-browser model to run here.
+    setAvatarFile(file);
+    setRemovePhoto(false);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
   const saveProfile = async () => {
@@ -484,10 +469,9 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  disabled={checkingImage}
                   className="inline-flex min-h-[38px] items-center justify-center gap-2 border border-edge bg-void/60 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:border-amethyst disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Camera size={14} /> {checkingImage ? pick(COPY.checking) : pick(COPY.changePhoto)}
+                  <Camera size={14} /> {pick(COPY.changePhoto)}
                 </button>
                 {(previewAvatar || profile?.avatar_url) && (
                   <button
@@ -519,7 +503,7 @@ export function FanAuthProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={saveProfile}
-              disabled={savingProfile || checkingImage}
+              disabled={savingProfile}
               className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center gap-2 border border-amethyst bg-amethyst/15 px-5 py-3 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:bg-amethyst/25 disabled:cursor-not-allowed disabled:opacity-45"
             >
               {savingProfile ? pick(COPY.saving) : pick(COPY.save)}
