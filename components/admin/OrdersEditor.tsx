@@ -283,12 +283,12 @@ export default function OrdersEditor() {
     }
   }
 
-  // Move every currently-shown order in one bucket to the next status at once
-  // (จ่ายแล้ว → กำลังแพ็กของ, กำลังแพ็กของ → ส่งแล้ว). Respects the active
-  // search/filter — only the orders visible in the list are moved.
-  async function bulkAdvance(targets: OrderRow[], to: string, toLabel: string) {
+  // Move a set of orders to the next status at once (จ่ายแล้ว → กำลังแพ็กของ,
+  // กำลังแพ็กของ → ส่งแล้ว). Used both for "move everything shown" and for
+  // "move just this courier group" — `what` describes the set in the confirm.
+  async function bulkAdvance(targets: OrderRow[], to: string, toLabel: string, what = "ที่แสดงอยู่") {
     if (targets.length === 0 || bulkBusy) return;
-    if (!window.confirm(`ย้าย ${targets.length} ออเดอร์ที่แสดงอยู่ไปเป็น “${toLabel}” ทั้งหมด?`)) return;
+    if (!window.confirm(`ย้าย ${targets.length} ออเดอร์${what}ไปเป็น “${toLabel}” ทั้งหมด?`)) return;
     setBulkBusy(true);
     setError("");
     const ids = targets.map((o) => o.id);
@@ -605,14 +605,34 @@ export default function OrdersEditor() {
           const firstOfGroup = grouping && (idx === 0 || courierKey(ordered[idx - 1]) !== ck);
           return (
             <React.Fragment key={o.id}>
-              {firstOfGroup && (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amethyst/40 bg-amethyst/10 px-3 py-2">
-                  <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">🚚 {ck}</span>
-                  <span className="font-mono text-[11px] text-spectre">
-                    {courierCount.get(ck) ?? 0} ออเดอร์ · <span className="font-bold text-soul">{courierUnits.get(ck) ?? 0}</span> ตัว
-                  </span>
-                </div>
-              )}
+              {firstOfGroup && (() => {
+                // Per-courier bulk move: advance only THIS courier's orders to the
+                // next step (e.g. one courier is packed → ship just that group),
+                // without touching the other couriers shown.
+                const cfg = BULK_ADVANCE[tab];
+                const groupTargets = cfg ? ordered.filter((r) => courierKey(r) === ck && r.status === cfg.from) : [];
+                return (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amethyst/40 bg-amethyst/10 px-3 py-2">
+                    <span className="keep-latin font-display text-sm font-bold uppercase tracking-wide text-soul">🚚 {ck}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[11px] text-spectre">
+                        {courierCount.get(ck) ?? 0} ออเดอร์ · <span className="font-bold text-soul">{courierUnits.get(ck) ?? 0}</span> ตัว
+                      </span>
+                      {cfg && groupTargets.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => bulkAdvance(groupTargets, cfg.to, cfg.toLabel, `ของขนส่ง ${ck} `)}
+                          disabled={bulkBusy}
+                          title={`ย้ายเฉพาะออเดอร์ของ ${ck} ไป “${cfg.toLabel}”`}
+                          className="inline-flex min-h-[32px] items-center gap-1 rounded-md border border-amethyst bg-amethyst/20 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-soul transition-all hover:bg-amethyst/30 disabled:opacity-50"
+                        >
+                          {bulkBusy ? "กำลังย้าย…" : `⇉ ย้ายกลุ่มนี้ (${groupTargets.length}) → ${cfg.toLabel}`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
               <Card className="space-y-3">
               {/* Order ref + amount — the two fields the boss matches against the slip */}
               <div className="flex flex-wrap items-stretch justify-between gap-3">
