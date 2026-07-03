@@ -356,8 +356,8 @@ explicit ✕ dismissal (`nm-install-dismissed`).
 order ids (`nm-shop-orders`), polls the public `GET /api/shop/order/status`
 endpoint (settle + every 90s + on tab-focus, and only when this device actually
 has orders), and pops an in-page toast the moment an order reaches a **positive
-milestone the buyer hasn't seen yet** — currently `verified` ("payment confirmed")
-and `shipped`. Deliberately **no OS Web Push / no permission / no PWA install**
+milestone the buyer hasn't seen yet** — currently `verified` ("payment confirmed"),
+`packing` and `shipped`. Deliberately **no OS Web Push / no permission / no PWA install**
 (so it also works on iPhone Safari) — the trade-off is the toast only appears
 while the buyer has the site open. "Seen" is tracked in its own key
 (`nm-shop-status-seen`, id→last-notified status) so each status toasts once even

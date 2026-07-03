@@ -32,6 +32,11 @@ const NOTIFY: Record<string, { title: Bilingual; body: Bilingual; accent: string
     body: { en: "We're preparing your order for shipping.", lo: "ພວກເຮົາກຳລັງກຽມຈັດສົ່ງອໍເດີຂອງທ່ານ." },
     accent: "!border-l-win",
   },
+  packing: {
+    title: { en: "Packing your order 📦", lo: "ກຳລັງແພັກເຄື່ອງ 📦" },
+    body: { en: "We're packing your jersey — shipping soon.", lo: "ພວກເຮົາກຳລັງແພັກເສື້ອ — ໃກ້ຈັດສົ່ງແລ້ວ." },
+    accent: "!border-l-amethyst",
+  },
   shipped: {
     title: { en: "Your order shipped 🚚", lo: "ອໍເດີຂອງທ່ານຈັດສົ່ງແລ້ວ 🚚" },
     body: { en: "It's on the way — tap to see the parcel details.", lo: "ກຳລັງຈັດສົ່ງ — ກົດເບິ່ງລາຍລະອຽດພັດສະດຸ." },
