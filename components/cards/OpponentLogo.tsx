@@ -49,7 +49,7 @@ export default function OpponentLogo({ src, name, abbr, size = 28, className = "
 
   return (
     <span
-      className={`grid shrink-0 place-items-center ${className}`}
+      className={`relative grid shrink-0 place-items-center ${className}`}
       style={dimension}
       role="img"
       aria-label={`${name} logo`}
@@ -58,9 +58,9 @@ export default function OpponentLogo({ src, name, abbr, size = 28, className = "
         <Image
           src={safeSrc}
           alt=""
-          className="h-full w-full object-contain drop-shadow-[0_0_12px_rgba(0,0,0,0.65)]"
-          width={size}
-          height={size}
+          fill
+          sizes={`${size}px`}
+          className="object-contain drop-shadow-[0_0_12px_rgba(0,0,0,0.65)]"
         />
       ) : (
         <span

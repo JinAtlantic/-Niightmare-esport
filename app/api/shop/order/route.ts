@@ -11,6 +11,7 @@ import {
   validateOrder,
   buildOrderMessage,
   cleanRefCode,
+  SHOP_PAYMENT_WINDOW_HOURS,
   type ShopContent,
   type ShopOrderInput,
   type ShopOrderItem,
@@ -95,7 +96,10 @@ export async function POST(request: Request) {
 
   // "reserve" = create an unpaid order the buyer can pay within the window;
   // "pay" = the buyer attached a slip and declared their transfer.
-  const intent = body.intent === "reserve" ? "reserve" : "pay";
+  const intent = body.intent;
+  if (intent !== "reserve" && intent !== "pay") {
+    return NextResponse.json({ error: "Invalid order intent" }, { status: 400 });
+  }
   const orderId = str(body.orderId, 64);
 
   const rawItems = Array.isArray(body.items) ? (body.items as unknown[]) : [];
@@ -212,43 +216,72 @@ export async function POST(request: Request) {
   }
 
   // ── PAY ─────────────────────────────────────────────────────────────────
-  // Buyer attached a slip and declared the transfer. Update the reserved order
-  // if we have its id, otherwise insert a fresh paid order so nothing is lost.
+  // Buyer attached a slip and declared the transfer. Only a still-unpaid,
+  // unexpired reserved order may move to paid_declared.
+  if (!UUID_RE.test(orderId)) {
+    return NextResponse.json({ error: "Bad order id" }, { status: 400 });
+  }
+  if (!refCode) {
+    return NextResponse.json({ error: "Missing order reference" }, { status: 400 });
+  }
   const slipUrl = await uploadSlip(body.slip);
-  let id: string | undefined = orderId || undefined;
+  if (!slipUrl) {
+    return NextResponse.json({ error: "Payment slip is required" }, { status: 400 });
+  }
+  if (!db) {
+    return NextResponse.json({ error: "Order storage is not configured" }, { status: 503 });
+  }
+
+  let id: string | undefined = orderId;
   // The transfer-declaration moment — the immutable "paid at" time. Written once
   // here and never touched by later admin status changes, so the order's shown
   // transfer time can't drift when the team advances it (verified/packing/shipped).
   const paidAt = new Date().toISOString();
-  if (db) {
-    let updated = false;
-    if (orderId) {
-      // Set updated_at + paid_at explicitly (the DB trigger isn't relied on).
-      const patch: Record<string, unknown> = {
-        slip_url: slipUrl ?? null,
-        status: "paid_declared",
-        updated_at: paidAt,
-        paid_at: paidAt,
-      };
-      let { error } = await db.from("shop_orders").update(patch).eq("id", orderId);
-      // Drop optional columns that may not exist yet (slip_url / paid_at) so the
-      // status change still lands instead of falling through to a duplicate insert.
-      let guard = 0;
-      while (error && guard < 4) {
-        const col = ["slip_url", "paid_at"].find((c) => error!.message.includes(c));
-        if (!col) break;
-        delete patch[col];
-        guard++;
-        ({ error } = await db.from("shop_orders").update(patch).eq("id", orderId));
-      }
-      updated = !error;
-    }
-    if (!updated) {
-      const res = await insertOrder(db, { ...baseRow("paid_declared", slipUrl ?? null), paid_at: paidAt });
-      if (res.error) return NextResponse.json({ error: res.error }, { status: 500 });
-      id = res.id;
-    }
+  const payWindowStart = new Date(
+    Date.now() - SHOP_PAYMENT_WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
+  // Set updated_at + paid_at explicitly (the DB trigger isn't relied on).
+  const patch: Record<string, unknown> = {
+    slip_url: slipUrl,
+    status: "paid_declared",
+    updated_at: paidAt,
+    paid_at: paidAt,
+  };
+  let { data: updatedRow, error } = await db
+    .from("shop_orders")
+    .update(patch)
+    .eq("id", orderId)
+    .eq("ref_code", refCode)
+    .eq("status", "awaiting_payment")
+    .gt("created_at", payWindowStart)
+    .select("id")
+    .maybeSingle();
+  // Drop optional columns that may not exist yet (slip_url / paid_at) so the
+  // guarded status change still lands instead of accepting a duplicate insert.
+  let guard = 0;
+  while (error && guard < 4) {
+    const col = ["slip_url", "paid_at"].find((c) => error!.message.includes(c));
+    if (!col) break;
+    delete patch[col];
+    guard++;
+    ({ data: updatedRow, error } = await db
+      .from("shop_orders")
+      .update(patch)
+      .eq("id", orderId)
+      .eq("ref_code", refCode)
+      .eq("status", "awaiting_payment")
+      .gt("created_at", payWindowStart)
+      .select("id")
+      .maybeSingle());
   }
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!updatedRow?.id) {
+    return NextResponse.json(
+      { error: "Order is expired, already paid, or not found" },
+      { status: 409 }
+    );
+  }
+  id = updatedRow.id as string;
 
   const paidRecord: ShopOrderRecord = { ...record, slipUrl, status: "paid_declared" };
 

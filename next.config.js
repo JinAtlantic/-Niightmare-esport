@@ -13,13 +13,22 @@ const supabaseOrigin = (() => {
 })();
 
 const supabaseRealtimeOrigin = supabaseOrigin.replace(/^https:/, "wss:");
+const isDev = process.env.NODE_ENV !== "production";
 
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self'",
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+  [
+    "script-src 'self' 'unsafe-inline'",
+    isDev ? "'unsafe-eval'" : "",
+    "https://www.googletagmanager.com",
+    "https://www.google-analytics.com",
+    "https://va.vercel-scripts.com",
+  ]
+    .filter(Boolean)
+    .join(" "),
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",

@@ -457,12 +457,12 @@ export default function ShopClient() {
 
   if (!shop.enabled) {
     return (
-      <main className="grid min-h-[70vh] place-items-center px-4 pt-24">
+      <section className="grid min-h-[70vh] place-items-center px-4 pt-24">
         <div className="max-w-md text-center">
           <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-soul">{pick(COPY.comingSoon)}</h1>
           <p className="mt-4 text-sm leading-relaxed text-ash">{pick(COPY.comingSoonBody)}</p>
         </div>
-      </main>
+      </section>
     );
   }
 
@@ -472,7 +472,7 @@ export default function ShopClient() {
   ];
 
   return (
-    <main className="relative mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
+    <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
       {/* ambient violet wash + faint scanline grain — decorative, no layout impact */}
       <div
         aria-hidden
@@ -936,7 +936,7 @@ export default function ShopClient() {
           </div>,
           document.body
         )}
-    </main>
+    </div>
   );
 }
 

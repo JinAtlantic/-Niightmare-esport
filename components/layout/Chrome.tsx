@@ -21,7 +21,7 @@ export default function Chrome({ children }: { children: React.ReactNode }) {
   const isOverlay = pathname?.startsWith("/live/overlay");
 
   if (isAdmin || isOverlay) {
-    return <main className="min-h-screen">{children}</main>;
+    return <>{children}</>;
   }
 
   return (

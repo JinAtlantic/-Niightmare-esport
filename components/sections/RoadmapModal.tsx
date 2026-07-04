@@ -232,7 +232,7 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
             </div>
           </header>
 
-          <main className="relative z-10 bg-crypt p-3 md:p-6">
+          <section className="relative z-10 bg-crypt p-3 md:p-6">
             <div className="grid grid-cols-2 border border-edge bg-void/50 p-1">
               {roadmap.halves.map((item) => (
                 <button
@@ -268,7 +268,7 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
               </div>
             </motion.section>
 
-          </main>
+          </section>
         </div>
 
         <button

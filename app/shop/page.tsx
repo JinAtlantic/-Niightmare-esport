@@ -4,7 +4,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo";
 
 const shopDescription =
-  "Order the official NIIGHTMARE Esports team jersey. Spin a 3D model, pick your size, and preview the fit before you buy.";
+  "Order the official NIIGHTMARE Esports team jersey, choose your size, and pay by bank transfer.";
 
 export const metadata: Metadata = {
   title: "Shop — Team Jersey",
