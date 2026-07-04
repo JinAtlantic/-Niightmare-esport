@@ -30,7 +30,8 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "200+ team": "/teams/200-team.png",
   "4merical esports": "/teams/4merical-esports.png",
   "av gaming th": "/teams/av-gaming-th.png",
-  "bacon time": "/teams/bacon-time.png",
+  // "bacon time" — the "Bacon_*" file is a different org; real Bacon Time crest
+  // not found. Monogram until a correct logo is provided.
   "bte 404": "/teams/bte-404.png",
   "burmese ghouls": "/teams/burmese-ghouls.png",
   "cfu gaming": "/teams/cfu-gaming.png",
