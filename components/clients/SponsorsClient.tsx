@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -216,17 +217,17 @@ function SponsorModal({
     };
   }, [sponsor, onClose]);
 
-  if (!sponsor) return null;
+  if (!sponsor || typeof document === "undefined") return null;
 
   const hasDescription = sponsor.description && (sponsor.description.en || sponsor.description.lo);
   const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={sponsor.name}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -273,7 +274,8 @@ function SponsorModal({
           <SponsorConnect sponsor={sponsor} linked={linked} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
