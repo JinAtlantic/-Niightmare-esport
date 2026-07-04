@@ -9,8 +9,9 @@ const shopDescription =
 export const metadata: Metadata = {
   title: "Shop — Team Jersey",
   description: shopDescription,
-  openGraph: { title: "Shop — NIIGHTMARE Esports Jersey", description: shopDescription },
-  twitter: { title: "Shop — NIIGHTMARE Esports Jersey", description: shopDescription },
+  alternates: { canonical: "/shop" },
+  openGraph: { title: "Shop — NIIGHTMARE Esports Jersey", description: shopDescription, images: ["/opengraph-image.png"] },
+  twitter: { title: "Shop — NIIGHTMARE Esports Jersey", description: shopDescription, images: ["/twitter-image.png"] },
 };
 
 export default function ShopPage() {

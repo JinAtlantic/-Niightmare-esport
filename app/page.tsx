@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import React from "react";
 import Hero from "@/components/sections/Hero";
 import UpcomingMatch from "@/components/sections/UpcomingMatch";
@@ -9,6 +10,13 @@ import AboutUs from "@/components/sections/AboutUs";
 // import PartnerStrip from "@/components/sections/PartnerStrip";
 import JsonLd from "@/components/seo/JsonLd";
 import { upcomingEventSchema } from "@/lib/seo";
+
+// The homepage inherits its title/description/OG from the root layout metadata;
+// only add the self-referencing canonical so search engines collapse
+// apex/query-string variants onto the clean https://…/ URL.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   return (

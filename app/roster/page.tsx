@@ -9,8 +9,9 @@ const rosterDescription =
 export const metadata: Metadata = {
   title: "Roster",
   description: rosterDescription,
-  openGraph: { title: "Roster — NIIGHTMARE Esports", description: rosterDescription },
-  twitter: { title: "Roster — NIIGHTMARE Esports", description: rosterDescription },
+  alternates: { canonical: "/roster" },
+  openGraph: { title: "Roster — NIIGHTMARE Esports", description: rosterDescription, images: ["/opengraph-image.png"] },
+  twitter: { title: "Roster — NIIGHTMARE Esports", description: rosterDescription, images: ["/twitter-image.png"] },
 };
 
 export default function RosterPage() {

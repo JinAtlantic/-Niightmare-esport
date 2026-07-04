@@ -9,8 +9,9 @@ const achievementsDescription =
 export const metadata: Metadata = {
   title: "Achievements",
   description: achievementsDescription,
-  openGraph: { title: "Achievements — NIIGHTMARE Esports", description: achievementsDescription },
-  twitter: { title: "Achievements — NIIGHTMARE Esports", description: achievementsDescription },
+  alternates: { canonical: "/achievements" },
+  openGraph: { title: "Achievements — NIIGHTMARE Esports", description: achievementsDescription, images: ["/opengraph-image.png"] },
+  twitter: { title: "Achievements — NIIGHTMARE Esports", description: achievementsDescription, images: ["/twitter-image.png"] },
 };
 
 export default function AchievementsPage() {

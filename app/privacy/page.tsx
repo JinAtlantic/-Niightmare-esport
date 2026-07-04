@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How NIIGHTMARE Esports collects, uses, and protects your information, including recruitment and tryout applicant data.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

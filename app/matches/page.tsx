@@ -9,8 +9,9 @@ const matchesDescription =
 export const metadata: Metadata = {
   title: "Matches & Tournaments",
   description: matchesDescription,
-  openGraph: { title: "Matches & Tournaments — NIIGHTMARE Esports", description: matchesDescription },
-  twitter: { title: "Matches & Tournaments — NIIGHTMARE Esports", description: matchesDescription },
+  alternates: { canonical: "/matches" },
+  openGraph: { title: "Matches & Tournaments — NIIGHTMARE Esports", description: matchesDescription, images: ["/opengraph-image.png"] },
+  twitter: { title: "Matches & Tournaments — NIIGHTMARE Esports", description: matchesDescription, images: ["/twitter-image.png"] },
 };
 
 export default function MatchesPage() {

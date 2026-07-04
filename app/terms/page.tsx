@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "The terms governing use of the NIIGHTMARE Esports website, our intellectual property, third-party game trademarks, and submissions.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

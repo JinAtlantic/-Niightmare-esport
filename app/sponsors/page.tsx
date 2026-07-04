@@ -9,8 +9,9 @@ const sponsorsDescription =
 export const metadata: Metadata = {
   title: "Sponsors & Partners",
   description: sponsorsDescription,
-  openGraph: { title: "Sponsors & Partners — NIIGHTMARE Esports", description: sponsorsDescription },
-  twitter: { title: "Sponsors & Partners — NIIGHTMARE Esports", description: sponsorsDescription },
+  alternates: { canonical: "/sponsors" },
+  openGraph: { title: "Sponsors & Partners — NIIGHTMARE Esports", description: sponsorsDescription, images: ["/opengraph-image.png"] },
+  twitter: { title: "Sponsors & Partners — NIIGHTMARE Esports", description: sponsorsDescription, images: ["/twitter-image.png"] },
 };
 
 export default function SponsorsPage() {
