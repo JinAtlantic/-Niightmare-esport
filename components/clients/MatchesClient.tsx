@@ -816,7 +816,11 @@ function TournamentSelect({
   const place = () => {
     const r = triggerRef.current?.getBoundingClientRect();
     if (!r) return;
-    setBox({ left: r.left, top: r.bottom + 4, width: r.width, maxHeight: Math.max(180, window.innerHeight - r.bottom - 16) });
+    // Cap to ~60% of the viewport (mobile toolbars make full innerHeight unsafe),
+    // and clamp horizontally so the panel never runs past the screen edges.
+    const maxHeight = Math.max(160, Math.min(window.innerHeight * 0.6, window.innerHeight - r.bottom - 16));
+    const left = Math.max(8, Math.min(r.left, window.innerWidth - r.width - 8));
+    setBox({ left, top: r.bottom + 4, width: r.width, maxHeight });
   };
 
   useEffect(() => {
@@ -867,7 +871,7 @@ function TournamentSelect({
               <button
                 type="button"
                 onClick={() => choose("all")}
-                className={`block w-full truncate px-3 py-2.5 text-left font-mono text-xs font-bold uppercase tracking-[0.1em] transition-colors hover:bg-edge/60 ${value === "all" ? "bg-amethyst/15 text-soul" : "text-ash"}`}
+                className={`block w-full whitespace-normal break-words px-3 py-2 text-left font-mono text-[11px] font-bold uppercase leading-snug tracking-[0.08em] transition-colors hover:bg-edge/60 ${value === "all" ? "bg-amethyst/15 text-soul" : "text-ash"}`}
               >
                 {allLabel}
               </button>
@@ -881,7 +885,7 @@ function TournamentSelect({
                       key={o.key}
                       type="button"
                       onClick={() => choose(o.key)}
-                      className={`block w-full truncate px-3 py-2.5 text-left font-mono text-xs font-bold uppercase tracking-[0.08em] transition-colors hover:bg-edge/60 ${value === o.key ? "bg-amethyst/15 text-soul" : "text-ash"}`}
+                      className={`block w-full whitespace-normal break-words px-3 py-2 text-left font-mono text-[11px] font-bold uppercase leading-snug tracking-[0.06em] transition-colors hover:bg-edge/60 ${value === o.key ? "bg-amethyst/15 text-soul" : "text-ash"}`}
                     >
                       {pick(o.label)}
                     </button>
