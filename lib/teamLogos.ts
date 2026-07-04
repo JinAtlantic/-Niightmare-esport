@@ -30,12 +30,13 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "200+ team": "/teams/200-team.png",
   "4merical esports": "/teams/4merical-esports.png",
   "av gaming th": "/teams/av-gaming-th.png",
-  "bacon": "/teams/bacon.png",
+  "bacon time": "/teams/bacon-time.png",
   "bte 404": "/teams/bte-404.png",
   "burmese ghouls": "/teams/burmese-ghouls.png",
   "cfu gaming": "/teams/cfu-gaming.png",
   "evil": "/teams/evil.png",
   "fire flux esports": "/teams/fire-flux-esports.png",
+  "gamelab": "/teams/gamelab.png",
   "geek fam id": "/teams/geek-fam-id.png",
   "geek slate": "/teams/geek-slate.png",
   "geekay esports": "/teams/geekay-esports.png",
@@ -60,6 +61,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "red giants esports": "/teams/red-giants-esports.png",
   "saigon phantom": "/teams/saigon-phantom.png",
   "spr esports": "/teams/spr-esports.png",
+  "sunset ravens": "/teams/sunset-ravens.png",
   "team evo": "/teams/team-evo.png",
   "team falcons": "/teams/team-falcons.png",
   "team falcons mena": "/teams/team-falcons.png", // same org (MENA division)
@@ -68,6 +70,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "team smg": "/teams/team-smg.png",
   "team x": "/teams/team-x.png",
   "the drift": "/teams/the-drift.png",
+  "the mongolz": "/teams/the-mongolz.png",
   "the sixstar octagarm": "/teams/the-sixstar-octagarm.png",
   "ulfhednar": "/teams/ulfhednar.png",
   "valhalla": "/teams/valhalla.png",
@@ -78,6 +81,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "wawa gaming th": "/teams/wawa-gaming-th.png",
   "zenith esports": "/teams/zenith-esports.png",
   "zeta division": "/teams/zeta-division.png",
+  "zino zenith": "/teams/zino-zenith.png",
 };
 
 /** Resolve the registry logo path for an opponent team, if we have one. */
