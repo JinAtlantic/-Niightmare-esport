@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
 import { BilingualField, Button, Card, Collapsible, ImageField, Label, Section, TextArea, TextField } from "@/components/admin/ui";
 import sponsorsSeed from "@/data/sponsors.json";
@@ -43,7 +43,9 @@ interface SponsorCta {
 interface SponsorsFile {
   page?: SponsorsPageCopy;
   sponsors: Sponsor[];
-  tiers: SponsorTier[];
+  // Legacy sponsorship tiers are no longer edited or shown; kept only so a save
+  // doesn't wipe the existing rows. Not surfaced anywhere in the UI.
+  tiers?: SponsorTier[];
 }
 
 const DEFAULT_PAGE = sponsorsSeed.page as SponsorsPageCopy;
@@ -91,6 +93,132 @@ function BilingualTextArea({
   );
 }
 
+/** How many contact channels a sponsor has filled — shown in the collapsed row. */
+function channelCount(sponsor: Sponsor) {
+  const s = sponsor.socials ?? {};
+  const filled = SOCIAL_FIELDS.filter(({ key }) => (s[key] ?? "").trim()).length;
+  const web = sponsor.url && sponsor.url.trim() && sponsor.url.trim() !== "#" ? 1 : 0;
+  return filled + web;
+}
+
+/** One collapsible partner row — collapsed shows logo + name; open shows the editor. */
+function SponsorRow({
+  sponsor,
+  index,
+  total,
+  onPatch,
+  onMove,
+  onRemove,
+}: {
+  sponsor: Sponsor;
+  index: number;
+  total: number;
+  onPatch: (patch: Partial<Sponsor>) => void;
+  onMove: (dir: -1 | 1) => void;
+  onRemove: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const channels = channelCount(sponsor);
+  const hasDesc = Boolean(sponsor.description && (sponsor.description.en || sponsor.description.lo));
+
+  return (
+    <div className="border border-edge bg-crypt/40">
+      {/* header */}
+      <div className="flex items-stretch justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-crypt"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden border border-edge bg-void/60">
+            {sponsor.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={sponsor.logo} alt="" className="h-full w-full object-contain" />
+            ) : (
+              <span className="font-mono text-[10px] font-bold text-ash-dim">
+                {(sponsor.name || "?").slice(0, 2).toUpperCase()}
+              </span>
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate font-display text-sm font-bold uppercase tracking-wide text-soul">
+              {sponsor.name || "ยังไม่ตั้งชื่อ"}
+            </span>
+            <span className="mt-0.5 block font-mono text-[10px] text-ash-dim">
+              {sponsor.logo ? "โลโก้ ✓" : "ยังไม่มีโลโก้"} · {channels} ช่องทาง
+              {hasDesc ? " · มีคำอธิบาย" : ""}
+            </span>
+          </span>
+          <span
+            aria-hidden
+            className={`ml-auto shrink-0 font-mono text-lg leading-none text-amethyst transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          >
+            ⌄
+          </span>
+        </button>
+        <div className="flex shrink-0 items-center gap-1 pr-2">
+          <Button onClick={() => onMove(-1)} disabled={index === 0} className="min-h-[34px] px-2.5">↑</Button>
+          <Button onClick={() => onMove(1)} disabled={index === total - 1} className="min-h-[34px] px-2.5">↓</Button>
+        </div>
+      </div>
+
+      {/* body */}
+      {open && (
+        <div className="space-y-4 border-t border-edge p-4">
+          <TextField
+            label="ชื่อ partner"
+            value={sponsor.name}
+            onChange={(name) => onPatch({ name })}
+          />
+          <ImageField
+            label="โลโก้"
+            value={sponsor.logo}
+            folder="sponsors"
+            onChange={(logo) => onPatch({ logo })}
+          />
+          <TextField
+            label="เว็บไซต์ (Website)"
+            value={sponsor.url}
+            onChange={(url) => onPatch({ url })}
+            placeholder="https://... หรือเว้นว่างถ้าไม่มี"
+          />
+          <BilingualField
+            label="หมวดหมู่ / ประเภทธุรกิจ"
+            value={sponsor.category ?? { en: "", lo: "" }}
+            onChange={(category) => onPatch({ category })}
+          />
+          <BilingualTextArea
+            label="คำอธิบาย (โชว์ใน popup)"
+            value={sponsor.description ?? { en: "", lo: "" }}
+            rows={3}
+            onChange={(description) => onPatch({ description })}
+          />
+          <div>
+            <Label>ช่องทาง Social / ติดต่อ (ใส่เฉพาะที่มี — ช่องว่างจะไม่โชว์)</Label>
+            <div className="grid gap-2 md:grid-cols-2">
+              {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
+                <TextField
+                  key={key}
+                  label={label}
+                  value={sponsor.socials?.[key] ?? ""}
+                  onChange={(v) => onPatch({ socials: { ...(sponsor.socials ?? {}), [key]: v } })}
+                  placeholder={placeholder}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end border-t border-edge pt-3">
+            <Button variant="danger" onClick={onRemove}>
+              ลบ partner นี้
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SponsorsEditor() {
   const { data, setData, loading, saving, error, savedAt, save } =
     useData<SponsorsFile>("sponsors");
@@ -99,7 +227,7 @@ export default function SponsorsEditor() {
   if (!data)
     return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
 
-  const { sponsors, tiers } = data;
+  const { sponsors } = data;
   const page = { ...DEFAULT_PAGE, ...(data.page ?? {}) };
   const patchPage = (patch: Partial<SponsorsPageCopy>) =>
     setData({ ...data, page: { ...page, ...patch } });
@@ -110,44 +238,20 @@ export default function SponsorsEditor() {
     patchPage({ valueProps });
   };
   const setSponsors = (next: Sponsor[]) => setData({ ...data, sponsors: next });
-  const setTiers = (next: SponsorTier[]) => setData({ ...data, tiers: next });
 
   const patchSponsor = (i: number, patch: Partial<Sponsor>) =>
     setSponsors(sponsors.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
-  const patchTier = (i: number, patch: Partial<SponsorTier>) =>
-    setTiers(tiers.map((tier, idx) => (idx === i ? { ...tier, ...patch } : tier)));
-  const patchBenefit = (tierIndex: number, benefitIndex: number, value: SponsorTier["benefits"][number]) => {
-    const tier = tiers[tierIndex];
-    if (!tier) return;
-    const benefits = tier.benefits.map((benefit, idx) =>
-      idx === benefitIndex ? value : benefit
-    );
-    patchTier(tierIndex, { benefits });
-  };
 
   const addSponsor = () =>
     setSponsors([
       ...sponsors,
-      { id: uid("s"), name: "New Partner", url: "#", logo: "" },
-    ]);
-
-  const addTier = () =>
-    setTiers([
-      ...tiers,
-      {
-        id: uid("tier"),
-        name: { en: "NEW SPONSOR TIER", lo: "ລະດັບສະປອນເຊີໃໝ່" },
-        color: "#A855F7",
-        benefits: [{ en: "Benefit detail", lo: "ລາຍລະອຽດສິດປະໂຫຍດ" }],
-      },
+      { id: uid("s"), name: "New Partner", url: "", logo: "" },
     ]);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 border-b border-edge bg-void/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
-        <p className="font-mono text-xs text-ash">
-          {sponsors.length} partners / {tiers.length} tiers
-        </p>
+        <p className="font-mono text-xs text-ash">{sponsors.length} partners</p>
         <div className="flex items-center gap-3">
           {error && <span className="font-mono text-[11px] text-loss">{error}</span>}
           {savedAt && !error && !saving && (
@@ -159,11 +263,37 @@ export default function SponsorsEditor() {
         </div>
       </div>
 
+      <Section
+        title="Partners"
+        hint="คลิกที่ชื่อเพื่อเปิดแก้ไข — โลโก้ / คำอธิบาย / ช่องทางติดต่อ"
+        defaultOpen
+        collapsible={false}
+        action={<Button onClick={addSponsor}>+ เพิ่ม partner</Button>}
+      >
+        <div className="space-y-2">
+          {sponsors.map((sponsor, i) => (
+            <SponsorRow
+              key={sponsor.id}
+              sponsor={sponsor}
+              index={i}
+              total={sponsors.length}
+              onPatch={(patch) => patchSponsor(i, patch)}
+              onMove={(dir) => setSponsors(move(sponsors, i, dir))}
+              onRemove={() => setSponsors(sponsors.filter((_, idx) => idx !== i))}
+            />
+          ))}
+          {sponsors.length === 0 && (
+            <p className="border border-dashed border-edge bg-void/30 px-4 py-6 text-center font-mono text-xs text-ash-dim">
+              ยังไม่มี partner — กด “+ เพิ่ม partner”
+            </p>
+          )}
+        </div>
+      </Section>
+
       <Collapsible
         title="ข้อความหน้า Sponsors"
-        hint="ข้อความทั้งหมดบนหน้า Sponsors — แก้นานๆ ครั้ง"
+        hint="หัวข้อ / คำโปรย / การ์ด Benefit / ปุ่ม CTA — แก้นานๆ ครั้ง"
       >
-
         <Card className="space-y-4">
           <BilingualField
             label="Hero title"
@@ -182,21 +312,11 @@ export default function SponsorsEditor() {
               onChange={(partnersLabel) => patchPage({ partnersLabel })}
             />
             <BilingualField
-              label="Tiers section label"
-              value={page.tiersLabel}
-              onChange={(tiersLabel) => patchPage({ tiersLabel })}
+              label="Value strip label"
+              value={page.valueLabel}
+              onChange={(valueLabel) => patchPage({ valueLabel })}
             />
           </div>
-          <BilingualTextArea
-            label="Tiers intro"
-            value={page.tiersIntro}
-            onChange={(tiersIntro) => patchPage({ tiersIntro })}
-          />
-          <BilingualField
-            label="Value strip label"
-            value={page.valueLabel}
-            onChange={(valueLabel) => patchPage({ valueLabel })}
-          />
 
           <div className="grid gap-4 md:grid-cols-2">
             {page.valueProps.slice(0, 4).map((item, i) => (
@@ -271,168 +391,6 @@ export default function SponsorsEditor() {
           </div>
         </Card>
       </Collapsible>
-
-      <Section
-        title="Partners"
-        hint="รายชื่อพาร์ทเนอร์ที่แสดงในหน้า Sponsors"
-        action={<Button onClick={addSponsor}>+ เพิ่ม partner</Button>}
-      >
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {sponsors.map((sponsor, i) => (
-            <Card key={sponsor.id} className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate font-mono text-xs text-spectre">
-                  {sponsor.name || "New Partner"}
-                </span>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <Button onClick={() => setSponsors(move(sponsors, i, -1))}>↑</Button>
-                  <Button onClick={() => setSponsors(move(sponsors, i, 1))}>↓</Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => setSponsors(sponsors.filter((_, idx) => idx !== i))}
-                  >
-                    ลบ
-                  </Button>
-                </div>
-              </div>
-              <TextField
-                label="ชื่อ partner"
-                value={sponsor.name}
-                onChange={(name) => patchSponsor(i, { name })}
-              />
-              <ImageField
-                label="Sponsor logo"
-                value={sponsor.logo}
-                folder="sponsors"
-                onChange={(logo) => patchSponsor(i, { logo })}
-              />
-              <TextField
-                label="เว็บไซต์ (Website)"
-                value={sponsor.url}
-                onChange={(url) => patchSponsor(i, { url })}
-                placeholder="https://... หรือ #"
-              />
-              <BilingualField
-                label="หมวดหมู่ / ประเภทธุรกิจ"
-                value={sponsor.category ?? { en: "", lo: "" }}
-                onChange={(category) => patchSponsor(i, { category })}
-              />
-              <BilingualTextArea
-                label="คำอธิบาย (โชว์ใน popup)"
-                value={sponsor.description ?? { en: "", lo: "" }}
-                rows={3}
-                onChange={(description) => patchSponsor(i, { description })}
-              />
-              <Collapsible title="ช่องทาง Social / ติดต่อ" hint="ใส่เฉพาะที่มี — ช่องว่างจะไม่โชว์">
-                <div className="grid gap-2 md:grid-cols-2">
-                  {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
-                    <TextField
-                      key={key}
-                      label={label}
-                      value={sponsor.socials?.[key] ?? ""}
-                      onChange={(v) =>
-                        patchSponsor(i, {
-                          socials: { ...(sponsor.socials ?? {}), [key]: v },
-                        })
-                      }
-                      placeholder={placeholder}
-                    />
-                  ))}
-                </div>
-              </Collapsible>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      <Section
-        title="Sponsorship Tiers"
-        hint="แพ็กเกจสปอนเซอร์และสิทธิประโยชน์ที่ใช้ต่อรองราคา"
-        action={<Button onClick={addTier}>+ เพิ่ม tier</Button>}
-      >
-
-        <div className="space-y-4">
-          {tiers.map((tier, i) => (
-            <Card key={tier.id} className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-mono text-xs text-spectre">
-                  {tier.name.en || tier.name.lo || "New tier"}
-                </span>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <Button onClick={() => setTiers(move(tiers, i, -1))}>↑</Button>
-                  <Button onClick={() => setTiers(move(tiers, i, 1))}>↓</Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => setTiers(tiers.filter((_, idx) => idx !== i))}
-                  >
-                    ลบ
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-[1fr_180px]">
-                <BilingualField
-                  label="ชื่อ tier"
-                  value={tier.name}
-                  onChange={(name) => patchTier(i, { name })}
-                />
-                <TextField
-                  label="สี accent"
-                  value={tier.color}
-                  onChange={(color) => patchTier(i, { color })}
-                  placeholder="#A855F7"
-                />
-              </div>
-
-              <div>
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                    Benefits
-                  </h3>
-                  <Button
-                    onClick={() =>
-                      patchTier(i, {
-                        benefits: [
-                          ...tier.benefits,
-                          { en: "New benefit", lo: "ສິດປະໂຫຍດໃໝ່" },
-                        ],
-                      })
-                    }
-                  >
-                    + benefit
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  {tier.benefits.map((benefit, benefitIndex) => (
-                    <div key={benefitIndex} className="grid gap-2 md:grid-cols-[1fr_auto]">
-                      <BilingualField
-                        label={`Benefit ${benefitIndex + 1}`}
-                        value={benefit}
-                        onChange={(value) => patchBenefit(i, benefitIndex, value)}
-                      />
-                      <div className="flex items-end">
-                        <Button
-                          variant="danger"
-                          onClick={() =>
-                            patchTier(i, {
-                              benefits: tier.benefits.filter(
-                                (_, idx) => idx !== benefitIndex
-                              ),
-                            })
-                          }
-                        >
-                          ลบ
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Section>
     </div>
   );
 }
