@@ -96,75 +96,124 @@
   "sponsors": [
     {
       "id": "s1",
-      "name": "Mekong Mobile",
+      "name": "Apollo Entertainment",
       "url": "#",
       "logo": "",
-      "category": { "en": "Telecom", "lo": "ໂທລະຄົມ" },
+      "category": { "en": "Entertainment", "lo": "ບັນເທີງ" },
       "description": {
-        "en": "A leading Lao mobile carrier powering fast data and nationwide coverage for the NIIGHTMARE squad on the road.",
-        "lo": "ຜູ້ໃຫ້ບໍລິການມືຖືຊັ້ນນຳຂອງລາວ ຮັບປະກັນສັນຍານໄວ ແລະຄຸ້ມຄອງທົ່ວປະເທດໃຫ້ທີມ NIIGHTMARE."
+        "en": "An entertainment and events partner supporting NIIGHTMARE's shows and community moments.",
+        "lo": "ພາກສ່ວນດ້ານບັນເທີງ ແລະງານອີເວັນທ໌ ທີ່ຮ່ວມສະໜັບສະໜູນ NIIGHTMARE ໃນເວທີ ແລະຊ່ວງເວລາຂອງແຟນຄັບ."
       },
-      "socials": { "facebook": "#", "whatsapp": "#" }
+      "socials": {}
     },
     {
       "id": "s2",
-      "name": "Lao Net",
+      "name": "M Frolic",
       "url": "#",
       "logo": "",
-      "category": { "en": "Internet / ISP", "lo": "ອິນເຕີເນັດ" },
+      "category": { "en": "Entertainment", "lo": "ບັນເທີງ" },
       "description": {
-        "en": "High-speed fibre internet keeping the team's scrims, streams, and online matches lag-free.",
-        "lo": "ອິນເຕີເນັດໄຟເບີຄວາມໄວສູງ ຊ່ວຍໃຫ້ການຝຶກຊ້ອມ ຖ່າຍທອດ ແລະການແຂ່ງອອນລາຍລ້ຽນໄຫຼ."
+        "en": "A Lao entertainment brand teaming up with NIIGHTMARE on content and events.",
+        "lo": "ແບຣນບັນເທີງລາວ ທີ່ຮ່ວມກັບ NIIGHTMARE ໃນຄອນເທນ ແລະງານຕ່າງໆ."
       },
-      "socials": { "facebook": "#", "tiktok": "#" }
+      "socials": { "facebook": "https://www.facebook.com/people/M-Frolic/100063707822167/" }
     },
     {
       "id": "s3",
-      "name": "ThunderGear",
+      "name": "Vibes Cafe VTE",
       "url": "#",
       "logo": "",
-      "category": { "en": "Gaming Hardware", "lo": "ອຸປະກອນເກມ" },
+      "category": { "en": "Café", "lo": "ຄາເຟ່" },
       "description": {
-        "en": "Pro-grade peripherals and gaming gear trusted by the roster for every practice and LAN.",
-        "lo": "ອຸປະກອນເກມລະດັບມືອາຊີບ ທີ່ນັກກິລາໄວ້ວາງໃຈໃນທຸກການຝຶກຊ້ອມ ແລະງານ LAN."
+        "en": "A laid-back Vientiane café with pool vibes, live music and great coffee — a chill spot for the community.",
+        "lo": "ຄາເຟ່ບັນຍາກາດຊິວໆໃນວຽງຈັນ ພ້ອມສະລອຍນ້ຳ ດົນຕີສົດ ແລະກາເຟລົດຊາດດີ ເປັນບ່ອນພັກຜ່ອນຂອງຊຸມຊົນ."
       },
-      "socials": { "facebook": "#", "instagram": "#", "youtube": "#" }
+      "socials": { "instagram": "https://www.instagram.com/vibescafevte/" }
     },
     {
       "id": "s4",
-      "name": "Vientiane Bank",
+      "name": "SV Garage",
       "url": "#",
       "logo": "",
-      "category": { "en": "Banking", "lo": "ທະນາຄານ" },
+      "category": { "en": "Automotive", "lo": "ບໍລິການລົດ" },
       "description": {
-        "en": "A trusted financial partner backing the club's growth and its journey to bigger stages.",
-        "lo": "ຄູ່ຮ່ວມທາງການເງິນທີ່ໜ້າເຊື່ອຖື ສະໜັບສະໜູນການເຕີບໂຕຂອງສະໂມສອນສູ່ເວທີໃຫຍ່ຂຶ້ນ."
+        "en": "An automotive service partner keeping the team rolling.",
+        "lo": "ພາກສ່ວນບໍລິການລົດ ທີ່ຊ່ວຍໃຫ້ທີມເດີນທາງໄດ້ຢ່າງໝັ້ນໃຈ."
       },
-      "socials": { "facebook": "#", "phone": "" }
+      "socials": {}
     },
     {
       "id": "s5",
-      "name": "Riverside Energy",
-      "url": "#",
+      "name": "Senglao Café",
+      "url": "https://senglaocafe.com/",
       "logo": "",
-      "category": { "en": "Energy Drink", "lo": "ເຄື່ອງດື່ມຊູກຳລັງ" },
+      "category": { "en": "Café", "lo": "ຄາເຟ່" },
       "description": {
-        "en": "The energy drink that keeps NIIGHTMARE sharp and focused through long tournament days.",
-        "lo": "ເຄື່ອງດື່ມຊູກຳລັງທີ່ຊ່ວຍໃຫ້ NIIGHTMARE ຄົມ ແລະຈົດຈໍ່ຕະຫຼອດມື້ແຂ່ງຂັນຍາວນານ."
+        "en": "A beloved Vientiane café known for fusion food, retro American décor and a warm, lively atmosphere.",
+        "lo": "ຄາເຟ່ຊື່ດັງໃນວຽງຈັນ ຂຶ້ນຊື່ເລື່ອງອາຫານຟິວຊັນ ການຕົກແຕ່ງແບບຍ້ອນຍຸກ ແລະບັນຍາກາດອົບອຸ່ນ."
       },
-      "socials": { "facebook": "#", "instagram": "#", "tiktok": "#" }
+      "socials": {
+        "facebook": "https://www.facebook.com/SenglaoCafe/",
+        "instagram": "https://www.instagram.com/senglaocafe/",
+        "phone": "+856 30 58 80 588"
+      }
     },
     {
       "id": "s6",
-      "name": "Nightfall Apparel",
+      "name": "WHR",
+      "url": "#",
+      "logo": "",
+      "description": {
+        "en": "An official NIIGHTMARE partner.",
+        "lo": "ພາກສ່ວນທາງການຂອງ NIIGHTMARE."
+      },
+      "socials": {}
+    },
+    {
+      "id": "s7",
+      "name": "DML",
+      "url": "#",
+      "logo": "",
+      "description": {
+        "en": "An official NIIGHTMARE partner.",
+        "lo": "ພາກສ່ວນທາງການຂອງ NIIGHTMARE."
+      },
+      "socials": {}
+    },
+    {
+      "id": "s8",
+      "name": "Good Start",
+      "url": "#",
+      "logo": "",
+      "description": {
+        "en": "An official NIIGHTMARE partner.",
+        "lo": "ພາກສ່ວນທາງການຂອງ NIIGHTMARE."
+      },
+      "socials": {}
+    },
+    {
+      "id": "s9",
+      "name": "IPEDD",
       "url": "#",
       "logo": "",
       "category": { "en": "Apparel", "lo": "ເສື້ອຜ້າ" },
       "description": {
-        "en": "Official apparel partner crafting the team's jerseys and fan merchandise.",
-        "lo": "ຄູ່ຮ່ວມເສື້ອຜ້າທາງການ ຜູ້ຜະລິດເສື້ອແຂ່ງ ແລະສິນຄ້າສຳລັບແຟນຄັບ."
+        "en": "A Lao clothing brand crafting 100% cotton, made-in-Laos apparel.",
+        "lo": "ແບຣນເສື້ອຜ້າລາວ ຜະລິດຈາກຝ້າຍ 100% ຜະລິດໃນລາວ."
       },
-      "socials": { "facebook": "#", "instagram": "#" }
+      "socials": { "facebook": "https://www.facebook.com/Ipeddofficial/" }
+    },
+    {
+      "id": "s10",
+      "name": "Lao Esports Federation",
+      "url": "https://laoesports.com/",
+      "logo": "",
+      "category": { "en": "Esports Federation", "lo": "ສະຫະພັນອີສະປອດ" },
+      "description": {
+        "en": "The official governing body for esports in Laos — developing talent and growing the national scene.",
+        "lo": "ອົງກອນທາງການທີ່ຄຸ້ມຄອງອີສະປອດຢູ່ລາວ ພັດທະນານັກກິລາ ແລະຂະຫຍາຍວົງການລະດັບຊາດ."
+      },
+      "socials": { "facebook": "https://www.facebook.com/LaoeSportsFederation/" }
     }
   ],
   "tiers": [
