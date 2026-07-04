@@ -7,8 +7,6 @@ import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/context/LanguageContext";
 import LanguageToggle from "@/components/ui/LanguageToggle";
 import { CloseIcon, MenuIcon } from "@/components/ui/Icons";
-import { useContent } from "@/components/context/ContentContext";
-import { safeHref } from "@/lib/safety";
 
 const NAV_ITEMS = [
   { href: "/", key: "nav.home" },
@@ -21,11 +19,9 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const { t } = useLanguage();
-  const { site } = useContent();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const communityHref = safeHref(site.communityUrl);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -90,19 +86,9 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {/* Right: language toggle + CTA (desktop) */}
+          {/* Right: language toggle (desktop) */}
           <div className="hidden items-center gap-4 lg:flex">
             <LanguageToggle />
-            {communityHref && (
-              <a
-                href={communityHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border border-amethyst-deep px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15 hover:shadow-[0_0_22px_rgba(168,85,247,0.3)]"
-              >
-                {t("nav.join_community")}
-              </a>
-            )}
           </div>
 
           {/* Mobile controls */}
@@ -171,18 +157,6 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-          <div className="mt-auto p-4">
-            {communityHref && (
-              <a
-                href={communityHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-h-[44px] items-center justify-center border border-amethyst-deep px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-soul transition-all duration-200 hover:border-amethyst hover:bg-amethyst/15"
-              >
-                {t("nav.join_community")}
-              </a>
-            )}
-          </div>
         </aside>
       </div>
     </>
