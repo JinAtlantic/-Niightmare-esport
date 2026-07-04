@@ -82,6 +82,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "virtus.pro": "/teams/virtus-pro.png",
   "wawa gaming": "/teams/wawa-gaming.png",
   "wawa gaming th": "/teams/wawa-gaming-th.png",
+  "wonderer panda": "/teams/wonderer-panda-mqdsgyo6.jpg",
   "zenith esports": "/teams/zenith-esports.png",
   "zeta division": "/teams/zeta-division.png",
   "zino zenith": "/teams/zino-zenith.png",
