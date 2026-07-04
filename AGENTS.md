@@ -173,24 +173,50 @@ a sub-editor in `HomeEditor`. The component reads `useContent().site.<key>` and 
 back to the default — so the block renders before anything is ever saved.
 
 ## Recently redesigned
-**Sponsors page (2026-07-03):** `components/clients/SponsorsClient.tsx` was rebuilt to be
-**logo-first** — a compact tile grid (2 cols mobile → 4 lg) where the logo is the hero and
-each tile clicks open a redesigned popup. The popup now shows **real per-sponsor data**: a
-category chip, an "About" description, and a **Connect** row of social/contact icons (only
-the filled ones render, like a player card) + a Visit Website button. The old identical
-`PARTNER_POINTS` boilerplate modal is gone; missing description falls back to a clean generic
-line so it never looks empty. The value-prop cards + CTA band were kept but made **compact**
-(less mobile scroll). `Sponsor` gained `category`/`description` (Bilingual) + `socials`
+**Sponsors revamp (2026-07-04):** `components/clients/SponsorsClient.tsx` is now **logo-first** —
+a compact tile grid (2 cols mobile → 4 lg) where the logo is the hero and each tile opens a
+redesigned popup with **real per-sponsor data**: a category chip, an "About" description, and a
+**Connect** row of social/contact icons (only filled ones render, like a player card) + a Visit
+Website button. The popup is **portaled to `document.body`** (`createPortal`) so it always centres
+in the viewport (a transformed ancestor otherwise anchored the `fixed` layer to the section).
+`Sponsor` gained `category`/`description` (Bilingual) + `socials`
 (`facebook/instagram/tiktok/youtube/whatsapp/phone`; website = `Sponsor.url`) — persisted as
-**three new jsonb columns on `sponsors`** (`sponsorRows` in `lib/migrate.ts`, read in
+**three jsonb columns on `sponsors`** (`sponsorRows` in `lib/migrate.ts`, read in
 `lib/contentFromSupabase.ts` via `jsonBi`), edited in **/admin → Sponsors**. New icons
-`GlobeIcon`/`PhoneIcon` in `components/ui/Icons.tsx`. **Run before saving sponsors in admin**
-(else the save 500s on the missing column):
-`alter table public.sponsors add column if not exists category jsonb;`
-`alter table public.sponsors add column if not exists description jsonb;`
-`alter table public.sponsors add column if not exists socials jsonb;`
-Sample category/description copy is seeded in `data/sponsors.json` (fallback only — live reads
-Supabase, so per-sponsor copy shows once the owner fills it in /admin or it's pushed to the DB).
+`GlobeIcon`/`PhoneIcon` in `components/ui/Icons.tsx`. Columns to run before saving sponsors in
+admin (else the save 500s): `alter table public.sponsors add column if not exists category jsonb;`
+`… description jsonb;` `… socials jsonb;` (already run on the live DB).
+- **Admin editor is an accordion** now (`components/admin/SponsorsEditor.tsx`): each partner is a
+  collapsed row (logo thumb + name + status) you click to edit — far easier for a long list.
+- **Sponsorship Tiers were removed** (unused, never rendered): the editor UI + the page copy's
+  tier fields are gone, and the `sponsor_tiers` table was **wiped to 0 rows**. `SponsorTier` /
+  `tierRows` / the `sponsor_tiers` read+write still exist in the lib layer (harmless) and the
+  editor passes `tiers` through untouched so a save doesn't recreate them.
+- **CTA band** is just a short **"Become Our Partner" / "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ"** invite
+  (hardcoded `COPY.ctaInvite`) + buttons; the descriptive `ctaBody` paragraph was dropped.
+- **Footer partner marquee** (`components/layout/SponsorMarquee.tsx`, mounted in `Footer.tsx`)
+  **replaced the Quick Links column**: a full-width band of partner logos auto-scrolling
+  left→right (CSS `.marquee-track`/`@keyframes sponsor-marquee` in `globals.css`, seamless via a
+  duplicated aria-hidden second copy, edge fade mask, pause-on-hover, frozen under
+  reduced-motion). Footer top grid dropped to 2 cols. Logos show once uploaded; until then each
+  partner renders as a **name wordmark**. Shared `partnersLabel` (footer + home `PartnerStrip` +
+  sponsors page) Lao is **"partners ຂອງເຮົາ"**.
+
+**GOTCHA — sponsors `page` copy is SEED-ONLY:** the sponsors-file `page` block (hero/labels/
+valueProps/CTA) is NOT persisted to Supabase — `supabaseWrite`'s `sponsors` branch only writes
+the `sponsors` + `sponsor_tiers` tables, and `contentFromSupabase` builds `page` from
+`data/sponsors.json`. So editing page copy in /admin does nothing live; to change it you must
+edit the seed + deploy. Per-sponsor rows (name/logo/category/description/socials) DO persist via
+Supabase and show instantly. Publish sponsor rows to live from a script by PUTting
+`/api/admin/data?file=sponsors` with a minted admin token (send the full sponsors list +
+current tiers so nothing is wiped) — same pattern as `scripts/sync-results.mjs`.
+
+**Sponsor data status (as of 2026-07-04):** 10 real sponsors are live (Apollo Entertainment,
+M Frolic, Vibes Cafe VTE, SV Garage, Senglao Café, WHR, DML, Good Start, IPEDD, Lao Esports
+Federation). Verified links filled: Senglao (FB/IG/web/phone), LESF (FB/web), Vibes (IG), IPEDD
+(FB), M Frolic (FB). **Still needs owner input:** what WHR / DML / Good Start are (not found
+online — left generic, no links), correct FB links for Apollo + SV Garage, and **real logo files
+for all 10** (currently wordmark fallback everywhere).
 
 `components/sections/UpcomingMatch.tsx` — the home "UPCOMING MATCH" fixture card was
 rebuilt as a split-arena broadcast card (mobile-first: stacked → side-by-side on `md`,
