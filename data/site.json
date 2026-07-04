@@ -13,7 +13,7 @@
     "instagram": "https://instagram.com/niightmareesports",
     "youtube": "https://youtube.com/@niightmareesports",
     "tiktok": "https://tiktok.com/@niightmareesports",
-    "discord": "https://discord.gg/niightmare"
+    "discord": ""
   },
   "contactPage": {
     "kicker": {
@@ -151,7 +151,7 @@
       "lo": "ມີບາງຢ່າງຜິດພາດ. ກະລຸນາສົ່ງອີເມວໂດຍກົງຫາ"
     }
   },
-  "communityUrl": "https://discord.gg/niightmare",
+  "communityUrl": "",
   "formspreeEndpoint": "https://formspree.io/f/your-form-id",
   "mediaKitUrl": "/media-kit.pdf",
   "matchSchedule": {
