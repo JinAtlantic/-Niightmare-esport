@@ -73,6 +73,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "team smg": "/teams/team-smg.png",
   "team x": "/teams/team-x.png",
   "the drift": "/teams/the-drift.png",
+  "the huns esport": "/teams/the-huns-esport.png",
   "the mongolz": "/teams/the-mongolz.png",
   "the sixstar octagarm": "/teams/the-sixstar-octagarm.png",
   "ulfhednar": "/teams/ulfhednar.png",
