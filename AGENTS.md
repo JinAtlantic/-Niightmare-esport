@@ -471,3 +471,124 @@ which statuses push, edit `SHOP_NOTIFY` in `lib/push.ts`.
 Possible follow-ups (only if asked): a real payment gateway (e.g. BCEL OnePay) for
 automatic transfer verification; a real `.glb` model + re-enabled vanilla-Three.js
 preview.
+
+## Claude Code handoff - launch hardening deploy (2026-07-04)
+
+Latest launch-readiness work was completed, committed, pushed, and promoted on Vercel.
+
+Commit:
+- `1d60b7c Harden shop payment flow before launch`
+- Pushed to `origin/main`
+- Vercel deployment for this commit reached `READY` / `PROMOTED`
+
+What changed:
+- Hardened `app/api/shop/order/route.ts`:
+  - `body.intent` must now be explicitly `"reserve"` or `"pay"`; missing/unknown intent returns 400.
+  - PAY now requires a valid UUID `orderId`, a non-empty sanitized ref code, a payment slip, and configured Supabase storage.
+  - PAY updates only an existing row matching `id + ref_code + status='awaiting_payment'`.
+  - PAY rejects expired reservations by checking `created_at` against `SHOP_PAYMENT_WINDOW_HOURS`.
+  - Removed the old fallback that inserted a fresh `paid_declared` order when update failed. This was the main pre-launch risk.
+- Updated `next.config.js` CSP:
+  - Dev keeps `'unsafe-eval'` so Next dev hydration/debugging works.
+  - Added `https://va.vercel-scripts.com` for Vercel Analytics scripts.
+- Updated `app/sitemap.ts` to include `/shop` and `/achievements`.
+- Updated `/shop` metadata in `app/shop/page.tsx` so it no longer mentions a removed 3D model.
+- Fixed nested landmark markup:
+  - `components/layout/Chrome.tsx` no longer wraps `/admin` or `/live/overlay` in an extra `<main>`.
+  - `components/shop/ShopClient.tsx` uses non-main wrappers inside the page.
+  - `components/sections/RoadmapModal.tsx` uses `<section>` instead of nested `<main>`.
+- Fixed Next Image sizing warnings in `components/cards/OpponentLogo.tsx` by switching opponent crests to `fill` inside a fixed relative box.
+
+Validation already run locally before deploy:
+- `npm.cmd run lint` passed.
+- `npx.cmd tsc --noEmit` passed.
+- `npm.cmd audit --omit=dev` passed with 0 vulnerabilities.
+- `npm.cmd run build` passed.
+- Production-mode local `next start` browser regression passed 30/30 with Playwright/Edge:
+  - desktop/mobile `/`, `/matches`, `/roster`, `/sponsors`, `/shop`, `/achievements`, `/privacy`, `/terms`, `/live/overlay`
+  - no broken images, horizontal overflow, Next error overlay, critical console errors, or stuck preloader
+  - mobile nav + language toggle passed
+  - Roadmap modal and sponsor modal passed
+  - shop empty-form validation stayed client-side and did not POST
+  - unauth admin routes returned 401
+  - admin dashboard tabs rendered with a locally minted signed cookie
+
+Production verification after deploy:
+- `https://www.niightmareesport.com/` returned 200.
+- `/matches` returned 200.
+- `/shop` returned 200.
+- `/api/content` returned 200 and included shop/sponsors data.
+- `/api/admin/orders` returned 401 when unauthenticated.
+- `/sitemap.xml` returned 200 and now includes `/shop` and `/achievements`.
+- Live `/api/shop/order` guard checks:
+  - POST with missing `intent` returned `400 {"error":"Invalid order intent"}`.
+  - POST with `intent:"pay"` but no slip returned `400 {"error":"Payment slip is required"}`.
+
+Important constraints for the next agent:
+- Do not run `npm run build` while a dev server is active on port 3000; stop it first or `.next` can be corrupted for the running dev server.
+- Do not perform a real reserve/pay test against production unless the user explicitly wants a real test order created. The live environment writes to real Supabase tables and uploads to real Supabase Storage.
+- If a real final order smoke test is requested, create one small test order, attach a test slip, verify it appears in `/admin -> Orders`, then delete it from admin so the row and uploaded test images are purged.
+- Current known non-code launch gaps: sponsor logos are still missing for all 10 sponsors, and WHR / DML / Good Start still have generic descriptions. This is content/asset work, not a code blocker.
+
+## Opponent team logos — auto name→logo registry (2026-07-04)
+`/matches` (and home RecentResults + UpcomingMatch) show opponent crests via a **central
+registry** `lib/teamLogos.ts`: a map of *normalized* team name → `/public/teams/<slug>.png`.
+`OpponentLogo` (`components/cards/OpponentLogo.tsx`) and `UpcomingMatch`'s `Crest` resolve the
+logo as `safeImageSrc(match.opponentLogo) || safeImageSrc(teamLogoFor(name))` — so a per-match
+`opponentLogo` still wins, otherwise the crest shows **automatically by team name** for every
+past & future match, no per-match setup. Add a team once and it applies everywhere. Unknown
+teams fall back to the initials monogram (unchanged). (`OpponentLogo` now renders via `fill`
+inside a fixed relative box — Codex's Next-Image sizing fix — but the registry fallback is intact.)
+- **55 real logos live** (52+ team names). Rebuild the registry block from disk with
+  `node scripts/gen-team-logos-map.mjs` (reads `/public/teams/*.png` + the live opponent list,
+  prints the `LOGO_BY_TEAM` entries to paste; **keys off the live opponent names**, so it also
+  surfaces orphans — e.g. an opponent renamed "Bacon"→"Bacon time" needs the file renamed too).
+- **HOW THE LOGOS WERE FETCHED (rate-limit gotcha — read before fetching more):** team names
+  match Liquipedia MLBB pages; logo files are `<TeamName>_darkmode/_allmode/_lightmode.png`
+  (some year-stamped, e.g. `Team_Falcons_2022_allmode.png`). **Do NOT hit liquipedia.net from our
+  IP** — it hard-blocks the whole domain (api.php + `?action=render` + the `commons` CDN) after
+  ~10 requests in a rolling ~15-min window, and that block cascades to the jina/wsrv proxies too.
+  **The route that works = Photon (Jetpack CDN):**
+  `https://i0.wp.com/liquipedia.net/commons/Special:FilePath/<File>?w=256` (also i1/i2). It fetches
+  from ITS IP (never ours), follows the `Special:FilePath` redirect without needing the hash,
+  resizes via `?w=`, and stays unblocked. A Photon 404 is a trustworthy "file absent". Scripts:
+  `scripts/fetch-team-logos.mjs` (guess `<name>_mode.png` across name variants via Photon — got
+  51/71), `scripts/fetch-known-logos.mjs` (confirmed filenames). The scorer rejects tournament/
+  event logos (kept "RLG Vietnam" from grabbing `Vietnam_MLBB_Championship`). **darkmode files are
+  white** (good on the void bg); **lightmode files are dark** (may vanish on the dark site — prefer
+  darkmode/allmode). Owner can also just drop image files in `Website/LOGO/` (outer folder) or
+  straight into `public/teams/` and ask to wire them; large ones get resized to 256px with
+  PowerShell `System.Drawing` (webp isn't readable by System.Drawing — copy those as-is).
+- **~15 teams still on the monogram** (odd-cased/absent filenames): The huns…, Nine Esports,
+  Nadaeng, RLG Vietnam, ESB Titans/Legacy, DianFengYaoGuai, Vampire Kanagan, Onyx Prime,
+  KalahKaluk, Royal Cybersports Club, CRIT x EVO, HTR Hybridz, IDONOTSLEEP. Need the exact
+  Liquipedia filename (discovery via jina/allorigins was exhausted at the time) or an owner upload.
+- Wrong-org risk: single/generic names can match a *different* org's Liquipedia page. Owner flagged
+  Genius/Paradise/Bacon Time/MyWay as wrong autos → replaced with owner-supplied art (a wrong logo
+  is worse than a monogram, so remove rather than guess). See also [country flags]: national flag
+  beside a name is a **separate** system (`lib/opponentCountries.ts` → `OpponentFlag`, flagcdn);
+  its keys must track live opponent-name changes too (fixed "bacon"→"bacon time").
+
+## Achievements page figures are DERIVED from /matches (2026-07-04)
+`components/clients/AchievementsClient.tsx` no longer hand-keeps its hero numbers. `lib/
+achievementsDerived.ts` computes them from `content.matches.tournaments` (the SAME list /matches
+uses), so they auto-update with results:
+- **Total Winnings** = Σ `prizeToUsd(t.prize)` (parses "$3,000" / "29,000$" / "$3,072.51" / "-"),
+  shown compact (`$109K`). **Championships** stat = count of first-place placements.
+- **Placement table** (`PodiumDashboard`) = per-tier `{first,second,third,top3,all}` where tier =
+  `tournamentTier(name)` and rank is parsed from the free-form `placement` ("Champion"/"Runner-up"/
+  "1st"; ranges like "22nd–23rd" → not podium). Untiered events go in a new **"Other"** row
+  (`PlacementSummaryTier` gained `"Other"`) so all 21 entries are counted, not just tiered ones.
+- **GOTCHA — total can trail Liquipedia** if the source `prize` fields are blank/`-`. e.g. the
+  ESL Snapdragon Pro Series S1/S3/S6, Kohai SEAC S2, VMWI rows have `-` → summed as 0, so the site
+  showed $108,692 vs Liquipedia's $113,338 ($4,646 gap). Fix = fill those prizes in the data
+  (admin / the tournaments source), NOT hardcode the total — the derivation is correct.
+
+## /matches tournament dropdown — custom portaled Select (2026-07-04)
+The Tournament filter in `MatchesClient.tsx` is a **custom `TournamentSelect`**, not a native
+`<select>` (the list is long AND the filter sits inside two `overflow-hidden` ancestors, so a
+native/absolute popup spilled off-screen). It renders its menu `position:fixed` **portaled to
+`document.body`** (same trick as the sponsor/shop popups), anchored under the trigger via
+`getBoundingClientRect()`, width = trigger, `maxHeight` capped to ~60vh (mobile-toolbar safe) and
+clamped horizontally. Options **wrap** in a smaller font (no truncation) + tier group headers.
+Closes on outside-click / Escape / scroll. The other filters (Game/Year/Result/Sort) stay native.
