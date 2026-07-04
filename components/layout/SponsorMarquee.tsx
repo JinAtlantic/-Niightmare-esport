@@ -12,7 +12,7 @@ interface MarqueeSponsor {
   logo?: string;
 }
 
-const FALLBACK_LABEL: Bilingual = { en: "OUR PARTNERS", lo: "ພາກສ່ວນຂອງພວກເຮົາ" };
+const FALLBACK_LABEL: Bilingual = { en: "OUR PARTNERS", lo: "partners ຂອງເຮົາ" };
 
 /**
  * Footer partner band — sponsor logos in a single horizontal row that slowly
