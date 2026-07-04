@@ -30,8 +30,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "200+ team": "/teams/200-team.png",
   "4merical esports": "/teams/4merical-esports.png",
   "av gaming th": "/teams/av-gaming-th.png",
-  // "bacon time" — the "Bacon_*" file is a different org; real Bacon Time crest
-  // not found. Monogram until a correct logo is provided.
+  "bacon time": "/teams/bacon-time.png",
   "bte 404": "/teams/bte-404.png",
   "burmese ghouls": "/teams/burmese-ghouls.png",
   "cfu gaming": "/teams/cfu-gaming.png",
@@ -41,8 +40,7 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "geek fam id": "/teams/geek-fam-id.png",
   "geek slate": "/teams/geek-slate.png",
   "geekay esports": "/teams/geekay-esports.png",
-  // "genius esports" — Liquipedia "Genius" matched a different org; Lao team's
-  // real crest not found. Monogram until a correct logo is provided.
+  "genius esports": "/teams/genius-esports.webp",
   "heloheli": "/teams/heloheli.png",
   "hozen squad": "/teams/hozen-squad.png",
   "index kh": "/teams/index-kh.png",
@@ -56,14 +54,15 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "minana esports": "/teams/minana-esports.png",
   "miracle gaming": "/teams/miracle-gaming.png",
   "myway esports": "/teams/myway-esports.png",
+  "nine esports": "/teams/nine-esports.png",
   "orange esports": "/teams/orange-esports.png",
   "pandora": "/teams/pandora.png",
-  // "paradise esports" — matched a different "Paradise" org; monogram until a
-  // correct Lao logo is provided.
+  "paradise esports": "/teams/paradise-esports.png",
   "pro esports": "/teams/pro-esports.png",
   "red giants esports": "/teams/red-giants-esports.png",
   "saigon phantom": "/teams/saigon-phantom.png",
   "spr esports": "/teams/spr-esports.png",
+  "squad tang": "/teams/squad-tang.png",
   "sunset ravens": "/teams/sunset-ravens.png",
   "team evo": "/teams/team-evo.png",
   "team falcons": "/teams/team-falcons.png",
