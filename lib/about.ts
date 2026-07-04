@@ -23,7 +23,7 @@ export interface AboutUsContent {
  *  the admin. */
 export const DEFAULT_ABOUT: AboutUsContent = {
   kicker: { en: "WHO WE ARE", lo: "ພວກເຮົາແມ່ນໃຜ" },
-  headLine1: { en: "FORGED IN VIENTIANE, 2020.", lo: "ຫຼໍ່ຫຼອມຂຶ້ນທີ່ວຽງຈັນ ປີ 2020." },
+  headLine1: { en: "FORGED IN VIENTIANE, 2019.", lo: "ຫຼໍ່ຫຼອມຂຶ້ນທີ່ວຽງຈັນ ປີ 2019." },
   headPre: { en: "BUILT TO CARRY LAOS TO THE ", lo: "ສ້າງມາເພື່ອພາທຸງລາວສູ່ " },
   headAccent: { en: "WORLD STAGE", lo: "ເວທີໂລກ" },
   headPost: { en: "", lo: "" },
