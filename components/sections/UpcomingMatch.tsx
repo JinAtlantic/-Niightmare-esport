@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { CloseIcon, EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
+import { teamLogoFor } from "@/lib/teamLogos";
 import OpponentFlag from "@/components/cards/OpponentFlag";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
@@ -76,7 +77,8 @@ function Crest({
   monoClass: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const safeLogo = safeImageSrc(logo);
+  // Explicit logo wins; otherwise fall back to the team registry (auto by name).
+  const safeLogo = safeImageSrc(logo) || safeImageSrc(teamLogoFor(name));
   return (
     <div className={`relative grid place-items-center ${boxClass}`}>
       {safeLogo && !failed ? (

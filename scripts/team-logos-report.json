@@ -1,0 +1,293 @@
+{
+  "ok": {
+    "Team Falcons Mena": {
+      "file": "/teams/team-falcons-mena.png",
+      "source": "Team_Falcons_2022_allmode.png",
+      "bytes": 23767
+    },
+    "ZETA DIVISION": {
+      "file": "/teams/zeta-division.png",
+      "source": "(existing)"
+    },
+    "Verso Time": {
+      "file": "/teams/verso-time.png",
+      "source": "(existing)"
+    },
+    "Virtus.pro": {
+      "file": "/teams/virtus-pro.png",
+      "source": "(existing)"
+    }
+  },
+  "failed": [
+    {
+      "name": "the Mongolz",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "The huns Esport",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Sunset ravens",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Bacon",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Saigon Phantom",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Nine Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Leon Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "189 Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Paradise Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Nadaeng",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Genius Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Evil",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Valhalla",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Index KH",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "RLG Vietnam",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Team Flash KH",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "King of Gamers Club",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "ESB Titans",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Geekay Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "ULFHEDNAR",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "DianFengYaoGuai",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Legion Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Vampire Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "IQ Phoenix",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "PRO Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Zino Zenith",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Team X",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Vampire Kanagan",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Wawa Gaming",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Onyx Prime",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "KalahKaluk Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Squad Tang",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "ESB Legacy",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "AV Gaming TH",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "MyWay Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Fire Flux Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Royal Cybersports Club",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Red Giants Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Miracle Gaming",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Team Lilgun",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "4Merical Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Team Falcons",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Team SMG",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "CRIT x EVO",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Zenith Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "SPR Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Pandora",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "HTR Hybridz",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Geek Slate",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "HeloHeli",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Minana Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Logic Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "BTE 404",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Wawa Gaming TH",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Team EVO",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "IDONOTSLEEP Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Level",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "MDH Esports",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "The SixStar Octagarm",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "200+ Team",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Hozen Squad",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Burmese Ghouls",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Geek Fam ID",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "GameLab",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "CFU Gaming",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "The Drift",
+      "reason": "no logo file matched"
+    },
+    {
+      "name": "Orange Esports",
+      "reason": "no logo file matched"
+    }
+  ],
+  "okCount": 4,
+  "failCount": 67
+}

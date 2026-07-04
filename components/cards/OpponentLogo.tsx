@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { safeImageSrc } from "@/lib/safety";
+import { teamLogoFor } from "@/lib/teamLogos";
 
 interface OpponentLogoProps {
   /**
@@ -40,7 +41,9 @@ export function opponentMonogram(name: string, abbr?: string): string {
 export default function OpponentLogo({ src, name, abbr, size = 28, className = "" }: OpponentLogoProps) {
   const dimension = { width: size, height: size, minWidth: size };
   const mono = opponentMonogram(name, abbr);
-  const safeSrc = safeImageSrc(src);
+  // Explicit per-match logo wins; otherwise fall back to the team registry so a
+  // team's crest shows automatically by name.
+  const safeSrc = safeImageSrc(src) || safeImageSrc(teamLogoFor(name));
   // Longer codes need a smaller glyph to sit inside the same fixed box.
   const fontSize = size * (mono.length >= 4 ? 0.26 : mono.length >= 3 ? 0.32 : 0.42);
 
