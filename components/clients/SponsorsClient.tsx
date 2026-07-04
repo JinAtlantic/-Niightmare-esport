@@ -68,6 +68,7 @@ const COPY = {
   visit: { en: "Visit Website", lo: "ໄປທີ່ເວັບໄຊ" },
   close: { en: "Close", lo: "ປິດ" },
   partners: { en: "Partners", lo: "ພາກສ່ວນ" },
+  ctaInvite: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ" },
 };
 
 function sponsorInitials(name: string) {
@@ -386,11 +387,8 @@ export default function SponsorsClient() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8">
             <div className="max-w-xl">
               <h2 className="font-display text-xl font-bold uppercase tracking-[0.1em] text-soul md:text-3xl">
-                {pick(page.ctaTitle)}
+                {pick(COPY.ctaInvite)}
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-ash md:text-[15px]">
-                {pick(page.ctaBody)}
-              </p>
             </div>
             <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row md:flex-col lg:flex-row">
               <a

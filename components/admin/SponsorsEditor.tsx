@@ -350,15 +350,9 @@ export default function SponsorsEditor() {
                 CTA Copy
               </h3>
               <BilingualField
-                label="CTA title"
+                label="หัวข้อ Benefit (ด้านบนการ์ด 4 อัน)"
                 value={page.ctaTitle}
                 onChange={(ctaTitle) => patchPage({ ctaTitle })}
-              />
-              <BilingualTextArea
-                label="CTA body"
-                value={page.ctaBody}
-                rows={3}
-                onChange={(ctaBody) => patchPage({ ctaBody })}
               />
             </div>
             <div className="space-y-3">
