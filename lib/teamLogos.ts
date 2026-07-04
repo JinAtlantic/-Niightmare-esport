@@ -40,7 +40,8 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "geek fam id": "/teams/geek-fam-id.png",
   "geek slate": "/teams/geek-slate.png",
   "geekay esports": "/teams/geekay-esports.png",
-  "genius esports": "/teams/genius-esports.png",
+  // "genius esports" — Liquipedia "Genius" matched a different org; Lao team's
+  // real crest not found. Monogram until a correct logo is provided.
   "heloheli": "/teams/heloheli.png",
   "hozen squad": "/teams/hozen-squad.png",
   "index kh": "/teams/index-kh.png",
@@ -56,7 +57,8 @@ const LOGO_BY_TEAM: Record<string, string> = {
   "myway esports": "/teams/myway-esports.png",
   "orange esports": "/teams/orange-esports.png",
   "pandora": "/teams/pandora.png",
-  "paradise esports": "/teams/paradise-esports.png",
+  // "paradise esports" — matched a different "Paradise" org; monogram until a
+  // correct Lao logo is provided.
   "pro esports": "/teams/pro-esports.png",
   "red giants esports": "/teams/red-giants-esports.png",
   "saigon phantom": "/teams/saigon-phantom.png",

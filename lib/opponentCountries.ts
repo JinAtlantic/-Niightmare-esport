@@ -49,11 +49,10 @@ const COUNTRY_BY_TEAM: Record<string, string> = {
 
   // ── Myanmar ────────────────────────────────────────────────────
   "burmese ghouls": "MM",
-  "genius esports": "MM",
 
   // ── Thailand ───────────────────────────────────────────────────
   "king of gamers club": "TH",
-  "bacon": "TH",
+  "bacon time": "TH",
   "vampire esports": "TH",
   "team lilgun": "TH",
   "av gaming th": "TH",
@@ -65,6 +64,7 @@ const COUNTRY_BY_TEAM: Record<string, string> = {
   // ── Laos ───────────────────────────────────────────────────────
   "leon esports": "LA",
   "189 esports": "LA",
+  "genius esports": "LA",
   "paradise esports": "LA",
   "team evo": "LA",
   "wawa gaming": "LA",
