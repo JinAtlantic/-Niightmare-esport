@@ -743,6 +743,31 @@ html.lang-lo .home-hero-tagline {
     background-position: -35% 0;
   }
 }
+/* Sponsor logo marquee (footer) — slow, seamless left→right auto-scroll.
+   Two identical copies of the list sit in .marquee-track; translating from
+   -50% to 0 slides the content rightward and loops without a visible seam.
+   Hovering the viewport pauses it; the edge fade is a mask on the viewport. */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: sponsor-marquee 34s linear infinite;
+}
+.marquee-viewport:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+@keyframes sponsor-marquee {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-hero-wordmark {
     opacity: 1;
@@ -751,6 +776,9 @@ html.lang-lo .home-hero-tagline {
   .home-hero-main {
     animation: none;
     background-position: 50% 0;
+  }
+  .marquee-track {
+    animation: none;
   }
 }
 /* Mobile Speed Index: under Lighthouse's 4x CPU throttle the hero's perpetual

@@ -5,16 +5,8 @@ import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { DiscordIcon, FacebookIcon, InstagramIcon, LiquipediaIcon, MailIcon, YoutubeIcon } from "@/components/ui/Icons";
 import { useContent } from "@/components/context/ContentContext";
+import SponsorMarquee from "@/components/layout/SponsorMarquee";
 import { safeHref, safeMailto } from "@/lib/safety";
-
-const NAV_ITEMS = [
-  { href: "/", key: "nav.home" },
-  { href: "/roster", key: "nav.roster" },
-  { href: "/matches", key: "nav.matches" },
-  { href: "/achievements", key: "nav.achievements" },
-  { href: "/shop", key: "nav.shop" },
-  { href: "/sponsors", key: "nav.sponsors" },
-];
 
 const LIQUIPEDIA_URL = "https://liquipedia.net/mobilelegends/Niightmare_Esports";
 
@@ -37,7 +29,7 @@ export default function Footer() {
   return (
     <footer className="relative mt-20 border-t border-edge bg-card">
       <div className="scythe-line absolute inset-x-0 -top-px h-[2px] opacity-60" aria-hidden />
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-3 md:px-6">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 md:px-6">
         {/* Brand — typographic wordmark with a slow violet shimmer */}
         <div>
           <div className="group inline-flex flex-col">
@@ -67,25 +59,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Quick links */}
-        <div>
-          <p className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-text-primary">
-            {t("footer.quick_links")}
-          </p>
-          <ul className="mt-2 grid grid-cols-2 gap-x-2">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="flex min-h-[44px] items-center text-sm text-text-muted transition-colors hover:text-accent"
-                >
-                  {t(item.key)}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         {/* Socials */}
         <div>
           <p className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-text-primary">
@@ -107,6 +80,9 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Partner logo marquee — replaces the old Quick Links column */}
+      <SponsorMarquee />
 
       {/* Sub-footer — game disclaimer (fan-content), copyright, legal links */}
       <div className="border-t border-edge bg-void/40">
