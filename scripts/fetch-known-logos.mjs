@@ -12,8 +12,8 @@ import path from "node:path";
 
 const OUT_DIR = path.resolve("public/teams");
 const WIDTH = 256;
-const GAP = 8000;
-const COOLDOWN = 180000; // let wsrv↔Liquipedia recover before we start
+const GAP = 3000;
+const COOLDOWN = 0; // photon path is fresh; no wait needed
 
 // slug (matches lib/teamLogos + fetch-team-logos) -> exact Liquipedia filename.
 // Every name here was confirmed to exist in an earlier run, so a 404 is a
@@ -35,22 +35,27 @@ const KNOWN = {
 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const proxyUrl = (f) =>
-  `https://wsrv.nl/?url=${encodeURIComponent(`https://liquipedia.net/commons/Special:FilePath/${f}`)}&w=${WIDTH}&output=png`;
+const filepath = (f) => `liquipedia.net/commons/Special:FilePath/${encodeURIComponent(f)}`;
+// Rotate image proxies (their IPs hit Liquipedia, not ours). Photon (i0/i1/i2.
+// wp.com) stayed unthrottled when wsrv was blocked, so it leads.
+const PROXIES = [
+  (f) => `https://i0.wp.com/${filepath(f)}?w=${WIDTH}`,
+  (f) => `https://i1.wp.com/${filepath(f)}?w=${WIDTH}`,
+  (f) => `https://i2.wp.com/${filepath(f)}?w=${WIDTH}`,
+  (f) => `https://wsrv.nl/?url=${encodeURIComponent("https://" + filepath(f))}&w=${WIDTH}&output=png`,
+];
 
-// Retry both 429 and 404 (wsrv returns 404 when Liquipedia throttles its fetch).
+// Every name here is confirmed to exist, so a miss is transient throttle — keep
+// rotating proxies and retrying with backoff until one serves the image.
 async function get(fileName) {
-  for (let attempt = 0; attempt < 8; attempt++) {
-    const res = await fetch(proxyUrl(fileName));
-    if (res.status === 200) {
+  let rr = 0;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const res = await fetch(PROXIES[rr++ % PROXIES.length](fileName)).catch(() => null);
+    if (res && res.status === 200 && (res.headers.get("content-type") || "").includes("image")) {
       const buf = Buffer.from(await res.arrayBuffer());
       if (buf.length > 800) return buf;
-    } else if (res.status !== 429 && res.status !== 404) {
-      return null;
     }
-    const back = 8000 * (attempt + 1);
-    console.error(`    …${res.status}, wait ${back / 1000}s`);
-    await sleep(back);
+    await sleep(1500 + 500 * attempt); // gentle, growing spacing
   }
   return null;
 }

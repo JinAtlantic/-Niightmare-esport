@@ -1,13 +1,9 @@
 {
   "ok": {
-    "Team Falcons Mena": {
-      "file": "/teams/team-falcons-mena.png",
-      "source": "Team_Falcons_2022_allmode.png",
-      "bytes": 23767
-    },
     "ZETA DIVISION": {
       "file": "/teams/zeta-division.png",
-      "source": "(existing)"
+      "source": "ZETA_DIVISION_darkmode.png",
+      "bytes": 4797
     },
     "Verso Time": {
       "file": "/teams/verso-time.png",
@@ -16,9 +12,242 @@
     "Virtus.pro": {
       "file": "/teams/virtus-pro.png",
       "source": "(existing)"
+    },
+    "Bacon": {
+      "file": "/teams/bacon.png",
+      "source": "Bacon_allmode.png",
+      "bytes": 7706
+    },
+    "Saigon Phantom": {
+      "file": "/teams/saigon-phantom.png",
+      "source": "(existing)"
+    },
+    "Leon Esports": {
+      "file": "/teams/leon-esports.png",
+      "source": "(existing)"
+    },
+    "189 Esports": {
+      "file": "/teams/189-esports.png",
+      "source": "189_Esports_allmode.png",
+      "bytes": 25575
+    },
+    "Paradise Esports": {
+      "file": "/teams/paradise-esports.png",
+      "source": "(existing)"
+    },
+    "Genius Esports": {
+      "file": "/teams/genius-esports.png",
+      "source": "Genius_allmode.png",
+      "bytes": 5788
+    },
+    "Evil": {
+      "file": "/teams/evil.png",
+      "source": "(existing)"
+    },
+    "Valhalla": {
+      "file": "/teams/valhalla.png",
+      "source": "Valhalla_allmode.png",
+      "bytes": 15018
+    },
+    "Index KH": {
+      "file": "/teams/index-kh.png",
+      "source": "Index_KH_allmode.png",
+      "bytes": 19526
+    },
+    "Team Flash KH": {
+      "file": "/teams/team-flash-kh.png",
+      "source": "(existing)"
+    },
+    "King of Gamers Club": {
+      "file": "/teams/king-of-gamers-club.png",
+      "source": "(existing)"
+    },
+    "Geekay Esports": {
+      "file": "/teams/geekay-esports.png",
+      "source": "(existing)"
+    },
+    "ULFHEDNAR": {
+      "file": "/teams/ulfhednar.png",
+      "source": "(existing)"
+    },
+    "Legion Esports": {
+      "file": "/teams/legion-esports.png",
+      "source": "Legion_Esports_darkmode.png",
+      "bytes": 5488
+    },
+    "Vampire Esports": {
+      "file": "/teams/vampire-esports.png",
+      "source": "Vampire_Esports_2022_allmode.png",
+      "bytes": 6477
+    },
+    "IQ Phoenix": {
+      "file": "/teams/iq-phoenix.png",
+      "source": "IQ_Phoenix_darkmode.png",
+      "bytes": 11567
+    },
+    "PRO Esports": {
+      "file": "/teams/pro-esports.png",
+      "source": "(existing)"
+    },
+    "Team X": {
+      "file": "/teams/team-x.png",
+      "source": "Team_X_darkmode.png",
+      "bytes": 9072
+    },
+    "Wawa Gaming": {
+      "file": "/teams/wawa-gaming.png",
+      "source": "Wawa_Gaming_allmode.png",
+      "bytes": 18146
+    },
+    "AV Gaming TH": {
+      "file": "/teams/av-gaming-th.png",
+      "source": "AV_Gaming_TH_full_allmode.png",
+      "bytes": 16579
+    },
+    "MyWay Esports": {
+      "file": "/teams/myway-esports.png",
+      "source": "MyWay_allmode.png",
+      "bytes": 12016
+    },
+    "Fire Flux Esports": {
+      "file": "/teams/fire-flux-esports.png",
+      "source": "Fire_Flux_Esports_allmode.png",
+      "bytes": 3318
+    },
+    "Red Giants Esports": {
+      "file": "/teams/red-giants-esports.png",
+      "source": "Red_Giants_Esports_allmode.png",
+      "bytes": 14509
+    },
+    "Miracle Gaming": {
+      "file": "/teams/miracle-gaming.png",
+      "source": "Miracle_Gaming_allmode.png",
+      "bytes": 8568
+    },
+    "Team Lilgun": {
+      "file": "/teams/team-lilgun.png",
+      "source": "Lilgun_allmode.png",
+      "bytes": 8464
+    },
+    "4Merical Esports": {
+      "file": "/teams/4merical-esports.png",
+      "source": "4Merical_Esports_allmode.png",
+      "bytes": 11247
+    },
+    "Team Falcons": {
+      "file": "/teams/team-falcons.png",
+      "source": "(existing)"
+    },
+    "Team SMG": {
+      "file": "/teams/team-smg.png",
+      "source": "Team_SMG_allmode.png",
+      "bytes": 10527
+    },
+    "Zenith Esports": {
+      "file": "/teams/zenith-esports.png",
+      "source": "Zenith_Esports_darkmode.png",
+      "bytes": 6154
+    },
+    "SPR Esports": {
+      "file": "/teams/spr-esports.png",
+      "source": "SPR_Esports_darkmode.png",
+      "bytes": 7259
+    },
+    "Pandora": {
+      "file": "/teams/pandora.png",
+      "source": "Pandora_allmode.png",
+      "bytes": 16946
+    },
+    "Geek Slate": {
+      "file": "/teams/geek-slate.png",
+      "source": "Geek_Slate_allmode.png",
+      "bytes": 13669
+    },
+    "HeloHeli": {
+      "file": "/teams/heloheli.png",
+      "source": "HeloHeli_darkmode.png",
+      "bytes": 4553
+    },
+    "Minana Esports": {
+      "file": "/teams/minana-esports.png",
+      "source": "Minana_Esports_darkmode.png",
+      "bytes": 9143
+    },
+    "Logic Esports": {
+      "file": "/teams/logic-esports.png",
+      "source": "Logic_Esports_darkmode.png",
+      "bytes": 4735
+    },
+    "BTE 404": {
+      "file": "/teams/bte-404.png",
+      "source": "BTE_404_darkmode.png",
+      "bytes": 15800
+    },
+    "Wawa Gaming TH": {
+      "file": "/teams/wawa-gaming-th.png",
+      "source": "Wawa_Gaming_allmode.png",
+      "bytes": 18146
+    },
+    "Team EVO": {
+      "file": "/teams/team-evo.png",
+      "source": "(existing)"
+    },
+    "Level": {
+      "file": "/teams/level.png",
+      "source": "Level_darkmode.png",
+      "bytes": 13455
+    },
+    "MDH Esports": {
+      "file": "/teams/mdh-esports.png",
+      "source": "MDH_Esports_allmode.png",
+      "bytes": 14262
+    },
+    "The SixStar Octagarm": {
+      "file": "/teams/the-sixstar-octagarm.png",
+      "source": "The_SixStar_Octagarm_allmode.png",
+      "bytes": 20349
+    },
+    "200+ Team": {
+      "file": "/teams/200-team.png",
+      "source": "200+_Team_allmode.png",
+      "bytes": 2711
+    },
+    "Hozen Squad": {
+      "file": "/teams/hozen-squad.png",
+      "source": "Hozen_Squad_allmode.png",
+      "bytes": 22773
+    },
+    "Burmese Ghouls": {
+      "file": "/teams/burmese-ghouls.png",
+      "source": "Burmese_Ghouls_allmode.png",
+      "bytes": 33737
+    },
+    "Geek Fam ID": {
+      "file": "/teams/geek-fam-id.png",
+      "source": "Geek_Fam_allmode.png",
+      "bytes": 14539
+    },
+    "CFU Gaming": {
+      "file": "/teams/cfu-gaming.png",
+      "source": "CFU_Gaming_allmode.png",
+      "bytes": 16336
+    },
+    "The Drift": {
+      "file": "/teams/the-drift.png",
+      "source": "The_Drift_lightmode.png",
+      "bytes": 9955
+    },
+    "Orange Esports": {
+      "file": "/teams/orange-esports.png",
+      "source": "Orange_Esports_allmode.png",
+      "bytes": 6300
     }
   },
   "failed": [
+    {
+      "name": "Team Falcons Mena",
+      "reason": "no logo file matched"
+    },
     {
       "name": "the Mongolz",
       "reason": "no logo file matched"
@@ -32,27 +261,7 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "Bacon",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Saigon Phantom",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "Nine Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Leon Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "189 Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Paradise Esports",
       "reason": "no logo file matched"
     },
     {
@@ -60,31 +269,7 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "Genius Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Evil",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Valhalla",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Index KH",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "RLG Vietnam",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Team Flash KH",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "King of Gamers Club",
       "reason": "no logo file matched"
     },
     {
@@ -92,31 +277,7 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "Geekay Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "ULFHEDNAR",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "DianFengYaoGuai",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Legion Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Vampire Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "IQ Phoenix",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "PRO Esports",
       "reason": "no logo file matched"
     },
     {
@@ -124,15 +285,7 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "Team X",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "Vampire Kanagan",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Wawa Gaming",
       "reason": "no logo file matched"
     },
     {
@@ -152,43 +305,7 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "AV Gaming TH",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "MyWay Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Fire Flux Esports",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "Royal Cybersports Club",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Red Giants Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Miracle Gaming",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Team Lilgun",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "4Merical Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Team Falcons",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Team SMG",
       "reason": "no logo file matched"
     },
     {
@@ -196,47 +313,7 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "Zenith Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "SPR Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Pandora",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "HTR Hybridz",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Geek Slate",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "HeloHeli",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Minana Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Logic Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "BTE 404",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Wawa Gaming TH",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Team EVO",
       "reason": "no logo file matched"
     },
     {
@@ -244,50 +321,10 @@
       "reason": "no logo file matched"
     },
     {
-      "name": "Level",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "MDH Esports",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "The SixStar Octagarm",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "200+ Team",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Hozen Squad",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Burmese Ghouls",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Geek Fam ID",
-      "reason": "no logo file matched"
-    },
-    {
       "name": "GameLab",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "CFU Gaming",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "The Drift",
-      "reason": "no logo file matched"
-    },
-    {
-      "name": "Orange Esports",
       "reason": "no logo file matched"
     }
   ],
-  "okCount": 4,
-  "failCount": 67
+  "okCount": 51,
+  "failCount": 20
 }

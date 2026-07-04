@@ -63,44 +63,52 @@ function nameVariants(name) {
   return out;
 }
 
-// Dark site → prefer dark/all variants. Kept short: wsrv throttles bursts, so
-// every extra suffix is another proxied request across 71 teams.
-const SUFFIXES = ["_darkmode", "_allmode", "_lightmode", "logo_std", "_full_allmode"];
+// Dark site → prefer dark/all variants. Ordered best-first; we stop at the first
+// hit so plain forms win over year forms. Base suffixes are tried on every name
+// variant; the (larger) year-stamped set only on the full name, to bound requests.
+const BASE_SUF = ["_darkmode", "_allmode", "_lightmode", "logo_std", "_std", "_full_allmode"];
+const YEARS = ["2025", "2024", "2023", "2022", "2021", "2020"];
+const YEAR_SUF = [...YEARS.map((y) => `_${y}_allmode`), ...YEARS.map((y) => `_${y}_darkmode`)];
 
 function candidates(name) {
   const files = [];
   const k = KNOWN[norm(name)];
   if (k) files.push(k);
-  for (const base of nameVariants(name))
-    for (const suf of SUFFIXES) files.push(base + suf + ".png");
+  const variants = nameVariants(name);
+  for (const base of variants) for (const suf of BASE_SUF) files.push(base + suf + ".png");
+  for (const suf of YEAR_SUF) files.push(variants[0] + suf + ".png"); // full name only
   return [...new Set(files)];
 }
 
-function proxyUrl(fileName) {
-  const src = `https://liquipedia.net/commons/Special:FilePath/${encodeURIComponent(fileName)}`;
-  return `https://wsrv.nl/?url=${encodeURIComponent(src)}&w=${WIDTH}&output=png`;
-}
+// Photon (Jetpack's i0/i1/i2.wp.com) fetches Liquipedia's CDN from ITS IPs (never
+// ours) and resizes on the fly. It stayed unthrottled when Liquipedia + wsrv were
+// blocking us, so we lead with it and trust its 404 as a genuine "file absent".
+const filepath = (f) => `liquipedia.net/commons/Special:FilePath/${encodeURIComponent(f)}`;
+const PHOTON = ["i0.wp.com", "i1.wp.com", "i2.wp.com"];
 
-// wsrv throttles bursts, so pace every proxied request globally and back off on 429.
-const GAP = 1600;
+// Pace globally so we stay a polite guest on Photon across hundreds of guesses.
+const GAP = 700;
 let lastHit = 0;
+let rr = 0;
 
-/** Try a candidate through wsrv. Returns the PNG bytes, null if the file doesn't
- *  exist, or throws only on a hard/unknown failure. */
+/** Try one candidate filename via Photon. Returns PNG bytes on a hit, or null
+ *  when Photon reports it missing (a trustworthy genuine miss). */
 async function tryFetch(fileName) {
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; attempt < PHOTON.length; attempt++) {
+    const host = PHOTON[rr++ % PHOTON.length];
     const wait = GAP - (Date.now() - lastHit);
     if (wait > 0) await sleep(wait);
     lastHit = Date.now();
-    const res = await fetch(proxyUrl(fileName));
-    if (res.status === 429) { await sleep(8000 * (attempt + 1)); continue; }
-    if (res.status === 404) return null; // file genuinely absent
-    if (res.status !== 200) return null;
-    if (!(res.headers.get("content-type") || "").includes("image")) return null;
-    const buf = Buffer.from(await res.arrayBuffer());
-    return buf.length > 800 ? buf : null; // guard against tiny error placeholders
+    let res;
+    try { res = await fetch(`https://${host}/${filepath(fileName)}?w=${WIDTH}`); } catch { continue; }
+    if (res.status === 200 && (res.headers.get("content-type") || "").includes("image")) {
+      const buf = Buffer.from(await res.arrayBuffer());
+      return buf.length > 800 ? buf : null;
+    }
+    if (res.status === 404) return null; // Photon is reliable — a real miss
+    if (res.status === 429) { await sleep(5000); continue; } // throttled — next host
   }
-  throw new Error("wsrv 429");
+  return null;
 }
 
 async function main() {
