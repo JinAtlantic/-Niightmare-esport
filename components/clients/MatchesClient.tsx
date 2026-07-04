@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
@@ -785,6 +786,116 @@ function GameTournamentSection({
 const selectClass =
   "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
 
+/**
+ * Tournament picker. A native <select> is used everywhere else, but the
+ * tournament list can be long AND the filter panel sits inside two
+ * `overflow-hidden` ancestors — so a native (or plain absolute) dropdown gets
+ * clipped / overflows the screen. This renders its menu into a `fixed`,
+ * scrollable panel PORTALED to document.body (same trick as the sponsor/shop
+ * popups), positioned under the trigger and capped to the viewport height.
+ */
+function TournamentSelect({
+  groups,
+  value,
+  onChange,
+  pick,
+  allLabel,
+  otherLabel,
+}: {
+  groups: { tier: Tier | null; options: { key: string; label: Bilingual }[] }[];
+  value: string;
+  onChange: (key: string) => void;
+  pick: (b: Bilingual) => string;
+  allLabel: string;
+  otherLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [box, setBox] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const place = () => {
+    const r = triggerRef.current?.getBoundingClientRect();
+    if (!r) return;
+    setBox({ left: r.left, top: r.bottom + 4, width: r.width, maxHeight: Math.max(180, window.innerHeight - r.bottom - 16) });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    // The panel is fixed to the viewport, so re-anchor it on scroll/resize.
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const currentLabel = useMemo(() => {
+    if (value === "all") return allLabel;
+    for (const g of groups) for (const o of g.options) if (o.key === value) return pick(o.label);
+    return allLabel;
+  }, [value, groups, pick, allLabel]);
+
+  const choose = (key: string) => { onChange(key); setOpen(false); };
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => { if (open) { setOpen(false); } else { place(); setOpen(true); } }}
+        className="flex h-12 w-full min-w-0 items-center justify-between gap-2 border border-edge bg-void/70 px-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]"
+      >
+        <span className="truncate">{currentLabel}</span>
+        <span aria-hidden className={`shrink-0 text-amethyst transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
+      </button>
+      {open && box &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
+            <div
+              role="listbox"
+              style={{ position: "fixed", left: box.left, top: box.top, width: box.width, maxHeight: box.maxHeight }}
+              className="z-50 overflow-y-auto border border-edge-bright bg-crypt shadow-[0_18px_44px_rgba(0,0,0,0.62)]"
+            >
+              <button
+                type="button"
+                onClick={() => choose("all")}
+                className={`block w-full truncate px-3 py-2.5 text-left font-mono text-xs font-bold uppercase tracking-[0.1em] transition-colors hover:bg-edge/60 ${value === "all" ? "bg-amethyst/15 text-soul" : "text-ash"}`}
+              >
+                {allLabel}
+              </button>
+              {groups.map((g) => (
+                <div key={g.tier ?? "other"}>
+                  <div className="border-t border-edge bg-void/60 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ash-dim">
+                    {g.tier ? `${g.tier}-Tier` : otherLabel}
+                  </div>
+                  {g.options.map((o) => (
+                    <button
+                      key={o.key}
+                      type="button"
+                      onClick={() => choose(o.key)}
+                      className={`block w-full truncate px-3 py-2.5 text-left font-mono text-xs font-bold uppercase tracking-[0.08em] transition-colors hover:bg-edge/60 ${value === o.key ? "bg-amethyst/15 text-soul" : "text-ash"}`}
+                    >
+                      {pick(o.label)}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </>,
+          document.body,
+        )}
+    </>
+  );
+}
+
 export default function MatchesClient() {
   const { pick } = useLanguage();
   const content = useContent();
@@ -1062,27 +1173,16 @@ export default function MatchesClient() {
 
             {/* Tournament — full width; lists every tournament in the current
                 game + year so you can jump straight to one. */}
-            <label className="mt-3 block">
-              <select
+            <div className="mt-3">
+              <TournamentSelect
+                groups={tournamentOptionGroups}
                 value={selectedTournament}
-                onChange={(event) => setSelectedTournament(event.target.value)}
-                className={selectClass}
-              >
-                <option value="all">{pick({ en: "All Tournaments", lo: "ທຸກລາຍການ" })}</option>
-                {tournamentOptionGroups.map((g) => (
-                  <optgroup
-                    key={g.tier ?? "other"}
-                    label={g.tier ? `${g.tier}-Tier` : pick({ en: "Other", lo: "ອື່ນໆ" })}
-                  >
-                    {g.options.map((t) => (
-                      <option key={t.key} value={t.key}>
-                        {pick(t.label)}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </label>
+                onChange={setSelectedTournament}
+                pick={pick}
+                allLabel={pick({ en: "All Tournaments", lo: "ທຸກລາຍການ" })}
+                otherLabel={pick({ en: "Other", lo: "ອື່ນໆ" })}
+              />
+            </div>
           </div>
         </Reveal>
 
