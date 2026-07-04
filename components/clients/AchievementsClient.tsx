@@ -1,18 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
 import { useContent } from "@/components/context/ContentContext";
+import {
+  deriveChampionships,
+  derivePlacementSummary,
+  deriveTotalWinnings,
+  formatUsdCompact,
+} from "@/lib/achievementsDerived";
 import type {
   AchievementsData,
   AchievementStaff,
   CampaignEntry,
   FormerPlayer,
   PlacementSummaryRow,
+  Tournament,
 } from "@/lib/types";
 
 /** Tournament tier colour system: C green, B cyan, A violet, S gold. */
@@ -197,6 +204,14 @@ function placementTierTone(tier: PlacementSummaryRow["tier"]) {
       glow: "shadow-[0_0_28px_rgba(168,85,247,0.18)]",
     };
   }
+  if (tier === "Other") {
+    return {
+      text: "text-spectre",
+      border: "border-edge-bright",
+      bg: "bg-void/45",
+      glow: "shadow-[0_0_18px_rgba(168,85,247,0.1)]",
+    };
+  }
   const tone = TIER_TONE[tier];
   return {
     text: tone.text,
@@ -257,7 +272,7 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
                 >
                   <div className="min-w-0">
                     <span className={`inline-flex border ${tone.border} ${tone.bg} px-2 py-1 font-display text-xs font-black uppercase tracking-[0.12em] ${tone.text} ${tone.glow}`}>
-                      {row.tier === "Total" ? "Total" : `${row.tier}-Tier`}
+                      {row.tier === "Total" ? "Total" : row.tier === "Other" ? "Other" : `${row.tier}-Tier`}
                     </span>
                   </div>
                   <span className="text-right font-extrabold text-gold">{row.first}</span>
@@ -327,9 +342,20 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function AchievementsClient() {
   const { pick } = useLanguage();
-  const { achievements, roster } = useContent();
+  const { achievements, roster, matches } = useContent();
   const ACH = achievements as unknown as AchievementsData;
   const [tab, setTab] = useState<TabId>("overview");
+
+  // Live figures derived from the /matches tournament list, so Total Winnings,
+  // per-tier entries and podium finishes track the real results automatically.
+  const tournaments = useMemo(
+    () => (matches as { tournaments?: Tournament[] }).tournaments ?? [],
+    [matches],
+  );
+  const derivedSummary = useMemo(() => derivePlacementSummary(tournaments), [tournaments]);
+  const totalWinnings = useMemo(() => formatUsdCompact(deriveTotalWinnings(tournaments)), [tournaments]);
+  const championships = useMemo(() => deriveChampionships(tournaments), [tournaments]);
+  const placementCount = derivedSummary.reduce((n, r) => n + r.all, 0);
   const currentStaffNames = new Set(
     ((roster as { staff?: { ign?: string; name?: string }[] }).staff ?? [])
       .flatMap((member) => [member.ign, member.name])
@@ -397,22 +423,32 @@ export default function AchievementsClient() {
                   </div>
 
                   <div className="relative mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
-                    {ACH.stats.map((s) => (
-                      <div key={s.id} className="border border-edge bg-void/45 p-4 transition-colors hover:border-edge-bright">
-                        <p className="font-mono text-3xl font-bold leading-none tabular-nums text-soul md:text-4xl">
-                          {s.value}
-                        </p>
-                        <p className="mt-3 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre">
-                          {pick(s.label)}
-                        </p>
-                        <p className="mt-1.5 text-[11px] leading-relaxed text-ash">{pick(s.detail)}</p>
-                      </div>
-                    ))}
+                    {ACH.stats.map((s) => {
+                      // Winnings + championships come from the live tournament data;
+                      // other cards (established / worlds) keep their authored value.
+                      const value =
+                        s.id === "winnings" ? totalWinnings : s.id === "titles" ? `${championships}×` : s.value;
+                      const detail =
+                        s.id === "winnings"
+                          ? pick({ en: `Across ${placementCount} placements`, lo: `ຈາກ ${placementCount} ລາຍການ` })
+                          : pick(s.detail);
+                      return (
+                        <div key={s.id} className="border border-edge bg-void/45 p-4 transition-colors hover:border-edge-bright">
+                          <p className="font-mono text-3xl font-bold leading-none tabular-nums text-soul md:text-4xl">
+                            {value}
+                          </p>
+                          <p className="mt-3 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre">
+                            {pick(s.label)}
+                          </p>
+                          <p className="mt-1.5 text-[11px] leading-relaxed text-ash">{detail}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              <PodiumDashboard rows={ACH.placementSummary ?? DEFAULT_PLACEMENT_SUMMARY} />
+              <PodiumDashboard rows={placementCount > 0 ? derivedSummary : ACH.placementSummary ?? DEFAULT_PLACEMENT_SUMMARY} />
 
               <div className="hidden border border-edge bg-crypt/25 p-5 md:p-6">
                 <div className="flex flex-col gap-2 text-center md:flex-row md:items-end md:justify-between md:text-left">

@@ -222,7 +222,7 @@ export interface SponsorTier {
 // ── Achievements page (static, sourced from Liquipedia) ──────────────────
 export type TournamentTier = "S" | "A" | "B" | "C";
 export type Medal = "gold" | "silver" | "bronze";
-export type PlacementSummaryTier = TournamentTier | "Total";
+export type PlacementSummaryTier = TournamentTier | "Other" | "Total";
 
 /** Big tale-of-the-tape number on the Achievements hero. */
 export interface AchievementStat {
