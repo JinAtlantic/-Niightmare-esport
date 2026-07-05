@@ -376,7 +376,19 @@ export default function AchievementsClient() {
         subtitleClassName="text-base font-medium text-spectre md:text-lg"
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-12">
+      <section className="relative overflow-hidden px-4 py-10 md:px-6 md:py-12">
+        {/* two-tone premium halos — amethyst key + magenta accent, matching the
+            home bands so the record body glows instead of floating on flat void */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-[22%] top-16 h-72 w-[min(680px,82vw)] -translate-x-1/2 rounded-full bg-amethyst/[0.10] blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-[6%] top-[42%] h-64 w-[min(520px,70vw)] rounded-full bg-magenta/[0.08] blur-3xl"
+        />
+
+        <div className="relative z-[1] mx-auto max-w-7xl">
         {/* TABS — split the record into focused views so nothing scrolls far */}
         <div className="mb-10 flex flex-wrap items-center justify-center gap-1 border-b border-edge">
           {TABS.map((t) => {
@@ -433,7 +445,11 @@ export default function AchievementsClient() {
                           ? pick({ en: `Across ${placementCount} placements`, lo: `ຈາກ ${placementCount} ລາຍການ` })
                           : pick(s.detail);
                       return (
-                        <div key={s.id} className="border border-edge bg-void/45 p-4 transition-colors hover:border-edge-bright">
+                        <div key={s.id} className="group/stat relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/55 via-void/50 to-void p-4 transition-all duration-300 hover:border-amethyst/40 hover:shadow-[0_0_24px_-6px_rgba(168,85,247,0.45)]">
+                          <span
+                            aria-hidden
+                            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/60 to-transparent opacity-0 transition-opacity duration-300 group-hover/stat:opacity-100"
+                          />
                           <p className="font-mono text-3xl font-bold leading-none tabular-nums text-soul md:text-4xl">
                             {value}
                           </p>
@@ -512,6 +528,7 @@ export default function AchievementsClient() {
             </div>
           )}
 
+        </div>
         </div>
       </section>
     </>
