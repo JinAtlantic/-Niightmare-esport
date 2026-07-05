@@ -474,7 +474,14 @@ export default function ShopClient() {
 
   return (
     <>
-      <PageHeader title={"Niightmare Jersey\nThe Last Dance\nCollection"} subtitle={pick(shop.tagline)} />
+      <PageHeader
+        title={pick({
+          en: "Niightmare Jersey\nThe Last Dance\nCollection",
+          lo: "ເສື້ອທີມ niightmare\nThe Last Dance\nCollection",
+        })}
+        titleClassName="text-2xl sm:text-3xl md:text-4xl"
+        subtitle={pick(shop.tagline)}
+      />
       <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-12 md:px-6 md:pt-14">
       {/* ambient two-tone wash — soft radial gradients (amethyst + magenta) that
           fade out, so the top reads as premium colour and never a hard block */}

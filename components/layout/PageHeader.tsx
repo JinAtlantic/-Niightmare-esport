@@ -9,6 +9,9 @@ interface PageHeaderProps {
   kicker?: string;
   /** Overrides the subtitle's size/color (layout classes are kept). */
   subtitleClassName?: string;
+  /** Overrides the title's size classes (default text-4xl md:text-5xl) — e.g. a
+   *  smaller size for a stacked multi-line hero. */
+  titleClassName?: string;
 }
 
 /**
@@ -16,7 +19,7 @@ interface PageHeaderProps {
  * disciplined light source rising from below, film grain, an optional mono
  * kicker, the display title with a violet glow, and the scythe-blade divider.
  */
-export default function PageHeader({ title, subtitle, kicker, subtitleClassName }: PageHeaderProps) {
+export default function PageHeader({ title, subtitle, kicker, subtitleClassName, titleClassName }: PageHeaderProps) {
   return (
     <section className="page-header relative overflow-hidden border-b border-edge">
       <div className="hero-grain" aria-hidden />
@@ -30,14 +33,14 @@ export default function PageHeader({ title, subtitle, kicker, subtitleClassName 
         )}
 
         <h1
-          className="balance fx-rise font-display text-4xl font-bold uppercase tracking-[0.05em] text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.35)] md:text-5xl"
+          className={`balance fx-rise font-display font-bold uppercase tracking-[0.05em] text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.35)] ${titleClassName ?? "text-4xl md:text-5xl"}`}
           style={{ animationDelay: "0.08s" }}
         >
           {/* A title may carry explicit line breaks ("\n") to stack it into
               several lines (e.g. the shop hero); plain titles render unchanged. */}
           {title.includes("\n")
             ? title.split("\n").map((line, i) => (
-                <span key={i} className="block">
+                <span key={i} className="block whitespace-nowrap">
                   {line}
                 </span>
               ))
