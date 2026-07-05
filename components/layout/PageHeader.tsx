@@ -33,7 +33,15 @@ export default function PageHeader({ title, subtitle, kicker, subtitleClassName 
           className="balance fx-rise font-display text-4xl font-bold uppercase tracking-[0.05em] text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.35)] md:text-5xl"
           style={{ animationDelay: "0.08s" }}
         >
-          {title}
+          {/* A title may carry explicit line breaks ("\n") to stack it into
+              several lines (e.g. the shop hero); plain titles render unchanged. */}
+          {title.includes("\n")
+            ? title.split("\n").map((line, i) => (
+                <span key={i} className="block">
+                  {line}
+                </span>
+              ))
+            : title}
         </h1>
 
         {subtitle && (
