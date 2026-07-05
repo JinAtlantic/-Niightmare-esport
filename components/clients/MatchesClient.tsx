@@ -844,6 +844,7 @@ function TournamentSelect({
   const [open, setOpen] = useState(false);
   const [box, setBox] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const place = () => {
     const r = triggerRef.current?.getBoundingClientRect();
@@ -859,12 +860,19 @@ function TournamentSelect({
     if (!open) return;
     const close = () => setOpen(false);
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    // The panel is fixed to the viewport, so re-anchor it on scroll/resize.
-    window.addEventListener("scroll", close, true);
+    // Close when the PAGE scrolls (the fixed panel would detach from the
+    // trigger), but IGNORE scrolling inside the menu list itself — that's the
+    // user browsing the options, and closing there made it feel un-scrollable.
+    const onScroll = (e: Event) => {
+      const t = e.target;
+      if (menuRef.current && t instanceof Node && menuRef.current.contains(t)) return;
+      setOpen(false);
+    };
+    window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", close);
     document.addEventListener("keydown", onKey);
     return () => {
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", close);
       document.removeEventListener("keydown", onKey);
     };
@@ -896,6 +904,7 @@ function TournamentSelect({
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
             <div
+              ref={menuRef}
               role="listbox"
               style={{ position: "fixed", left: box.left, top: box.top, width: box.width, maxHeight: box.maxHeight }}
               className="z-50 overflow-y-auto border border-edge-bright bg-crypt shadow-[0_18px_44px_rgba(0,0,0,0.62)]"
