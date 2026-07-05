@@ -107,8 +107,8 @@ export default function PlayerCard({ player }: { player: Player }) {
           )}
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#12091d]/96 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4">
-            <p className="mb-2 inline-flex max-w-full whitespace-nowrap border border-amethyst/50 bg-void/85 px-2.5 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.1em] text-soul shadow-[0_2px_10px_rgba(0,0,0,0.55)] backdrop-blur-md md:text-[11px]">
-              {pick(player.role)}
+            <p className="mb-2 flex max-w-full items-center border-l-2 border-amethyst pl-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-glow [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-[11px]">
+              <span className="min-w-0 truncate">{pick(player.role)}</span>
             </p>
             <h3 className="keep-latin break-words font-display text-xl font-bold uppercase leading-none tracking-wide text-soul transition-colors duration-300 group-hover:text-glow md:text-2xl">
               {player.ign}

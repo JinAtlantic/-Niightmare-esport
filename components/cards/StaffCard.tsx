@@ -80,8 +80,8 @@ export default function StaffCard({ member }: { member: StaffMember }) {
           {/* bottom text overlay — only the name + role; contact links live in
               the modal (click the card). */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-void via-[#12091d]/96 to-transparent px-3 pb-3 pt-20 sm:px-4 sm:pb-4">
-            <p className="mb-2 inline-flex max-w-full whitespace-nowrap border-l-2 border-amethyst bg-void/85 px-2.5 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.1em] text-soul shadow-[0_2px_10px_rgba(0,0,0,0.55)] backdrop-blur-md md:text-[11px]">
-              {pick(member.role)}
+            <p className="mb-2 flex max-w-full items-center border-l-2 border-amethyst pl-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-glow [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-[11px]">
+              <span className="min-w-0 truncate">{pick(member.role)}</span>
             </p>
             <h3 className="leading-[1.1]">
               <FitText
