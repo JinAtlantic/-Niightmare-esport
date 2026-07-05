@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
-import { readSection, writeSection, type ContentKey } from "@/lib/store";
+import { readSection, type ContentKey } from "@/lib/store";
 import { supabaseAdminEnabled } from "@/lib/supabaseAdmin";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import { writeSectionToSupabase } from "@/lib/supabaseWrite";
@@ -62,7 +62,7 @@ export async function PUT(request: Request) {
       const res = await writeSectionToSupabase(key, data);
       if (!res.ok) return NextResponse.json({ error: res.error }, { status: 500 });
     } else {
-      await writeSection(key, data);
+      return NextResponse.json({ error: "Storage not configured (Supabase required)" }, { status: 500 });
     }
     revalidateTag("content"); // surface the edit on the public site immediately
     revalidatePath("/", "layout");

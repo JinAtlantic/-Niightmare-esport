@@ -183,6 +183,14 @@ export interface MigrateResult {
 }
 
 export async function migrateAll(): Promise<MigrateResult> {
+  // Migrate (Blob → Supabase) is RETIRED: Vercel Blob is gone and Supabase is
+  // the source of truth. Re-running it would wipe every table and re-insert the
+  // bundled seed (readAll now returns the seed) → data loss. Hard-disabled.
+  const MIGRATE_DISABLED = true;
+  if (MIGRATE_DISABLED) {
+    return { ok: false, error: "Migrate is disabled — Supabase is the source of truth; admin edits save directly." };
+  }
+
   const db = getSupabaseAdmin();
   if (!db) return { ok: false, error: "Supabase service role not configured" };
 
