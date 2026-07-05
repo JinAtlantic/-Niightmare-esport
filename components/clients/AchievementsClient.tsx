@@ -235,7 +235,7 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
   const summary = [...baseRows, total];
 
   return (
-    <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/90 via-crypt/55 to-void p-5 shadow-glow-soft md:p-7">
+    <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/90 via-crypt/55 to-void p-3.5 shadow-glow-soft sm:p-5 md:p-7">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
@@ -255,7 +255,7 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
       </div>
 
       <div className="relative mt-6 overflow-x-auto border border-edge bg-void/35">
-        <div className="grid grid-cols-[minmax(58px,1fr)_repeat(5,minmax(46px,1fr))] border-b border-edge bg-crypt/60 px-3 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ash md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:text-[11px]">
+        <div className="grid grid-cols-[minmax(44px,1.1fr)_repeat(5,minmax(34px,1fr))] border-b border-edge bg-crypt/60 px-2.5 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.04em] text-ash sm:text-[10px] md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:px-3 md:text-[11px] md:tracking-[0.14em]">
           <span>Tier</span>
           <span className="text-right text-gold">1st</span>
           <span className="text-right text-silver">2nd</span>
@@ -269,10 +269,10 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
               return (
                 <div
                   key={row.tier}
-                  className={`grid grid-cols-[minmax(58px,1fr)_repeat(5,minmax(46px,1fr))] items-center px-3 py-3.5 font-mono text-lg tabular-nums md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:text-xl ${row.tier === "Total" ? "bg-amethyst/10" : ""}`}
+                  className={`grid grid-cols-[minmax(44px,1.1fr)_repeat(5,minmax(34px,1fr))] items-center px-2.5 py-3.5 font-mono text-base tabular-nums sm:text-lg md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:px-3 md:text-xl ${row.tier === "Total" ? "bg-amethyst/10" : ""}`}
                 >
                   <div className="min-w-0">
-                    <span className={`inline-flex border ${tone.border} ${tone.bg} px-2 py-1 font-display text-xs font-black uppercase tracking-[0.12em] ${tone.text} ${tone.glow}`}>
+                    <span className={`inline-flex whitespace-nowrap border ${tone.border} ${tone.bg} px-1.5 py-0.5 font-display text-[10px] font-black uppercase tracking-[0.02em] ${tone.text} ${tone.glow} md:px-2 md:py-1 md:text-xs md:tracking-[0.12em]`}>
                       {row.tier === "Total" ? "Total" : row.tier === "Other" ? "Other" : `${row.tier}-Tier`}
                     </span>
                   </div>
