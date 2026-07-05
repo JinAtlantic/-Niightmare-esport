@@ -93,6 +93,24 @@ const labels = {
   globalProof: { en: "Global Proof", lo: "ຜົນງານລະດັບໂລກ" },
 };
 
+// Bilingual copy for the placement table so it switches with the language.
+// Lao kept compact so the six columns still fit on small phones.
+const PLACEMENT = {
+  heading: { en: "Placement Table", lo: "ຕາຕະລາງອັນດັບ" },
+  note: {
+    en: "The Total row adds up the tiers above automatically",
+    lo: "ແຖວ 'ລວມ' ບວກລະດັບຂ້າງເທິງໃຫ້ອັດຕະໂນມັດ",
+  },
+  tier: { en: "Tier", lo: "ລະດັບ" },
+  first: { en: "1st", lo: "ທີ1" },
+  second: { en: "2nd", lo: "ທີ2" },
+  third: { en: "3rd", lo: "ທີ3" },
+  top3: { en: "Top 3", lo: "3 ອັນດັບ" },
+  all: { en: "All", lo: "ທັງໝົດ" },
+  total: { en: "Total", lo: "ລວມ" },
+  other: { en: "Other", lo: "ອື່ນໆ" },
+};
+
 const DEFAULT_PLACEMENT_SUMMARY: PlacementSummaryRow[] = [
   { tier: "S", first: 0, second: 0, third: 0, top3: 0, all: 3 },
   { tier: "A", first: 0, second: 0, third: 0, top3: 0, all: 2 },
@@ -223,6 +241,7 @@ function placementTierTone(tier: PlacementSummaryRow["tier"]) {
 }
 
 function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
+  const { pick, lang } = useLanguage();
   const baseRows = (rows.length ? rows : DEFAULT_PLACEMENT_SUMMARY).filter((row) => row.tier !== "Total");
   const total: PlacementSummaryRow = {
     tier: "Total",
@@ -242,26 +261,23 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
       />
       <div className="relative flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.3em] text-amethyst">
-            Liquipedia Placement Summary
-          </p>
-          <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
-            Placement Table
+          <h3 className="font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
+            {pick(PLACEMENT.heading)}
           </h3>
         </div>
         <p className="max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.18em] text-ash md:text-right">
-          Total row calculates itself from the tiers above
+          {pick(PLACEMENT.note)}
         </p>
       </div>
 
       <div className="relative mt-6 overflow-x-auto border border-edge bg-void/35">
         <div className="grid grid-cols-[minmax(44px,1.1fr)_repeat(5,minmax(34px,1fr))] border-b border-edge bg-crypt/60 px-2.5 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.04em] text-ash sm:text-[10px] md:grid-cols-[minmax(160px,1fr)_repeat(5,96px)] md:px-3 md:text-[11px] md:tracking-[0.14em]">
-          <span>Tier</span>
-          <span className="text-right text-gold">1st</span>
-          <span className="text-right text-silver">2nd</span>
-          <span className="text-right text-bronze">3rd</span>
-          <span className="text-right text-amethyst">Top 3</span>
-          <span className="text-right text-soul">All</span>
+          <span className="whitespace-nowrap">{pick(PLACEMENT.tier)}</span>
+          <span className="whitespace-nowrap text-right text-gold">{pick(PLACEMENT.first)}</span>
+          <span className="whitespace-nowrap text-right text-silver">{pick(PLACEMENT.second)}</span>
+          <span className="whitespace-nowrap text-right text-bronze">{pick(PLACEMENT.third)}</span>
+          <span className="whitespace-nowrap text-right text-amethyst">{pick(PLACEMENT.top3)}</span>
+          <span className="whitespace-nowrap text-right text-soul">{pick(PLACEMENT.all)}</span>
         </div>
         <div className="divide-y divide-edge/80">
           {summary.map((row) => {
@@ -273,7 +289,13 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
                 >
                   <div className="min-w-0">
                     <span className={`inline-flex whitespace-nowrap border ${tone.border} ${tone.bg} px-1.5 py-0.5 font-display text-[10px] font-black uppercase tracking-[0.02em] ${tone.text} ${tone.glow} md:px-2 md:py-1 md:text-xs md:tracking-[0.12em]`}>
-                      {row.tier === "Total" ? "Total" : row.tier === "Other" ? "Other" : `${row.tier}-Tier`}
+                      {row.tier === "Total"
+                        ? pick(PLACEMENT.total)
+                        : row.tier === "Other"
+                          ? pick(PLACEMENT.other)
+                          : lang === "lo"
+                            ? row.tier
+                            : `${row.tier}-Tier`}
                     </span>
                   </div>
                   <span className="text-right font-extrabold text-gold">{row.first}</span>
