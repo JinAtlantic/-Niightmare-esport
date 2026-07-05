@@ -201,11 +201,12 @@ function parsePrizeValue(value?: string) {
   const numeric = text.match(/\d[\d.,]*/)?.[0] ?? "";
   if (!numeric) return 0;
 
-  if (multiplier > 1 && /^\d+[.,]\d+$/.test(numeric)) {
-    return Number(numeric.replace(",", ".")) * multiplier;
-  }
-
-  return Number(numeric.replace(/\D/g, "")) * multiplier || 0;
+  // Strip thousands separators but KEEP the decimal point, so "$3,072.51"
+  // parses as 3072.51 — not 307251. Stripping the dot inflated cents-bearing
+  // prizes ~100x and broke the "highest prize" sort. Commas are thousands
+  // separators in this data.
+  const n = Number(numeric.replace(/,/g, ""));
+  return (Number.isFinite(n) ? n : 0) * multiplier;
 }
 
 function roundRank(match: Match) {
