@@ -236,7 +236,8 @@ function groupMatchesByTournament(
   matches: Match[],
   tournaments: Tournament[],
   fallbackName: Bilingual,
-  sortOrder: SortOrder
+  sortOrder: SortOrder,
+  placementOnly: Tournament[] = []
 ) {
   const tournamentByKey = new Map(
     tournaments.map((tournament) => [
@@ -266,6 +267,24 @@ function groupMatchesByTournament(
       matches: [match],
       latestDate: match.date,
       earliestDate: match.date,
+    });
+  }
+
+  // Placement-only tournaments (no logged matches, e.g. older records) — surface
+  // them as empty groups so their placement/prize still shows on the timeline.
+  for (const t of placementOnly) {
+    const key = `${t.game}:${normalizeValue(t.name.en || t.name.lo)}`;
+    if (groups.has(key)) continue;
+    const yr = extractYear(t.season);
+    const anchor = yr ? `${yr}-06-30` : "";
+    groups.set(key, {
+      key,
+      name: t.name,
+      game: t.game,
+      tournament: t,
+      matches: [],
+      latestDate: anchor,
+      earliestDate: anchor,
     });
   }
 
@@ -581,6 +600,9 @@ function TournamentRecordGroup({
   }, [forceOpen]);
   const tournament = group.tournament;
   const matchCount = group.matches.length;
+  // A placement-only entry (older / no logged matches): show the placement +
+  // prize, but hide the W/L tally and the expandable match list.
+  const placementOnly = matchCount === 0;
   const tier = tournamentTier(group.name.en || group.name.lo);
   const border = tier ? `${TIER_BORDER[tier]} ${TIER_SHADOW[tier]}` : "border-edge shadow-[0_0_28px_rgba(168,85,247,0.1)]";
   const softBorder = tier ? TIER_BORDER_SOFT[tier] : "border-edge";
@@ -605,13 +627,15 @@ function TournamentRecordGroup({
       className={`clip-esports max-w-full overflow-hidden border ${border} ${surface}`}
     >
       <div className={`group relative overflow-hidden border-b px-4 py-5 transition-colors sm:px-5 md:px-7 md:py-6 ${softBorder} ${headerSurface}`}>
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          aria-expanded={open}
-          aria-label={`${open ? "Hide" : "View"} matches for ${pick(group.name)}`}
-          className="absolute inset-0 z-10 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
-        />
+        {!placementOnly && (
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-label={`${open ? "Hide" : "View"} matches for ${pick(group.name)}`}
+            className="absolute inset-0 z-10 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+          />
+        )}
         <span aria-hidden className={`absolute left-0 top-0 h-full w-1.5 ${tier ? TIER_BLADE[tier] : TIER_BLADE.default}`} />
         <span
           aria-hidden
@@ -646,9 +670,11 @@ function TournamentRecordGroup({
                   {tier}-Tier Tournament
                 </span>
               )}
-              <span className="inline-flex font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre md:text-[11px]">
-                {matchCount} {matchCount === 1 ? "match" : "matches"}
-              </span>
+              {!placementOnly && (
+                <span className="inline-flex font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre md:text-[11px]">
+                  {matchCount} {matchCount === 1 ? "match" : "matches"}
+                </span>
+              )}
               {latestDate && (
                 <span className="inline-flex font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash md:text-[11px]">
                   {latestDate}
@@ -658,16 +684,18 @@ function TournamentRecordGroup({
             <h2 className="balance mt-3 max-w-4xl break-words font-display text-2xl font-extrabold uppercase leading-[0.98] tracking-[0.02em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-4xl">
               {pick(group.name)}
             </h2>
-            <div className={`mt-4 grid max-w-xs grid-cols-2 border bg-void/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${softBorder}`}>
-              <div className={`border-r px-3 py-2 md:px-4 md:py-2.5 ${softBorder}`}>
-                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.wins)}</p>
-                <p className="mt-1 font-display text-xl font-bold leading-none text-win md:text-2xl">{wins}</p>
+            {!placementOnly && (
+              <div className={`mt-4 grid max-w-xs grid-cols-2 border bg-void/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${softBorder}`}>
+                <div className={`border-r px-3 py-2 md:px-4 md:py-2.5 ${softBorder}`}>
+                  <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.wins)}</p>
+                  <p className="mt-1 font-display text-xl font-bold leading-none text-win md:text-2xl">{wins}</p>
+                </div>
+                <div className="px-3 py-2 md:px-4 md:py-2.5">
+                  <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.losses)}</p>
+                  <p className="mt-1 font-display text-xl font-bold leading-none text-loss md:text-2xl">{losses}</p>
+                </div>
               </div>
-              <div className="px-3 py-2 md:px-4 md:py-2.5">
-                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ash">{pick(page.stats.losses)}</p>
-                <p className="mt-1 font-display text-xl font-bold leading-none text-loss md:text-2xl">{losses}</p>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="flex min-w-0 flex-col gap-2 lg:items-end">
@@ -695,14 +723,16 @@ function TournamentRecordGroup({
                 )}
               </div>
             )}
-            <span className="w-full border border-edge-bright bg-void/70 px-3 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-soul lg:w-auto lg:min-w-[150px]">
-              {open ? "Hide Matches" : "View Matches"}
-            </span>
+            {!placementOnly && (
+              <span className="w-full border border-edge-bright bg-void/70 px-3 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-soul lg:w-auto lg:min-w-[150px]">
+                {open ? "Hide Matches" : "View Matches"}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {open && (
+      {open && !placementOnly && (
         <div className="relative flex flex-col gap-1.5 bg-void/55 p-2 md:gap-2 md:p-3">
           <span
             aria-hidden
@@ -936,8 +966,18 @@ export default function MatchesClient() {
       const year = tournamentYearByKey.get(matchTournamentKey(match)) || extractYear(match.date);
       if (year) years.add(year);
     }
+    // Include the seasons of tournaments that have no logged matches (older /
+    // placement-only records) so the Year filter covers the full history.
+    const matchKeys = new Set(gameMatches.map((m) => matchTournamentKey(m)));
+    for (const t of data.tournaments ?? []) {
+      if (t.game !== selectedGame) continue;
+      const key = `${t.game}:${normalizeValue(t.name.en || t.name.lo)}`;
+      if (matchKeys.has(key)) continue;
+      const y = extractYear(t.season);
+      if (y) years.add(y);
+    }
     return [...years].sort((a, b) => b.localeCompare(a));
-  }, [gameMatches, tournamentYearByKey]);
+  }, [gameMatches, tournamentYearByKey, data.tournaments, selectedGame]);
 
   // Default to "All Years" so the full history is visible on open. The Reveal
   // stagger below is capped so the long list still appears quickly.
@@ -1014,9 +1054,22 @@ export default function MatchesClient() {
     });
   }, [resultFilter, gameYearMatches]);
 
+  // Tournaments with no logged matches (older / placement-only records) so they
+  // still appear on the timeline. Only when not filtering by W/L (they carry no
+  // result) and matching the active year.
+  const placementOnlyTournaments = useMemo(() => {
+    if (resultFilter !== "all") return [];
+    const matchKeys = new Set(data.matches.map((m) => matchTournamentKey(m)));
+    return (data.tournaments ?? []).filter((t) => {
+      const key = `${t.game}:${normalizeValue(t.name.en || t.name.lo)}`;
+      if (matchKeys.has(key)) return false;
+      return activeYear === "all" || extractYear(t.season) === activeYear;
+    });
+  }, [data.matches, data.tournaments, resultFilter, activeYear]);
+
   const tournamentGroups = useMemo(
-    () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder),
-    [filtered, data.tournaments, page.unknownTournament, sortOrder]
+    () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder, placementOnlyTournaments),
+    [filtered, data.tournaments, page.unknownTournament, sortOrder, placementOnlyTournaments]
   );
   const groupsByGame = useMemo(() => {
     const q = normalizeValue(search);
