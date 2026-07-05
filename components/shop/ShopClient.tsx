@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import ShopPushToggle from "@/components/shop/ShopPushToggle";
+import AuroraHalos from "@/components/ui/AuroraHalos";
 import type { Lang } from "@/lib/types";
 import {
   resolveShop,
@@ -472,12 +473,9 @@ export default function ShopClient() {
   ];
 
   return (
-    <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
-      {/* ambient violet wash + faint scanline grain — decorative, no layout impact */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] bg-[radial-gradient(75%_60%_at_50%_0%,rgba(168,85,247,0.18),transparent_72%)]"
-      />
+    <div className="relative isolate mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
+      {/* premium two-tone ambient colour — tuned centrally in AuroraHalos */}
+      <AuroraHalos />
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 top-40 -z-10 h-72 w-72 rounded-full bg-glow/10 blur-[90px]"

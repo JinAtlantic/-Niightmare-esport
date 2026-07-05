@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
+import AuroraHalos from "@/components/ui/AuroraHalos";
 import OpponentLogo from "@/components/cards/OpponentLogo";
 import OpponentFlag from "@/components/cards/OpponentFlag";
 import Reveal from "@/components/ui/Reveal";
@@ -1059,7 +1060,8 @@ export default function MatchesClient() {
         subtitle={pick(page.intro)}
       />
 
-      <section className="mx-auto max-w-7xl overflow-hidden px-3 py-12 sm:px-4 md:px-6 md:py-16">
+      <section className="relative isolate mx-auto max-w-7xl overflow-hidden px-3 py-12 sm:px-4 md:px-6 md:py-16">
+        <AuroraHalos />
         <Reveal>
           <div className="glass glass-sheen max-w-full overflow-hidden p-3 shadow-elev-2 sm:p-4 md:p-6">
             <button

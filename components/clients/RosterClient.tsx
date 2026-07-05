@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
+import AuroraHalos from "@/components/ui/AuroraHalos";
 import PlayerCard from "@/components/cards/PlayerCard";
 import StaffCard from "@/components/cards/StaffCard";
 import Reveal from "@/components/ui/Reveal";
@@ -114,7 +115,8 @@ export default function RosterClient() {
         subtitleClassName="text-lg font-medium text-spectre md:text-2xl"
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
+      <section className="relative isolate mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
+        <AuroraHalos />
         {/* View tabs — MLBB / eFootball lineups, and the back-office team */}
         <div className="flex flex-wrap items-center justify-center gap-1 border-b border-edge">
           {tabs.map(({ id, label, count }) => {

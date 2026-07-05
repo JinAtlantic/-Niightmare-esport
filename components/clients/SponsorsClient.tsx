@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
+import AuroraHalos from "@/components/ui/AuroraHalos";
 import SectionLabel from "@/components/ui/SectionLabel";
 import { useContent } from "@/components/context/ContentContext";
 import {
@@ -344,7 +345,8 @@ export default function SponsorsClient() {
     <>
       <PageHeader title={pick(page.heroTitle)} subtitle={pick(page.heroSubtitle)} />
 
-      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
+      <section className="relative isolate mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
+        <AuroraHalos />
         {/* Partner wall — logo first */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>

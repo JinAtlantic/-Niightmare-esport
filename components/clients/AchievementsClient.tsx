@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
+import AuroraHalos from "@/components/ui/AuroraHalos";
 import { useContent } from "@/components/context/ContentContext";
 import {
   deriveChampionships,
@@ -376,17 +377,9 @@ export default function AchievementsClient() {
         subtitleClassName="text-base font-medium text-spectre md:text-lg"
       />
 
-      <section className="relative overflow-hidden px-4 py-10 md:px-6 md:py-12">
-        {/* two-tone premium halos — amethyst key + magenta accent, matching the
-            home bands so the record body glows instead of floating on flat void */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-[22%] top-16 h-72 w-[min(680px,82vw)] -translate-x-1/2 rounded-full bg-amethyst/[0.10] blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute right-[6%] top-[42%] h-64 w-[min(520px,70vw)] rounded-full bg-magenta/[0.08] blur-3xl"
-        />
+      <section className="relative isolate overflow-hidden px-4 py-10 md:px-6 md:py-12">
+        {/* premium two-tone ambient colour — tuned centrally in AuroraHalos */}
+        <AuroraHalos />
 
         <div className="relative z-[1] mx-auto max-w-7xl">
         {/* TABS — split the record into focused views so nothing scrolls far */}
