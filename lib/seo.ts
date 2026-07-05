@@ -11,13 +11,15 @@ import type { Match, Player, StaffMember, Tournament, UpcomingMatch } from "@/li
  */
 
 /**
- * Canonical site origin used in metadata, OG tags, and structured data. Set
- * NEXT_PUBLIC_SITE_URL in Vercel once a custom domain is connected (e.g.
- * https://niightmare.gg) — no code change needed. Falls back to the vercel.app
- * URL. Always trimmed of a trailing slash so `${SITE_URL}/path` is clean.
+ * Canonical site origin used in metadata, OG tags, and structured data. MUST
+ * match the host the site is actually served on — the apex (niightmareesport.com)
+ * 308-redirects to www, so canonicalising to www keeps every canonical/sitemap/
+ * OG URL a direct 200 (an apex canonical/sitemap redirected, which broke Google's
+ * sitemap fetch). Override with NEXT_PUBLIC_SITE_URL in Vercel if the primary
+ * domain ever changes. Always trimmed of a trailing slash.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://niightmareesport.com"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.niightmareesport.com"
 ).replace(/\/$/, "");
 
 const abs = (path: string) =>
