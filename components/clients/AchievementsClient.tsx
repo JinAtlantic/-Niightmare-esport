@@ -97,10 +97,6 @@ const labels = {
 // Lao kept compact so the six columns still fit on small phones.
 const PLACEMENT = {
   heading: { en: "Placement Table", lo: "ຕາຕະລາງອັນດັບ" },
-  note: {
-    en: "The Total row adds up the tiers above automatically",
-    lo: "ແຖວ 'ລວມ' ບວກລະດັບຂ້າງເທິງໃຫ້ອັດຕະໂນມັດ",
-  },
   tier: { en: "Tier", lo: "ລະດັບ" },
   first: { en: "1st", lo: "ທີ1" },
   second: { en: "2nd", lo: "ທີ2" },
@@ -259,15 +255,10 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
       />
-      <div className="relative flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h3 className="font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
-            {pick(PLACEMENT.heading)}
-          </h3>
-        </div>
-        <p className="max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.18em] text-ash md:text-right">
-          {pick(PLACEMENT.note)}
-        </p>
+      <div className="relative">
+        <h3 className="font-display text-2xl font-black uppercase tracking-[0.08em] text-soul md:text-4xl">
+          {pick(PLACEMENT.heading)}
+        </h3>
       </div>
 
       <div className="relative mt-6 overflow-x-auto border border-edge bg-void/35">
