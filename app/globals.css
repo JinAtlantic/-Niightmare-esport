@@ -101,7 +101,11 @@ html.lang-lo .font-mono {
 }
 
 html.lang-lo .keep-latin {
-  font-family: var(--font-rajdhani) !important;
+  /* Latin glyphs stay on the display face, but Lao glyphs must still fall to
+     Noto Sans Lao (not the system Lao font) so Lao renders in ONE consistent
+     face everywhere — many keep-latin elements (tournament/opponent names,
+     labels) also carry Lao text. */
+  font-family: var(--font-rajdhani), var(--font-lao) !important;
 }
 
 /* ----------------------------------------------------------------
