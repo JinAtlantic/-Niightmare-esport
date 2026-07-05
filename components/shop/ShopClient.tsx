@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import ShopPushToggle from "@/components/shop/ShopPushToggle";
+import PageHeader from "@/components/layout/PageHeader";
 import type { Lang } from "@/lib/types";
 import {
   resolveShop,
@@ -472,7 +473,9 @@ export default function ShopClient() {
   ];
 
   return (
-    <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-24 md:px-6 md:pt-28">
+    <>
+      <PageHeader title={pick(shop.productName)} subtitle={pick(shop.tagline)} />
+      <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-12 md:px-6 md:pt-14">
       {/* ambient two-tone wash — soft radial gradients (amethyst + magenta) that
           fade out, so the top reads as premium colour and never a hard block */}
       <div
@@ -483,13 +486,6 @@ export default function ShopClient() {
         aria-hidden
         className="pointer-events-none absolute -left-24 top-40 -z-10 h-72 w-72 rounded-full bg-glow/10 blur-[90px]"
       />
-      <header className="mb-6 text-center">
-        <h1 className="font-display text-3xl font-bold uppercase leading-[1.05] tracking-tight text-soul [text-shadow:0_2px_30px_rgba(168,85,247,0.3)] md:text-4xl">
-          {pick(shop.productName)}
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-spectre/85 md:text-base">{pick(shop.tagline)}</p>
-      </header>
-
       {/* tabs — switch between Order and My Orders */}
       <div className="mb-8 flex items-center justify-center gap-1 border-b border-edge">
         {TABS.map((t) => {
@@ -937,7 +933,8 @@ export default function ShopClient() {
           </div>,
           document.body
         )}
-    </div>
+      </div>
+    </>
   );
 }
 
