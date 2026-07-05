@@ -79,9 +79,13 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   // Icons driven via metadata (not the app/icon.png file convention) so the
   // /admin route can cleanly override them with the reaper icon.
+  // A real favicon.ico (48px, the reaper logo) fills the classic /favicon.ico
+  // slot that Google + older browsers request; the ?v= busts any stale cached
+  // icon so the real logo replaces an old placeholder.
   icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
+    icon: [{ url: "/icon.png?v=2", type: "image/png" }],
+    shortcut: "/favicon.ico?v=2",
+    apple: "/apple-icon.png?v=2",
   },
   title: {
     default: "NIIGHTMARE Esports — Lao PDR | MLBB & eFootball",
