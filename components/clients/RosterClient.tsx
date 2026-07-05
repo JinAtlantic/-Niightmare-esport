@@ -67,11 +67,11 @@ function TierRow({ label, members }: { label: string; members: StaffMember[] }) 
   return (
     <div className="mt-12 first:mt-10">
       <div className="mb-6 flex items-center justify-center gap-3">
-        <span aria-hidden className="h-px w-8 bg-gradient-to-r from-transparent to-amethyst/60" />
-        <span className="font-mono text-sm font-semibold uppercase tracking-[0.3em] text-soul sm:text-base">
+        <span aria-hidden className="h-px w-6 shrink-0 bg-gradient-to-r from-transparent to-amethyst/60 sm:w-8" />
+        <span className="whitespace-nowrap font-mono text-sm font-semibold uppercase tracking-[0.16em] text-soul sm:text-base sm:tracking-[0.3em]">
           {label}
         </span>
-        <span aria-hidden className="h-px w-8 bg-gradient-to-l from-transparent to-amethyst/60" />
+        <span aria-hidden className="h-px w-6 shrink-0 bg-gradient-to-l from-transparent to-amethyst/60 sm:w-8" />
       </div>
       <div className="flex flex-wrap items-stretch justify-center gap-4 sm:gap-5">
         {members.map((member, i) => (
