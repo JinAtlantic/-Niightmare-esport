@@ -75,6 +75,7 @@ export async function writeSectionToSupabase(
   try {
     if (key === "roster") {
       const r = value as {
+        page?: unknown;
         mlbb?: { players?: Player[] };
         efootball?: { players?: Player[] };
         staff?: StaffMember[];
@@ -104,6 +105,15 @@ export async function writeSectionToSupabase(
         "members",
         membersHaveProfileColumns ? members : omitKeys(members, memberProfileColumns)
       );
+      // Roster PAGE COPY (hero/labels/stats) is not a table — it's a jsonb blob
+      // on site_settings, same pattern as about_us/roadmap/shop. Guarded: the
+      // column may not exist yet, and an upsert with an unknown column fails the
+      // whole write, so only send it once the column is present. Until the SQL
+      // is run the players/staff lists still save (this is a no-op).
+      if (r.page !== undefined && (await hasColumns(db, "site_settings", "roster_page"))) {
+        const { error } = await db.from("site_settings").upsert({ id: 1, roster_page: r.page ?? null });
+        if (error) throw new Error(`site_settings roster_page: ${error.message}`);
+      }
     } else if (key === "matches") {
       const m = value as { matches?: Match[]; tournaments?: Tournament[] };
       const rows = matchRows(m.matches ?? []);

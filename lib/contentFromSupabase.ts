@@ -117,8 +117,14 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     const storedSite = siteSeed as Record<string, unknown>;
 
     const all = (players.data ?? []) as Record<string, unknown>[];
+    // Roster page copy (hero/labels/stats) is admin-editable and stored as a
+    // jsonb blob on site_settings. When present it overrides the bundled seed
+    // page; null/absent → keep the seed (RosterClient also merges over the seed).
+    const ssRow = (ss.data ?? {}) as Record<string, unknown>;
+    const rosterPage = ssRow.roster_page as Record<string, unknown> | null;
     const roster = {
       ...storedRoster,
+      ...(rosterPage ? { page: rosterPage } : {}),
       mlbb: { players: all.filter((r) => r.game === "mlbb").map(toPlayer) },
       efootball: { players: all.filter((r) => r.game === "efootball").map(toPlayer) },
       staff: ((members.data ?? []) as MemberRow[]).map(rowToStaff),

@@ -241,6 +241,10 @@ alter table public.site_settings add column if not exists match_schedule jsonb;
 alter table public.site_settings add column if not exists last_result jsonb;
 -- Shop / 3D jersey config (admin-editable): price, stock, size chart, order links.
 alter table public.site_settings add column if not exists shop jsonb;
+-- Roster page copy (admin-editable): hero title/intro, tab + tier labels, stat
+-- labels. The player/staff LISTS live in their own tables; this is only the
+-- surrounding page text so /admin → Roster → "หน้า Roster (Page)" saves live.
+alter table public.site_settings add column if not exists roster_page jsonb;
 
 -- ── STORAGE BUCKET (admin media + customer payment slips) ───────────────────
 -- All image uploads live in one public bucket. Moved off Vercel Blob, whose free
