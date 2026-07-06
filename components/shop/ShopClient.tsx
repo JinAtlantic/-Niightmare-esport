@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
 import ShopPushToggle from "@/components/shop/ShopPushToggle";
+import JerseyShowcase from "@/components/shop/JerseyShowcase";
 import PageHeader from "@/components/layout/PageHeader";
 import type { Lang } from "@/lib/types";
 import {
@@ -523,6 +524,14 @@ export default function ShopClient() {
         {/* ── ORDER ──────────────────────────────────────────────────── */}
         {tab === "order" && (
           <section id="order-form" className="space-y-5">
+            {/* front/back jersey gallery — premium viewer with tap-to-zoom */}
+            <JerseyShowcase
+              front={shop.frontImage}
+              back={shop.backImage}
+              productName={shop.productName}
+              jerseyNumber={shop.fixedJerseyNumber}
+            />
+
             <div className="relative overflow-hidden rounded-md border border-amethyst/60 bg-gradient-to-br from-amethyst/[0.18] via-crypt/50 to-crypt/20 p-4 shadow-[0_0_30px_-6px_rgba(168,85,247,0.5)] ring-1 ring-inset ring-amethyst/10">
               {/* decorative corner halo + accent blade — purely visual, no layout impact */}
               <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-glow/25 blur-2xl" />

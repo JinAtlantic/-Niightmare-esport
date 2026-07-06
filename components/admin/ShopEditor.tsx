@@ -146,6 +146,31 @@ export default function ShopEditor() {
         </Card>
       </Section>
 
+      <Section title="รูปเสื้อ (หน้า / หลัง)" hint="อัปโหลดรูปเสื้อด้านหน้าและด้านหลัง — โชว์เป็นแกลเลอรีพรีเมียมบนหน้า /shop (แตะซูมได้)">
+        <Card>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <ImageField
+                label="รูปด้านหน้าเสื้อ"
+                value={shop.frontImage}
+                folder="shop"
+                onChange={(frontImage) => patch({ frontImage: frontImage || undefined })}
+              />
+              <p className="font-mono text-[10px] text-ash">แนะนำรูปแนวตั้ง พื้นหลังโล่ง/เข้ม จะดูพรีเมียมสุด</p>
+            </div>
+            <div className="space-y-2">
+              <ImageField
+                label="รูปด้านหลังเสื้อ"
+                value={shop.backImage}
+                folder="shop"
+                onChange={(backImage) => patch({ backImage: backImage || undefined })}
+              />
+              <p className="font-mono text-[10px] text-ash">ใส่รูปหลัง (โชว์ชื่อ + เบอร์ 7) — เว้นว่างได้ ถ้ายังไม่มี</p>
+            </div>
+          </div>
+        </Card>
+      </Section>
+
       <Section title="ธนาคาร & QR โอนเงิน" hint="ข้อมูลที่โชว์ใน popup โอนเงิน" collapsible={false}>
         <Card className="space-y-4">
           <div className="grid gap-3 md:grid-cols-3">

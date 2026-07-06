@@ -70,6 +70,10 @@ export interface ShopContent {
   contactUrl: string;
   /** Optional flat product image path used as a poster/fallback. */
   productImage?: string;
+  /** Front-of-jersey product photo (admin-uploaded). Shown in the showcase gallery. */
+  frontImage?: string;
+  /** Back-of-jersey product photo (admin-uploaded). Shown in the showcase gallery. */
+  backImage?: string;
 }
 
 export const DEFAULT_SHOP: ShopContent = {
@@ -121,6 +125,8 @@ export const DEFAULT_SHOP: ShopContent = {
   },
   contactUrl: "https://m.me/niightmareesports",
   productImage: "",
+  frontImage: "",
+  backImage: "",
 };
 
 /** Wearer height bounds the slider is clamped to (cm). */
@@ -228,6 +234,8 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
     },
     contactUrl: raw?.contactUrl ?? DEFAULT_SHOP.contactUrl,
     productImage: raw?.productImage || undefined,
+    frontImage: raw?.frontImage || undefined,
+    backImage: raw?.backImage || undefined,
   };
 }
 

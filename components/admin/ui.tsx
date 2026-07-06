@@ -214,8 +214,8 @@ export function ImageField({
 }: {
   label: string;
   value?: string;
-  /** Upload target subfolder under /public/blob (e.g. "teams", "players", "staff", "sponsors"). */
-  folder: "teams" | "players" | "staff" | "sponsors";
+  /** Upload target subfolder under /public/blob (e.g. "teams", "players", "staff", "sponsors", "shop"). */
+  folder: "teams" | "players" | "staff" | "sponsors" | "shop";
   onChange: (path: string) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
