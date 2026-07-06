@@ -4,27 +4,48 @@ import React, { useRef, useState } from "react";
 
 /**
  * Shrinks a photo in the browser before upload so large phone images don't
- * bloat the site (the main mobile-speed killer). Resizes to a max edge and
- * re-encodes as JPEG; leaves SVG/GIF and already-small files untouched.
+ * bloat the site (the main mobile-speed killer) AND never hit the server's 4 MB
+ * cap. Resizes to a max edge and re-encodes as JPEG, then keeps lowering quality
+ * (and, if needed, dimensions) until the result is safely under the cap — so an
+ * upload always succeeds regardless of the source file size. Leaves SVG/GIF
+ * untouched, and keeps a smaller original (e.g. a transparent PNG) as-is.
  */
+// Stay comfortably below the /api/admin/upload 4 MB limit.
+const SAFE_UPLOAD_BYTES = 3.5 * 1024 * 1024;
+
 async function downscaleImage(file: File, maxEdge = 1200, quality = 0.82): Promise<Blob> {
   if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) return file;
   try {
     // imageOrientation:'from-image' bakes EXIF rotation in so phone photos
     // don't end up sideways once the orientation tag is dropped.
     const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
-    const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
-    const w = Math.round(bmp.width * scale);
-    const h = Math.round(bmp.height * scale);
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return file;
-    ctx.drawImage(bmp, 0, 0, w, h);
+    let edge = Math.min(maxEdge, Math.max(bmp.width, bmp.height));
+    let q = quality;
+    let best: Blob | null = null;
+    // Re-encode, then progressively lower quality (down to 0.6) and finally the
+    // dimensions until the JPEG fits under the safe cap. Bounded to 6 tries.
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const scale = Math.min(1, edge / Math.max(bmp.width, bmp.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bmp.width * scale);
+      canvas.height = Math.round(bmp.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) break;
+      ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", q));
+      if (!blob) break;
+      best = blob;
+      if (blob.size <= SAFE_UPLOAD_BYTES) break;
+      if (q > 0.6) q = Math.max(0.6, q - 0.12);
+      else edge = Math.round(edge * 0.8);
+    }
     bmp.close?.();
-    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", quality));
-    return blob && blob.size < file.size ? blob : file;
+    if (!best) return file;
+    // Keep the original only when it's already small enough AND not larger than
+    // our re-encode — preserves an intentionally-uploaded transparent PNG. If the
+    // original is over the cap, always use the shrunk JPEG so the upload succeeds.
+    if (file.size <= SAFE_UPLOAD_BYTES && file.size <= best.size) return file;
+    return best;
   } catch {
     return file;
   }
@@ -227,6 +248,14 @@ export function ImageField({
     setErr("");
     try {
       const blob = await downscaleImage(file);
+      // Raster images are always shrunk under the cap above; only a file we can't
+      // re-encode (e.g. a huge GIF/SVG) can still be too big — tell the owner in
+      // plain Thai instead of letting the server return an English 413.
+      if (blob.size > 4 * 1024 * 1024) {
+        setErr("ไฟล์ใหญ่เกิน 4 MB และย่ออัตโนมัติไม่ได้ (เช่น GIF/SVG) — กรุณาใช้รูป JPEG หรือ PNG");
+        setBusy(false);
+        return;
+      }
       const isJpeg = blob !== file && blob.type === "image/jpeg";
       const name = isJpeg ? file.name.replace(/\.[^.]+$/, "") + ".jpg" : file.name;
       const fd = new FormData();
