@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
-import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
 import AuroraHalos from "@/components/ui/AuroraHalos";
 import { useContent } from "@/components/context/ContentContext";
@@ -16,9 +15,7 @@ import {
 } from "@/lib/achievementsDerived";
 import type {
   AchievementsData,
-  AchievementStaff,
   CampaignEntry,
-  FormerPlayer,
   PlacementSummaryRow,
   Tournament,
 } from "@/lib/types";
@@ -82,8 +79,6 @@ const MEDAL_BORDER: Record<NonNullable<CampaignEntry["medal"]>, string> = {
   bronze: "border-bronze/40",
 };
 
-const yr = (iso: string) => iso.slice(0, 4);
-const monogram = (s: string) => s.replace(/\s+/g, "").slice(0, 2).toUpperCase();
 const labels = {
   date: { en: "Date", lo: "ວັນທີ" },
   rank: { en: "Rank", lo: "ອັນດັບ" },
@@ -126,12 +121,6 @@ function formatDate(iso: string, lang: "en" | "lo"): string {
 
 function placementTone(e: CampaignEntry): string {
   return e.medal ? MEDAL_TEXT[e.medal] : TIER_TONE[e.tier].text;
-}
-
-function tenure(p: FormerPlayer): string {
-  const a = yr(p.joined);
-  const b = yr(p.left);
-  return a === b ? a : `${a}–${b}`;
 }
 
 /** One result on the vertical campaign timeline. */
@@ -303,62 +292,10 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
   );
 }
 
-/** A past player in the Legacy roll. */
-function FormerRow({ p }: { p: FormerPlayer }) {
-  return (
-    <div className="flex h-full items-center gap-3 border border-edge bg-crypt/30 p-3.5 transition-colors hover:border-edge-bright">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-edge bg-void/60 font-display text-xs font-bold uppercase text-spectre/55">
-        {monogram(p.ign)}
-      </span>
-      <div className="min-w-0">
-        <p className="keep-latin truncate font-display text-sm font-bold uppercase text-soul">{p.ign}</p>
-        <p className="font-mono text-[11px] text-ash">
-          <span className="keep-latin">{p.role}</span>
-          <span className="text-ash-dim"> · </span>
-          <span className="tabular-nums">{tenure(p)}</span>
-        </p>
-        {p.note && (
-          <p className="keep-latin truncate font-mono text-[10px] text-amethyst/75">{p.note}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function LegacyStaffRow({ s }: { s: AchievementStaff }) {
-  const { pick } = useLanguage();
-  return (
-    <div className="flex h-full items-center gap-3 border border-edge bg-crypt/30 p-3.5 transition-colors hover:border-edge-bright">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-edge bg-void/60 text-amethyst/75">
-        <Users size={16} strokeWidth={1.8} />
-      </span>
-      <div className="min-w-0">
-        <p className="keep-latin truncate font-display text-sm font-bold uppercase text-soul">{s.ign}</p>
-        <p className="font-mono text-[11px] text-ash">
-          <span>{pick(s.role)}</span>
-          {s.since && (
-            <>
-              <span className="text-ash-dim"> · </span>
-              <span className="tabular-nums">{s.since}</span>
-            </>
-          )}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-const TABS = [
-  { id: "overview", label: { en: "Overview", lo: "ພາບລວມ" } },
-  { id: "legacy", label: { en: "Legacy", lo: "ອະດີດ" } },
-] as const;
-type TabId = (typeof TABS)[number]["id"];
-
 export default function AchievementsClient() {
   const { pick } = useLanguage();
-  const { achievements, roster, matches } = useContent();
+  const { achievements, matches } = useContent();
   const ACH = achievements as unknown as AchievementsData;
-  const [tab, setTab] = useState<TabId>("overview");
 
   // Live figures derived from the /matches tournament list, so Total Winnings,
   // per-tier entries and podium finishes track the real results automatically.
@@ -370,16 +307,6 @@ export default function AchievementsClient() {
   const totalWinnings = useMemo(() => formatUsdCompact(deriveTotalWinnings(tournaments)), [tournaments]);
   const championships = useMemo(() => deriveChampionships(tournaments), [tournaments]);
   const placementCount = derivedSummary.reduce((n, r) => n + r.all, 0);
-  const currentStaffNames = new Set(
-    ((roster as { staff?: { ign?: string; name?: string }[] }).staff ?? [])
-      .flatMap((member) => [member.ign, member.name])
-      .filter(Boolean)
-      .map((name) => String(name).trim().toLowerCase())
-  );
-  const legacyStaff = (ACH.staff ?? []).filter((member) => {
-    const ign = member.ign.trim().toLowerCase();
-    return ign && !currentStaffNames.has(ign);
-  });
 
   return (
     <>
@@ -394,38 +321,8 @@ export default function AchievementsClient() {
         {/* premium two-tone ambient colour — tuned centrally in AuroraHalos */}
         <AuroraHalos />
 
-        <div className="relative z-[1] mx-auto max-w-7xl">
-        {/* TABS — split the record into focused views so nothing scrolls far */}
-        <div className="mb-10 flex flex-wrap items-center justify-center gap-1 border-b border-edge">
-          {TABS.map((t) => {
-            const active = tab === t.id;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                aria-pressed={active}
-                className={`group relative -mb-px px-5 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.14em] transition-colors md:px-8 md:text-base ${
-                  active ? "text-soul" : "text-ash hover:text-soul"
-                }`}
-              >
-                <span className="keep-latin">{pick(t.label)}</span>
-                <span
-                  aria-hidden
-                  className={`absolute inset-x-0 bottom-0 h-[2px] -skew-x-[24deg] bg-gradient-to-r from-amethyst to-glow transition-opacity duration-300 ${
-                    active ? "opacity-100 shadow-[0_0_14px_rgba(168,85,247,0.7)]" : "opacity-0"
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* re-keyed so each view fades in fresh on switch */}
-        <div key={tab} className="animate-fadeIn">
-          {/* ── OVERVIEW — tale of the tape + trophies + staff ──────────── */}
-          {tab === "overview" && (
-            <div className="space-y-10">
+        <div className="relative z-[1] mx-auto max-w-7xl animate-fadeIn">
+          <div className="space-y-10">
               <div className="grid gap-4">
                 <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/85 via-crypt/60 to-void p-5 shadow-glow-soft md:p-7">
                   <span
@@ -506,35 +403,6 @@ export default function AchievementsClient() {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* ── CAMPAIGN — full timeline ────────────────────────────────── */}
-          {/* ── LEGACY — former players ─────────────────────────────────── */}
-          {tab === "legacy" && (
-            <div className="space-y-8">
-              <div>
-                <SectionLabel centered kicker="PAST PLAYERS">LEGACY ROSTER</SectionLabel>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {ACH.formerPlayers.map((p) => (
-                    <FormerRow key={p.ign} p={p} />
-                  ))}
-                </div>
-              </div>
-
-              {legacyStaff.length > 0 && (
-                <div>
-                  <SectionLabel centered kicker="PAST STAFF">LEGACY STAFF</SectionLabel>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {legacyStaff.map((s) => (
-                      <LegacyStaffRow key={s.ign} s={s} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-        </div>
         </div>
       </section>
     </>
