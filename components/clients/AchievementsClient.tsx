@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Globe2, Users } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
@@ -8,10 +8,8 @@ import Reveal from "@/components/ui/Reveal";
 import AuroraHalos from "@/components/ui/AuroraHalos";
 import { useContent } from "@/components/context/ContentContext";
 import {
-  deriveChampionships,
   derivePlacementSummary,
   deriveTotalWinnings,
-  formatUsdCompact,
 } from "@/lib/achievementsDerived";
 import type {
   AchievementsData,
@@ -86,6 +84,7 @@ const labels = {
   totalRecord: { en: "Total Record", lo: "ບັນທຶກລວມ" },
   championshipCore: { en: "Championship Core", lo: "ແກນແຊມປ໌" },
   globalProof: { en: "Global Proof", lo: "ຜົນງານລະດັບໂລກ" },
+  prizeWon: { en: "Total prize won", lo: "ເງິນລາງວັນທັງໝົດ" },
 };
 
 // Bilingual copy for the placement table so it switches with the language.
@@ -292,6 +291,36 @@ function PodiumDashboard({ rows }: { rows: PlacementSummaryRow[] }) {
   );
 }
 
+/** Animate a number from 0 → target on mount (ease-out), like a prize counter.
+ *  Honours prefers-reduced-motion by jumping straight to the final value. */
+function useCountUp(target: number, durationMs = 1300): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (target <= 0) {
+      setValue(0);
+      return;
+    }
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setValue(target);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setValue(Math.round(target * eased));
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, durationMs]);
+  return value;
+}
+
 export default function AchievementsClient() {
   const { pick } = useLanguage();
   const { achievements, matches } = useContent();
@@ -304,9 +333,14 @@ export default function AchievementsClient() {
     [matches],
   );
   const derivedSummary = useMemo(() => derivePlacementSummary(tournaments), [tournaments]);
-  const totalWinnings = useMemo(() => formatUsdCompact(deriveTotalWinnings(tournaments)), [tournaments]);
-  const championships = useMemo(() => deriveChampionships(tournaments), [tournaments]);
+  const totalWinnings = useMemo(() => deriveTotalWinnings(tournaments), [tournaments]);
   const placementCount = derivedSummary.reduce((n, r) => n + r.all, 0);
+  // Count up to the live prize total; fall back to the authored seed figure if
+  // the tournament list is empty (e.g. a data outage).
+  const countedWinnings = useCountUp(totalWinnings);
+  const seedWinnings = ACH.stats.find((s) => s.id === "winnings")?.value ?? "$0";
+  const prizeDisplay =
+    totalWinnings > 0 ? `$${countedWinnings.toLocaleString("en-US")}` : seedWinnings;
 
   return (
     <>
@@ -324,45 +358,47 @@ export default function AchievementsClient() {
         <div className="relative z-[1] mx-auto max-w-7xl animate-fadeIn">
           <div className="space-y-10">
               <div className="grid gap-4">
-                <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/85 via-crypt/60 to-void p-5 shadow-glow-soft md:p-7">
+                <div className="clip-esports relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/85 via-crypt/60 to-void px-5 py-11 shadow-glow-soft md:px-10 md:py-16">
                   <span
                     aria-hidden
                     className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent"
                   />
-                  <div className="relative">
-                    <div>
-                      <h2 className="font-display text-4xl font-black uppercase leading-none tracking-[0.08em] text-soul [text-shadow:0_0_24px_rgba(236,231,242,0.18)] md:text-6xl">
-                        {pick(labels.totalRecord)}
-                      </h2>
-                    </div>
-                  </div>
+                  {/* ambient prize glow behind the figure */}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-[22rem] max-w-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amethyst/20 blur-[90px]"
+                  />
 
-                  <div className="relative mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
-                    {ACH.stats.map((s) => {
-                      // Winnings + championships come from the live tournament data;
-                      // other cards (established / worlds) keep their authored value.
-                      const value =
-                        s.id === "winnings" ? totalWinnings : s.id === "titles" ? `${championships}×` : s.value;
-                      const detail =
-                        s.id === "winnings"
-                          ? pick({ en: `Across ${placementCount} placements`, lo: `ຈາກ ${placementCount} ລາຍການ` })
-                          : pick(s.detail);
-                      return (
-                        <div key={s.id} className="group/stat relative overflow-hidden border border-edge bg-gradient-to-br from-crypt2/55 via-void/50 to-void p-4 transition-all duration-300 hover:border-amethyst/40 hover:shadow-[0_0_24px_-6px_rgba(168,85,247,0.45)]">
-                          <span
-                            aria-hidden
-                            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/60 to-transparent opacity-0 transition-opacity duration-300 group-hover/stat:opacity-100"
-                          />
-                          <p className="font-mono text-3xl font-bold leading-none tabular-nums text-soul md:text-4xl">
-                            {value}
-                          </p>
-                          <p className="mt-3 font-display text-xs font-bold uppercase tracking-[0.12em] text-spectre">
-                            {pick(s.label)}
-                          </p>
-                          <p className="mt-1.5 text-[11px] leading-relaxed text-ash">{detail}</p>
-                        </div>
-                      );
-                    })}
+                  <div className="relative flex flex-col items-center text-center">
+                    {/* eyebrow — section identity, flanked by hairlines */}
+                    <div className="flex items-center gap-3">
+                      <span aria-hidden className="h-px w-8 bg-gradient-to-r from-transparent to-amethyst/70 md:w-12" />
+                      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.34em] text-amethyst md:text-xs">
+                        {pick(labels.totalRecord)}
+                      </span>
+                      <span aria-hidden className="h-px w-8 bg-gradient-to-l from-transparent to-amethyst/70 md:w-12" />
+                    </div>
+
+                    {/* the prize figure — the one thing this section is remembered by */}
+                    <p
+                      aria-label={
+                        totalWinnings > 0 ? `$${totalWinnings.toLocaleString("en-US")}` : seedWinnings
+                      }
+                      className="mt-6 bg-[linear-gradient(176deg,#FBE9C0_2%,#F5C451_18%,#C77DFF_60%,#A855F7_100%)] bg-clip-text font-display text-6xl font-black leading-[0.88] tracking-tight tabular-nums text-transparent [filter:drop-shadow(0_0_34px_rgba(168,85,247,0.42))] sm:text-7xl md:text-[8.5rem]"
+                    >
+                      {prizeDisplay}
+                    </p>
+
+                    {/* supporting copy */}
+                    <p className="mt-6 font-mono text-xs font-bold uppercase tracking-[0.24em] text-spectre md:text-sm">
+                      {pick(labels.prizeWon)}
+                    </p>
+                    <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ash md:text-xs">
+                      {pick({
+                        en: `Across ${placementCount} tournaments`,
+                        lo: `ຈາກ ${placementCount} ລາຍການແຂ່ງຂັນ`,
+                      })}
+                    </p>
                   </div>
                 </div>
               </div>
