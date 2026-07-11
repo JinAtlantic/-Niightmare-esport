@@ -622,3 +622,112 @@ native/absolute popup spilled off-screen). It renders its menu `position:fixed` 
 `getBoundingClientRect()`, width = trigger, `maxHeight` capped to ~60vh (mobile-toolbar safe) and
 clamped horizontally. Options **wrap** in a smaller font (no truncation) + tier group headers.
 Closes on outside-click / Escape / scroll. The other filters (Game/Year/Result/Sort) stay native.
+
+## Claude Code handoff - achievements, sponsors, roadmap, and Orders UX (2026-07-11)
+
+This batch is complete, committed, pushed to `origin/main`, and deployed to production.
+The latest Vercel deployment for `f8c2636` reached `READY`.
+
+Commits, oldest to newest:
+- `c74b5eb Remove achievements legacy view`
+- `8a68bd1 Simplify sponsors CTA and admin`
+- `9626328 Move sponsor CTA copy onto button`
+- `5862f74 Make roadmap statuses admin controlled`
+- `f8c2636 Redesign desktop order management`
+
+### Achievements public page
+
+File:
+- `components/clients/AchievementsClient.tsx`
+
+Changes:
+- `/achievements` is now one Overview page only.
+- Removed the Overview/Legacy tab switch and all public Legacy roster/staff rendering.
+- Legacy data shapes and admin data were deliberately preserved for backward compatibility;
+  they are simply not rendered on the public page.
+
+### Sponsors CTA and admin cleanup
+
+Files:
+- `components/clients/SponsorsClient.tsx`
+- `components/admin/SponsorsEditor.tsx`
+- `data/sponsors.json`
+
+Changes:
+- The bottom Sponsors CTA contains one centered Facebook button only.
+- The button label is `Become Our Partner` and its Lao translation. The same phrase is no
+  longer rendered as a separate heading.
+- The link comes from `site.contact.facebook`, with
+  `https://facebook.com/niightmareesports` as a safe fallback.
+- Removed the CTA email button.
+- `/admin -> Sponsors` now exposes only live partner-row fields: name, logo, website,
+  category, description, and per-sponsor social/contact channels.
+- Removed the misleading Sponsors page-copy editor. That editor was seed-only and its
+  saves never affected the public site because the Sponsors `page` block is not persisted
+  by the Supabase sponsors branch.
+- Removed unused page-copy fields from `data/sponsors.json`: old partner/tier labels,
+  tier intro, CTA body, and old primary/secondary CTA definitions.
+
+### Roadmap status control
+
+Files:
+- `components/admin/RoadmapEditor.tsx`
+- `components/sections/RoadmapModal.tsx`
+- `lib/roadmap.ts`
+
+Changes:
+- `/admin -> Home -> Niightmare Roadmap` now gives every stage a clear Thai status select:
+  completed, competing now, or up next.
+- Removed the manual `Active stage ID` field from the admin UI.
+- Selecting a stage as active updates `activeStageId` automatically and demotes any other
+  active stage to future. Changing the current active stage to past/future stores an empty
+  `activeStageId`, and `resolveRoadmap()` now respects that instead of forcing the default.
+- Public labels are bilingual and fixed by state: `COMPLETED`, `COMPETING NOW`, `UP NEXT`
+  plus Lao equivalents. The future icon is now a calendar/clock rather than a lock.
+- Existing `site_settings.roadmap` JSONB persistence is reused; no migration is required.
+
+### Desktop Orders workspace
+
+Files:
+- `components/admin/OrdersEditor.tsx`
+- `components/admin/AdminApp.tsx`
+
+Changes:
+- At `xl` desktop widths, `/admin -> Orders` is now a two-pane workspace:
+  - left: dense, scannable order table;
+  - right: sticky selected-order detail and action panel.
+- The table exposes reference/customer, slip thumbnail, sizes/quantity/courier, amount,
+  status, transfer timestamp, and duplicate warning without opening every card.
+- Selecting an order is keyboard-accessible through a real button in the order cell.
+- The detail panel centralizes reference/amount copy actions, full slip, item breakdown,
+  customer/contact/address, shipping image management, quick advance, manual status, and
+  permanent delete.
+- Courier grouping and per-courier bulk advance remain available in desktop table headers.
+- The existing mobile/narrow-screen card workflow is preserved below `xl`.
+- Only the Orders tab expands the admin content width to `max-w-[1500px]`; other admin tabs
+  keep the previous `max-w-5xl` layout.
+
+### Validation and production checks
+
+Local checks passed after the final Orders/Roadmap changes:
+- `npm.cmd run lint`
+- `npx.cmd tsc --noEmit`
+- `npm.cmd run build`
+
+Production checks after deploy:
+- Vercel deployment for `f8c2636` reached `READY`.
+- `https://www.niightmareesport.com/matches` returned 200.
+- `https://www.niightmareesport.com/admin` returned 200.
+- Deployed admin bundles contained the new Orders table/detail-panel markers and all three
+  Roadmap admin status labels.
+- Unauthenticated `GET /api/admin/orders` returned 401.
+- No real production order was created, changed, or deleted during verification.
+
+Known QA limitation and recommended first follow-up:
+- The in-app browser backend was unavailable during the final Orders visual pass, so there
+  is no screenshot-based desktop QA for the new two-pane layout yet.
+- Before making further visual refinements, sign in to `/admin`, open Orders on a screen at
+  least 1280px wide, and inspect the real table/detail split with existing orders. Do not
+  change statuses or delete orders merely for visual testing.
+- If the owner requests refinements, preserve all existing API calls and mobile cards; focus
+  on desktop density, column widths, panel scroll behavior, and action prominence.
