@@ -373,7 +373,7 @@ export default function AchievementsClient() {
                     {/* eyebrow — section identity, flanked by hairlines */}
                     <div className="flex items-center gap-3">
                       <span aria-hidden className="h-px w-8 bg-gradient-to-r from-transparent to-amethyst/70 md:w-12" />
-                      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.34em] text-amethyst md:text-xs">
+                      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.34em] text-soul md:text-xs">
                         {pick(labels.prizeWon)}
                       </span>
                       <span aria-hidden className="h-px w-8 bg-gradient-to-l from-transparent to-amethyst/70 md:w-12" />
