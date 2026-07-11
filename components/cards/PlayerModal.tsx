@@ -7,6 +7,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   X,
   Database,
+  MapPin,
+  CalendarDays,
+  Clock,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
@@ -21,6 +24,35 @@ function SectionHead({ label }: { label: string }) {
     <p className="mb-3 border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-spectre/85">
       {label}
     </p>
+  );
+}
+
+/** A single vital (country / birth date / age) as a premium bordered tile with a
+ *  corner icon and a violet hover edge. */
+function StatTile({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="group/tile relative overflow-hidden border border-edge bg-void/45 px-3 py-2.5 transition-colors duration-300 hover:border-amethyst/40">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/50 to-transparent opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100"
+      />
+      <span
+        aria-hidden
+        className="absolute right-2 top-2 text-amethyst/45 transition-colors duration-300 group-hover/tile:text-amethyst/85"
+      >
+        {icon}
+      </span>
+      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">{label}</p>
+      <div className="mt-1.5">{children}</div>
+    </div>
   );
 }
 
@@ -43,8 +75,6 @@ export default function PlayerModal({
 
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
-  const tba = t("roster.tba");
-  const bio = player.description ? pick(player.description) : "";
   const flag = countryFlag(player.countryCode);
   const countryName = player.country ? pick(player.country) : player.countryCode?.toUpperCase();
   const birthDate = formatBirthDate(player.birthDate, lang);
@@ -154,70 +184,59 @@ export default function PlayerModal({
               {player.ign}
             </h2>
 
-            {/* ROLE — neon violet, right under IGN */}
-            <p className="mt-3 inline-flex w-fit items-center border-l-2 border-amethyst pl-2.5 font-display text-base font-bold uppercase tracking-[0.12em] text-glow">
-              {pick(player.role)}
-            </p>
+            {/* bladed accent under the name */}
+            <span
+              aria-hidden
+              className="mt-3.5 block h-[3px] w-14 -skew-x-[20deg] bg-gradient-to-r from-amethyst to-glow shadow-[0_0_14px_rgba(168,85,247,0.6)]"
+            />
 
-            {/* Real name */}
-            {player.name && (
-              <p className="mt-2 font-mono text-sm text-spectre">{player.name}</p>
-            )}
+            {/* ROLE chip + real name */}
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="inline-flex items-center border border-amethyst/50 bg-amethyst/10 px-2.5 py-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-glow shadow-[0_0_16px_rgba(168,85,247,0.22)]">
+                {pick(player.role)}
+              </span>
+              {player.name && (
+                <span className="font-mono text-sm text-spectre">{player.name}</span>
+              )}
+            </div>
 
+            {/* VITALS — premium stat tiles */}
             {(flag || countryName || birthDate || age !== null) && (
-              <div className="mt-5 grid gap-2 sm:grid-cols-3">
+              <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
                 {(flag || countryName) && (
-                  <div className="border border-edge bg-void/45 px-3 py-2">
-                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
-                      {t("roster.country_label")}
-                    </p>
-                    <p className="mt-1 flex items-center gap-2 font-mono text-xs font-semibold uppercase text-soul">
+                  <StatTile icon={<MapPin size={13} strokeWidth={2} />} label={t("roster.country_label")}>
+                    <span className="flex items-center gap-1.5 font-mono text-sm font-semibold uppercase text-soul">
                       {flag && <span className="text-base leading-none">{flag}</span>}
                       {countryName && <span className="truncate">{countryName}</span>}
-                    </p>
-                  </div>
+                    </span>
+                  </StatTile>
                 )}
                 {birthDate && (
-                  <div className="border border-edge bg-void/45 px-3 py-2">
-                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
-                      {t("roster.birth_date")}
-                    </p>
-                    <p className="mt-1 keep-latin font-mono text-xs font-semibold text-soul">{birthDate}</p>
-                  </div>
+                  <StatTile icon={<CalendarDays size={13} strokeWidth={2} />} label={t("roster.birth_date")}>
+                    <span className="keep-latin font-mono text-sm font-semibold text-soul">{birthDate}</span>
+                  </StatTile>
                 )}
                 {age !== null && (
-                  <div className="border border-edge bg-void/45 px-3 py-2">
-                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">
-                      {t("roster.age_label")}
-                    </p>
-                    <p className="mt-1 keep-latin font-mono text-xs font-semibold text-soul">
+                  <StatTile icon={<Clock size={13} strokeWidth={2} />} label={t("roster.age_label")}>
+                    <span className="keep-latin font-mono text-sm font-semibold text-soul">
                       {age} {t("roster.years_old")}
-                    </p>
-                  </div>
+                    </span>
+                  </StatTile>
                 )}
               </div>
             )}
-
-            {/* ABOUT — short career bio */}
-            <div className="mt-7">
-              <SectionHead label={t("roster.about_label")} />
-              {bio ? (
-                <p className="keep-latin text-sm leading-relaxed text-spectre">{bio}</p>
-              ) : (
-                <p className="font-mono text-sm text-ash-dim">{tba}</p>
-              )}
-            </div>
 
             {tenures.length > 0 && (
               <div className="mt-6">
                 <SectionHead label={t("roster.team_period")} />
                 <div className="grid gap-2">
                   {tenures.map((tn, idx) => (
-                    <p key={idx} className="border border-edge bg-void/40 px-3 py-2">
+                    <div key={idx} className="flex items-center gap-2.5 border border-edge bg-void/40 px-3 py-2">
+                      <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-amethyst shadow-[0_0_8px_rgba(168,85,247,0.85)]" />
                       <span className="keep-latin font-mono text-xs font-medium tracking-wide text-spectre">
                         {formatDate(tn.joined, lang)} – {tn.left ? formatDate(tn.left, lang) : t("roster.present")}
                       </span>
-                    </p>
+                    </div>
                   ))}
                 </div>
               </div>
