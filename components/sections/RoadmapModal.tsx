@@ -4,10 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import {
+  CalendarClock,
   Check,
   Crown,
   Languages,
-  Lock,
   Radar,
   X,
 } from "lucide-react";
@@ -33,9 +33,15 @@ const statusClass = {
   future: {
     card: "border-edge bg-crypt/55",
     node: "border-edge-bright bg-void text-ash-dim",
-    icon: Lock,
+    icon: CalendarClock,
     label: "text-ash-dim",
   },
+} as const;
+
+const STATUS_LABEL = {
+  past: { en: "COMPLETED", lo: "ແຂ່ງແລ້ວ" },
+  active: { en: "COMPETING NOW", lo: "ກຳລັງແຂ່ງ" },
+  future: { en: "UP NEXT", lo: "ງານຕໍ່ໄປ" },
 } as const;
 
 const TIER_BORDER: Record<Tier, string> = {
@@ -94,11 +100,9 @@ function LangButton({ value, active, onClick }: { value: Lang; active: boolean; 
 
 function StageCard({
   stage,
-  activeLabel,
   isActiveStage,
 }: {
   stage: RoadmapStage;
-  activeLabel: string;
   isActiveStage: boolean;
 }) {
   const { pick } = useLanguage();
@@ -141,7 +145,11 @@ function StageCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${style.label}`}>
-              {status === "active" ? activeLabel : status === "past" ? "CLEARED" : "LOCKED"}
+              {status === "active"
+                ? pick(STATUS_LABEL.active)
+                : status === "past"
+                  ? pick(STATUS_LABEL.past)
+                  : pick(STATUS_LABEL.future)}
             </span>
             <span className={`keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${tierText}`}>
               {tagLabel}
@@ -262,7 +270,6 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
                     key={stage.id}
                     stage={stage}
                     isActiveStage={stage.id === roadmap.activeStageId}
-                    activeLabel={pick(roadmap.activeLabel)}
                   />
                 ))}
               </div>

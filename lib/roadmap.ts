@@ -201,11 +201,15 @@ function mergeHalf(fallback: RoadmapHalf, raw?: Partial<RoadmapHalf>): RoadmapHa
 }
 
 export function resolveRoadmap(raw?: Partial<RoadmapContent> | null): RoadmapContent {
+  const hasExplicitActiveStageId = raw?.activeStageId !== undefined;
   const requestedActiveStageId = raw?.activeStageId ?? DEFAULT_ROADMAP.activeStageId;
   const availableStageIds = new Set(DEFAULT_ROADMAP.halves.flatMap((half) => half.stages.map((stage) => stage.id)));
-  const activeStageId = availableStageIds.has(requestedActiveStageId)
-    ? requestedActiveStageId
-    : DEFAULT_ROADMAP.activeStageId;
+  const activeStageId =
+    hasExplicitActiveStageId && requestedActiveStageId === ""
+      ? ""
+      : availableStageIds.has(requestedActiveStageId)
+        ? requestedActiveStageId
+        : DEFAULT_ROADMAP.activeStageId;
   const halves = DEFAULT_ROADMAP.halves.map((half, index) => mergeHalf(half, raw?.halves?.[index])).map((half) => ({
     ...half,
     stages: half.stages.map((stage) => ({

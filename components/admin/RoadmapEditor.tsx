@@ -6,9 +6,9 @@ import type { Bilingual } from "@/lib/types";
 import type { RoadmapContent, RoadmapStage, RoadmapStageStatus } from "@/lib/roadmap";
 
 const STATUS_OPTS: { value: RoadmapStageStatus; label: string }[] = [
-  { value: "past", label: "Past / Cleared" },
-  { value: "active", label: "Active / Current Battleground" },
-  { value: "future", label: "Future / Locked" },
+  { value: "past", label: "แข่งแล้ว" },
+  { value: "active", label: "กำลังแข่ง" },
+  { value: "future", label: "งานถัดไป" },
 ];
 
 const subhead = "font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre";
@@ -60,20 +60,44 @@ export default function RoadmapEditor({
     });
   };
 
+  const patchStageStatus = (
+    halfIndex: number,
+    stageIndex: number,
+    status: RoadmapStageStatus,
+  ) => {
+    const selectedId = value.halves[halfIndex].stages[stageIndex].id;
+    const activeStageId =
+      status === "active"
+        ? selectedId
+        : value.activeStageId === selectedId
+          ? ""
+          : value.activeStageId;
+
+    onChange({
+      ...value,
+      activeStageId,
+      halves: value.halves.map((half, currentHalfIndex) => ({
+        ...half,
+        stages: half.stages.map((stage, currentStageIndex) => {
+          if (currentHalfIndex === halfIndex && currentStageIndex === stageIndex) {
+            return { ...stage, status };
+          }
+          return status === "active" && stage.status === "active"
+            ? { ...stage, status: "future" as const }
+            : stage;
+        }),
+      })),
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <Collapsible title="Popup settings" hint="ปุ่มเปิด popup, หัวข้อ และ active stage" defaultOpen>
+      <Collapsible title="Popup settings" hint="ปุ่มเปิด popup และหัวข้อ Roadmap" defaultOpen>
         <div className="space-y-3">
-        <h3 className={subhead}>Popup + Active Card</h3>
+        <h3 className={subhead}>Popup</h3>
         <BilingualField label="Button label" value={value.buttonLabel} onChange={(buttonLabel) => onChange({ ...value, buttonLabel })} />
         <BilingualField label="Hero title" value={value.hero.title} onChange={(title) => patchHero({ title })} />
         <BilingualTextArea label="Hero intro" value={value.hero.intro} onChange={(intro) => patchHero({ intro })} rows={3} />
-        <TextField
-          label="Active stage ID (example: h1-step-2, h1-destination, h2-destination)"
-          value={value.activeStageId}
-          onChange={(activeStageId) => onChange({ ...value, activeStageId })}
-        />
-        <BilingualField label="Active label" value={value.activeLabel} onChange={(activeLabel) => onChange({ ...value, activeLabel })} />
         </div>
       </Collapsible>
 
@@ -85,13 +109,12 @@ export default function RoadmapEditor({
 
           {half.stages.map((stage, stageIndex) => (
             <div key={stage.id} className="space-y-3 border border-edge bg-void/40 p-3">
-              <div className="grid gap-3 md:grid-cols-3">
-                <TextField label="Stage ID" value={stage.id} onChange={(id) => patchStage(halfIndex, stageIndex, { id })} />
+              <div className="grid gap-3 md:grid-cols-2">
                 <TextField label="Tag" value={stage.tag} onChange={(tag) => patchStage(halfIndex, stageIndex, { tag })} />
                 <SelectField
-                  label="Status"
+                  label="สถานะบน Roadmap"
                   value={stage.status}
-                  onChange={(status) => patchStage(halfIndex, stageIndex, { status: status as RoadmapStageStatus })}
+                  onChange={(status) => patchStageStatus(halfIndex, stageIndex, status as RoadmapStageStatus)}
                   options={STATUS_OPTS}
                 />
               </div>
