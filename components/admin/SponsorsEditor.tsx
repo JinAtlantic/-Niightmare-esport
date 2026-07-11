@@ -2,9 +2,8 @@
 
 import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
-import { BilingualField, Button, Card, Collapsible, ImageField, Label, Section, TextArea, TextField } from "@/components/admin/ui";
-import sponsorsSeed from "@/data/sponsors.json";
-import type { Bilingual, Sponsor, SponsorSocials, SponsorTier } from "@/lib/types";
+import { BilingualField, Button, ImageField, Label, Section, TextArea, TextField } from "@/components/admin/ui";
+import type { Bilingual, Sponsor, SponsorSocials } from "@/lib/types";
 
 const SOCIAL_FIELDS: { key: keyof SponsorSocials; label: string; placeholder: string }[] = [
   { key: "facebook", label: "Facebook", placeholder: "https://facebook.com/..." },
@@ -15,40 +14,9 @@ const SOCIAL_FIELDS: { key: keyof SponsorSocials; label: string; placeholder: st
   { key: "phone", label: "เบอร์โทร", placeholder: "+856 20 ..." },
 ];
 
-interface SponsorsPageCopy {
-  heroTitle: Bilingual;
-  heroSubtitle: Bilingual;
-  partnersLabel: Bilingual;
-  tiersLabel: Bilingual;
-  tiersIntro: Bilingual;
-  valueLabel: Bilingual;
-  valueProps: SponsorValueProp[];
-  ctaTitle: Bilingual;
-  ctaBody: Bilingual;
-  ctaPrimary: SponsorCta;
-  ctaSecondary: SponsorCta;
-}
-
-interface SponsorValueProp {
-  id: string;
-  title: Bilingual;
-  body: Bilingual;
-}
-
-interface SponsorCta {
-  label: Bilingual;
-  href: string;
-}
-
 interface SponsorsFile {
-  page?: SponsorsPageCopy;
   sponsors: Sponsor[];
-  // Legacy sponsorship tiers are no longer edited or shown; kept only so a save
-  // doesn't wipe the existing rows. Not surfaced anywhere in the UI.
-  tiers?: SponsorTier[];
 }
-
-const DEFAULT_PAGE = sponsorsSeed.page as SponsorsPageCopy;
 
 const uid = (prefix: string) =>
   `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e3)}`;
@@ -228,15 +196,6 @@ export default function SponsorsEditor() {
     return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
 
   const { sponsors } = data;
-  const page = { ...DEFAULT_PAGE, ...(data.page ?? {}) };
-  const patchPage = (patch: Partial<SponsorsPageCopy>) =>
-    setData({ ...data, page: { ...page, ...patch } });
-  const patchValueProp = (index: number, patch: Partial<SponsorValueProp>) => {
-    const valueProps = page.valueProps.map((item, idx) =>
-      idx === index ? { ...item, ...patch } : item
-    );
-    patchPage({ valueProps });
-  };
   const setSponsors = (next: Sponsor[]) => setData({ ...data, sponsors: next });
 
   const patchSponsor = (i: number, patch: Partial<Sponsor>) =>
@@ -290,101 +249,6 @@ export default function SponsorsEditor() {
         </div>
       </Section>
 
-      <Collapsible
-        title="ข้อความหน้า Sponsors"
-        hint="หัวข้อ / คำโปรย / การ์ด Benefit / ปุ่ม CTA — แก้นานๆ ครั้ง"
-      >
-        <Card className="space-y-4">
-          <BilingualField
-            label="Hero title"
-            value={page.heroTitle}
-            onChange={(heroTitle) => patchPage({ heroTitle })}
-          />
-          <BilingualTextArea
-            label="Hero subtitle"
-            value={page.heroSubtitle}
-            onChange={(heroSubtitle) => patchPage({ heroSubtitle })}
-          />
-          <div className="grid gap-3 md:grid-cols-2">
-            <BilingualField
-              label="Partners section label"
-              value={page.partnersLabel}
-              onChange={(partnersLabel) => patchPage({ partnersLabel })}
-            />
-            <BilingualField
-              label="Value strip label"
-              value={page.valueLabel}
-              onChange={(valueLabel) => patchPage({ valueLabel })}
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {page.valueProps.slice(0, 4).map((item, i) => (
-              <Card key={item.id} className="space-y-3 bg-void/35">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                    Value Prop {i + 1}
-                  </h3>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash-dim">
-                    {item.id}
-                  </span>
-                </div>
-                <BilingualField
-                  label="Title"
-                  value={item.title}
-                  onChange={(title) => patchValueProp(i, { title })}
-                />
-                <BilingualTextArea
-                  label="Body"
-                  value={item.body}
-                  rows={3}
-                  onChange={(body) => patchValueProp(i, { body })}
-                />
-              </Card>
-            ))}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                CTA Copy
-              </h3>
-              <BilingualField
-                label="หัวข้อ Benefit (ด้านบนการ์ด 4 อัน)"
-                value={page.ctaTitle}
-                onChange={(ctaTitle) => patchPage({ ctaTitle })}
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-spectre">
-                CTA Buttons
-              </h3>
-              <BilingualField
-                label="Primary button"
-                value={page.ctaPrimary.label}
-                onChange={(label) => patchPage({ ctaPrimary: { ...page.ctaPrimary, label } })}
-              />
-              <TextField
-                label="Primary link"
-                value={page.ctaPrimary.href}
-                onChange={(href) => patchPage({ ctaPrimary: { ...page.ctaPrimary, href } })}
-              />
-              <BilingualField
-                label="Secondary button"
-                value={page.ctaSecondary.label}
-                onChange={(label) =>
-                  patchPage({ ctaSecondary: { ...page.ctaSecondary, label } })
-                }
-              />
-              <TextField
-                label="Secondary link"
-                value={page.ctaSecondary.href}
-                onChange={(href) => patchPage({ ctaSecondary: { ...page.ctaSecondary, href } })}
-              />
-            </div>
-          </div>
-        </Card>
-      </Collapsible>
     </div>
   );
 }

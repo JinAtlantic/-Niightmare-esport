@@ -18,7 +18,7 @@ import {
   YoutubeIcon,
 } from "@/components/ui/Icons";
 import sponsorsSeed from "@/data/sponsors.json";
-import { safeHref, safeImageSrc, safeMailto } from "@/lib/safety";
+import { safeHref, safeImageSrc } from "@/lib/safety";
 import type { Bilingual, Sponsor } from "@/lib/types";
 
 interface SponsorValueProp {
@@ -27,23 +27,12 @@ interface SponsorValueProp {
   body: Bilingual;
 }
 
-interface SponsorCta {
-  label: Bilingual;
-  href: string;
-}
-
 interface SponsorsPageCopy {
   heroTitle: Bilingual;
   heroSubtitle: Bilingual;
-  partnersLabel: Bilingual;
-  tiersLabel: Bilingual;
-  tiersIntro: Bilingual;
   valueLabel: Bilingual;
   valueProps: SponsorValueProp[];
   ctaTitle: Bilingual;
-  ctaBody: Bilingual;
-  ctaPrimary: SponsorCta;
-  ctaSecondary: SponsorCta;
 }
 
 const FALLBACK_PAGE = sponsorsSeed.page as SponsorsPageCopy;
@@ -70,6 +59,7 @@ const COPY = {
   close: { en: "Close", lo: "ປິດ" },
   partners: { en: "Partners", lo: "ພາກສ່ວນ" },
   ctaInvite: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ" },
+  facebook: { en: "Connect on Facebook", lo: "ຕິດຕໍ່ຜ່ານ Facebook" },
 };
 
 function sponsorInitials(name: string) {
@@ -339,7 +329,8 @@ export default function SponsorsClient() {
   const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
   const valueProps = page.valueProps?.length ? page.valueProps : FALLBACK_PAGE.valueProps;
   const sponsorCount = useMemo(() => data.sponsors.length, [data.sponsors.length]);
-  const contactEmail = content.site?.contact?.email || "contact@niightmare.gg";
+  const facebookHref =
+    safeHref(content.site?.contact?.facebook) || safeHref("https://facebook.com/niightmareesports");
 
   return (
     <>
@@ -392,23 +383,16 @@ export default function SponsorsClient() {
                 {pick(COPY.ctaInvite)}
               </h2>
             </div>
-            <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row md:flex-col lg:flex-row">
+            <div className="flex shrink-0">
               <a
-                href={
-                  page.ctaPrimary.href && page.ctaPrimary.href !== "/contact"
-                    ? safeHref(page.ctaPrimary.href)
-                    : safeMailto(contactEmail, "mailto:contact@niightmare.gg")
-                }
+                href={facebookHref}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex min-h-[48px] items-center justify-center gap-2 whitespace-nowrap border border-amethyst bg-amethyst/20 px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-soul shadow-[0_0_28px_rgba(168,85,247,0.26)] transition-colors hover:bg-amethyst/30"
               >
-                {pick(page.ctaPrimary.label)}
+                <FacebookIcon size={17} />
+                {pick(COPY.facebook)}
                 <ArrowRightIcon size={16} />
-              </a>
-              <a
-                href={safeMailto(contactEmail, "mailto:contact@niightmare.gg")}
-                className="inline-flex min-h-[48px] items-center justify-center whitespace-nowrap border border-edge-bright bg-void/45 px-6 py-3 font-mono text-xs font-bold tracking-[0.1em] text-spectre transition-colors hover:border-amethyst/70 hover:text-soul"
-              >
-                {contactEmail}
               </a>
             </div>
           </div>

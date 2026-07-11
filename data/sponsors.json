@@ -8,18 +8,6 @@
       "en": "Join the brands backing Lao esports on the road to bigger stages.",
       "lo": "ຮ່ວມກັບແບຣນທີ່ສະໜັບສະໜູນອີສະປອດລາວໃນເສັ້ນທາງສູ່ເວທີທີ່ໃຫຍ່ກວ່າ."
     },
-    "partnersLabel": {
-      "en": "OUR PARTNERS",
-      "lo": "partners ຂອງເຮົາ"
-    },
-    "tiersLabel": {
-      "en": "SPONSORSHIP TIERS",
-      "lo": "ລະດັບການສະໜັບສະໜູນ"
-    },
-    "tiersIntro": {
-      "en": "Flexible partnership packages for brands that want meaningful visibility with Lao gaming fans.",
-      "lo": "ແພັກເກດພາກສ່ວນທີ່ຍືດຫຍຸ່ນ ສຳລັບແບຣນທີ່ຕ້ອງການການເຫັນທີ່ມີຄຸນຄ່າຕໍ່ແຟນເກມລາວ."
-    },
     "valueLabel": {
       "en": "SPONSORSHIP BENEFITS",
       "lo": "ສິດປະໂຫຍດຂອງພາກສ່ວນ"
@@ -73,24 +61,6 @@
     "ctaTitle": {
       "en": "WHY PARTNER WITH NIIGHTMARE",
       "lo": "ເປັນຫຍັງຕ້ອງຮ່ວມກັບ NIIGHTMARE"
-    },
-    "ctaBody": {
-      "en": "Put your brand inside the momentum of Lao esports: team jerseys, matchday stories, social-first campaigns, and world-stage ambition.",
-      "lo": "ນຳແບຣນຂອງທ່ານເຂົ້າສູ່ກະແສຂອງອີສະປອດລາວ: ເສື້ອແຂ່ງ, ເລື່ອງລາວວັນແຂ່ງ, ແຄມເປນ social-first ແລະເປົ້າໝາຍສູ່ເວທີໂລກ."
-    },
-    "ctaPrimary": {
-      "label": {
-        "en": "PARTNER WITH US",
-        "lo": "ຮ່ວມເປັນພັນທະມິດກັບພວກເຮົາ"
-      },
-      "href": "/contact"
-    },
-    "ctaSecondary": {
-      "label": {
-        "en": "VIEW TEAM PROFILE",
-        "lo": "ເບິ່ງໂປຣໄຟລ໌ທີມ"
-      },
-      "href": "/"
     }
   },
   "sponsors": [
