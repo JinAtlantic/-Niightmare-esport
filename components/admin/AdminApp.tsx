@@ -88,7 +88,7 @@ export default function AdminApp() {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 md:px-6">
+      <main className={`mx-auto px-4 py-8 md:px-6 ${tab === "orders" ? "max-w-[1500px]" : "max-w-5xl"}`}>
         {tab === "home" && <HomeEditor />}
         {tab === "matches" && <MatchesEditor />}
         {tab === "achievements" && <AchievementsEditor />}

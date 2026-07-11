@@ -184,6 +184,179 @@ const fmtDate = (iso: string) => {
   }
 };
 
+function OrderDetailPanel({
+  order,
+  duplicateCount,
+  busy,
+  copied,
+  onCopy,
+  onSetStatus,
+  onDelete,
+  onUploadShipping,
+  onClearShipping,
+}: {
+  order: OrderRow;
+  duplicateCount: number;
+  busy: boolean;
+  copied: string;
+  onCopy: (text: string, key: string) => void;
+  onSetStatus: (id: string, status: string) => void;
+  onDelete: (order: OrderRow) => void;
+  onUploadShipping: (id: string, file: File) => void;
+  onClearShipping: (id: string) => void;
+}) {
+  const opt = STATUS_OPTS.find((item) => item.value === order.status);
+  const expired = isOrderExpired(order.created_at, order.status);
+  const next = NEXT_STEP[order.status];
+  const showShipping = ["verified", "packing", "shipped"].includes(order.status);
+  const statusTone = expired ? "text-loss" : opt?.tone ?? "text-ash";
+  const statusText = expired ? "หมดเวลา 24 ชม" : opt?.label ?? order.status;
+
+  return (
+    <aside className="sticky top-3 max-h-[calc(100vh-7rem)] overflow-y-auto border border-edge-bright bg-crypt shadow-[0_18px_55px_rgba(0,0,0,0.28)]">
+      <div className="border-b border-edge bg-gradient-to-r from-amethyst/15 via-crypt2 to-crypt p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">รายละเอียดออเดอร์</p>
+            <button
+              type="button"
+              onClick={() => onCopy(order.ref_code || "", `desk-ref-${order.id}`)}
+              className="keep-latin mt-1 flex items-center gap-2 font-display text-2xl font-black tracking-[0.08em] text-glow transition-colors hover:text-soul"
+            >
+              {order.ref_code || "ไม่มีเลขอ้างอิง"}
+              {order.ref_code && <span className="font-mono text-xs text-ash">{copied === `desk-ref-${order.id}` ? "✓" : "⧉"}</span>}
+            </button>
+          </div>
+          <span className={`inline-flex shrink-0 items-center gap-1.5 border border-current/30 bg-void/40 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] ${statusTone}`}>
+            <span className="h-2 w-2 rounded-full bg-current" />
+            {statusText}
+          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3 border-t border-edge/70 pt-3">
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash">ยอดโอน</p>
+            <button
+              type="button"
+              onClick={() => onCopy(String(order.total ?? ""), `desk-amt-${order.id}`)}
+              className="mt-1 font-display text-2xl font-black tabular-nums text-soul transition-colors hover:text-glow"
+            >
+              {fmt(order.total, order.currency)} <span className="font-mono text-xs text-ash">{copied === `desk-amt-${order.id}` ? "✓" : "⧉"}</span>
+            </button>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash">เวลาโอน</p>
+            <p className="mt-1 font-mono text-xs text-soul">{fmtDate(orderTime(order))}</p>
+            <p className="font-mono text-[10px] text-ash">{timeAgo(orderTime(order))}</p>
+          </div>
+        </div>
+        {duplicateCount > 1 && (
+          <p className="mt-3 border border-loss/45 bg-loss/10 px-2.5 py-2 font-mono text-[10px] text-loss">
+            ⚠ พบ {duplicateCount} ออเดอร์ที่ใช้เบอร์หรือบัญชีเดียวกัน
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-4 p-4">
+        <section>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">หลักฐานการโอน</h3>
+            {order.slip_url && <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-win">แนบแล้ว ✓</span>}
+          </div>
+          {order.slip_url ? (
+            <a href={order.slip_url} target="_blank" rel="noreferrer" className="group block overflow-hidden border border-edge bg-void/60 p-2 transition-colors hover:border-amethyst">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={order.slip_url} alt="payment slip" className="h-52 w-full object-contain" />
+              <span className="mt-2 block text-center font-mono text-[10px] uppercase tracking-[0.14em] text-ash group-hover:text-soul">เปิดรูปเต็ม ↗</span>
+            </a>
+          ) : (
+            <div className="grid h-24 place-items-center border border-dashed border-edge bg-void/35 font-mono text-[11px] text-ash-dim">ยังไม่มีสลิป</div>
+          )}
+        </section>
+
+        <section className="border-t border-edge pt-4">
+          <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">สินค้า</h3>
+          <div className="mt-2 flex items-center justify-between gap-3 border border-edge bg-void/35 px-3 py-2.5">
+            <div>
+              <p className="keep-latin font-display text-lg font-bold text-soul">{order.size || "—"}</p>
+              <p className="font-mono text-[10px] text-ash">รวม {order.quantity} ตัว</p>
+            </div>
+            <p className="font-display text-lg font-bold tabular-nums text-glow">{fmt(order.total, order.currency)}</p>
+          </div>
+          {Array.isArray(order.items) && order.items.length > 1 && (
+            <div className="mt-2 space-y-1 font-mono text-[11px] text-spectre">
+              {order.items.map((line, index) => (
+                <div key={index} className="flex justify-between gap-3">
+                  <span className="keep-latin">{line.label} × {line.quantity}</span>
+                  <span>{fmt(line.lineTotal, order.currency)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="border-t border-edge pt-4">
+          <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">ลูกค้าและการจัดส่ง</h3>
+          <dl className="mt-2 grid grid-cols-[5.25rem_1fr] gap-x-3 gap-y-2 font-mono text-[12px] leading-relaxed">
+            <dt className="text-ash">ชื่อ</dt><dd className="font-bold text-soul">{order.customer_name || "—"}</dd>
+            <dt className="text-ash">โทร</dt>
+            <dd className="flex items-center gap-2">
+              <a href={`tel:${order.phone}`} className="keep-latin text-glow underline">{order.phone || "—"}</a>
+              {order.phone && <button type="button" onClick={() => onCopy(order.phone, `desk-ph-${order.id}`)} className="text-ash hover:text-soul">{copied === `desk-ph-${order.id}` ? "✓" : "⧉"}</button>}
+            </dd>
+            {order.user_email && <><dt className="text-ash">บัญชี</dt><dd className="keep-latin break-all text-spectre">{order.user_email}</dd></>}
+            <dt className="text-ash">ขนส่ง</dt><dd className="font-bold text-soul">{order.courier || "—"}</dd>
+            <dt className="text-ash">แขวง/เมือง</dt><dd className="text-spectre">{[order.province, order.city].filter(Boolean).join(" · ") || "—"}</dd>
+            <dt className="text-ash">สาขา</dt><dd className="text-spectre">{order.branch || "—"}</dd>
+          </dl>
+        </section>
+
+        {showShipping && (
+          <section className="border-t border-edge pt-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">รูปส่งสินค้า</h3>
+              <span className={`font-mono text-[9px] ${order.shipping_image_url ? "text-win" : "text-ash"}`}>{order.shipping_image_url ? "แนบแล้ว ✓" : "ยังไม่แนบ"}</span>
+            </div>
+            {order.shipping_image_url ? (
+              <div className="flex items-center gap-3 border border-edge bg-void/35 p-2.5">
+                <a href={order.shipping_image_url} target="_blank" rel="noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={order.shipping_image_url} alt="shipping" className="h-20 w-20 border border-edge object-cover" />
+                </a>
+                <div className="flex flex-col gap-2">
+                  <label className="cursor-pointer font-mono text-[11px] text-glow hover:text-soul">
+                    เปลี่ยนรูป
+                    <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) onUploadShipping(order.id, file); event.target.value = ""; }} />
+                  </label>
+                  <button type="button" onClick={() => onClearShipping(order.id)} disabled={busy} className="text-left font-mono text-[11px] text-ash hover:text-loss">ลบรูป</button>
+                </div>
+              </div>
+            ) : (
+              <label className="flex min-h-[44px] cursor-pointer items-center justify-center border border-dashed border-edge-bright bg-void/35 px-4 font-mono text-[11px] text-spectre hover:border-amethyst hover:text-soul">
+                {busy ? "กำลังอัปโหลด…" : "+ แนบรูปส่งสินค้า"}
+                <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) onUploadShipping(order.id, file); event.target.value = ""; }} />
+              </label>
+            )}
+          </section>
+        )}
+
+        <section className="space-y-2 border-t border-edge pt-4">
+          {next && (
+            <button type="button" onClick={() => onSetStatus(order.id, next.value)} disabled={busy} className="inline-flex min-h-[46px] w-full items-center justify-center border border-amethyst bg-amethyst/20 px-4 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul hover:bg-amethyst/30 disabled:opacity-50">
+              {busy ? "กำลังอัปเดต…" : `→ ${next.label}`}
+            </button>
+          )}
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <select value={order.status} onChange={(event) => onSetStatus(order.id, event.target.value)} disabled={busy} className="min-h-[40px] border border-edge bg-void/60 px-3 font-mono text-[11px] text-soul focus:border-amethyst focus:outline-none disabled:opacity-50">
+              {STATUS_OPTS.filter((item) => item.value !== "cancelled" || order.status === "cancelled").map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+            <button type="button" onClick={() => onDelete(order)} disabled={busy} className="border border-loss/45 bg-loss/10 px-3 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-loss hover:bg-loss/20 disabled:opacity-50">ลบออเดอร์</button>
+          </div>
+        </section>
+      </div>
+    </aside>
+  );
+}
+
 export default function OrdersEditor() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,6 +368,7 @@ export default function OrdersEditor() {
   const [query, setQuery] = useState("");
   const [sortDir, setSortDir] = useState<"new" | "old">("new");
   const [copied, setCopied] = useState("");
+  const [selectedOrderId, setSelectedOrderId] = useState("");
   // ส่งแล้ว tab — narrow both the sales summary and the order list to one
   // day / month / year (or all).
   const [shipGran, setShipGran] = useState<"all" | "day" | "month" | "year">("all");
@@ -431,6 +605,16 @@ export default function OrdersEditor() {
       courierUnits.set(k, (courierUnits.get(k) ?? 0) + Number(o.quantity || 0));
     }
   }
+  const groupAdvanceConfig = BULK_ADVANCE[tab];
+  const courierAdvanceTargets = new Map<string, OrderRow[]>();
+  if (grouping && groupAdvanceConfig) {
+    for (const order of ordered) {
+      if (order.status !== groupAdvanceConfig.from) continue;
+      const key = courierKey(order);
+      courierAdvanceTargets.set(key, [...(courierAdvanceTargets.get(key) ?? []), order]);
+    }
+  }
+  const selectedOrder = ordered.find((order) => order.id === selectedOrderId) ?? ordered[0] ?? null;
 
   return (
     <div className="space-y-5">
@@ -609,7 +793,138 @@ export default function OrdersEditor() {
         </Card>
       )}
 
-      <div className="space-y-3">
+      {selectedOrder && (
+        <div className="hidden items-start gap-4 xl:grid xl:grid-cols-[minmax(0,1.6fr)_minmax(350px,0.8fr)]">
+          <section className="min-w-0 overflow-hidden border border-edge bg-crypt/55 shadow-[0_18px_55px_rgba(0,0,0,0.2)]">
+            <div className="flex items-center justify-between gap-3 border-b border-edge bg-crypt2/70 px-4 py-3">
+              <div>
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">รายการออเดอร์</h3>
+                <p className="font-mono text-[10px] text-ash">คลิกเลขออเดอร์เพื่อเปิดรายละเอียดและจัดการ</p>
+              </div>
+              <span className="border border-edge bg-void/50 px-2.5 py-1 font-mono text-[10px] text-spectre">{ordered.length} รายการ</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] table-fixed border-collapse">
+                <colgroup>
+                  <col className="w-[27%]" />
+                  <col className="w-[20%]" />
+                  <col className="w-[17%]" />
+                  <col className="w-[18%]" />
+                  <col className="w-[18%]" />
+                </colgroup>
+                <thead className="bg-void/45">
+                  <tr className="border-b border-edge font-mono text-[9px] uppercase tracking-[0.14em] text-ash">
+                    <th className="px-3 py-2.5 text-left font-semibold">ออเดอร์ / ลูกค้า</th>
+                    <th className="px-3 py-2.5 text-left font-semibold">สินค้า / ขนส่ง</th>
+                    <th className="px-3 py-2.5 text-right font-semibold">ยอดโอน</th>
+                    <th className="px-3 py-2.5 text-left font-semibold">สถานะ</th>
+                    <th className="px-3 py-2.5 text-left font-semibold">เวลาโอน</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ordered.map((order, index) => {
+                    const opt = STATUS_OPTS.find((item) => item.value === order.status);
+                    const expired = isOrderExpired(order.created_at, order.status);
+                    const duplicate = dupCount(order);
+                    const tone = expired ? "text-loss" : opt?.tone ?? "text-ash";
+                    const label = expired ? "หมดเวลา 24 ชม" : opt?.label ?? order.status;
+                    const courier = courierKey(order);
+                    const firstOfGroup = grouping && (index === 0 || courierKey(ordered[index - 1]) !== courier);
+                    const groupAdvance = groupAdvanceConfig;
+                    const groupTargets = courierAdvanceTargets.get(courier) ?? [];
+                    const isSelected = selectedOrder.id === order.id;
+                    return (
+                      <React.Fragment key={order.id}>
+                        {firstOfGroup && (
+                          <tr className="border-b border-amethyst/25 bg-amethyst/[0.08]">
+                            <td colSpan={5} className="px-3 py-2">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="keep-latin font-display text-xs font-bold uppercase tracking-[0.1em] text-soul">🚚 {courier}</span>
+                                <span className="flex items-center gap-2">
+                                  <span className="font-mono text-[10px] text-spectre">{courierCount.get(courier) ?? 0} ออเดอร์ · {courierUnits.get(courier) ?? 0} ตัว</span>
+                                  {groupAdvance && groupTargets.length > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => bulkAdvance(groupTargets, groupAdvance.to, groupAdvance.toLabel, `ของขนส่ง ${courier} `)}
+                                      disabled={bulkBusy}
+                                      className="border border-amethyst bg-amethyst/15 px-2 py-1 font-mono text-[9px] font-bold uppercase text-soul hover:bg-amethyst/25 disabled:opacity-50"
+                                    >
+                                      ย้ายกลุ่ม → {groupAdvance.toLabel}
+                                    </button>
+                                  )}
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        <tr
+                          className={`border-b border-edge/70 transition-colors last:border-b-0 ${isSelected ? "bg-amethyst/[0.11] shadow-[inset_3px_0_0_#A855F7]" : "bg-crypt/30"}`}
+                        >
+                          <td className="px-3 py-3 align-middle">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedOrderId(order.id)}
+                              aria-pressed={isSelected}
+                              className="flex w-full min-w-0 items-center gap-2.5 text-left outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-amethyst"
+                            >
+                              <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden border border-edge bg-void/60">
+                                {order.slip_url ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={order.slip_url} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                  <span className="font-mono text-[8px] text-ash-dim">NO SLIP</span>
+                                )}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="keep-latin block truncate font-display text-sm font-black tracking-[0.06em] text-glow">{order.ref_code || "ไม่มีเลข"}</span>
+                                <span className="block truncate font-mono text-[11px] text-soul">{order.customer_name || "—"}</span>
+                                {duplicate > 1 && <span className="block font-mono text-[9px] text-loss">⚠ อาจซ้ำ {duplicate} รายการ</span>}
+                              </span>
+                              <span aria-hidden className="ml-auto font-mono text-xs text-ash">›</span>
+                            </button>
+                          </td>
+                          <td className="px-3 py-3 align-middle">
+                            <p className="keep-latin truncate font-display text-sm font-bold text-soul">{order.size || "—"}</p>
+                            <p className="font-mono text-[10px] text-ash">{order.quantity} ตัว · {courier}</p>
+                          </td>
+                          <td className="px-3 py-3 text-right align-middle">
+                            <p className="font-display text-base font-black tabular-nums text-soul">{Number(order.total || 0).toLocaleString("en-US")}</p>
+                            <p className="font-mono text-[9px] text-ash">{order.currency}</p>
+                          </td>
+                          <td className="px-3 py-3 align-middle">
+                            <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] font-bold ${tone}`}>
+                              <span className="h-2 w-2 shrink-0 rounded-full bg-current" />
+                              {label}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 align-middle">
+                            <p className="font-mono text-[10px] text-soul">{fmtDate(orderTime(order))}</p>
+                            <p className="font-mono text-[9px] text-ash">{timeAgo(orderTime(order))}</p>
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <OrderDetailPanel
+            order={selectedOrder}
+            duplicateCount={dupCount(selectedOrder)}
+            busy={busyId === selectedOrder.id}
+            copied={copied}
+            onCopy={(text, key) => void copy(text, key)}
+            onSetStatus={(id, status) => void setStatus(id, status)}
+            onDelete={(order) => void deleteOrder(order)}
+            onUploadShipping={(id, file) => void uploadShipping(id, file)}
+            onClearShipping={(id) => void clearShipping(id)}
+          />
+        </div>
+      )}
+
+      <div className="space-y-3 xl:hidden">
         {ordered.map((o, idx) => {
           const opt = STATUS_OPTS.find((s) => s.value === o.status);
           const expired = isOrderExpired(o.created_at, o.status);
