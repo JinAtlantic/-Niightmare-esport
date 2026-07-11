@@ -47,7 +47,6 @@ const COPY = {
     en: "Tap any logo to see who they are and how to reach them.",
     lo: "ແຕະໂລໂກ້ໃດກໍ່ໄດ້ ເພື່ອເບິ່ງວ່າເປັນໃຜ ແລະຊ່ອງທາງຕິດຕໍ່.",
   },
-  open: { en: "View", lo: "ເບິ່ງ" },
   official: { en: "Official NIIGHTMARE Partner", lo: "ພາກສ່ວນທາງການຂອງ NIIGHTMARE" },
   modalIntro: {
     en: "An official partner helping power the club's competitive journey, content, and fan moments across the season.",
@@ -133,8 +132,6 @@ function SponsorCard({
   sponsor: Sponsor;
   onOpen: (sponsor: Sponsor) => void;
 }) {
-  const { pick } = useLanguage();
-  const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
   return (
     <button
       type="button"
@@ -149,15 +146,6 @@ function SponsorCard({
       <h3 className="keep-latin mt-3 line-clamp-1 font-display text-sm font-bold uppercase tracking-[0.06em] text-soul md:text-[15px]">
         {sponsor.name}
       </h3>
-      {category ? (
-        <p className="mt-1 line-clamp-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-ash-dim">
-          {pick(sponsor.category!)}
-        </p>
-      ) : (
-        <p className="mt-1 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-amethyst opacity-0 transition-opacity group-hover:opacity-100">
-          {pick(COPY.open)}
-        </p>
-      )}
     </button>
   );
 }
