@@ -15,9 +15,17 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
 import { formatDate } from "@/lib/format";
-import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile";
+import { calculateAge, countryFlagImageUrl, formatBirthDate } from "@/lib/personProfile";
 import { safeHref } from "@/lib/safety";
 import type { Player } from "@/lib/types";
+
+/** Best-guess country code when a player has none set — mirrors PlayerCard so
+ *  the modal always shows the same flag as the grid card. */
+function fallbackCountryCode(player: Player): string {
+  const identity = `${player.ign} ${player.name ?? ""}`.toLowerCase();
+  if (/i\s*did|marcelino|grijaldo|semontina/.test(identity)) return "PH";
+  return "LA";
+}
 
 function SectionHead({ label }: { label: string }) {
   return (
@@ -75,8 +83,9 @@ export default function PlayerModal({
 
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const crop = { zoom: 1, x: 50, y: 50, ...player.photoCrop };
-  const flag = countryFlag(player.countryCode);
-  const countryName = player.country ? pick(player.country) : player.countryCode?.toUpperCase();
+  const flagCode = player.countryCode || fallbackCountryCode(player);
+  const flagUrl = countryFlagImageUrl(flagCode);
+  const countryName = player.country ? pick(player.country) : flagCode?.toUpperCase();
   const birthDate = formatBirthDate(player.birthDate, lang);
   const age = calculateAge(player.birthDate);
   const liquipediaHref = safeHref(player.liquipedia);
@@ -201,12 +210,24 @@ export default function PlayerModal({
             </div>
 
             {/* VITALS — premium stat tiles */}
-            {(flag || countryName || birthDate || age !== null) && (
+            {(flagUrl || countryName || birthDate || age !== null) && (
               <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
-                {(flag || countryName) && (
+                {(flagUrl || countryName) && (
                   <StatTile icon={<MapPin size={13} strokeWidth={2} />} label={t("roster.country_label")}>
-                    <span className="flex items-center gap-1.5 font-mono text-sm font-semibold uppercase text-soul">
-                      {flag && <span className="text-base leading-none">{flag}</span>}
+                    <span className="flex items-center gap-2 font-mono text-sm font-semibold uppercase text-soul">
+                      {flagUrl && (
+                        <span className="block h-3.5 w-5 shrink-0 overflow-hidden border border-edge/70">
+                          <Image
+                            src={flagUrl}
+                            alt=""
+                            width={28}
+                            height={20}
+                            unoptimized
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        </span>
+                      )}
                       {countryName && <span className="truncate">{countryName}</span>}
                     </span>
                   </StatTile>
