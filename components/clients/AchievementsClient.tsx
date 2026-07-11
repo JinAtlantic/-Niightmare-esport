@@ -374,7 +374,7 @@ export default function AchievementsClient() {
                     <div className="flex items-center gap-3">
                       <span aria-hidden className="h-px w-8 bg-gradient-to-r from-transparent to-amethyst/70 md:w-12" />
                       <span className="font-mono text-[11px] font-bold uppercase tracking-[0.34em] text-amethyst md:text-xs">
-                        {pick(labels.totalRecord)}
+                        {pick(labels.prizeWon)}
                       </span>
                       <span aria-hidden className="h-px w-8 bg-gradient-to-l from-transparent to-amethyst/70 md:w-12" />
                     </div>
@@ -387,17 +387,6 @@ export default function AchievementsClient() {
                       className="mt-6 bg-[linear-gradient(176deg,#FBE9C0_2%,#F5C451_18%,#C77DFF_60%,#A855F7_100%)] bg-clip-text font-display text-6xl font-black leading-[0.88] tracking-tight tabular-nums text-transparent [filter:drop-shadow(0_0_34px_rgba(168,85,247,0.42))] sm:text-7xl md:text-[8.5rem]"
                     >
                       {prizeDisplay}
-                    </p>
-
-                    {/* supporting copy */}
-                    <p className="mt-6 font-mono text-xs font-bold uppercase tracking-[0.24em] text-spectre md:text-sm">
-                      {pick(labels.prizeWon)}
-                    </p>
-                    <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ash md:text-xs">
-                      {pick({
-                        en: `Across ${placementCount} tournaments`,
-                        lo: `ຈາກ ${placementCount} ລາຍການແຂ່ງຂັນ`,
-                      })}
                     </p>
                   </div>
                 </div>
