@@ -58,8 +58,7 @@ const COPY = {
   visit: { en: "Visit Website", lo: "ໄປທີ່ເວັບໄຊ" },
   close: { en: "Close", lo: "ປິດ" },
   partners: { en: "Partners", lo: "ພາກສ່ວນ" },
-  ctaInvite: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ" },
-  facebook: { en: "Connect on Facebook", lo: "ຕິດຕໍ່ຜ່ານ Facebook" },
+  facebook: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ" },
 };
 
 function sponsorInitials(name: string) {
@@ -377,12 +376,7 @@ export default function SponsorsClient() {
         {/* CTA — compact */}
         <div className="relative mt-12 overflow-hidden border border-edge-bright bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(28,20,40,0.88)_42%,rgba(11,7,16,0.98))] p-5 shadow-[0_0_32px_rgba(168,85,247,0.16)] md:mt-16 md:p-8">
           <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8">
-            <div className="max-w-xl">
-              <h2 className="font-display text-xl font-bold uppercase tracking-[0.1em] text-soul md:text-3xl">
-                {pick(COPY.ctaInvite)}
-              </h2>
-            </div>
+          <div className="flex justify-center">
             <div className="flex shrink-0">
               <a
                 href={facebookHref}
