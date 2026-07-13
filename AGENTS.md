@@ -731,3 +731,84 @@ Known QA limitation and recommended first follow-up:
   change statuses or delete orders merely for visual testing.
 - If the owner requests refinements, preserve all existing API calls and mobile cards; focus
   on desktop density, column widths, panel scroll behavior, and action prominence.
+
+## Claude Code handoff - sponsors tile, achievements prize hero, player modal (2026-07-13)
+
+All of this batch is complete, committed, pushed to `origin/main`, and deployed to
+production (each change verified `READY` on Vercel before moving on). Commits, oldest to
+newest:
+- `888fd37 Document 2026-07-11 handoff in AGENTS.md` (docs only)
+- `5ff9640 Show only name on sponsor tiles`
+- `ebacb3f Feature total prize on achievements hero`
+- `7f6449a Trim achievements hero to prize only`
+- `4ef89e1 Make prize hero heading white`
+- `d0e6a4d Refine player profile modal, drop bio`
+- `131db26 Use image flag in player modal country tile`
+
+Every change passed `npx.cmd tsc --noEmit` + `npm.cmd run lint` locally, then was verified
+live by fetching the page HTML through `https://www.niightmareesport.com/...` (client-only
+UI — the profile modal and count-up — is verified via tsc+lint per the headless-hydration
+limitation, not screenshots).
+
+### Sponsors — logo-first tiles show only the name
+File: `components/clients/SponsorsClient.tsx`.
+- The outer partner-grid tile (`SponsorCard`) now renders **only the logo + name** — the
+  category caption line (and the hover "View" hint) under the name were removed. The full
+  category chip + description + Connect channels still live in the sponsor **popup**
+  (`SponsorModal`), untouched. Removed the now-dead `COPY.open` and the `category`/`pick`
+  locals from `SponsorCard`.
+- The per-sponsor `category` still ships in the page's serialized content data (the popup
+  uses it) — so grepping the live HTML still finds e.g. "Automotive"; that's the data blob,
+  not a visible tile caption. Confirm removal by the absence of the tile caption class
+  (`... tracking-[0.16em] text-ash-dim`), which is what I checked live.
+
+### Achievements — Total Record replaced by a single prize hero
+File: `components/clients/AchievementsClient.tsx`.
+- The four Total Record stat cards (Established year, Championships, World Championship,
+  Winnings) were **replaced by one premium hero**: a colossal gold-to-violet gradient
+  numeral of the **total prize won**, e.g. `$113,338`. It **counts up on mount** via a new
+  local `useCountUp` hook (ease-out cubic, `requestAnimationFrame`) that **honours
+  `prefers-reduced-motion`** (jumps to the final value) and starts from 0 (so SSR/first
+  paint shows `$0` then animates — acceptable, it fades in with the container).
+- The amount stays **derived live** from the tournament list: `deriveTotalWinnings(tournaments)`
+  gives the raw number (now shown in **full** `toLocaleString`, not the old `$113K` compact),
+  with the authored seed `winnings` stat value as the fallback when the list is empty. An
+  `aria-label` carries the final exact figure for screen readers during the count.
+- Copy: after two follow-up tweaks the hero now shows just the heading **"Total prize won"**
+  (`labels.prizeWon`, bilingual, colored `text-soul`/white) + the numeral. The earlier
+  "TOTAL RECORD" eyebrow and the "Across N tournaments" sub-line were both removed.
+- Removed imports/vars that went unused: `deriveChampionships`, `formatUsdCompact`, and the
+  `championships` memo. The **Placement Table** (`PodiumDashboard`) below is unchanged.
+- The gradient is an arbitrary Tailwind value: `bg-[linear-gradient(176deg,#FBE9C0_2%,
+  #F5C451_18%,#C77DFF_60%,#A855F7_100%)] bg-clip-text text-transparent` + a violet
+  `drop-shadow` filter. If you touch it, keep spaces as underscores inside the arbitrary value.
+
+### Roster — player profile modal redesign + country flag fix
+File: `components/cards/PlayerModal.tsx` (the popup opened from a `PlayerCard`, lazy-loaded
+via `PlayerModalHost`; the grid `PlayerCard` itself was **not** changed).
+- **Removed the ABOUT / bio section** entirely (it read `player.description` and showed a
+  "TBA" placeholder when empty). `player.description` is still a valid field on the type and
+  still editable in admin — it's simply no longer rendered. Dropped the now-unused `bio`/`tba`
+  locals and the `roster.about_label` usage.
+- **Premium pass** on the right detail column: a bladed skewed accent bar under the IGN, the
+  role is now a glowing bordered **chip** (was a left-rule label), and the vitals
+  (country / birth date / age) are **`StatTile`s** — a new local component with a corner
+  lucide icon (`MapPin`/`CalendarDays`/`Clock`), a violet hover edge + top hairline. Tenure
+  rows gained a glowing amethyst node dot. Two-column layout + bottom social row unchanged.
+- **Country now shows a real image flag + name.** The modal previously used `countryFlag()`
+  (an emoji regional-indicator flag) which **does not render on Windows** (shows the letters
+  "LA"). It now uses `countryFlagImageUrl()` (flagcdn PNG) like the grid card, plus the
+  country name. It resolves the code the same way the card does — a copied
+  `fallbackCountryCode(player)` (PH for a few known IGNs, else LA) — so a flag always appears.
+  NB: `calculateAge` (in `lib/personProfile.ts`) is already **auto-computed** from `birthDate`
+  vs `new Date()` at render, correctly decrementing before the birthday — it self-updates, no
+  manual age field.
+
+### Still-open / recommended follow-ups (unchanged, content/asset work)
+- Sponsor **logo files** are still missing for all 10 partners (tiles render the name
+  wordmark until real logos are uploaded in `/admin → Sponsors`, folder `sponsors`). The
+  owner sent a single combined "Thank you" graphic of 8 logos but no separate files yet;
+  from that image DML is a **delivery/logistics** brand ("Deliver·Move·Life") — one of the
+  three previously-unknown partners (WHR / DML / Good Start).
+- The 2026-07-11 desktop **Orders** two-pane layout still has no screenshot-based QA (see the
+  previous handoff) — verify by signing into `/admin` on a ≥1280px screen with real orders.
