@@ -38,7 +38,7 @@ interface OrderRow {
 }
 
 const STATUS_OPTS: { value: string; label: string; tone: string }[] = [
-  { value: "awaiting_payment", label: "รอชำระ", tone: "text-ash" },
+  { value: "awaiting_payment", label: "รอชำระ", tone: "text-spectre" },
   { value: "paid_declared", label: "รอตรวจสอบ", tone: "text-glow" },
   { value: "verified", label: "จ่ายแล้ว", tone: "text-win" },
   { value: "packing", label: "กำลังแพ็กของ", tone: "text-amethyst" },
@@ -213,77 +213,77 @@ function OrderDetailPanel({
   const statusText = expired ? "หมดเวลา 24 ชม" : opt?.label ?? order.status;
 
   return (
-    <aside className="sticky top-3 max-h-[calc(100vh-7rem)] overflow-y-auto border border-edge-bright bg-crypt shadow-[0_18px_55px_rgba(0,0,0,0.28)]">
-      <div className="border-b border-edge bg-gradient-to-r from-amethyst/15 via-crypt2 to-crypt p-4">
+    <aside className="sticky top-3 max-h-[calc(100vh-7rem)] overflow-y-auto border border-edge-bright bg-crypt shadow-[0_22px_65px_rgba(0,0,0,0.38)]">
+      <div className="border-b border-edge-bright bg-gradient-to-r from-amethyst/20 via-crypt2 to-crypt p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">รายละเอียดออเดอร์</p>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-spectre">รายละเอียดออเดอร์</p>
             <button
               type="button"
               onClick={() => onCopy(order.ref_code || "", `desk-ref-${order.id}`)}
-              className="keep-latin mt-1 flex items-center gap-2 font-display text-2xl font-black tracking-[0.08em] text-glow transition-colors hover:text-soul"
+              className="keep-latin mt-1.5 flex items-center gap-2 font-display text-[1.75rem] font-black tracking-[0.07em] text-glow transition-colors hover:text-soul"
             >
               {order.ref_code || "ไม่มีเลขอ้างอิง"}
-              {order.ref_code && <span className="font-mono text-xs text-ash">{copied === `desk-ref-${order.id}` ? "✓" : "⧉"}</span>}
+              {order.ref_code && <span className="font-mono text-sm text-spectre">{copied === `desk-ref-${order.id}` ? "✓" : "⧉"}</span>}
             </button>
           </div>
-          <span className={`inline-flex shrink-0 items-center gap-1.5 border border-current/30 bg-void/40 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] ${statusTone}`}>
+          <span className={`inline-flex shrink-0 items-center gap-2 border border-current/40 bg-void/60 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.1em] shadow-[0_0_18px_rgba(168,85,247,0.08)] ${statusTone}`}>
             <span className="h-2 w-2 rounded-full bg-current" />
             {statusText}
           </span>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-3 border-t border-edge/70 pt-3">
+        <div className="mt-4 grid grid-cols-2 gap-4 border-t border-edge-bright/70 pt-4">
           <div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash">ยอดโอน</p>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-spectre">ยอดโอน</p>
             <button
               type="button"
               onClick={() => onCopy(String(order.total ?? ""), `desk-amt-${order.id}`)}
-              className="mt-1 font-display text-2xl font-black tabular-nums text-soul transition-colors hover:text-glow"
+              className="mt-1 font-display text-[1.65rem] font-black tabular-nums text-soul transition-colors hover:text-glow"
             >
-              {fmt(order.total, order.currency)} <span className="font-mono text-xs text-ash">{copied === `desk-amt-${order.id}` ? "✓" : "⧉"}</span>
+              {fmt(order.total, order.currency)} <span className="font-mono text-sm text-spectre">{copied === `desk-amt-${order.id}` ? "✓" : "⧉"}</span>
             </button>
           </div>
           <div className="text-right">
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ash">เวลาโอน</p>
-            <p className="mt-1 font-mono text-xs text-soul">{fmtDate(orderTime(order))}</p>
-            <p className="font-mono text-[10px] text-ash">{timeAgo(orderTime(order))}</p>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-spectre">เวลาโอน</p>
+            <p className="mt-1 font-mono text-[13px] font-semibold text-soul">{fmtDate(orderTime(order))}</p>
+            <p className="mt-0.5 font-mono text-[11px] text-spectre">{timeAgo(orderTime(order))}</p>
           </div>
         </div>
         {duplicateCount > 1 && (
-          <p className="mt-3 border border-loss/45 bg-loss/10 px-2.5 py-2 font-mono text-[10px] text-loss">
+          <p className="mt-4 border border-loss/55 bg-loss/15 px-3 py-2.5 font-mono text-xs font-semibold text-loss">
             ⚠ พบ {duplicateCount} ออเดอร์ที่ใช้เบอร์หรือบัญชีเดียวกัน
           </p>
         )}
       </div>
 
-      <div className="space-y-4 p-4">
+      <div className="space-y-5 p-5">
         <section>
           <div className="mb-2 flex items-center justify-between gap-3">
-            <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">หลักฐานการโอน</h3>
-            {order.slip_url && <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-win">แนบแล้ว ✓</span>}
+            <h3 className="border-l-2 border-amethyst pl-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">หลักฐานการโอน</h3>
+            {order.slip_url && <span className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-win">แนบแล้ว ✓</span>}
           </div>
           {order.slip_url ? (
             <a href={order.slip_url} target="_blank" rel="noreferrer" className="group block overflow-hidden border border-edge bg-void/60 p-2 transition-colors hover:border-amethyst">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={order.slip_url} alt="payment slip" className="h-52 w-full object-contain" />
-              <span className="mt-2 block text-center font-mono text-[10px] uppercase tracking-[0.14em] text-ash group-hover:text-soul">เปิดรูปเต็ม ↗</span>
+              <span className="mt-2 block text-center font-mono text-xs font-semibold uppercase tracking-[0.12em] text-spectre group-hover:text-soul">เปิดรูปเต็ม ↗</span>
             </a>
           ) : (
-            <div className="grid h-24 place-items-center border border-dashed border-edge bg-void/35 font-mono text-[11px] text-ash-dim">ยังไม่มีสลิป</div>
+            <div className="grid h-24 place-items-center border border-dashed border-edge-bright bg-void/45 font-mono text-xs font-semibold text-spectre">ยังไม่มีสลิป</div>
           )}
         </section>
 
         <section className="border-t border-edge pt-4">
-          <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">สินค้า</h3>
-          <div className="mt-2 flex items-center justify-between gap-3 border border-edge bg-void/35 px-3 py-2.5">
+          <h3 className="border-l-2 border-amethyst pl-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">สินค้า</h3>
+          <div className="mt-3 flex items-center justify-between gap-3 border border-edge-bright bg-void/50 px-4 py-3">
             <div>
               <p className="keep-latin font-display text-lg font-bold text-soul">{order.size || "—"}</p>
-              <p className="font-mono text-[10px] text-ash">รวม {order.quantity} ตัว</p>
+              <p className="mt-0.5 font-mono text-xs text-spectre">รวม {order.quantity} ตัว</p>
             </div>
             <p className="font-display text-lg font-bold tabular-nums text-glow">{fmt(order.total, order.currency)}</p>
           </div>
           {Array.isArray(order.items) && order.items.length > 1 && (
-            <div className="mt-2 space-y-1 font-mono text-[11px] text-spectre">
+            <div className="mt-3 space-y-1.5 font-mono text-xs text-spectre">
               {order.items.map((line, index) => (
                 <div key={index} className="flex justify-between gap-3">
                   <span className="keep-latin">{line.label} × {line.quantity}</span>
@@ -295,26 +295,26 @@ function OrderDetailPanel({
         </section>
 
         <section className="border-t border-edge pt-4">
-          <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">ลูกค้าและการจัดส่ง</h3>
-          <dl className="mt-2 grid grid-cols-[5.25rem_1fr] gap-x-3 gap-y-2 font-mono text-[12px] leading-relaxed">
-            <dt className="text-ash">ชื่อ</dt><dd className="font-bold text-soul">{order.customer_name || "—"}</dd>
-            <dt className="text-ash">โทร</dt>
+          <h3 className="border-l-2 border-amethyst pl-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">ลูกค้าและการจัดส่ง</h3>
+          <dl className="mt-3 grid grid-cols-[6rem_1fr] gap-x-4 gap-y-2.5 font-mono text-[13px] leading-relaxed">
+            <dt className="font-semibold text-spectre">ชื่อ</dt><dd className="font-bold text-soul">{order.customer_name || "—"}</dd>
+            <dt className="font-semibold text-spectre">โทร</dt>
             <dd className="flex items-center gap-2">
               <a href={`tel:${order.phone}`} className="keep-latin text-glow underline">{order.phone || "—"}</a>
-              {order.phone && <button type="button" onClick={() => onCopy(order.phone, `desk-ph-${order.id}`)} className="text-ash hover:text-soul">{copied === `desk-ph-${order.id}` ? "✓" : "⧉"}</button>}
+              {order.phone && <button type="button" onClick={() => onCopy(order.phone, `desk-ph-${order.id}`)} className="text-spectre hover:text-soul">{copied === `desk-ph-${order.id}` ? "✓" : "⧉"}</button>}
             </dd>
-            {order.user_email && <><dt className="text-ash">บัญชี</dt><dd className="keep-latin break-all text-spectre">{order.user_email}</dd></>}
-            <dt className="text-ash">ขนส่ง</dt><dd className="font-bold text-soul">{order.courier || "—"}</dd>
-            <dt className="text-ash">แขวง/เมือง</dt><dd className="text-spectre">{[order.province, order.city].filter(Boolean).join(" · ") || "—"}</dd>
-            <dt className="text-ash">สาขา</dt><dd className="text-spectre">{order.branch || "—"}</dd>
+            {order.user_email && <><dt className="font-semibold text-spectre">บัญชี</dt><dd className="keep-latin break-all text-soul/90">{order.user_email}</dd></>}
+            <dt className="font-semibold text-spectre">ขนส่ง</dt><dd className="font-bold text-soul">{order.courier || "—"}</dd>
+            <dt className="font-semibold text-spectre">แขวง/เมือง</dt><dd className="text-soul/90">{[order.province, order.city].filter(Boolean).join(" · ") || "—"}</dd>
+            <dt className="font-semibold text-spectre">สาขา</dt><dd className="text-soul/90">{order.branch || "—"}</dd>
           </dl>
         </section>
 
         {showShipping && (
           <section className="border-t border-edge pt-4">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-spectre">รูปส่งสินค้า</h3>
-              <span className={`font-mono text-[9px] ${order.shipping_image_url ? "text-win" : "text-ash"}`}>{order.shipping_image_url ? "แนบแล้ว ✓" : "ยังไม่แนบ"}</span>
+              <h3 className="border-l-2 border-amethyst pl-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">รูปส่งสินค้า</h3>
+              <span className={`font-mono text-[11px] font-semibold ${order.shipping_image_url ? "text-win" : "text-spectre"}`}>{order.shipping_image_url ? "แนบแล้ว ✓" : "ยังไม่แนบ"}</span>
             </div>
             {order.shipping_image_url ? (
               <div className="flex items-center gap-3 border border-edge bg-void/35 p-2.5">
@@ -323,15 +323,15 @@ function OrderDetailPanel({
                   <img src={order.shipping_image_url} alt="shipping" className="h-20 w-20 border border-edge object-cover" />
                 </a>
                 <div className="flex flex-col gap-2">
-                  <label className="cursor-pointer font-mono text-[11px] text-glow hover:text-soul">
+                  <label className="cursor-pointer font-mono text-xs font-semibold text-glow hover:text-soul">
                     เปลี่ยนรูป
                     <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) onUploadShipping(order.id, file); event.target.value = ""; }} />
                   </label>
-                  <button type="button" onClick={() => onClearShipping(order.id)} disabled={busy} className="text-left font-mono text-[11px] text-ash hover:text-loss">ลบรูป</button>
+                  <button type="button" onClick={() => onClearShipping(order.id)} disabled={busy} className="text-left font-mono text-xs text-spectre hover:text-loss">ลบรูป</button>
                 </div>
               </div>
             ) : (
-              <label className="flex min-h-[44px] cursor-pointer items-center justify-center border border-dashed border-edge-bright bg-void/35 px-4 font-mono text-[11px] text-spectre hover:border-amethyst hover:text-soul">
+              <label className="flex min-h-[48px] cursor-pointer items-center justify-center border border-dashed border-edge-bright bg-void/45 px-4 font-mono text-xs font-semibold text-spectre hover:border-amethyst hover:text-soul">
                 {busy ? "กำลังอัปโหลด…" : "+ แนบรูปส่งสินค้า"}
                 <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) onUploadShipping(order.id, file); event.target.value = ""; }} />
               </label>
@@ -346,10 +346,10 @@ function OrderDetailPanel({
             </button>
           )}
           <div className="grid grid-cols-[1fr_auto] gap-2">
-            <select value={order.status} onChange={(event) => onSetStatus(order.id, event.target.value)} disabled={busy} className="min-h-[40px] border border-edge bg-void/60 px-3 font-mono text-[11px] text-soul focus:border-amethyst focus:outline-none disabled:opacity-50">
+            <select value={order.status} onChange={(event) => onSetStatus(order.id, event.target.value)} disabled={busy} className="min-h-[44px] border border-edge-bright bg-void/70 px-3 font-mono text-sm text-soul focus:border-amethyst focus:outline-none disabled:opacity-50">
               {STATUS_OPTS.filter((item) => item.value !== "cancelled" || order.status === "cancelled").map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
-            <button type="button" onClick={() => onDelete(order)} disabled={busy} className="border border-loss/45 bg-loss/10 px-3 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-loss hover:bg-loss/20 disabled:opacity-50">ลบออเดอร์</button>
+            <button type="button" onClick={() => onDelete(order)} disabled={busy} className="border border-loss/55 bg-loss/15 px-3 font-mono text-xs font-bold uppercase tracking-[0.06em] text-loss hover:bg-loss/25 disabled:opacity-50">ลบออเดอร์</button>
           </div>
         </section>
       </div>
@@ -619,7 +619,10 @@ export default function OrdersEditor() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">ออเดอร์เสื้อ</h2>
+        <div>
+          <h2 className="font-display text-xl font-black uppercase tracking-[0.08em] text-soul xl:text-2xl">ออเดอร์เสื้อ</h2>
+          <p className="mt-1 hidden font-mono text-xs text-spectre xl:block">ตรวจยอด ดูสลิป และจัดการสถานะออเดอร์จากหน้าจอเดียว</p>
+        </div>
         <Button onClick={load} disabled={loading}>
           {loading ? "กำลังโหลด…" : "รีเฟรช"}
         </Button>
@@ -644,14 +647,14 @@ export default function OrdersEditor() {
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`rounded-md border px-3 py-2.5 text-center transition-colors ${
-                active ? "border-amethyst bg-amethyst/15" : "border-edge bg-void/40 hover:border-edge-bright"
+              className={`rounded-md border px-3 py-3 text-center transition-colors xl:py-3.5 ${
+                active ? "border-amethyst bg-amethyst/20 shadow-[inset_0_-3px_0_rgba(168,85,247,0.75),0_0_22px_rgba(168,85,247,0.08)]" : "border-edge-bright bg-void/50 hover:border-amethyst/60 hover:bg-crypt2"
               }`}
             >
-              <span className={`block font-display text-sm font-bold uppercase tracking-wide ${active ? "text-soul" : "text-ash"}`}>
+              <span className={`block font-display text-sm font-bold uppercase tracking-wide xl:text-base ${active ? "text-soul" : "text-spectre"}`}>
                 {t.label}
               </span>
-              <span className={`font-mono text-lg font-bold tabular-nums ${active ? tone : "text-ash-dim"}`}>{counts[t.id]}</span>
+              <span className={`mt-0.5 block font-mono text-xl font-black tabular-nums xl:text-2xl ${active ? tone : "text-spectre"}`}>{counts[t.id]}</span>
             </button>
           );
         })}
@@ -664,7 +667,7 @@ export default function OrdersEditor() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="ค้นหา เลขออเดอร์ / ชื่อ / เบอร์"
-            className="w-full rounded-md border border-edge bg-void/60 px-3 py-2 pr-8 font-mono text-[12px] text-soul placeholder:text-ash-dim focus:border-amethyst focus:outline-none"
+            className="min-h-[46px] w-full rounded-md border border-edge-bright bg-void/70 px-4 py-2.5 pr-10 font-mono text-sm text-soul placeholder:text-spectre/70 focus:border-amethyst focus:outline-none focus:ring-1 focus:ring-amethyst/35"
           />
           {query && (
             <button
@@ -686,8 +689,8 @@ export default function OrdersEditor() {
               key={s.id}
               type="button"
               onClick={() => setSortDir(s.id)}
-              className={`rounded-md border px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
-                sortDir === s.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+              className={`min-h-[46px] rounded-md border px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${
+                sortDir === s.id ? "border-amethyst bg-amethyst/20 text-soul" : "border-edge-bright bg-void/50 text-spectre hover:border-amethyst/60 hover:text-soul"
               }`}
             >
               {s.label}
@@ -699,8 +702,8 @@ export default function OrdersEditor() {
             type="button"
             onClick={() => setGroupCourier((v) => !v)}
             title="จัดกลุ่มออเดอร์ตามบริษัทขนส่ง เพื่อแพ็กทีละเจ้า"
-            className={`rounded-md border px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
-              groupCourier ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+            className={`min-h-[46px] rounded-md border px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${
+              groupCourier ? "border-amethyst bg-amethyst/20 text-soul" : "border-edge-bright bg-void/50 text-spectre hover:border-amethyst/60 hover:text-soul"
             }`}
           >
             {groupCourier ? "▦ จัดกลุ่มขนส่ง" : "จัดกลุ่มขนส่ง"}
@@ -708,14 +711,14 @@ export default function OrdersEditor() {
         )}
       </div>
 
-      {error && <p className="font-mono text-[11px] text-loss">{error}</p>}
+      {error && <p className="border border-loss/45 bg-loss/10 px-3 py-2 font-mono text-xs font-semibold text-loss">{error}</p>}
 
       {tab === "shipped" && (
         <div className="space-y-3">
           {/* pick a day / month / year (or all) — filters BOTH the report and
               the order list below, so what you see always matches the summary */}
-          <div className="flex flex-wrap items-center gap-2 rounded-md border border-edge bg-void/40 p-2.5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">ดูช่วง</span>
+          <div className="flex flex-wrap items-center gap-2.5 rounded-md border border-edge-bright bg-void/50 p-3">
+            <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-spectre">ดูช่วง</span>
             <div className="flex flex-wrap gap-1.5">
               {([
                 { id: "all", label: "ทั้งหมด" },
@@ -727,8 +730,8 @@ export default function OrdersEditor() {
                   key={g.id}
                   type="button"
                   onClick={() => setShipGran(g.id)}
-                  className={`rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
-                    shipGran === g.id ? "border-amethyst bg-amethyst/15 text-soul" : "border-edge bg-void/40 text-ash hover:text-soul"
+                  className={`min-h-[40px] rounded-md border px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${
+                    shipGran === g.id ? "border-amethyst bg-amethyst/20 text-soul" : "border-edge-bright bg-void/50 text-spectre hover:border-amethyst/60 hover:text-soul"
                   }`}
                 >
                   {g.label}
@@ -740,7 +743,7 @@ export default function OrdersEditor() {
                 type="date"
                 value={effDay}
                 onChange={(e) => setShipDay(e.target.value)}
-                className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul [color-scheme:dark] focus:border-amethyst focus:outline-none"
+                className="min-h-[40px] rounded-md border border-edge-bright bg-void/70 px-3 py-1.5 font-mono text-sm text-soul [color-scheme:dark] focus:border-amethyst focus:outline-none"
               />
             )}
             {shipGran === "month" && (
@@ -748,14 +751,14 @@ export default function OrdersEditor() {
                 type="month"
                 value={effMonth}
                 onChange={(e) => setShipMonth(e.target.value)}
-                className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul [color-scheme:dark] focus:border-amethyst focus:outline-none"
+                className="min-h-[40px] rounded-md border border-edge-bright bg-void/70 px-3 py-1.5 font-mono text-sm text-soul [color-scheme:dark] focus:border-amethyst focus:outline-none"
               />
             )}
             {shipGran === "year" && (
               <select
                 value={effYear}
                 onChange={(e) => setShipYear(e.target.value)}
-                className="rounded-md border border-edge bg-void/60 px-2.5 py-1.5 font-mono text-[12px] text-soul focus:border-amethyst focus:outline-none"
+                className="min-h-[40px] rounded-md border border-edge-bright bg-void/70 px-3 py-1.5 font-mono text-sm text-soul focus:border-amethyst focus:outline-none"
               >
                 {shipYearOpts.length === 0 && <option value="">—</option>}
                 {shipYearOpts.map((y) => (
@@ -794,14 +797,14 @@ export default function OrdersEditor() {
       )}
 
       {selectedOrder && (
-        <div className="hidden items-start gap-4 xl:grid xl:grid-cols-[minmax(0,1.6fr)_minmax(350px,0.8fr)]">
-          <section className="min-w-0 overflow-hidden border border-edge bg-crypt/55 shadow-[0_18px_55px_rgba(0,0,0,0.2)]">
-            <div className="flex items-center justify-between gap-3 border-b border-edge bg-crypt2/70 px-4 py-3">
+        <div className="hidden items-start gap-5 xl:grid xl:grid-cols-[minmax(0,1.55fr)_minmax(390px,0.9fr)]">
+          <section className="min-w-0 overflow-hidden border border-edge-bright bg-crypt/70 shadow-[0_22px_65px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center justify-between gap-3 border-b border-edge-bright bg-crypt2 px-5 py-4">
               <div>
-                <h3 className="font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">รายการออเดอร์</h3>
-                <p className="font-mono text-[10px] text-ash">คลิกเลขออเดอร์เพื่อเปิดรายละเอียดและจัดการ</p>
+                <h3 className="font-display text-lg font-black uppercase tracking-[0.1em] text-soul">รายการออเดอร์</h3>
+                <p className="mt-0.5 font-mono text-xs text-spectre">คลิกเลขออเดอร์เพื่อเปิดรายละเอียดและจัดการ</p>
               </div>
-              <span className="border border-edge bg-void/50 px-2.5 py-1 font-mono text-[10px] text-spectre">{ordered.length} รายการ</span>
+              <span className="border border-edge-bright bg-void/60 px-3 py-1.5 font-mono text-xs font-bold text-soul">{ordered.length} รายการ</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] table-fixed border-collapse">
@@ -812,13 +815,13 @@ export default function OrdersEditor() {
                   <col className="w-[18%]" />
                   <col className="w-[18%]" />
                 </colgroup>
-                <thead className="bg-void/45">
-                  <tr className="border-b border-edge font-mono text-[9px] uppercase tracking-[0.14em] text-ash">
-                    <th className="px-3 py-2.5 text-left font-semibold">ออเดอร์ / ลูกค้า</th>
-                    <th className="px-3 py-2.5 text-left font-semibold">สินค้า / ขนส่ง</th>
-                    <th className="px-3 py-2.5 text-right font-semibold">ยอดโอน</th>
-                    <th className="px-3 py-2.5 text-left font-semibold">สถานะ</th>
-                    <th className="px-3 py-2.5 text-left font-semibold">เวลาโอน</th>
+                <thead className="bg-void/70">
+                  <tr className="border-b border-edge-bright font-mono text-[11px] uppercase tracking-[0.11em] text-spectre">
+                    <th className="px-4 py-3 text-left font-bold">ออเดอร์ / ลูกค้า</th>
+                    <th className="px-4 py-3 text-left font-bold">สินค้า / ขนส่ง</th>
+                    <th className="px-4 py-3 text-right font-bold">ยอดโอน</th>
+                    <th className="px-4 py-3 text-left font-bold">สถานะ</th>
+                    <th className="px-4 py-3 text-left font-bold">เวลาโอน</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -836,18 +839,18 @@ export default function OrdersEditor() {
                     return (
                       <React.Fragment key={order.id}>
                         {firstOfGroup && (
-                          <tr className="border-b border-amethyst/25 bg-amethyst/[0.08]">
-                            <td colSpan={5} className="px-3 py-2">
+                          <tr className="border-b border-amethyst/35 bg-amethyst/[0.11]">
+                            <td colSpan={5} className="px-4 py-2.5">
                               <div className="flex items-center justify-between gap-3">
-                                <span className="keep-latin font-display text-xs font-bold uppercase tracking-[0.1em] text-soul">🚚 {courier}</span>
+                                <span className="keep-latin font-display text-sm font-bold uppercase tracking-[0.08em] text-soul">🚚 {courier}</span>
                                 <span className="flex items-center gap-2">
-                                  <span className="font-mono text-[10px] text-spectre">{courierCount.get(courier) ?? 0} ออเดอร์ · {courierUnits.get(courier) ?? 0} ตัว</span>
+                                  <span className="font-mono text-xs font-semibold text-spectre">{courierCount.get(courier) ?? 0} ออเดอร์ · {courierUnits.get(courier) ?? 0} ตัว</span>
                                   {groupAdvance && groupTargets.length > 0 && (
                                     <button
                                       type="button"
                                       onClick={() => bulkAdvance(groupTargets, groupAdvance.to, groupAdvance.toLabel, `ของขนส่ง ${courier} `)}
                                       disabled={bulkBusy}
-                                      className="border border-amethyst bg-amethyst/15 px-2 py-1 font-mono text-[9px] font-bold uppercase text-soul hover:bg-amethyst/25 disabled:opacity-50"
+                                      className="border border-amethyst bg-amethyst/20 px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase text-soul hover:bg-amethyst/30 disabled:opacity-50"
                                     >
                                       ย้ายกลุ่ม → {groupAdvance.toLabel}
                                     </button>
@@ -858,48 +861,48 @@ export default function OrdersEditor() {
                           </tr>
                         )}
                         <tr
-                          className={`border-b border-edge/70 transition-colors last:border-b-0 ${isSelected ? "bg-amethyst/[0.11] shadow-[inset_3px_0_0_#A855F7]" : "bg-crypt/30"}`}
+                          className={`border-b border-edge/80 transition-colors last:border-b-0 ${isSelected ? "bg-amethyst/[0.16] shadow-[inset_4px_0_0_#A855F7]" : "bg-crypt/35 hover:bg-crypt2/70"}`}
                         >
-                          <td className="px-3 py-3 align-middle">
+                          <td className="px-4 py-3.5 align-middle">
                             <button
                               type="button"
                               onClick={() => setSelectedOrderId(order.id)}
                               aria-pressed={isSelected}
                               className="flex w-full min-w-0 items-center gap-2.5 text-left outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-amethyst"
                             >
-                              <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden border border-edge bg-void/60">
+                              <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden border border-edge-bright bg-void/70">
                                 {order.slip_url ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img src={order.slip_url} alt="" className="h-full w-full object-cover" />
                                 ) : (
-                                  <span className="font-mono text-[8px] text-ash-dim">NO SLIP</span>
+                                  <span className="font-mono text-[9px] font-semibold text-spectre">NO SLIP</span>
                                 )}
                               </span>
                               <span className="min-w-0">
-                                <span className="keep-latin block truncate font-display text-sm font-black tracking-[0.06em] text-glow">{order.ref_code || "ไม่มีเลข"}</span>
-                                <span className="block truncate font-mono text-[11px] text-soul">{order.customer_name || "—"}</span>
-                                {duplicate > 1 && <span className="block font-mono text-[9px] text-loss">⚠ อาจซ้ำ {duplicate} รายการ</span>}
+                                <span className="keep-latin block truncate font-display text-base font-black tracking-[0.05em] text-glow">{order.ref_code || "ไม่มีเลข"}</span>
+                                <span className="mt-0.5 block truncate font-mono text-[13px] font-semibold text-soul">{order.customer_name || "—"}</span>
+                                {duplicate > 1 && <span className="mt-0.5 block font-mono text-[11px] font-semibold text-loss">⚠ อาจซ้ำ {duplicate} รายการ</span>}
                               </span>
-                              <span aria-hidden className="ml-auto font-mono text-xs text-ash">›</span>
+                              <span aria-hidden className="ml-auto font-mono text-base text-spectre">›</span>
                             </button>
                           </td>
-                          <td className="px-3 py-3 align-middle">
-                            <p className="keep-latin truncate font-display text-sm font-bold text-soul">{order.size || "—"}</p>
-                            <p className="font-mono text-[10px] text-ash">{order.quantity} ตัว · {courier}</p>
+                          <td className="px-4 py-3.5 align-middle">
+                            <p className="keep-latin truncate font-display text-base font-bold text-soul">{order.size || "—"}</p>
+                            <p className="mt-0.5 font-mono text-xs text-spectre">{order.quantity} ตัว · {courier}</p>
                           </td>
-                          <td className="px-3 py-3 text-right align-middle">
-                            <p className="font-display text-base font-black tabular-nums text-soul">{Number(order.total || 0).toLocaleString("en-US")}</p>
-                            <p className="font-mono text-[9px] text-ash">{order.currency}</p>
+                          <td className="px-4 py-3.5 text-right align-middle">
+                            <p className="font-display text-lg font-black tabular-nums text-soul">{Number(order.total || 0).toLocaleString("en-US")}</p>
+                            <p className="font-mono text-[11px] font-semibold text-spectre">{order.currency}</p>
                           </td>
-                          <td className="px-3 py-3 align-middle">
-                            <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] font-bold ${tone}`}>
+                          <td className="px-4 py-3.5 align-middle">
+                            <span className={`inline-flex items-center gap-2 border border-current/30 bg-void/55 px-2.5 py-1.5 font-mono text-xs font-bold ${tone}`}>
                               <span className="h-2 w-2 shrink-0 rounded-full bg-current" />
                               {label}
                             </span>
                           </td>
-                          <td className="px-3 py-3 align-middle">
-                            <p className="font-mono text-[10px] text-soul">{fmtDate(orderTime(order))}</p>
-                            <p className="font-mono text-[9px] text-ash">{timeAgo(orderTime(order))}</p>
+                          <td className="px-4 py-3.5 align-middle">
+                            <p className="font-mono text-xs font-semibold text-soul">{fmtDate(orderTime(order))}</p>
+                            <p className="mt-0.5 font-mono text-[11px] text-spectre">{timeAgo(orderTime(order))}</p>
                           </td>
                         </tr>
                       </React.Fragment>
@@ -1236,9 +1239,9 @@ function SalesReport({
     <Card className="space-y-4 border-amethyst/30">
       {/* summary for the selected period */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">ยอดขายรวม (ส่งแล้ว) · {periodLabelText}</p>
+        <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-spectre">ยอดขายรวม (ส่งแล้ว) · {periodLabelText}</p>
         <p className="font-display text-3xl font-black tabular-nums text-win">{fmt(totalRevenue, currency)}</p>
-        <p className="mt-0.5 font-mono text-[11px] text-spectre">
+        <p className="mt-1 font-mono text-[13px] text-spectre">
           ขายได้ <span className="font-bold text-soul">{totalUnits}</span> ตัว · {orders.length} ออเดอร์
         </p>
       </div>
@@ -1246,7 +1249,7 @@ function SalesReport({
       {sortSizes(totalSizes).length > 0 && (
         <div className="flex flex-wrap gap-1.5 border-t border-edge pt-3">
           {sortSizes(totalSizes).map(([label, qty]) => (
-            <span key={label} className="rounded border border-edge bg-void/50 px-2 py-1 font-mono text-[11px] text-spectre">
+            <span key={label} className="rounded border border-edge-bright bg-void/60 px-2.5 py-1.5 font-mono text-xs text-spectre">
               <span className="keep-latin font-bold text-soul">{label}</span> {qty}
             </span>
           ))}
@@ -1255,18 +1258,18 @@ function SalesReport({
 
       {showBreakdown && rows.length > 0 && (
         <div className="space-y-1.5 border-t border-edge pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">แยกรายเดือน</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-spectre">แยกรายเดือน</p>
           {rows.map((g) => (
-            <div key={g.label} className="rounded-md border border-edge bg-void/40 p-2.5">
+            <div key={g.label} className="rounded-md border border-edge-bright bg-void/50 p-3">
               <div className="flex items-center justify-between gap-3">
-                <span className="keep-latin font-mono text-[12px] font-bold text-soul">{g.label}</span>
+                <span className="keep-latin font-mono text-sm font-bold text-soul">{g.label}</span>
                 <span className="text-right">
-                  <span className="font-display text-base font-bold tabular-nums text-win">{fmt(g.revenue, currency)}</span>
-                  <span className="ml-2 font-mono text-[11px] text-ash">{g.units} ตัว</span>
+                  <span className="font-display text-lg font-bold tabular-nums text-win">{fmt(g.revenue, currency)}</span>
+                  <span className="ml-2 font-mono text-xs text-spectre">{g.units} ตัว</span>
                 </span>
               </div>
               {sortSizes(g.sizes).length > 0 && (
-                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10px] text-spectre">
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-spectre">
                   {sortSizes(g.sizes).map(([label, qty]) => (
                     <span key={label}>
                       <span className="keep-latin font-bold text-soul">{label}</span> {qty}
