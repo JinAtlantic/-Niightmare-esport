@@ -812,3 +812,69 @@ via `PlayerModalHost`; the grid `PlayerCard` itself was **not** changed).
   three previously-unknown partners (WHR / DML / Good Start).
 - The 2026-07-11 desktop **Orders** two-pane layout still has no screenshot-based QA (see the
   previous handoff) — verify by signing into `/admin` on a ≥1280px screen with real orders.
+
+## Codex handoff - order privacy, 30-day retention, atomic admin saves (2026-07-13)
+
+Code commit `115f6f6` is pushed to `origin/main` and deployed `READY` on Vercel. The
+production domain was checked after deploy: `/`, `/shop`, `/privacy`, `/terms`, `/admin`,
+and `/api/content` returned 200; unauthenticated admin-orders and retention-cron requests
+returned 401; a PAY request for a nonexistent order returned 409 before accepting a slip.
+Vercel reported no runtime errors during the verification window.
+
+### Shop-order privacy and payment integrity
+- Payment slips and shipping proof now use the private Supabase Storage bucket
+  `order-evidence`. Database values are opaque `order-evidence:<path>` references, and
+  authorized reads receive short-lived signed URLs. The one existing legacy public slip
+  was copied into the private bucket, its database value was updated, and the old public
+  object was removed.
+- `lib/supabaseStorage.ts` validates and re-encodes order evidence with Sharp as JPEG,
+  strips metadata, caps dimensions, signs private reads, and deletes both new private refs
+  and legacy public URLs. Site/editor media intentionally stays in the public `uploads`
+  bucket because those images are public content.
+- The PAY route verifies the order UUID, reference, status, and 24-hour payment window
+  before uploading a slip. It treats the reserved database row as authoritative for
+  notifications and the response, deletes a newly uploaded object if the database update
+  loses a race/fails, and never returns the internal slip reference to the buyer.
+- Reference codes are generated server-side. Buyer push subscriptions are size-limited
+  and can only reference order IDs that exist. The service worker no longer posts a
+  buyer subscription to the admin-only endpoint after a subscription change.
+
+### 30-day retention
+- Owner decision: two trusted admins may continue sharing the admin password. Personal
+  shop-order data and evidence must be retained for 30 days, not 90 days.
+- `lib/orderRetention.ts` deletes private evidence after 30 days from `created_at`.
+  Unpaid reservations are deleted; paid/processed rows are anonymized by removing customer
+  identity, contact/address, note, reference, and evidence fields. Aggregate sales fields
+  (dates/status/items/quantity/prices/total/currency/courier) remain for reporting.
+- Buyer-side `nm-shop-orders` copies are also removed after 30 days. The daily protected
+  route is `/api/cron/order-retention`; Vercel Cron is active at `15 18 * * *` (01:15 in
+  Bangkok/Lao time). `CRON_SECRET` is configured as a sensitive Production environment
+  variable. Keep the single retention duration in `lib/shop.ts`.
+
+### Database and admin-save hardening
+- Applied production migration `20260713143157_harden_order_privacy_and_content_saves.sql`.
+  It creates the private bucket, adds/backfills order fields, adds `anonymized_at`, installs
+  indexes, fixes the trigger function search path, and creates the service-role-only
+  `replace_content_section` RPC.
+- Multi-table admin saves now use that RPC transactionally instead of delete-then-insert,
+  so a failed save rolls back instead of leaving live content empty. Anonymous and
+  authenticated roles cannot execute the RPC; the service role can.
+- `/api/admin/data` now enforces a 5 MB body limit plus section-specific complete-payload
+  validation. An authenticated `{}` save is rejected with 400 rather than wiping a section.
+
+### Legal, accessibility, and validation
+- Privacy and Terms were updated on 2026-07-13 for private signed evidence, providers,
+  localStorage, 30-day retention/anonymized statistics, the 24-hour reservation window,
+  manual payment verification, delivery estimates, and case-by-case cancellation/refunds.
+- Fixed footer/marquee contrast, the language control's accessible name, and explicit
+  labels for admin password/TOTP inputs.
+- Passed `npm run typecheck`, `npm run lint`, `npm audit --omit=dev` (0 vulnerabilities),
+  `npm run build`, local production API checks, desktop/mobile Playwright smoke checks, and
+  Lighthouse accessibility (100). Supabase security/performance advisors were reviewed;
+  remaining findings are intentional service-role tables, unused Supabase Auth password
+  protection, and expected unused/legacy indexes.
+
+### Still pending owner assets
+- No separate sponsor logos, player photos, jersey front/back photos, or final bank QR were
+  available during this pass. Existing deliberate placeholders/wordmarks remain until the
+  owner supplies or uploads them through `/admin`.
