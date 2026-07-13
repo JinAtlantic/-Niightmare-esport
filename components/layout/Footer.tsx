@@ -37,7 +37,7 @@ export default function Footer() {
               <h2 className="wordmark-shimmer keep-latin font-display text-3xl font-bold uppercase leading-none tracking-[0.12em] transition-transform duration-300 ease-out [text-shadow:0_2px_30px_rgba(168,85,247,0.45)] group-hover:-translate-y-0.5 sm:text-[2.1rem]">
                 NIIGHTMARE
               </h2>
-              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.42em] text-amethyst/85">
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.42em] text-glow">
                 Esport
               </span>
             </div>
@@ -88,7 +88,7 @@ export default function Footer() {
       <div className="border-t border-edge bg-void/40">
         <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
           {/* Game / trademark disclaimer — small, muted, clean */}
-          <p className="mx-auto max-w-3xl text-center text-[11px] leading-relaxed text-ash-dim md:mx-0 md:text-left">
+          <p className="mx-auto max-w-3xl text-center text-[11px] leading-relaxed text-ash md:mx-0 md:text-left">
             All game images, hero assets, and trademarks are the property of their
             respective owners (Moonton / Mobile Legends: Bang Bang) and are used
             for informational purposes under Fan Content policies.

@@ -46,12 +46,13 @@ export default function LoginScreen() {
           Secure access for managing live website content.
         </p>
 
-        <label className="mt-6 block">
-          <span className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
+        <div className="mt-6 block">
+          <label htmlFor="admin-password" className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
             Password
-          </span>
+          </label>
           <div className="relative">
             <input
+              id="admin-password"
               type={showPw ? "text" : "password"}
               autoFocus
               value={password}
@@ -69,13 +70,14 @@ export default function LoginScreen() {
               {showPw ? <EyeOffGlyph /> : <EyeGlyph />}
             </button>
           </div>
-        </label>
+        </div>
 
-        <label className="mt-4 block">
-          <span className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
+        <div className="mt-4 block">
+          <label htmlFor="admin-totp" className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ash">
             2FA Code
-          </span>
+          </label>
           <input
+            id="admin-totp"
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
@@ -88,7 +90,7 @@ export default function LoginScreen() {
           <span className="mt-1 block font-mono text-[10px] leading-relaxed text-ash-dim">
             Required when ADMIN_TOTP_SECRET is enabled.
           </span>
-        </label>
+        </div>
 
         {error && <p className="mt-3 font-mono text-xs text-loss">{error}</p>}
 

@@ -16,7 +16,9 @@
 
 -- Auto-touch updated_at on every UPDATE.
 create or replace function public.set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;
@@ -246,16 +248,20 @@ alter table public.site_settings add column if not exists shop jsonb;
 -- surrounding page text so /admin → Roster → "หน้า Roster (Page)" saves live.
 alter table public.site_settings add column if not exists roster_page jsonb;
 
--- ── STORAGE BUCKET (admin media + customer payment slips) ───────────────────
--- All image uploads live in one public bucket. Moved off Vercel Blob, whose free
--- store gets suspended at its usage cap (`limits-exceeded-suspended`), silently
--- breaking every upload. Public-read; writes are service-role only from the API
--- routes (app/api/admin/upload, app/api/shop/order via lib/supabaseStorage.ts).
+-- ── STORAGE BUCKETS ──────────────────────────────────────────────────────────
+-- Public website media stays CDN-readable. Customer slips and shipping evidence
+-- live separately in a private bucket and are displayed through signed URLs.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('uploads', 'uploads', true, 5242880,
         array['image/png','image/jpeg','image/webp','image/gif'])
 on conflict (id) do update
   set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('order-evidence', 'order-evidence', false, 5242880, array['image/jpeg'])
+on conflict (id) do update
+  set public = false,
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
@@ -283,21 +289,34 @@ create table if not exists public.shop_orders (
 );
 -- Per-size breakdown for multi-size orders: [{ sizeId, label, quantity, unitPrice, lineTotal }, …]
 alter table public.shop_orders add column if not exists items jsonb;
+update public.shop_orders
+set items = jsonb_build_array(jsonb_build_object(
+  'sizeId', lower(coalesce(size, 'legacy')),
+  'label', coalesce(size, 'Legacy order'),
+  'quantity', greatest(coalesce(quantity, 1), 1),
+  'unitPrice', coalesce(unit_price, case when coalesce(quantity, 0) > 0 then total / quantity else total end, 0),
+  'lineTotal', coalesce(total, 0)
+))
+where items is null;
 -- Short order reference code (e.g. "NM-7K3QX") the buyer is asked to put in the
 -- transfer note, so the team can match a payment to one order (manual, no gateway).
 alter table public.shop_orders add column if not exists ref_code text;
--- Public URL of the customer-uploaded payment slip image (Supabase Storage).
+-- Private storage reference for the customer-uploaded payment slip.
 alter table public.shop_orders add column if not exists slip_url text;
 -- Email of the signed-in buyer (the shop now requires sign-in to order). The
 -- order route degrades gracefully if this column is missing, but add it to keep it.
 alter table public.shop_orders add column if not exists user_email text;
--- Public URL of an admin-uploaded shipping image (e.g. the courier branch's
--- parcel/receipt number) shown to the buyer in My Orders once shipped.
+-- Private storage reference for an admin-uploaded shipping image. APIs turn it
+-- into a short-lived signed URL for authorized displays.
 alter table public.shop_orders add column if not exists shipping_image_url text;
 -- Immutable moment the buyer declared their transfer (slip attached). Set once by
 -- the PAY route and never touched by admin status changes, so the order's shown
 -- "transfer time" can't drift as it advances (verified/packing/shipped).
 alter table public.shop_orders add column if not exists paid_at timestamptz;
+-- Timestamp set by the 30-day retention job after PII and evidence are removed.
+alter table public.shop_orders add column if not exists anonymized_at timestamptz;
+create index if not exists shop_orders_status_created_idx on public.shop_orders (status, created_at desc);
+create unique index if not exists shop_orders_ref_code_unique_idx on public.shop_orders (ref_code) where ref_code is not null;
 alter table public.shop_orders enable row level security;
 drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
 create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();
@@ -332,6 +351,61 @@ create table if not exists public.shop_push_subscriptions (
   updated_at  timestamptz default now()
 );
 alter table public.shop_push_subscriptions enable row level security;
+
+-- Atomic content replacement RPC. Admin list editors replace full sections; the
+-- transaction prevents a failed insert from leaving a deleted/half-saved table.
+create or replace function public.replace_content_table_internal(p_table text, p_rows jsonb)
+returns void language plpgsql security invoker set search_path = '' as $$
+declare target regclass;
+begin
+  target := case p_table
+    when 'players' then 'public.players'::regclass
+    when 'members' then 'public.members'::regclass
+    when 'matches' then 'public.matches'::regclass
+    when 'tournaments' then 'public.tournaments'::regclass
+    when 'news' then 'public.news'::regclass
+    when 'sponsors' then 'public.sponsors'::regclass
+    when 'sponsor_tiers' then 'public.sponsor_tiers'::regclass
+    else null
+  end;
+  if target is null then raise exception 'content table not allowed'; end if;
+  execute format('delete from %s', target);
+  if jsonb_array_length(coalesce(p_rows, '[]'::jsonb)) > 0 then
+    execute format('insert into %1$s select * from jsonb_populate_recordset(null::%1$s, $1)', target) using p_rows;
+    execute format('update %s set created_at = coalesce(created_at, now()), updated_at = coalesce(updated_at, now())', target);
+  end if;
+end; $$;
+
+create or replace function public.replace_content_section(
+  p_section text,
+  p_primary jsonb,
+  p_secondary jsonb default '[]'::jsonb,
+  p_settings jsonb default '{}'::jsonb
+)
+returns void language plpgsql security invoker set search_path = '' as $$
+begin
+  case p_section
+    when 'roster' then
+      perform public.replace_content_table_internal('players', p_primary);
+      perform public.replace_content_table_internal('members', p_secondary);
+      if p_settings ? 'roster_page' then
+        insert into public.site_settings (id, roster_page) values (1, p_settings -> 'roster_page')
+        on conflict (id) do update set roster_page = excluded.roster_page;
+      end if;
+    when 'matches' then
+      perform public.replace_content_table_internal('matches', p_primary);
+      perform public.replace_content_table_internal('tournaments', p_secondary);
+    when 'news' then
+      perform public.replace_content_table_internal('news', p_primary);
+    when 'sponsors' then
+      perform public.replace_content_table_internal('sponsors', p_primary);
+      perform public.replace_content_table_internal('sponsor_tiers', p_secondary);
+    else raise exception 'content section not allowed';
+  end case;
+end; $$;
+revoke all on function public.replace_content_table_internal(text, jsonb) from public, anon, authenticated;
+revoke all on function public.replace_content_section(text, jsonb, jsonb, jsonb) from public, anon, authenticated;
+grant execute on function public.replace_content_section(text, jsonb, jsonb, jsonb) to service_role;
 
 -- ============================================================================
 -- Row Level Security: public read everywhere, writes only via service role.

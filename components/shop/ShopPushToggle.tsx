@@ -100,7 +100,17 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
           navigator.serviceWorker.ready,
           new Promise<ServiceWorkerRegistration | undefined>((r) => setTimeout(() => r(undefined), 5000)),
         ])) ?? (await navigator.serviceWorker.getRegistration());
-      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      let sub = reg ? await reg.pushManager.getSubscription() : null;
+      if (!sub && reg && Notification.permission === "granted") {
+        try {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          });
+        } catch {
+          // Leave it off; the buyer can retry from the explicit button.
+        }
+      }
       if (sub && Notification.permission === "granted") {
         setState("on");
         syncSub(sub).catch(() => {}); // keep the server's order_ids current
@@ -123,6 +133,21 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
       }
       refresh();
     })();
+  }, [refresh]);
+
+  // Browsers can rotate/drop a push subscription while the site is closed.
+  // Recheck on foreground so the buyer route (not the admin route) refreshes
+  // the endpoint together with its order capabilities.
+  useEffect(() => {
+    const recheck = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", recheck);
+    window.addEventListener("focus", recheck);
+    return () => {
+      document.removeEventListener("visibilitychange", recheck);
+      window.removeEventListener("focus", recheck);
+    };
   }, [refresh]);
 
   // When the buyer's order list changes while already subscribed, push the new

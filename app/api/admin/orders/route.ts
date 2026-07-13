@@ -1,35 +1,59 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { uploadToStorage, deleteFromStorage } from "@/lib/supabaseStorage";
+import {
+  deleteFromStorage,
+  normalizeOrderEvidenceImage,
+  signedStorageUrl,
+  uploadOrderEvidence,
+} from "@/lib/supabaseStorage";
 import { sendPushForOrder } from "@/lib/push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const STATUSES = new Set(["awaiting_payment", "paid_declared", "verified", "packing", "shipped", "cancelled"]);
-const IMAGE_MAX_BYTES = 4 * 1024 * 1024; // 4 MB
+const STATUSES = new Set([
+  "awaiting_payment",
+  "paid_declared",
+  "verified",
+  "packing",
+  "shipped",
+  "cancelled",
+]);
+const IMAGE_MAX_BYTES = 4 * 1024 * 1024;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function authed(): Promise<boolean> {
   return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
 }
 
-/** Decode a base64 image data URL and upload it to Supabase Storage. Returns the
- *  public URL, or undefined if the payload is invalid/too big/storage is down. */
 async function uploadImage(data: unknown): Promise<string | undefined> {
-  if (typeof data !== "string" || !data.startsWith("data:image/")) return undefined;
-  const m = /^data:(image\/(png|jpeg|webp));base64,([\s\S]+)$/.exec(data);
-  if (!m) return undefined;
+  if (typeof data !== "string") return undefined;
+  const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(data);
+  if (!match) return undefined;
   try {
-    const bytes = Buffer.from(m[3], "base64");
-    if (!bytes.length || bytes.length > IMAGE_MAX_BYTES) return undefined;
-    const ext = m[2] === "jpeg" ? "jpg" : m[2];
-    const name = `shop-shipping/ship-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    return await uploadToStorage(name, bytes, m[1]);
+    const input = Buffer.from(match[1], "base64");
+    if (!input.length || input.length > IMAGE_MAX_BYTES) return undefined;
+    const normalized = await normalizeOrderEvidenceImage(input, IMAGE_MAX_BYTES);
+    if (!normalized) return undefined;
+    return await uploadOrderEvidence(
+      `shop-shipping/${randomUUID()}.jpg`,
+      normalized,
+      "image/jpeg"
+    );
   } catch {
     return undefined;
   }
+}
+
+async function exposeEvidence(row: Record<string, unknown>) {
+  const [slipUrl, shippingUrl] = await Promise.all([
+    signedStorageUrl(row.slip_url as string | null, 60 * 60),
+    signedStorageUrl(row.shipping_image_url as string | null, 60 * 60),
+  ]);
+  return { ...row, slip_url: slipUrl, shipping_image_url: shippingUrl };
 }
 
 export async function GET() {
@@ -42,7 +66,13 @@ export async function GET() {
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ orders: data ?? [] }, { headers: { "Cache-Control": "no-store" } });
+  const orders = await Promise.all(
+    ((data ?? []) as Record<string, unknown>[]).map(exposeEvidence)
+  );
+  return NextResponse.json(
+    { orders },
+    { headers: { "Cache-Control": "no-store, private", Pragma: "no-cache" } }
+  );
 }
 
 export async function PATCH(request: Request) {
@@ -53,54 +83,64 @@ export async function PATCH(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!body.id) return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  if (!body.id || !UUID_RE.test(body.id)) {
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
   if (body.status && !STATUSES.has(body.status)) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
+  if (!body.status && !body.shippingImage && !body.clearShippingImage) {
+    return NextResponse.json({ error: "No changes" }, { status: 400 });
+  }
+
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+  const { data: existing, error: readError } = await db
+    .from("shop_orders")
+    .select("id, shipping_image_url")
+    .eq("id", body.id)
+    .maybeSingle();
+  if (readError) return NextResponse.json({ error: readError.message }, { status: 500 });
+  if (!existing) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-  // Build the update. Set updated_at explicitly so the order's displayed time
-  // tracks the last change (the DB trigger isn't relied on).
+  const oldRef = (existing as { shipping_image_url?: string | null }).shipping_image_url ?? null;
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (body.status) update.status = body.status;
 
-  let shippingImageUrl: string | undefined;
+  let newRef: string | undefined;
   if (body.clearShippingImage) {
     update.shipping_image_url = null;
   } else if (body.shippingImage) {
-    shippingImageUrl = await uploadImage(body.shippingImage);
-    if (!shippingImageUrl) return NextResponse.json({ error: "อัปโหลดรูปไม่สำเร็จ" }, { status: 400 });
-    update.shipping_image_url = shippingImageUrl;
-  }
-
-  let { error } = await db.from("shop_orders").update(update).eq("id", body.id);
-  // The shipping_image_url column may not exist yet — retry without it so a
-  // plain status change still goes through.
-  if (error && /shipping_image_url/.test(error.message)) {
-    delete update.shipping_image_url;
-    ({ error } = await db.from("shop_orders").update(update).eq("id", body.id));
-    if (!error && (body.shippingImage || body.clearShippingImage)) {
-      return NextResponse.json(
-        { error: "ยังไม่มีคอลัมน์ shipping_image_url ใน DB (รันสคริปต์ migration ก่อน)" },
-        { status: 500 }
-      );
+    newRef = await uploadImage(body.shippingImage);
+    if (!newRef) {
+      return NextResponse.json({ error: "อัปโหลดรูปไม่สำเร็จ" }, { status: 400 });
     }
+    update.shipping_image_url = newRef;
   }
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Notify the buyer's opted-in devices on a positive milestone (verified /
-  // packing / shipped) — fires even when their site is closed. Best-effort:
-  // a no-op unless they enabled notifications, and never blocks the response.
+  const { error } = await db.from("shop_orders").update(update).eq("id", body.id);
+  if (error) {
+    if (newRef) await deleteFromStorage(newRef);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Only delete the prior object after the row safely points at the replacement.
+  if ((body.clearShippingImage || newRef) && oldRef && oldRef !== newRef) {
+    await deleteFromStorage(oldRef);
+  }
+
   if (body.status) {
     try {
       await sendPushForOrder(body.id, body.status);
     } catch {
-      /* push is best-effort */
+      // Push is best-effort.
     }
   }
 
-  return NextResponse.json({ ok: true, shippingImageUrl: shippingImageUrl ?? null });
+  return NextResponse.json({
+    ok: true,
+    shippingImageUrl: newRef ? await signedStorageUrl(newRef, 60 * 60) : null,
+  });
 }
 
 export async function DELETE(request: Request) {
@@ -111,31 +151,23 @@ export async function DELETE(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!body.id) return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  if (!body.id || !UUID_RE.test(body.id)) {
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
-
-  // Read the order's uploaded image URLs first so we can purge them from Storage
-  // after the row is gone (deleting the row alone orphans the slip/shipping image
-  // in the `uploads` bucket). `select("*")` tolerates the optional columns
-  // (slip_url / shipping_image_url) not existing yet.
-  const { data: existing } = await db.from("shop_orders").select("*").eq("id", body.id).maybeSingle();
-
+  const { data: existing } = await db
+    .from("shop_orders")
+    .select("slip_url, shipping_image_url")
+    .eq("id", body.id)
+    .maybeSingle();
   const { error } = await db.from("shop_orders").delete().eq("id", body.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Best-effort cleanup — never fail the delete if storage removal doesn't land.
-  const imageUrls = [
+  const refs = [
     (existing as { slip_url?: string | null } | null)?.slip_url,
     (existing as { shipping_image_url?: string | null } | null)?.shipping_image_url,
-  ].filter((u): u is string => typeof u === "string" && u.length > 0);
-  for (const url of imageUrls) {
-    try {
-      await deleteFromStorage(url);
-    } catch {
-      /* storage cleanup is best-effort */
-    }
-  }
-
+  ].filter((value): value is string => Boolean(value));
+  await Promise.all(refs.map((ref) => deleteFromStorage(ref)));
   return NextResponse.json({ ok: true });
 }

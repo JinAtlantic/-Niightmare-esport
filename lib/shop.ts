@@ -138,6 +138,8 @@ export const SHOP_QTY_MAX = 999;
 /** Hours a buyer has to transfer before an unpaid (reserved) order auto-cancels. */
 export const SHOP_PAYMENT_WINDOW_HOURS = 24;
 const PAYMENT_WINDOW_MS = SHOP_PAYMENT_WINDOW_HOURS * 3600000;
+export const SHOP_ORDER_PERSONAL_DATA_RETENTION_DAYS = 30;
+const PERSONAL_DATA_RETENTION_MS = SHOP_ORDER_PERSONAL_DATA_RETENTION_DAYS * 24 * 3600000;
 
 /** Order lifecycle status. `awaiting_payment` = reserved but not yet transferred;
  *  `paid_declared` = buyer attached a slip and declared the transfer. */
@@ -155,6 +157,15 @@ export function isOrderExpired(createdAt?: string, status?: string, nowMs = Date
   const created = new Date(createdAt).getTime();
   if (!Number.isFinite(created)) return false;
   return nowMs - created > PAYMENT_WINDOW_MS;
+}
+
+/** Keep buyer-entered order details on that device for the same 30-day window
+ * as the server. Anonymous aggregate sales data is server-only after this. */
+export function isOrderPersonalDataExpired(createdAt?: string, nowMs = Date.now()): boolean {
+  if (!createdAt) return false;
+  const created = new Date(createdAt).getTime();
+  if (!Number.isFinite(created)) return false;
+  return nowMs - created > PERSONAL_DATA_RETENTION_MS;
 }
 
 /** Milliseconds left to pay a reserved order (0 once expired). */
@@ -376,10 +387,9 @@ export interface ShopOrderRecord {
   province: string;
   city: string;
   branch: string;
-  /** Public URL of the uploaded payment slip (Vercel Blob). */
+  /** Legacy client field; private payment evidence is no longer returned. */
   slipUrl?: string;
-  /** Public URL of the admin-uploaded shipping image (e.g. courier parcel number),
-   *  synced back from the server and shown once the order is shipped. */
+  /** Short-lived signed URL for the shipping image, refreshed by status sync. */
   shippingImageUrl?: string;
   createdAt?: string;
   status?: string;

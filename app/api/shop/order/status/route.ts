@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { signedStorageUrl } from "@/lib/supabaseStorage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,10 +33,17 @@ export async function GET(request: Request) {
   }
   if (res.error) return NextResponse.json({ synced: false, orders: [] });
 
-  const orders = ((res.data ?? []) as Record<string, unknown>[]).map((r) => ({
-    id: r.id as string,
-    status: r.status as string,
-    shippingImageUrl: ((r as { shipping_image_url?: string | null }).shipping_image_url ?? null) as string | null,
-  }));
-  return NextResponse.json({ synced: true, orders }, { headers: { "Cache-Control": "no-store" } });
+  const orders = await Promise.all(
+    ((res.data ?? []) as Record<string, unknown>[]).map(async (r) => ({
+      id: r.id as string,
+      status: r.status as string,
+      shippingImageUrl: await signedStorageUrl(
+        (r as { shipping_image_url?: string | null }).shipping_image_url
+      ),
+    }))
+  );
+  return NextResponse.json(
+    { synced: true, orders },
+    { headers: { "Cache-Control": "no-store, private", Pragma: "no-cache" } }
+  );
 }

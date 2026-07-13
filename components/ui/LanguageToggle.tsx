@@ -45,7 +45,7 @@ export default function LanguageToggle({ className = "" }: { className?: string 
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Choose language"
+        aria-label={`Choose language, current ${active.native}`}
         className="group inline-flex min-h-[44px] items-center gap-2 border border-edge bg-void/70 px-3 text-soul shadow-[0_0_18px_rgba(11,7,16,0.42)] backdrop-blur-md transition-all duration-200 hover:border-amethyst hover:bg-crypt/90 hover:shadow-glow-soft"
       >
         <Globe2

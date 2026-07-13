@@ -21,6 +21,43 @@ function asKey(name: string | null): ContentKey | null {
   return name && ALLOWED.has(name as ContentKey) ? (name as ContentKey) : null;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+/** Reject partial/empty payloads before they reach whole-section replacement.
+ * Admin editors always PUT the full section; accepting `{}` here would turn a
+ * client bug or malformed script into a destructive table wipe. */
+function validateSection(key: ContentKey, value: unknown): string | null {
+  if (!isRecord(value)) return "Expected an object";
+  const array = (name: string) => Array.isArray(value[name]);
+  const object = (name: string) => isRecord(value[name]);
+  switch (key) {
+    case "matches":
+      return object("page") && array("matches") && array("tournaments")
+        ? null
+        : "Invalid matches payload";
+    case "roster":
+      return object("page") && object("mlbb") && object("efootball") && array("staff")
+        ? null
+        : "Invalid roster payload";
+    case "sponsors":
+      return object("page") && array("sponsors") && array("tiers")
+        ? null
+        : "Invalid sponsors payload";
+    case "news":
+      return object("page") && array("articles") ? null : "Invalid news payload";
+    case "site":
+      return object("team") && object("contact") && object("upcomingMatch")
+        ? null
+        : "Invalid site payload";
+    case "achievements":
+      return object("page") && array("stats") && array("trophies")
+        ? null
+        : "Invalid achievements payload";
+  }
+}
+
 export async function GET(request: Request) {
   if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const key = asKey(new URL(request.url).searchParams.get("file"));
@@ -45,15 +82,22 @@ export async function PUT(request: Request) {
   const key = asKey(new URL(request.url).searchParams.get("file"));
   if (!key) return NextResponse.json({ error: "Unknown file" }, { status: 400 });
 
+  const contentLength = Number(request.headers.get("content-length") || 0);
+  if (contentLength > 5 * 1024 * 1024) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
   let data: unknown;
   try {
-    data = await request.json();
+    const raw = await request.text();
+    if (raw.length > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+    data = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (data === null || typeof data !== "object") {
-    return NextResponse.json({ error: "Expected an object" }, { status: 400 });
-  }
+  const validationError = validateSection(key, data);
+  if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
 
   try {
     // Write to Supabase (source of truth) when configured; otherwise the Blob

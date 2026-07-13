@@ -26,16 +26,23 @@ import type {
 import type { ContentKey } from "./store";
 import { hasMatchSchedulePayload } from "./matchSchedule";
 
-const NONE = "00000000-0000-0000-0000-000000000000";
-
-/** Replace a whole table with the given rows (clear, then insert). */
-async function replaceTable(db: SupabaseClient, table: string, rows: Record<string, unknown>[]) {
-  const { error: delErr } = await db.from(table).delete().neq("id", NONE);
-  if (delErr) throw new Error(`clear ${table}: ${delErr.message}`);
-  if (rows.length) {
-    const { error } = await db.from(table).insert(rows);
-    if (error) throw new Error(`insert ${table}: ${error.message}`);
-  }
+/** Replace every table in a logical content section inside one Postgres
+ * transaction. The RPC is service-role only and rolls all deletes back if any
+ * mapped row fails to insert. */
+async function replaceSection(
+  db: SupabaseClient,
+  section: "roster" | "matches" | "news" | "sponsors",
+  primary: Record<string, unknown>[],
+  secondary: Record<string, unknown>[] = [],
+  settings: Record<string, unknown> = {}
+) {
+  const { error } = await db.rpc("replace_content_section", {
+    p_section: section,
+    p_primary: primary,
+    p_secondary: secondary,
+    p_settings: settings,
+  });
+  if (error) throw new Error(`atomic ${section} save: ${error.message}`);
 }
 
 async function hasColumns(db: SupabaseClient, table: string, columns: string): Promise<boolean> {
@@ -95,25 +102,17 @@ export async function writeSectionToSupabase(
       if (!membersHaveProfileColumns && hasAnyValue(members, memberProfileColumns)) {
         throw new Error("Supabase members profile columns are missing. Run supabase/schema.sql before saving staff flag fields.");
       }
-      await replaceTable(
-        db,
-        "players",
-        playersHaveProfileColumns ? players : omitKeys(players, playerProfileColumns)
-      );
-      await replaceTable(
-        db,
-        "members",
-        membersHaveProfileColumns ? members : omitKeys(members, memberProfileColumns)
-      );
-      // Roster PAGE COPY (hero/labels/stats) is not a table — it's a jsonb blob
-      // on site_settings, same pattern as about_us/roadmap/shop. Guarded: the
-      // column may not exist yet, and an upsert with an unknown column fails the
-      // whole write, so only send it once the column is present. Until the SQL
-      // is run the players/staff lists still save (this is a no-op).
+      const rosterSettings: Record<string, unknown> = {};
       if (r.page !== undefined && (await hasColumns(db, "site_settings", "roster_page"))) {
-        const { error } = await db.from("site_settings").upsert({ id: 1, roster_page: r.page ?? null });
-        if (error) throw new Error(`site_settings roster_page: ${error.message}`);
+        rosterSettings.roster_page = r.page ?? null;
       }
+      await replaceSection(
+        db,
+        "roster",
+        playersHaveProfileColumns ? players : omitKeys(players, playerProfileColumns),
+        membersHaveProfileColumns ? members : omitKeys(members, memberProfileColumns),
+        rosterSettings
+      );
     } else if (key === "matches") {
       const m = value as { matches?: Match[]; tournaments?: Tournament[] };
       const rows = matchRows(m.matches ?? []);
@@ -128,15 +127,23 @@ export async function writeSectionToSupabase(
         ...(matchesHaveVodColumns ? [] : ["vods"]),
         ...(matchesHaveBo ? [] : ["bo"]),
       ];
-      await replaceTable(db, "matches", matchDropKeys.length ? omitKeys(rows, matchDropKeys) : rows);
-      await replaceTable(db, "tournaments", tournamentRows(m.tournaments ?? []));
+      await replaceSection(
+        db,
+        "matches",
+        matchDropKeys.length ? omitKeys(rows, matchDropKeys) : rows,
+        tournamentRows(m.tournaments ?? [])
+      );
     } else if (key === "news") {
       const n = value as { articles?: NewsArticle[] };
-      await replaceTable(db, "news", newsRows(n.articles ?? []));
+      await replaceSection(db, "news", newsRows(n.articles ?? []));
     } else if (key === "sponsors") {
       const sp = value as { sponsors?: Sponsor[]; tiers?: SponsorTier[] };
-      await replaceTable(db, "sponsors", sponsorRows(sp.sponsors ?? []));
-      await replaceTable(db, "sponsor_tiers", tierRows(sp.tiers ?? []));
+      await replaceSection(
+        db,
+        "sponsors",
+        sponsorRows(sp.sponsors ?? []),
+        tierRows(sp.tiers ?? [])
+      );
     } else if (key === "achievements") {
       const { error } = await db.from("site_settings").upsert({
         id: 1,

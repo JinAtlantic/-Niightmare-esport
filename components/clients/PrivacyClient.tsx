@@ -5,7 +5,7 @@ import LegalLayout, { type LegalSectionData } from "@/components/layout/LegalLay
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 
-const LAST_UPDATED = "16 June 2026";
+const LAST_UPDATED = "13 July 2026";
 
 function sections(email: string): LegalSectionData[] {
   const mail = { href: `mailto:${email}`, label: { en: email, lo: email } };
@@ -43,6 +43,14 @@ function sections(email: string): LegalSectionData[] {
               lo: "ຂໍ້ມູນການຕິດຕໍ່ ແລະ ສອບຖາມ — ຊື່, ອີເມວ, ອົງກອນ ແລະ ຂໍ້ຄວາມທີ່ທ່ານສົ່ງມາເມື່ອຕິດຕໍ່ຫາພວກເຮົາ.",
             },
             {
+              en: "Shop & delivery data — the products, sizes and quantities you order; your name, phone or WhatsApp number, courier, province, city and branch; order reference, payment status, payment slip and any shipping proof or parcel image.",
+              lo: "ຂໍ້ມູນຮ້ານຄ້າ ແລະ ການຈັດສົ່ງ — ສິນຄ້າ, ຂະໜາດ ແລະ ຈຳນວນທີ່ທ່ານສັ່ງ; ຊື່, ເບີໂທ ຫຼື WhatsApp, ຜູ້ຂົນສົ່ງ, ແຂວງ, ເມືອງ ແລະ ສາຂາ; ລະຫັດອ້າງອີງ, ສະຖານະການຊຳລະ, ສະລິບໂອນເງິນ ແລະ ຮູບຫຼັກຖານການຈັດສົ່ງ ຫຼື ພັດສະດຸ.",
+            },
+            {
+              en: "Notification data — if you opt in, your browser push endpoint and cryptographic subscription keys, linked only to the order IDs saved on that device.",
+              lo: "ຂໍ້ມູນການແຈ້ງເຕືອນ — ຫາກທ່ານເລືອກເປີດໃຊ້, ພວກເຮົາຈະເກັບ push endpoint ຂອງເບຣົາເຊີ ແລະ ຄີການສະໝັກແບບເຂົ້າລະຫັດ ໂດຍເຊື່ອມສະເພາະກັບລະຫັດອໍເດີທີ່ບັນທຶກໃນອຸປະກອນນັ້ນ.",
+            },
+            {
               en: "Technical data — basic, privacy-respecting analytics (such as anonymized page views) and a language preference stored locally in your browser. We do not run invasive ad-tracking.",
               lo: "ຂໍ້ມູນທາງເຕັກນິກ — ສະຖິຕິພື້ນຖານທີ່ເຄົາລົບຄວາມເປັນສ່ວນຕົວ (ເຊັ່ນ: ຈຳນວນການເຂົ້າຊົມແບບບໍ່ລະບຸຕົວຕົນ) ແລະ ການຕັ້ງຄ່າພາສາທີ່ເກັບໄວ້ໃນເບຣົາເຊີຂອງທ່ານ. ພວກເຮົາບໍ່ມີການຕິດຕາມເພື່ອການໂຄສະນາທີ່ລ່ວງລ້ຳຄວາມເປັນສ່ວນຕົວ.",
             },
@@ -58,6 +66,8 @@ function sections(email: string): LegalSectionData[] {
             { en: "To review and evaluate tryout and recruitment applications.", lo: "ເພື່ອພິຈາລະນາ ແລະ ປະເມີນໃບສະໝັກທົດສອບ ແລະ ການຮັບສະໝັກ." },
             { en: "To contact applicants about the status of their application.", lo: "ເພື່ອຕິດຕໍ່ຜູ້ສະໝັກກ່ຽວກັບສະຖານະຂອງໃບສະໝັກ." },
             { en: "To respond to sponsorship, media, and general enquiries.", lo: "ເພື່ອຕອບກັບການສອບຖາມເລື່ອງສະປອນເຊີ, ສື່ ແລະ ເລື່ອງທົ່ວໄປ." },
+            { en: "To reserve, verify, prepare and deliver shop orders, prevent duplicate or fraudulent payment declarations, and contact you about fulfillment.", lo: "ເພື່ອຈອງ, ກວດສອບ, ກຽມ ແລະ ຈັດສົ່ງອໍເດີຮ້ານຄ້າ, ປ້ອງກັນການແຈ້ງຊຳລະຊ້ຳ ຫຼື ສໍ້ໂກງ ແລະ ຕິດຕໍ່ທ່ານກ່ຽວກັບການຈັດສົ່ງ." },
+            { en: "To send order-status notifications when you explicitly opt in.", lo: "ເພື່ອສົ່ງການແຈ້ງເຕືອນສະຖານະອໍເດີ ເມື່ອທ່ານເລືອກຍິນຍອມເປີດໃຊ້." },
             { en: "To operate, maintain, and improve this website.", lo: "ເພື່ອດຳເນີນງານ, ດູແລ ແລະ ປັບປຸງເວັບໄຊ້ນີ້." },
           ],
         },
@@ -105,8 +115,8 @@ function sections(email: string): LegalSectionData[] {
       blocks: [
         {
           p: {
-            en: "We rely on a small number of trusted providers to run this website and process form submissions, such as our form-handling service and our hosting provider. They process data only on our behalf and under their own security obligations. We do not share your data with anyone else except where the law requires it.",
-            lo: "ພວກເຮົາອາໄສຜູ້ໃຫ້ບໍລິການທີ່ເຊື່ອຖືໄດ້ຈຳນວນໜຶ່ງ ເພື່ອດຳເນີນເວັບໄຊ້ ແລະ ປະມວນຜົນຂໍ້ມູນຈາກແບບຟອມ ເຊັ່ນ: ບໍລິການຈັດການແບບຟອມ ແລະ ຜູ້ໃຫ້ບໍລິການໂຮສຕິ້ງ. ພວກເຂົາປະມວນຜົນຂໍ້ມູນແທນພວກເຮົາ ແລະ ຢູ່ພາຍໃຕ້ພັນທະດ້ານຄວາມປອດໄພຂອງເຂົາເຈົ້າເອງ. ພວກເຮົາຈະບໍ່ແບ່ງປັນຂໍ້ມູນຂອງທ່ານໃຫ້ຜູ້ໃດ ນອກຈາກກໍລະນີທີ່ກົດໝາຍກຳນົດ.",
+            en: "We use trusted providers to operate the service, including Vercel for hosting and analytics, Supabase for the database and private order-evidence storage, web-push delivery providers, and our optional form-handling service. They process data on our behalf under their own security obligations. We do not sell your data or share it for third-party advertising, except where disclosure is required by law.",
+            lo: "ພວກເຮົານຳໃຊ້ຜູ້ໃຫ້ບໍລິການທີ່ເຊື່ອຖືໄດ້ເພື່ອດຳເນີນລະບົບ ລວມມີ Vercel ສຳລັບໂຮສຕິ້ງ ແລະ ສະຖິຕິ, Supabase ສຳລັບຖານຂໍ້ມູນ ແລະ ການເກັບຫຼັກຖານອໍເດີແບບສ່ວນຕົວ, ຜູ້ສົ່ງ Web Push ແລະ ບໍລິການຮັບແບບຟອມທີ່ເປີດໃຊ້ເປັນບາງຄັ້ງ. ຜູ້ໃຫ້ບໍລິການເຫຼົ່ານີ້ປະມວນຜົນແທນພວກເຮົາຕາມພັນທະຄວາມປອດໄພຂອງຕົນ. ພວກເຮົາບໍ່ຂາຍຂໍ້ມູນ ຫຼື ແບ່ງປັນເພື່ອໂຄສະນາຂອງບຸກຄົນທີສາມ ນອກຈາກກໍລະນີທີ່ກົດໝາຍກຳນົດ.",
           },
         },
       ],
@@ -116,8 +126,8 @@ function sections(email: string): LegalSectionData[] {
       blocks: [
         {
           p: {
-            en: "We apply reasonable technical and organizational measures to protect your information against loss, misuse, and unauthorized access — including encrypted (HTTPS) connections and restricted access to submissions. However, no method of transmission or storage is completely secure, so we cannot guarantee absolute security.",
-            lo: "ພວກເຮົານຳໃຊ້ມາດຕະການທາງເຕັກນິກ ແລະ ການຈັດການທີ່ເໝາະສົມ ເພື່ອປົກປ້ອງຂໍ້ມູນຂອງທ່ານຈາກການສູນເສຍ, ການນຳໃຊ້ຜິດ ແລະ ການເຂົ້າເຖິງໂດຍບໍ່ໄດ້ຮັບອະນຸຍາດ — ລວມທັງການເຊື່ອມຕໍ່ແບບເຂົ້າລະຫັດ (HTTPS) ແລະ ການຈຳກັດການເຂົ້າເຖິງຂໍ້ມູນທີ່ສົ່ງມາ. ເຖິງຢ່າງໃດກໍຕາມ ບໍ່ມີວິທີການສົ່ງ ຫຼື ການເກັບຮັກສາໃດທີ່ປອດໄພ 100% ສະນັ້ນ ພວກເຮົາຈຶ່ງບໍ່ສາມາດຮັບປະກັນຄວາມປອດໄພຢ່າງສົມບູນໄດ້.",
+            en: "We use encrypted HTTPS connections, restricted administrator access, a private storage bucket for payment slips and shipping evidence, and short-lived signed links when an authorized screen needs to display those files. No transmission or storage method is completely secure, so we cannot guarantee absolute security.",
+            lo: "ພວກເຮົານຳໃຊ້ການເຊື່ອມຕໍ່ HTTPS ແບບເຂົ້າລະຫັດ, ຈຳກັດການເຂົ້າເຖິງສະເພາະຜູ້ດູແລ, ເກັບສະລິບ ແລະ ຫຼັກຖານຈັດສົ່ງໃນພື້ນທີ່ສ່ວນຕົວ ແລະ ໃຊ້ລິ້ງຊົ່ວຄາວອາຍຸສັ້ນເມື່ອໜ້າທີ່ໄດ້ຮັບອະນຸຍາດຕ້ອງສະແດງໄຟລ໌. ບໍ່ມີວິທີສົ່ງ ຫຼື ເກັບຂໍ້ມູນໃດທີ່ປອດໄພ 100% ພວກເຮົາຈຶ່ງບໍ່ສາມາດຮັບປະກັນໄດ້ຢ່າງສົມບູນ.",
           },
         },
       ],
@@ -127,8 +137,8 @@ function sections(email: string): LegalSectionData[] {
       blocks: [
         {
           p: {
-            en: "We keep personal information only for as long as necessary for the purpose it was collected for — for example, the length of a recruitment cycle — after which it is deleted or anonymized. You can ask us to delete your data sooner at any time.",
-            lo: "ພວກເຮົາເກັບຮັກສາຂໍ້ມູນສ່ວນຕົວໄວ້ພຽງເທົ່າທີ່ຈຳເປັນຕາມຈຸດປະສົງທີ່ໄດ້ເກັບກຳ — ຕົວຢ່າງ: ຕະຫຼອດໄລຍະຮອບການຮັບສະໝັກ — ຈາກນັ້ນຈະຖືກລຶບ ຫຼື ເຮັດໃຫ້ບໍ່ສາມາດລະບຸຕົວຕົນໄດ້. ທ່ານສາມາດຮ້ອງຂໍໃຫ້ພວກເຮົາລຶບຂໍ້ມູນກ່ອນກຳນົດໄດ້ທຸກເວລາ.",
+            en: "For shop orders, personal contact and delivery details, order references, push-notification links, payment slips and shipping images are deleted or anonymized automatically 30 days after the order was created. We retain only non-identifying sales facts — dates, final status, items, sizes, quantities, prices, total and currency — for business reporting. Unpaid expired reservations may be deleted entirely. Other data is kept only as long as its purpose requires. You can ask us to delete your data sooner at any time.",
+            lo: "ສຳລັບອໍເດີຮ້ານຄ້າ, ຂໍ້ມູນຕິດຕໍ່ ແລະ ຈັດສົ່ງສ່ວນຕົວ, ລະຫັດອ້າງອີງ, ການເຊື່ອມຕໍ່ແຈ້ງເຕືອນ, ສະລິບໂອນເງິນ ແລະ ຮູບຈັດສົ່ງ ຈະຖືກລຶບ ຫຼື ເຮັດໃຫ້ບໍ່ລະບຸຕົວຕົນໂດຍອັດຕະໂນມັດຫຼັງຈາກສ້າງອໍເດີ 30 ວັນ. ພວກເຮົາຈະເກັບສະເພາະສະຖິຕິການຂາຍທີ່ບໍ່ລະບຸບຸກຄົນ — ວັນທີ, ສະຖານະສຸດທ້າຍ, ລາຍການ, ຂະໜາດ, ຈຳນວນ, ລາຄາ, ຍອດລວມ ແລະ ສະກຸນເງິນ — ເພື່ອລາຍງານທຸລະກິດ. ລາຍການຈອງທີ່ໝົດອາຍຸແລະບໍ່ຊຳລະອາດຖືກລຶບທັງໝົດ. ຂໍ້ມູນອື່ນຈະເກັບພຽງເທົ່າທີ່ຈຸດປະສົງຕ້ອງການ ແລະ ທ່ານສາມາດຂໍໃຫ້ລຶບໄວກວ່ານັ້ນໄດ້.",
           },
         },
       ],
@@ -157,8 +167,8 @@ function sections(email: string): LegalSectionData[] {
       blocks: [
         {
           p: {
-            en: "This site uses minimal browser storage — mainly to remember your language preference. We do not use cookies for cross-site advertising. You can clear this data at any time through your browser settings.",
-            lo: "ເວັບໄຊ້ນີ້ນຳໃຊ້ການເກັບຂໍ້ມູນໃນເບຣົາເຊີໃຫ້ໜ້ອຍທີ່ສຸດ — ສ່ວນຫຼາຍແມ່ນເພື່ອຈົດຈຳການຕັ້ງຄ່າພາສາຂອງທ່ານ. ພວກເຮົາບໍ່ນຳໃຊ້ຄຸກກີ້ເພື່ອການໂຄສະນາຂ້າມເວັບໄຊ້. ທ່ານສາມາດລຶບຂໍ້ມູນນີ້ໄດ້ທຸກເວລາ ຜ່ານການຕັ້ງຄ່າເບຣົາເຊີ.",
+            en: "This site stores your language preference and, when you use the shop, a My Orders list containing order IDs and the details you entered on that device. Notification permission and push subscriptions are controlled by your browser. We do not use cross-site advertising cookies. Clearing browser storage removes the local list but does not cancel a paid order; contact us if you need help with server-held data.",
+            lo: "ເວັບໄຊ້ນີ້ເກັບການຕັ້ງຄ່າພາສາ ແລະ ເມື່ອທ່ານໃຊ້ຮ້ານຄ້າ ຈະມີລາຍການ “ອໍເດີຂອງຂ້ອຍ” ທີ່ປະກອບດ້ວຍລະຫັດອໍເດີ ແລະ ລາຍລະອຽດທີ່ທ່ານປ້ອນໃນອຸປະກອນນັ້ນ. ສິດແຈ້ງເຕືອນ ແລະ push subscription ຄວບຄຸມໂດຍເບຣົາເຊີ. ພວກເຮົາບໍ່ໃຊ້ຄຸກກີ້ໂຄສະນາຂ້າມເວັບ. ການລຶບຂໍ້ມູນເບຣົາເຊີຈະລຶບລາຍການໃນອຸປະກອນ ແຕ່ບໍ່ໄດ້ຍົກເລີກອໍເດີທີ່ຊຳລະແລ້ວ; ກະລຸນາຕິດຕໍ່ພວກເຮົາຫາກຕ້ອງການຈັດການຂໍ້ມູນໃນລະບົບ.",
           },
         },
       ],

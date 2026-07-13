@@ -19,6 +19,10 @@ interface Body {
 }
 
 export async function POST(request: Request) {
+  const contentLength = Number(request.headers.get("content-length") || 0);
+  if (contentLength > 16 * 1024) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
   let body: Body;
   try {
     body = (await request.json()) as Body;
@@ -26,9 +30,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const endpoint = String(body.endpoint || "");
-  const p256dh = String(body.keys?.p256dh || "");
-  const auth = String(body.keys?.auth || "");
+  const endpoint = String(body.endpoint || "").slice(0, 2048);
+  const p256dh = String(body.keys?.p256dh || "").slice(0, 256);
+  const auth = String(body.keys?.auth || "").slice(0, 256);
   if (!endpoint || !p256dh || !auth) {
     return NextResponse.json({ error: "Bad subscription" }, { status: 400 });
   }
@@ -42,6 +46,16 @@ export async function POST(request: Request) {
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ ok: true, stored: false });
 
+  // A UUID is a capability only when it names a real order. Refuse arbitrary
+  // IDs so this public endpoint cannot be used to bloat subscription rows.
+  const { data: existingOrders, error: orderError } = await db
+    .from("shop_orders")
+    .select("id")
+    .in("id", orderIds);
+  if (orderError) return NextResponse.json({ error: orderError.message }, { status: 500 });
+  const validIds = (existingOrders ?? []).map((row) => String(row.id));
+  if (!validIds.length) return NextResponse.json({ error: "No valid orders" }, { status: 400 });
+
   // Upsert on the unique endpoint so re-subscribing / refreshing order_ids for
   // the same device is idempotent.
   const { error } = await db.from("shop_push_subscriptions").upsert(
@@ -49,7 +63,7 @@ export async function POST(request: Request) {
       endpoint,
       p256dh,
       auth,
-      order_ids: orderIds,
+      order_ids: validIds,
       lang,
       user_agent: String(body.userAgent || "").slice(0, 300),
       updated_at: new Date().toISOString(),

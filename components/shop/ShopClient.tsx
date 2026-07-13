@@ -17,6 +17,7 @@ import {
   validateOrder,
   isOtherCourier,
   isOrderExpired,
+  isOrderPersonalDataExpired,
   payWindowRemaining,
   qrFrameStyle,
   SHOP_QTY_MAX,
@@ -174,8 +175,13 @@ export default function ShopClient() {
         return;
       }
       const parsed = JSON.parse(raw) as ShopOrderRecord[];
-      // Drop reservations that blew past the 24-hour pay window.
-      const kept = parsed.filter((o) => !isOrderExpired(o.createdAt, o.status));
+      // Drop expired reservations and all device-held personal details after
+      // the same 30-day retention window enforced on the server.
+      const kept = parsed.filter(
+        (o) =>
+          !isOrderExpired(o.createdAt, o.status) &&
+          !isOrderPersonalDataExpired(o.createdAt)
+      );
       setMyOrders(kept);
       if (kept.length !== parsed.length) window.localStorage.setItem(storageKey, JSON.stringify(kept));
     } catch {
@@ -188,7 +194,11 @@ export default function ShopClient() {
     const id = window.setInterval(() => {
       setNow(Date.now());
       setMyOrders((prev) => {
-        const kept = prev.filter((o) => !isOrderExpired(o.createdAt, o.status));
+        const kept = prev.filter(
+          (o) =>
+            !isOrderExpired(o.createdAt, o.status) &&
+            !isOrderPersonalDataExpired(o.createdAt)
+        );
         if (kept.length === prev.length) return prev;
         try {
           window.localStorage.setItem(storageKeyRef.current, JSON.stringify(kept));
@@ -330,12 +340,11 @@ export default function ShopClient() {
     }
     setOrderError("");
     setReserving(true);
-    const ref = "NM-" + Math.random().toString(36).slice(2, 7).toUpperCase();
     try {
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent: "reserve", ref, ...currentInput() }),
+        body: JSON.stringify({ intent: "reserve", ...currentInput() }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "reserve failed");
@@ -405,7 +414,6 @@ export default function ShopClient() {
     setSubmitting(true);
     setPayError("");
     try {
-      const payItems = (payingOrder.items ?? []).map((l) => ({ sizeId: l.sizeId, quantity: l.quantity }));
       const res = await fetch("/api/shop/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -414,13 +422,6 @@ export default function ShopClient() {
           orderId: payingOrder.id,
           ref: payingOrder.refCode,
           slip,
-          items: payItems,
-          customerName: payingOrder.customerName,
-          phone: payingOrder.phone,
-          courier: payingOrder.courier,
-          province: payingOrder.province,
-          city: payingOrder.city,
-          branch: payingOrder.branch,
         }),
       });
       const json = await res.json();

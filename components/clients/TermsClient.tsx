@@ -5,7 +5,7 @@ import LegalLayout, { type LegalSectionData } from "@/components/layout/LegalLay
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 
-const LAST_UPDATED = "16 June 2026";
+const LAST_UPDATED = "13 July 2026";
 
 function sections(email: string): LegalSectionData[] {
   const mail = { href: `mailto:${email}`, label: { en: email, lo: email } };
@@ -91,6 +91,20 @@ function sections(email: string): LegalSectionData[] {
             label: { en: "Privacy Policy", lo: "ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ" },
           },
           after: { en: ".", lo: " ຂອງພວກເຮົາ." },
+        },
+      ],
+    },
+    {
+      heading: { en: "Shop Orders & Payment", lo: "ອໍເດີຮ້ານຄ້າ ແລະ ການຊຳລະ" },
+      blocks: [
+        {
+          ul: [
+            { en: "An order is reserved for 24 hours. If payment is not declared within that window, the reservation may expire and stock is not guaranteed.", lo: "ອໍເດີຈະຖືກຈອງໄວ້ 24 ຊົ່ວໂມງ. ຫາກບໍ່ແຈ້ງການຊຳລະພາຍໃນເວລາດັ່ງກ່າວ ການຈອງອາດໝົດອາຍຸ ແລະ ບໍ່ຮັບປະກັນສິນຄ້າ." },
+            { en: "Prices are calculated by the server from the selected sizes and quantities. You must transfer the displayed total and include the order reference where possible.", lo: "ລາຄາຄຳນວນໂດຍລະບົບຈາກຂະໜາດ ແລະ ຈຳນວນທີ່ເລືອກ. ທ່ານຕ້ອງໂອນຕາມຍອດທີ່ສະແດງ ແລະ ໃສ່ລະຫັດອ້າງອີງເມື່ອສາມາດ." },
+            { en: "Uploading a slip and selecting ‘I've transferred’ is a declaration, not automatic payment confirmation. NIIGHTMARE verifies the transfer manually before preparing or shipping the order.", lo: "ການແນບສະລິບ ແລະ ເລືອກ ‘ໂອນແລ້ວ’ ເປັນການແຈ້ງຊຳລະ ບໍ່ແມ່ນການຢືນຢັນອັດຕະໂນມັດ. NIIGHTMARE ຈະກວດກາການໂອນດ້ວຍຕົນເອງກ່ອນກຽມ ຫຼື ຈັດສົ່ງ." },
+            { en: "You are responsible for checking sizes, quantities, phone number and delivery details before payment. Delivery dates are estimates and may depend on the courier.", lo: "ທ່ານຮັບຜິດຊອບກວດສອບຂະໜາດ, ຈຳນວນ, ເບີໂທ ແລະ ລາຍລະອຽດຈັດສົ່ງກ່ອນຊຳລະ. ວັນຈັດສົ່ງເປັນພຽງການຄາດຄະເນ ແລະ ຂຶ້ນກັບຜູ້ຂົນສົ່ງ." },
+            { en: "For a cancellation, correction, refund or return request, contact NIIGHTMARE as soon as possible. Eligibility is reviewed case by case according to payment status, fulfillment progress, product condition and applicable law; no request is approved until NIIGHTMARE confirms it in writing.", lo: "ຫາກຕ້ອງການຍົກເລີກ, ແກ້ໄຂ, ຂໍຄືນເງິນ ຫຼື ຄືນສິນຄ້າ ກະລຸນາຕິດຕໍ່ NIIGHTMARE ໃຫ້ໄວທີ່ສຸດ. ສິດໃນການດຳເນີນການຈະພິຈາລະນາເປັນກໍລະນີຕາມສະຖານະຊຳລະ, ຂັ້ນຕອນຈັດກຽມ, ສະພາບສິນຄ້າ ແລະ ກົດໝາຍທີ່ນຳໃຊ້; ຄຳຮ້ອງຍັງບໍ່ຖືກອະນຸມັດຈົນກວ່າ NIIGHTMARE ຈະຢືນຢັນເປັນລາຍລັກອັກສອນ." },
+          ],
         },
       ],
     },
