@@ -814,7 +814,7 @@ function GameTournamentSection({
 }
 
 const selectClass =
-  "h-12 w-full min-w-0 border border-edge-bright bg-gradient-to-r from-crypt2 to-void px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] outline-none transition-all hover:border-amethyst/60 focus:border-amethyst focus:shadow-[0_0_18px_rgba(168,85,247,0.24)]";
+  "h-12 w-full min-w-0 border border-edge-bright bg-gradient-to-r from-crypt2 to-void px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] outline-none transition-all [color-scheme:dark] hover:border-amethyst/60 focus:border-amethyst focus:shadow-[0_0_18px_rgba(168,85,247,0.24)] [&>option]:bg-crypt [&>option]:text-soul";
 
 /**
  * Tournament picker. A native <select> is used everywhere else, but the
