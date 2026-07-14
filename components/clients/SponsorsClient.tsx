@@ -31,7 +31,6 @@ interface SponsorsPageCopy {
   heroTitle: Bilingual;
   valueLabel: Bilingual;
   valueProps: SponsorValueProp[];
-  ctaTitle: Bilingual;
 }
 
 const FALLBACK_PAGE = sponsorsSeed.page as SponsorsPageCopy;
@@ -334,10 +333,7 @@ export default function SponsorsClient() {
 
         {/* Benefits — compact */}
         <div className="mt-12 md:mt-16">
-          <SectionLabel>{pick(page.valueLabel)}</SectionLabel>
-          <h2 className="mt-3 max-w-3xl font-display text-xl font-black uppercase leading-tight tracking-[0.06em] text-soul md:text-3xl">
-            {pick(page.ctaTitle)}
-          </h2>
+          <SectionLabel centered>{pick(page.valueLabel)}</SectionLabel>
           <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
             {valueProps.slice(0, 4).map((item, index) => (
               <ValuePropCard key={item.id} item={item} index={index} />
