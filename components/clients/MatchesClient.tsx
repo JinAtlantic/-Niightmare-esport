@@ -813,9 +813,6 @@ function GameTournamentSection({
   );
 }
 
-const selectClass =
-  "h-12 w-full min-w-0 border border-edge-bright bg-gradient-to-r from-crypt2 to-void px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] outline-none transition-all hover:border-amethyst/60 focus:border-amethyst focus:shadow-[0_0_18px_rgba(168,85,247,0.24)]";
-
 /**
  * Tournament picker. A native <select> is used everywhere else, but the
  * tournament list can be long AND the filter panel sits inside two
@@ -1178,27 +1175,35 @@ export default function MatchesClient() {
 
             {/* Secondary filters — year and tournament only. Results always
                 show the complete history, newest tournament first. */}
-            <div className="mt-4 grid gap-3 border-t border-edge/80 pt-4 md:grid-cols-[minmax(180px,0.32fr)_minmax(0,1fr)]">
-              <label className="block">
+            <div className="mt-4 grid gap-3 border-t border-edge/80 pt-4 md:grid-cols-[minmax(280px,0.42fr)_minmax(0,1fr)]">
+              <div>
                 <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-spectre">
                   {pick(page.yearLabel)}
                 </span>
-                <select
-                  value={activeYear}
-                  onChange={(event) => {
-                    setSelectedYear(event.target.value);
-                    setSelectedTournament("all");
-                  }}
-                  className={selectClass}
-                >
-                  <option value="all">{pick(page.allYears)}</option>
-                  {yearOptions.map((y) => (
-                    <option key={y} value={y}>
-                      {y}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <div className="flex min-h-12 gap-1 overflow-x-auto border border-edge-bright bg-void/75 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {["all", ...yearOptions].map((year) => {
+                    const active = activeYear === year;
+                    return (
+                      <button
+                        key={year}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => {
+                          setSelectedYear(year === "all" ? "" : year);
+                          setSelectedTournament("all");
+                        }}
+                        className={`keep-latin min-h-[40px] shrink-0 border px-3 font-display text-sm font-black uppercase tracking-[0.08em] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst ${
+                          active
+                            ? "border-amethyst bg-amethyst/25 text-soul shadow-[inset_0_-2px_0_#A855F7,0_0_16px_rgba(168,85,247,0.14)]"
+                            : "border-transparent bg-crypt/70 text-spectre hover:border-edge-bright hover:text-soul"
+                        }`}
+                      >
+                        {year === "all" ? pick(page.allYears) : year}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               <div>
                 <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-spectre">
