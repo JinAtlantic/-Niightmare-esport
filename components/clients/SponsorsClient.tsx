@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
@@ -47,10 +47,6 @@ function useSponsorPick() {
 
 const COPY = {
   wallLabel: { en: "OFFICIAL PARTNERS", lo: "ພາດເນີ້ທາງການ" },
-  wallTitle: {
-    en: "Brands Behind The Nightmare",
-    lo: "ແບຣນທີ່ຢືນຢູ່ຫຼັງ NIIGHTMARE",
-  },
   official: { en: "Official NIIGHTMARE Partner", lo: "ພາດເນີ້ທາງການຂອງ NIIGHTMARE" },
   modalIntro: {
     en: "An official partner helping power the club's competitive journey, content, and fan moments across the season.",
@@ -60,7 +56,6 @@ const COPY = {
   connect: { en: "Connect", lo: "ຊ່ອງທາງຕິດຕໍ່" },
   visit: { en: "Visit Website", lo: "ໄປທີ່ເວັບໄຊ" },
   close: { en: "Close", lo: "ປິດ" },
-  partners: { en: "Partners", lo: "ພາດເນີ້" },
   facebook: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາດເນີ້ກັບພວກເຮົາ" },
 };
 
@@ -319,7 +314,6 @@ export default function SponsorsClient() {
   const [activeSponsor, setActiveSponsor] = useState<Sponsor | null>(null);
   const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
   const valueProps = page.valueProps?.length ? page.valueProps : FALLBACK_PAGE.valueProps;
-  const sponsorCount = useMemo(() => data.sponsors.length, [data.sponsors.length]);
   const facebookHref =
     safeHref(content.site?.contact?.facebook) || safeHref("https://facebook.com/niightmareesports");
 
@@ -330,18 +324,7 @@ export default function SponsorsClient() {
       <section className="relative isolate mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <AuroraHalos />
         {/* Partner wall — logo first */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <SectionLabel>{pick(COPY.wallLabel)}</SectionLabel>
-            <h2 className="mt-3 font-display text-2xl font-black uppercase leading-none tracking-wide text-soul md:text-4xl">
-              {pick(COPY.wallTitle)}
-            </h2>
-          </div>
-          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.18em] text-ash-dim">
-            <span className="font-display text-2xl font-bold text-glow">{sponsorCount}</span>{" "}
-            {pick(COPY.partners)}
-          </p>
-        </div>
+        <SectionLabel>{pick(COPY.wallLabel)}</SectionLabel>
 
         <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
           {data.sponsors.map((sponsor) => (
