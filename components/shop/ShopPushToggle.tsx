@@ -13,26 +13,9 @@ import { useLanguage } from "@/components/context/LanguageContext";
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
 const COPY = {
-  heading: { en: "Order updates", lo: "ແຈ້ງເຕືອນອໍເດີ" },
-  lead: {
-    en: "Get a notification when your order is confirmed, packed or shipped — even with this site closed.",
-    lo: "ຮັບການແຈ້ງເຕືອນເມື່ອອໍເດີຖືກຢືນຢັນ, ແພັກ ຫຼື ຈັດສົ່ງ — ເຖິງແມ່ນປິດເວັບໄວ້.",
-  },
   enable: { en: "Turn on notifications", lo: "ເປີດການແຈ້ງເຕືອນ" },
-  on: { en: "Notifications on — this device will be alerted.", lo: "ເປີດແລ້ວ — ເຄື່ອງນີ້ຈະໄດ້ຮັບການແຈ້ງເຕືອນ." },
-  off: { en: "Turn off", lo: "ປິດ" },
-  fine: { en: "Free · no spam · turn off anytime.", lo: "ຟຣີ · ບໍ່ສະແປມ · ປິດໄດ້ທຸກເມື່ອ." },
+  off: { en: "Turn off notifications", lo: "ປິດການແຈ້ງເຕືອນ" },
   working: { en: "Working…", lo: "ກຳລັງດຳເນີນ…" },
-  denied: {
-    en: "Notifications are blocked. Enable them for this site in your browser settings.",
-    lo: "ການແຈ້ງເຕືອນຖືກບລັອກ. ເປີດໃຫ້ເວັບນີ້ໃນຕັ້ງຄ່າ browser ຂອງທ່ານ.",
-  },
-  iosInstall: {
-    en: "On iPhone: tap Share → “Add to Home Screen”, open it from the icon, then turn this on.",
-    lo: "ເທິງ iPhone: ກົດ Share → “Add to Home Screen”, ເປີດຈາກໄອຄອນ ແລ້ວຄ່ອຍເປີດອັນນີ້.",
-  },
-  unsupported: { en: "This browser doesn't support notifications.", lo: "Browser ນີ້ບໍ່ຮອງຮັບການແຈ້ງເຕືອນ." },
-  failed: { en: "Couldn't turn on. Please try again.", lo: "ເປີດບໍ່ສຳເລັດ. ລອງໃໝ່ອີກຄັ້ງ." },
 };
 
 type State = "loading" | "unsupported" | "ios-install" | "no-key" | "denied" | "off" | "on";
@@ -51,7 +34,6 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
   const { pick, lang } = useLanguage();
   const [state, setState] = useState<State>("loading");
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
   const idsKey = orderIds.join(",");
 
   /** POST the live subscription + the device's current order ids to the server. */
@@ -168,7 +150,6 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
 
   async function enable() {
     setBusy(true);
-    setMsg("");
     try {
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
@@ -195,7 +176,6 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
       if (!res.ok) throw new Error();
       setState("on");
     } catch {
-      setMsg(pick(COPY.failed));
       setState("off");
     } finally {
       setBusy(false);
@@ -204,7 +184,6 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
 
   async function disable() {
     setBusy(true);
-    setMsg("");
     try {
       const reg = await navigator.serviceWorker.getRegistration();
       const sub = reg ? await reg.pushManager.getSubscription() : null;
@@ -226,48 +205,24 @@ export default function ShopPushToggle({ orderIds }: { orderIds: string[] }) {
   }
 
   // Nothing to show while probing, or where push can't work at all.
-  if (state === "loading" || state === "unsupported" || state === "no-key") return null;
+  if (state === "loading" || state === "unsupported" || state === "no-key" || state === "ios-install") return null;
+
+  const isOn = state === "on";
 
   return (
-    <div className="mb-4 rounded-md border border-edge bg-crypt/60 p-3.5">
-      <div className="flex items-start gap-3">
-        <span aria-hidden className="mt-0.5 text-lg text-glow">🔔</span>
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-sm font-bold uppercase tracking-wide text-soul">{pick(COPY.heading)}</p>
-
-          {state === "on" ? (
-            <>
-              <p className="mt-0.5 font-mono text-[11px] leading-snug text-win">✓ {pick(COPY.on)}</p>
-              <button
-                type="button"
-                onClick={disable}
-                disabled={busy}
-                className="mt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ash underline transition-colors hover:text-loss disabled:opacity-50"
-              >
-                {busy ? pick(COPY.working) : pick(COPY.off)}
-              </button>
-            </>
-          ) : state === "denied" ? (
-            <p className="mt-0.5 font-mono text-[11px] leading-snug text-loss">{pick(COPY.denied)}</p>
-          ) : state === "ios-install" ? (
-            <p className="mt-0.5 font-mono text-[11px] leading-snug text-spectre">{pick(COPY.iosInstall)}</p>
-          ) : (
-            <>
-              <p className="mt-0.5 font-mono text-[11px] leading-snug text-spectre">{pick(COPY.lead)}</p>
-              <button
-                type="button"
-                onClick={enable}
-                disabled={busy}
-                className="mt-2 inline-flex min-h-[40px] items-center justify-center rounded-md border border-amethyst bg-amethyst/20 px-4 py-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul transition-all hover:bg-amethyst/30 disabled:opacity-50"
-              >
-                {busy ? pick(COPY.working) : pick(COPY.enable)}
-              </button>
-              <p className="mt-1.5 font-mono text-[10px] text-ash-dim">{pick(COPY.fine)}</p>
-              {msg && <p className="mt-1 font-mono text-[11px] text-loss">{msg}</p>}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={isOn ? disable : enable}
+      disabled={busy || state === "denied"}
+      aria-pressed={isOn}
+      className={`mb-4 inline-flex min-h-[42px] items-center justify-center gap-2 rounded-md border px-4 py-2 font-display text-sm font-bold uppercase tracking-[0.1em] transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+        isOn
+          ? "border-win/55 bg-win/10 text-win hover:bg-win/20"
+          : "border-amethyst bg-amethyst/20 text-soul hover:bg-amethyst/30"
+      }`}
+    >
+      <span aria-hidden>{isOn ? "🔕" : "🔔"}</span>
+      {busy ? pick(COPY.working) : pick(isOn ? COPY.off : COPY.enable)}
+    </button>
   );
 }
