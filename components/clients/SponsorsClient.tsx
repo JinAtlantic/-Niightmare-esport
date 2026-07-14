@@ -29,7 +29,6 @@ interface SponsorValueProp {
 
 interface SponsorsPageCopy {
   heroTitle: Bilingual;
-  heroSubtitle: Bilingual;
   valueLabel: Bilingual;
   valueProps: SponsorValueProp[];
   ctaTitle: Bilingual;
@@ -51,10 +50,6 @@ const COPY = {
   wallTitle: {
     en: "Brands Behind The Nightmare",
     lo: "ແບຣນທີ່ຢືນຢູ່ຫຼັງ NIIGHTMARE",
-  },
-  wallIntro: {
-    en: "Tap any logo to see who they are and how to reach them.",
-    lo: "ແຕະໂລໂກ້ໃດກໍ່ໄດ້ ເພື່ອເບິ່ງວ່າເປັນໃຜ ແລະຊ່ອງທາງຕິດຕໍ່.",
   },
   official: { en: "Official NIIGHTMARE Partner", lo: "ພາດເນີ້ທາງການຂອງ NIIGHTMARE" },
   modalIntro: {
@@ -330,7 +325,7 @@ export default function SponsorsClient() {
 
   return (
     <>
-      <PageHeader title={pick(page.heroTitle)} subtitle={pick(page.heroSubtitle)} />
+      <PageHeader title={pick(page.heroTitle)} />
 
       <section className="relative isolate mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <AuroraHalos />
@@ -341,9 +336,6 @@ export default function SponsorsClient() {
             <h2 className="mt-3 font-display text-2xl font-black uppercase leading-none tracking-wide text-soul md:text-4xl">
               {pick(COPY.wallTitle)}
             </h2>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-ash">
-              {pick(COPY.wallIntro)}
-            </p>
           </div>
           <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.18em] text-ash-dim">
             <span className="font-display text-2xl font-bold text-glow">{sponsorCount}</span>{" "}
