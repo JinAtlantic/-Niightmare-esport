@@ -2,7 +2,7 @@
   "page": {
     "heroTitle": {
       "en": "PARTNER WITH NIIGHTMARE",
-      "lo": "ຮ່ວມເປັນພາກສ່ວນກັບ NIIGHTMARE"
+      "lo": "ຮ່ວມເປັນພາດເນີ້ກັບ NIIGHTMARE"
     },
     "heroSubtitle": {
       "en": "Join the brands backing Lao esports on the road to bigger stages.",
@@ -10,7 +10,7 @@
     },
     "valueLabel": {
       "en": "SPONSORSHIP BENEFITS",
-      "lo": "ສິດປະໂຫຍດຂອງພາກສ່ວນ"
+      "lo": "ສິດປະໂຫຍດຂອງພາດເນີ້"
     },
     "valueProps": [
       {
@@ -72,7 +72,7 @@
       "category": { "en": "Entertainment", "lo": "ບັນເທີງ" },
       "description": {
         "en": "An entertainment and events partner supporting NIIGHTMARE's shows and community moments.",
-        "lo": "ພາກສ່ວນດ້ານບັນເທີງ ແລະງານອີເວັນທ໌ ທີ່ຮ່ວມສະໜັບສະໜູນ NIIGHTMARE ໃນເວທີ ແລະຊ່ວງເວລາຂອງແຟນຄັບ."
+        "lo": "ພາດເນີ້ດ້ານບັນເທີງ ແລະງານອີເວັນທ໌ ທີ່ຮ່ວມສະໜັບສະໜູນ NIIGHTMARE ໃນເວທີ ແລະຊ່ວງເວລາຂອງແຟນຄັບ."
       },
       "socials": {}
     },
@@ -108,7 +108,7 @@
       "category": { "en": "Automotive", "lo": "ບໍລິການລົດ" },
       "description": {
         "en": "An automotive service partner keeping the team rolling.",
-        "lo": "ພາກສ່ວນບໍລິການລົດ ທີ່ຊ່ວຍໃຫ້ທີມເດີນທາງໄດ້ຢ່າງໝັ້ນໃຈ."
+        "lo": "ພາດເນີ້ບໍລິການລົດ ທີ່ຊ່ວຍໃຫ້ທີມເດີນທາງໄດ້ຢ່າງໝັ້ນໃຈ."
       },
       "socials": {}
     },
@@ -135,7 +135,7 @@
       "logo": "",
       "description": {
         "en": "An official NIIGHTMARE partner.",
-        "lo": "ພາກສ່ວນທາງການຂອງ NIIGHTMARE."
+        "lo": "ພາດເນີ້ທາງການຂອງ NIIGHTMARE."
       },
       "socials": {}
     },
@@ -146,7 +146,7 @@
       "logo": "",
       "description": {
         "en": "An official NIIGHTMARE partner.",
-        "lo": "ພາກສ່ວນທາງການຂອງ NIIGHTMARE."
+        "lo": "ພາດເນີ້ທາງການຂອງ NIIGHTMARE."
       },
       "socials": {}
     },
@@ -157,7 +157,7 @@
       "logo": "",
       "description": {
         "en": "An official NIIGHTMARE partner.",
-        "lo": "ພາກສ່ວນທາງການຂອງ NIIGHTMARE."
+        "lo": "ພາດເນີ້ທາງການຂອງ NIIGHTMARE."
       },
       "socials": {}
     },
@@ -214,7 +214,7 @@
       "color": "#8B2FC9",
       "benefits": [
         { "en": "Social media shoutouts", "lo": "ການ shoutout ໃນສື່ສັງຄົມ" },
-        { "en": "Logo in partner section", "lo": "ໂລໂກ້ຢູ່ໃນສ່ວນພາກສ່ວນ" },
+        { "en": "Logo in partner section", "lo": "ໂລໂກ້ຢູ່ໃນສ່ວນພາດເນີ້" },
         { "en": "Community event collaborations", "lo": "ຮ່ວມຈັດກິດຈະກຳກັບຊຸມຊົນ" }
       ]
     }

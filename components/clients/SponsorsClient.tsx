@@ -37,8 +37,17 @@ interface SponsorsPageCopy {
 
 const FALLBACK_PAGE = sponsorsSeed.page as SponsorsPageCopy;
 
+const PARTNER_TERM_OLD = "ພາກສ່ວນ";
+const PARTNER_TERM = "ພາດເນີ້";
+
+/** Keep legacy Supabase copy consistent with the public Sponsors terminology. */
+function useSponsorPick() {
+  const { pick } = useLanguage();
+  return (value?: Bilingual | null) => pick(value).replaceAll(PARTNER_TERM_OLD, PARTNER_TERM);
+}
+
 const COPY = {
-  wallLabel: { en: "OFFICIAL PARTNERS", lo: "ພາກສ່ວນທາງການ" },
+  wallLabel: { en: "OFFICIAL PARTNERS", lo: "ພາດເນີ້ທາງການ" },
   wallTitle: {
     en: "Brands Behind The Nightmare",
     lo: "ແບຣນທີ່ຢືນຢູ່ຫຼັງ NIIGHTMARE",
@@ -47,17 +56,17 @@ const COPY = {
     en: "Tap any logo to see who they are and how to reach them.",
     lo: "ແຕະໂລໂກ້ໃດກໍ່ໄດ້ ເພື່ອເບິ່ງວ່າເປັນໃຜ ແລະຊ່ອງທາງຕິດຕໍ່.",
   },
-  official: { en: "Official NIIGHTMARE Partner", lo: "ພາກສ່ວນທາງການຂອງ NIIGHTMARE" },
+  official: { en: "Official NIIGHTMARE Partner", lo: "ພາດເນີ້ທາງການຂອງ NIIGHTMARE" },
   modalIntro: {
     en: "An official partner helping power the club's competitive journey, content, and fan moments across the season.",
-    lo: "ພາກສ່ວນທາງການທີ່ຊ່ວຍຜັກດັນເສັ້ນທາງແຂ່ງຂັນ ຄອນເທນ ແລະຊ່ວງເວລາຂອງແຟນຄັບຕະຫຼອດຊີຊັນ.",
+    lo: "ພາດເນີ້ທາງການທີ່ຊ່ວຍຜັກດັນເສັ້ນທາງແຂ່ງຂັນ ຄອນເທນ ແລະຊ່ວງເວລາຂອງແຟນຄັບຕະຫຼອດຊີຊັນ.",
   },
   about: { en: "About", lo: "ກ່ຽວກັບ" },
   connect: { en: "Connect", lo: "ຊ່ອງທາງຕິດຕໍ່" },
   visit: { en: "Visit Website", lo: "ໄປທີ່ເວັບໄຊ" },
   close: { en: "Close", lo: "ປິດ" },
-  partners: { en: "Partners", lo: "ພາກສ່ວນ" },
-  facebook: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ" },
+  partners: { en: "Partners", lo: "ພາດເນີ້" },
+  facebook: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາດເນີ້ກັບພວກເຮົາ" },
 };
 
 function sponsorInitials(name: string) {
@@ -179,7 +188,7 @@ function SponsorModal({
   sponsor: Sponsor | null;
   onClose: () => void;
 }) {
-  const { pick } = useLanguage();
+  const pick = useSponsorPick();
   const linked = isExternalLink(sponsor?.url);
 
   useEffect(() => {
@@ -259,7 +268,7 @@ function SponsorModal({
 }
 
 function SponsorConnect({ sponsor, linked }: { sponsor: Sponsor; linked: boolean }) {
-  const { pick } = useLanguage();
+  const pick = useSponsorPick();
   const channels = sponsorChannels(sponsor);
   if (channels.length === 0 && !linked) return null;
 
@@ -285,7 +294,7 @@ function SponsorConnect({ sponsor, linked }: { sponsor: Sponsor; linked: boolean
 }
 
 function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number }) {
-  const { pick } = useLanguage();
+  const pick = useSponsorPick();
   return (
     <div className="group relative overflow-hidden border border-edge bg-[linear-gradient(150deg,rgba(28,20,40,0.78),rgba(11,7,16,0.98))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amethyst/60 md:p-5">
       <span aria-hidden className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -306,7 +315,7 @@ function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number 
 }
 
 export default function SponsorsClient() {
-  const { pick } = useLanguage();
+  const pick = useSponsorPick();
   const content = useContent();
   const data = content.sponsors as {
     page?: SponsorsPageCopy;
