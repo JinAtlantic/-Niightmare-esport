@@ -23,11 +23,9 @@ import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
-type ResultFilter = "all" | "wins" | "losses";
 type SortOrder = "newest" | "oldest" | "prize-high" | "prize-low";
 
 const GAME_FILTERS: GameId[] = ["mlbb", "efootball"];
-const RESULT_FILTERS: ResultFilter[] = ["all", "wins", "losses"];
 
 interface MatchesPageCopy {
   kicker: Bilingual;
@@ -816,7 +814,7 @@ function GameTournamentSection({
 }
 
 const selectClass =
-  "h-12 w-full min-w-0 border border-edge bg-void/70 px-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]";
+  "h-12 w-full min-w-0 border border-edge-bright bg-gradient-to-r from-crypt2 to-void px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] outline-none transition-all hover:border-amethyst/60 focus:border-amethyst focus:shadow-[0_0_18px_rgba(168,85,247,0.24)]";
 
 /**
  * Tournament picker. A native <select> is used everywhere else, but the
@@ -894,7 +892,7 @@ function TournamentSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => { if (open) { setOpen(false); } else { place(); setOpen(true); } }}
-        className="flex h-12 w-full min-w-0 items-center justify-between gap-2 border border-edge bg-void/70 px-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul outline-none transition-colors hover:border-edge-bright focus:border-amethyst focus:shadow-[0_0_16px_rgba(168,85,247,0.28)]"
+        className="flex h-12 w-full min-w-0 items-center justify-between gap-2 border border-edge-bright bg-gradient-to-r from-crypt2 to-void px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] outline-none transition-all hover:border-amethyst/60 focus:border-amethyst focus:shadow-[0_0_18px_rgba(168,85,247,0.24)]"
       >
         <span className="truncate">{currentLabel}</span>
         <span aria-hidden className={`shrink-0 text-amethyst transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
@@ -949,8 +947,6 @@ export default function MatchesClient() {
     matches: Match[];
     tournaments: Tournament[];
   };
-  const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [roadmapOpen, setRoadmapOpen] = useState(false);
   const page = mergePageCopy(data.page);
   const roadmap = resolveRoadmap((content.site as { roadmap?: Partial<RoadmapContent> }).roadmap);
@@ -1006,7 +1002,7 @@ export default function MatchesClient() {
 
   // Tournaments available for the current game + year (most recent first) — the
   // options for the Tournament filter. Reflects game/year so the list stays
-  // relevant; the result filter doesn't narrow it.
+  // relevant without turning the filter bar into a long form.
   // Grouped by Liquipedia tier (S → A → B → C, then untiered last). Within a
   // tier, most recent first. Rendered as <optgroup>s so the dropdown shows
   // which tier each tournament sits in.
@@ -1041,8 +1037,6 @@ export default function MatchesClient() {
       .filter((g) => g.options.length > 0);
   }, [gameYearMatches]);
 
-  const tournamentCount = tournamentOptionGroups.reduce((n, g) => n + g.options.length, 0);
-
   const stats = useMemo(() => {
     const count = (r: MatchResult) => gameYearMatches.filter((m) => m.result === r).length;
     const wins = count("win");
@@ -1051,35 +1045,20 @@ export default function MatchesClient() {
     return { wins, losses, winrate: Math.round((wins / total) * 100) };
   }, [gameYearMatches]);
 
-  const filtered = useMemo(() => {
-    return gameYearMatches.filter((m) => {
-      switch (resultFilter) {
-        case "wins":
-          return m.result === "win";
-        case "losses":
-          return m.result === "loss";
-        default:
-          return true;
-      }
-    });
-  }, [resultFilter, gameYearMatches]);
-
   // Tournaments with no logged matches (older / placement-only records) so they
-  // still appear on the timeline. Only when not filtering by W/L (they carry no
-  // result) and matching the active year.
+  // still appear on the timeline when matching the active year.
   const placementOnlyTournaments = useMemo(() => {
-    if (resultFilter !== "all") return [];
     const matchKeys = new Set(data.matches.map((m) => matchTournamentKey(m)));
     return (data.tournaments ?? []).filter((t) => {
       const key = `${t.game}:${normalizeValue(t.name.en || t.name.lo)}`;
       if (matchKeys.has(key)) return false;
       return activeYear === "all" || extractYear(t.season) === activeYear;
     });
-  }, [data.matches, data.tournaments, resultFilter, activeYear]);
+  }, [data.matches, data.tournaments, activeYear]);
 
   const tournamentGroups = useMemo(
-    () => groupMatchesByTournament(filtered, data.tournaments ?? [], page.unknownTournament, sortOrder, placementOnlyTournaments),
-    [filtered, data.tournaments, page.unknownTournament, sortOrder, placementOnlyTournaments]
+    () => groupMatchesByTournament(gameYearMatches, data.tournaments ?? [], page.unknownTournament, "newest", placementOnlyTournaments),
+    [gameYearMatches, data.tournaments, page.unknownTournament, placementOnlyTournaments]
   );
   const groupsByGame = useMemo(() => {
     const q = normalizeValue(search);
@@ -1165,30 +1144,51 @@ export default function MatchesClient() {
               )}
             </label>
 
-            {/* filters — each with a visible label so the control is obvious.
-                Row 1: scope (Game / Year / Result / Sort); Tournament gets its
-                own full-width row so long names stay readable. */}
-            <div className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
-              <label className="block">
-                <select
-                  value={selectedGame}
-                  onChange={(event) => {
-                    setSelectedGame(event.target.value as GameId);
-                    setSelectedYear("");
-                    setSelectedTournament("all");
-                    setResultFilter("all");
-                  }}
-                  className={selectClass}
-                >
-                  {GAME_FILTERS.map((id) => (
-                    <option key={id} value={id}>
-                      {pick(page.filters[id])}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            {/* Game division — a deliberate primary choice, separate from the
+                secondary year/tournament filters below. */}
+            <div className="mt-6">
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-spectre">
+                {pick({ en: "Game division", lo: "ປະເພດເກມ" })}
+              </p>
+              <div className="relative grid grid-cols-2 gap-1.5 border border-edge-bright bg-void/75 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.24)] before:pointer-events-none before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amethyst/70 before:to-transparent">
+                {GAME_FILTERS.map((id) => {
+                  const active = selectedGame === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        setSelectedGame(id);
+                        setSelectedYear("");
+                        setSelectedTournament("all");
+                      }}
+                      className={`group relative min-h-[62px] overflow-hidden border px-3 py-2.5 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst ${
+                        active
+                          ? "border-amethyst/75 bg-gradient-to-br from-amethyst/25 via-crypt2 to-void shadow-[inset_0_-2px_0_#A855F7,0_0_24px_rgba(168,85,247,0.16)]"
+                          : "border-edge bg-crypt/55 hover:border-edge-bright hover:bg-crypt2/80"
+                      }`}
+                    >
+                      <span className={`absolute right-3 top-3 h-2 w-2 rounded-full border ${active ? "border-glow bg-glow shadow-[0_0_12px_#A855F7]" : "border-edge-bright bg-void"}`} />
+                      <span className={`keep-latin block font-display text-base font-black uppercase tracking-[0.1em] sm:text-lg ${active ? "text-soul" : "text-spectre group-hover:text-soul"}`}>
+                        {pick(page.filters[id])}
+                      </span>
+                      <span className={`keep-latin mt-0.5 block truncate font-mono text-[9px] uppercase tracking-[0.12em] sm:text-[10px] ${active ? "text-glow" : "text-ash"}`}>
+                        {id === "mlbb" ? "Mobile Legends: Bang Bang" : "eFootball"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
+            {/* Secondary filters — year and tournament only. Results always
+                show the complete history, newest tournament first. */}
+            <div className="mt-4 grid gap-3 border-t border-edge/80 pt-4 md:grid-cols-[minmax(180px,0.32fr)_minmax(0,1fr)]">
               <label className="block">
+                <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-spectre">
+                  {pick(page.yearLabel)}
+                </span>
                 <select
                   value={activeYear}
                   onChange={(event) => {
@@ -1206,51 +1206,19 @@ export default function MatchesClient() {
                 </select>
               </label>
 
-              <label className="block">
-                <select
-                  value={resultFilter}
-                  onChange={(event) => setResultFilter(event.target.value as ResultFilter)}
-                  className={selectClass}
-                >
-                  {RESULT_FILTERS.map((id) => (
-                    <option key={id} value={id}>
-                      {id === "all" ? pick({ en: "All Result", lo: "ຜົນທັງໝົດ" }) : pick(page.filters[id])}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block">
-                <select
-                  value={sortOrder}
-                  onChange={(event) => setSortOrder(event.target.value as SortOrder)}
-                  className={selectClass}
-                >
-                  {([
-                    { id: "newest", label: pick(page.sortNewest) },
-                    { id: "oldest", label: pick(page.sortOldest) },
-                    { id: "prize-high", label: pick(page.sortPrizeHigh) },
-                    { id: "prize-low", label: pick(page.sortPrizeLow) },
-                  ] as const).map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            {/* Tournament — full width; lists every tournament in the current
-                game + year so you can jump straight to one. */}
-            <div className="mt-3">
-              <TournamentSelect
-                groups={tournamentOptionGroups}
-                value={selectedTournament}
-                onChange={setSelectedTournament}
-                pick={pick}
-                allLabel={pick({ en: "All Tournaments", lo: "ທຸກລາຍການ" })}
-                otherLabel={pick({ en: "Other", lo: "ອື່ນໆ" })}
-              />
+              <div>
+                <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-spectre">
+                  {pick({ en: "Tournament", lo: "ລາຍການແຂ່ງຂັນ" })}
+                </span>
+                <TournamentSelect
+                  groups={tournamentOptionGroups}
+                  value={selectedTournament}
+                  onChange={setSelectedTournament}
+                  pick={pick}
+                  allLabel={pick({ en: "All Tournaments", lo: "ທຸກລາຍການ" })}
+                  otherLabel={pick({ en: "Other", lo: "ອື່ນໆ" })}
+                />
+              </div>
             </div>
           </div>
         </Reveal>
@@ -1260,7 +1228,7 @@ export default function MatchesClient() {
         </AnimatePresence>
 
         <div
-          key={`${selectedGame}-${activeYear}-${resultFilter}-${sortOrder}-${selectedTournament}`}
+          key={`${selectedGame}-${activeYear}-${selectedTournament}`}
           className="mt-8 grid gap-6"
         >
           {groupsByGame.some((section) => section.groups.length > 0) ? (
