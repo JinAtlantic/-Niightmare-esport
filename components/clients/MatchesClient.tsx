@@ -1147,9 +1147,6 @@ export default function MatchesClient() {
             {/* Game division — a deliberate primary choice, separate from the
                 secondary year/tournament filters below. */}
             <div className="mt-6">
-              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-spectre">
-                {pick({ en: "Game division", lo: "ປະເພດເກມ" })}
-              </p>
               <div className="relative grid grid-cols-2 gap-1.5 border border-edge-bright bg-void/75 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.24)] before:pointer-events-none before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amethyst/70 before:to-transparent">
                 {GAME_FILTERS.map((id) => {
                   const active = selectedGame === id;
@@ -1163,18 +1160,15 @@ export default function MatchesClient() {
                         setSelectedYear("");
                         setSelectedTournament("all");
                       }}
-                      className={`group relative min-h-[62px] overflow-hidden border px-3 py-2.5 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst ${
+                      className={`group relative min-h-[54px] overflow-hidden border px-4 py-3 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst ${
                         active
                           ? "border-amethyst/75 bg-gradient-to-br from-amethyst/25 via-crypt2 to-void shadow-[inset_0_-2px_0_#A855F7,0_0_24px_rgba(168,85,247,0.16)]"
                           : "border-edge bg-crypt/55 hover:border-edge-bright hover:bg-crypt2/80"
                       }`}
                     >
                       <span className={`absolute right-3 top-3 h-2 w-2 rounded-full border ${active ? "border-glow bg-glow shadow-[0_0_12px_#A855F7]" : "border-edge-bright bg-void"}`} />
-                      <span className={`keep-latin block font-display text-base font-black uppercase tracking-[0.1em] sm:text-lg ${active ? "text-soul" : "text-spectre group-hover:text-soul"}`}>
-                        {pick(page.filters[id])}
-                      </span>
-                      <span className={`keep-latin mt-0.5 block truncate font-mono text-[9px] uppercase tracking-[0.12em] sm:text-[10px] ${active ? "text-glow" : "text-ash"}`}>
-                        {id === "mlbb" ? "Mobile Legends: Bang Bang" : "eFootball"}
+                      <span className={`keep-latin block font-display text-lg font-black uppercase tracking-[0.12em] ${active ? "text-soul" : "text-spectre group-hover:text-soul"}`}>
+                        {id === "mlbb" ? "MLBB" : "EFOOTBALL"}
                       </span>
                     </button>
                   );
