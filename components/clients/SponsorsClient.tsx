@@ -323,7 +323,7 @@ export default function SponsorsClient() {
       <section className="relative isolate mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <AuroraHalos />
         {/* Partner wall — logo first */}
-        <SectionLabel>{pick(COPY.wallLabel)}</SectionLabel>
+        <SectionLabel centered>{pick(COPY.wallLabel)}</SectionLabel>
 
         <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
           {data.sponsors.map((sponsor) => (
