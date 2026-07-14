@@ -5,58 +5,58 @@
       "lo": "ຮ່ວມເປັນພາດເນີ້ກັບ NIIGHTMARE"
     },
     "valueLabel": {
-      "en": "SPONSORSHIP BENEFITS",
-      "lo": "ສິດປະໂຫຍດຂອງພາດເນີ້"
+      "en": "WORKING TOGETHER",
+      "lo": "ຮ່ວມງານກັບພວກເຮົາ"
     },
     "valueProps": [
       {
         "id": "gen-z-reach",
         "title": {
-          "en": "Gen Z & Millennial Reach",
-          "lo": "ເຂົ້າເຖິງ Gen Z ແລະ Millennial"
+          "en": "Meet Our Community",
+          "lo": "ເຂົ້າເຖິງແຟນຂອງພວກເຮົາ"
         },
         "body": {
-          "en": "Direct Access to Gen Z: Tap into our fast-growing, highly engaged community of esports fans and youth demographics across Laos and Southeast Asia.",
-          "lo": "ເຂົ້າເຖິງກຸ່ມຄົນຮຸ່ນໃໝ່ໂດຍກົງ: ເຊື່ອມຕໍ່ກັບຖານແຟນຄັບກິລາອີສະປອດ ແລະ ກຸ່ມໄວຮຸ່ນທີ່ມີການເຕີບໂຕຢ່າງໄວວາ ທັງໃນປະເທດລາວ ແລະ ທົ່ວພາກພື້ນອາຊີຕາເວັນອອກສຽງໃຕ້."
+          "en": "Share your brand with esports fans across Laos through content that feels genuine and fits the community.",
+          "lo": "ແນະນຳແບຣນຂອງທ່ານໃຫ້ແຟນອີສະປອດທົ່ວລາວໄດ້ຮູ້ຈັກ ຜ່ານຄອນເທນທີ່ເປັນທຳມະຊາດ ແລະ ເຂົ້າກັບຊຸມຊົນ."
         }
       },
       {
         "id": "premium-visibility",
         "title": {
-          "en": "Premium Brand Visibility",
-          "lo": "ພື້ນທີ່ໂຄສະນາພຣີມຽມ"
+          "en": "Be Seen With The Team",
+          "lo": "ໃຫ້ແຟນເຫັນແບຣນຂອງທ່ານ"
         },
         "body": {
-          "en": "High-Impact Placement: Feature your brand prominently on our official team jerseys, website, gaming house backdrop, and all viral social media contents.",
-          "lo": "ພື້ນທີ່ໂຄສະນາລະດັບພຣີມ່ຽມ: ສ້າງຄວາມໂດດເດັ່ນໃຫ້ແບຣນຂອງທ່ານ ເທິງເສື້ອແຂ່ງຢ່າງເປັນທາງການ, ເວັບໄຊທ໌, ແຄມປ໌ຝຶກຊ້ອມ, ແລະ ທຸກຄອນເທນຕ໌ທີ່ເປັນກະແສໃນໂລກອອນລາຍ."
+          "en": "Show up where our fans already follow us—from team jerseys and match days to our website and social channels.",
+          "lo": "ແບຣນຂອງທ່ານຈະຢູ່ໃນຈຸດທີ່ແຟນຕິດຕາມພວກເຮົາ ຕັ້ງແຕ່ເສື້ອແຂ່ງ ວັນແຂ່ງຂັນ ໄປຈົນເຖິງເວັບໄຊ ແລະ ໂຊຊຽວ."
         }
       },
       {
         "id": "conversion-campaigns",
         "title": {
-          "en": "Conversion Campaigns",
-          "lo": "ແຄມເປນສ້າງຍອດຂາຍ"
+          "en": "Create Together",
+          "lo": "ສ້າງສິ່ງດີໆນຳກັນ"
         },
         "body": {
-          "en": "ROI-Focused Marketing: We create tailor-made content, exclusive promo codes, and interactive activations that turn our loyal fans into your active customers.",
-          "lo": "ການຕະຫຼາດທີ່ເນັ້ນຍອດຂາຍຈິງ: ພວກເຮົາພ້ອມຮ່ວມສ້າງຄອນເທນຕ໌ພິເສດ, ແຈກໂຄ້ດສ່ວນລົດ ແລະ ກິດຈະກຳຫຼາກຫຼາຍຮູບແບບ ເພື່ອປ່ຽນແຟນຄັບໃຫ້ມາເປັນລູກຄ້າຂອງທ່ານ."
+          "en": "Let’s make content, offers, and activities that are useful for your brand and enjoyable for our fans.",
+          "lo": "ພວກເຮົາສາມາດຮ່ວມກັນເຮັດຄອນເທນ ໂປຣໂມຊັນ ແລະ ກິດຈະກຳທີ່ເປັນປະໂຫຍດກັບແບຣນ ແລະ ມ່ວນສຳລັບແຟນ."
         }
       },
       {
         "id": "global-stage",
         "title": {
-          "en": "Global Stage Exposure",
-          "lo": "ເວທີໂລກລະດັບ S-Tier"
+          "en": "Grow With Our Journey",
+          "lo": "ເຕີບໂຕໄປນຳກັນ"
         },
         "body": {
-          "en": "Go Global with the Champions: Ride with us onto the world's biggest S-Tier stages—including the Esports World Cup (EWC) in Riyadh and the M-Series. Showcase your brand to millions of global viewers.",
-          "lo": "ກ້າວສູ່ເວທີໂລກໄປພ້ອມກັນ: ຮ່ວມເດີນທາງສູ່ສະໜາມຮົບຍັກໃຫຍ່ລະດັບ S-Tier ທັງເວທີ Esports World Cup (EWC) ທີ່ ຣິຍາດ ແລະ ສຶກ M-Series ພ້ອມນຳສະເໜີແບຣນຂອງທ່ານສູ່ສາຍຕາຜູ້ຊົມນັບລ້ານທົ່ວໂລກ."
+          "en": "As NIIGHTMARE reaches bigger stages, your brand comes with us and becomes part of the story.",
+          "lo": "ເມື່ອ NIIGHTMARE ໄປເຖິງເວທີທີ່ໃຫຍ່ຂຶ້ນ ແບຣນຂອງທ່ານກໍຈະຮ່ວມເດີນທາງ ແລະ ເປັນສ່ວນໜຶ່ງຂອງເລື່ອງລາວນີ້."
         }
       }
     ],
     "ctaTitle": {
-      "en": "WHY PARTNER WITH NIIGHTMARE",
-      "lo": "ເປັນຫຍັງຕ້ອງຮ່ວມກັບ NIIGHTMARE"
+      "en": "LET'S GROW TOGETHER",
+      "lo": "ມາເຕີບໂຕໄປນຳກັນ"
     }
   },
   "sponsors": [
