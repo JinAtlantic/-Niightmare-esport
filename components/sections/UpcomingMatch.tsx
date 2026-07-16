@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { CloseIcon, EfootballIcon, MlbbIcon, PlayIcon } from "@/components/ui/Icons";
+import { CloseIcon, PlayIcon } from "@/components/ui/Icons";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { teamLogoFor } from "@/lib/teamLogos";
 import OpponentFlag from "@/components/cards/OpponentFlag";
@@ -407,7 +407,6 @@ export default function UpcomingMatch() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const status: MatchStatus = match.status ?? "next";
   const s = STATUS[status] ?? STATUS.next;
-  const GameIcon = match.game === "efootball" ? EfootballIcon : MlbbIcon;
   const streamHref = safeHref(match.streamUrl);
 
   const hasOpponent = Boolean(match.opponent && match.opponent.trim());
@@ -647,17 +646,7 @@ export default function UpcomingMatch() {
             {hasOpponent ? (
               <TeamSide logo={match.opponentLogo} name={match.opponent} abbr={match.opponentAbbr} />
             ) : (
-              <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden px-1.5 py-7 sm:px-2 md:gap-3.5 md:px-5 md:py-10">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.36em] text-ash-dim">
-                  {t("sections.upcoming_status_practice")}
-                </span>
-                <div className="grid h-[88px] w-[88px] shrink-0 place-items-center rounded-full border-2 border-dashed border-edge-bright bg-void/40 sm:h-[104px] sm:w-[104px] md:h-[120px] md:w-[120px]">
-                  <GameIcon size={40} className="text-ash md:size-[42px]" />
-                </div>
-                <span className="text-center font-display text-sm font-bold uppercase leading-tight tracking-[0.04em] text-spectre sm:text-lg md:text-2xl md:tracking-[0.07em]">
-                  {t("sections.upcoming_practice_label")}
-                </span>
-              </div>
+              <div aria-hidden className="relative min-w-0 flex-1 self-stretch" />
             )}
           </div>
 
