@@ -121,9 +121,6 @@ export default function ShopEditor() {
             <Button variant={shop.enabled ? "primary" : "ghost"} onClick={() => patch({ enabled: !shop.enabled })}>
               {shop.enabled ? "เปิดขายอยู่" : "ปิดร้านอยู่"}
             </Button>
-            <Button variant={shop.preorder ? "primary" : "ghost"} onClick={() => patch({ preorder: !shop.preorder })}>
-              {shop.preorder ? "โหมด Pre-order" : "โหมดพร้อมส่ง"}
-            </Button>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             <TextField label="สกุลเงิน (เช่น ກີບ)" value={shop.currency} onChange={(currency) => patch({ currency })} />
@@ -138,11 +135,10 @@ export default function ShopEditor() {
         </Card>
       </Section>
 
-      <Section title="ข้อความสินค้า" hint="ชื่อสินค้า, แท็กไลน์, รายละเอียด">
+      <Section title="ข้อความสินค้า" hint="ชื่อสินค้าและแท็กไลน์ที่แสดงบนหน้า /shop">
         <Card className="space-y-4">
           <BilingualField label="ชื่อสินค้า" value={shop.productName} onChange={(productName) => patch({ productName })} />
           <BilingualField label="แท็กไลน์" value={shop.tagline} onChange={(tagline) => patch({ tagline })} />
-          <BilingualTextArea label="รายละเอียด" value={shop.description} onChange={(description) => patch({ description })} />
         </Card>
       </Section>
 
@@ -234,7 +230,7 @@ export default function ShopEditor() {
         </Card>
       </Section>
 
-      <Section title="ตารางไซส์ & สต็อก & ค่าเพิ่ม" hint="หน่วย ซม. — 3XL/4XL ใส่ค่าเพิ่มในช่อง 'ค่าเพิ่ม'" collapsible={false}>
+      <Section title="ไซส์ สต็อก และค่าเพิ่ม" hint="เปิด/ปิดสต็อกและตั้งราคาเพิ่มของแต่ละไซส์" collapsible={false}>
         <div className="space-y-3">
           {shop.sizes.map((s, i) => (
             <Card key={s.id} className="space-y-3">
@@ -244,16 +240,9 @@ export default function ShopEditor() {
                   {s.inStock ? "มีสต็อก" : "หมด"}
                 </Button>
               </div>
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid gap-3 md:grid-cols-2">
                 <TextField label="ป้ายไซส์" value={s.label} onChange={(label) => patchSize(i, { label })} />
                 <NumberField label="ค่าเพิ่ม (สกุลเงิน)" value={s.surcharge} onChange={(surcharge) => patchSize(i, { surcharge })} />
-                <NumberField label="รอบอก (ซม)" value={s.chest} onChange={(chest) => patchSize(i, { chest })} />
-                <NumberField label="ความยาว (ซม)" value={s.length} onChange={(length) => patchSize(i, { length })} />
-                <NumberField label="ไหล่ (ซม)" value={s.shoulder} onChange={(shoulder) => patchSize(i, { shoulder })} />
-                <NumberField label="แขนเสื้อ (ซม)" value={s.sleeve} onChange={(sleeve) => patchSize(i, { sleeve })} />
-                <NumberField label="สูงต่ำสุด" value={s.minHeight} onChange={(minHeight) => patchSize(i, { minHeight })} />
-                <NumberField label="สูงสูงสุด" value={s.maxHeight} onChange={(maxHeight) => patchSize(i, { maxHeight })} />
-                <div />
               </div>
             </Card>
           ))}

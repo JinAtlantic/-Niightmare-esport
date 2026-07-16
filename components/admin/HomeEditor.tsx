@@ -20,7 +20,6 @@ import {
   FacebookIcon,
   InstagramIcon,
   YoutubeIcon,
-  TiktokIcon,
   DiscordIcon,
 } from "@/components/ui/Icons";
 import RoadmapEditor from "@/components/admin/RoadmapEditor";
@@ -68,7 +67,6 @@ const CONTACT_FIELDS: {
   { key: "facebook", label: "Facebook", Icon: FacebookIcon, placeholder: "https://facebook.com/…" },
   { key: "instagram", label: "Instagram", Icon: InstagramIcon, placeholder: "https://instagram.com/…" },
   { key: "youtube", label: "YouTube", Icon: YoutubeIcon, placeholder: "https://youtube.com/@…" },
-  { key: "tiktok", label: "TikTok", Icon: TiktokIcon, placeholder: "https://tiktok.com/@…" },
   { key: "discord", label: "Discord", Icon: DiscordIcon, placeholder: "https://discord.gg/…" },
 ];
 

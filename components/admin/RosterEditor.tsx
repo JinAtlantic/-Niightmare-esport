@@ -263,17 +263,6 @@ function PlayerList({
                   <Button onClick={addTenure}>+ เพิ่มช่วงเวลา</Button>
                 </div>
               </div>
-              <div className="md:col-span-2">
-                <BilingualField
-                  label="ประวัติคร่าวๆ (ABOUT — โชว์ในการ์ดโปรไฟล์)"
-                  value={p.description ?? { en: "", lo: "" }}
-                  onChange={(v) =>
-                    onPatch(i, {
-                      description: v.en?.trim() || v.lo?.trim() ? v : undefined,
-                    })
-                  }
-                />
-              </div>
 
               <div className="md:col-span-2">
                 <TextField
@@ -487,11 +476,6 @@ export default function RosterEditor() {
   const page = pageCopy(data.page);
   const setPage = (next: RosterPageCopy) => setData({ ...data, page: next });
   const patchPage = (patch: Partial<RosterPageCopy>) => setPage({ ...page, ...patch });
-  const patchStat = (id: RosterStatId, patch: Partial<RosterPageStat>) =>
-    setPage({
-      ...page,
-      stats: page.stats.map((stat) => (stat.id === id ? { ...stat, ...patch } : stat)),
-    });
 
   const setPlayers = (game: GameId, next: Player[]) =>
     setData({ ...data, [game]: { players: next } } as RosterFile);
@@ -569,7 +553,7 @@ export default function RosterEditor() {
       {/* sub-tabs — edit players or staff separately for a shorter, focused form */}
       <div className="flex flex-wrap gap-2">
         {([
-          { id: "page", label: "หน้า Roster (Page)", count: page.stats.length },
+          { id: "page", label: "หน้า Roster (Page)", count: 8 },
           { id: "players", label: "นักกีฬา + โค้ช (Players)", count: data.mlbb.players.length + data.efootball.players.length + (data.staff.length - backOffice.length) },
           { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: backOffice.length },
         ] as const).map(({ id, label, count }) => {
@@ -598,24 +582,8 @@ export default function RosterEditor() {
           <Section title="Roster page copy" hint="ข้อความบนหน้า /roster — แก้ได้โดยไม่ต้อง deploy">
             <Card>
             <div className="grid gap-3">
-              <BilingualField
-                label="Hero kicker"
-                value={page.kicker ?? { en: "", lo: "" }}
-                onChange={(v) => patchPage({ kicker: v.en || v.lo ? v : undefined })}
-              />
               <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
               <BilingualField label="Hero intro" value={page.intro} onChange={(v) => patchPage({ intro: v })} />
-              <BilingualField
-                label="Overview label"
-                value={page.overviewLabel}
-                onChange={(v) => patchPage({ overviewLabel: v })}
-              />
-              <BilingualField
-                label="Overview intro"
-                value={page.overviewIntro}
-                onChange={(v) => patchPage({ overviewIntro: v })}
-              />
-              <BilingualField label="Lineup heading" value={page.lineupLabel} onChange={(v) => patchPage({ lineupLabel: v })} />
               <BilingualField label="Staff heading" value={page.staffLabel} onChange={(v) => patchPage({ staffLabel: v })} />
             </div>
             </Card>
@@ -653,23 +621,6 @@ export default function RosterEditor() {
             </Card>
           </Section>
 
-          <Section title="Overview stats" hint="ตัวเลขคำนวณจากจำนวน player/staff; แก้ label และคำอธิบายได้ที่นี่">
-            <Card>
-            <div className="grid gap-4 md:grid-cols-2">
-              {page.stats.map((stat) => (
-                <div key={stat.id} className="border border-edge bg-void/40 p-4">
-                  <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">
-                    {stat.id}
-                  </p>
-                  <div className="grid gap-3">
-                    <BilingualField label="Label" value={stat.label} onChange={(v) => patchStat(stat.id, { label: v })} />
-                    <BilingualField label="Detail" value={stat.detail} onChange={(v) => patchStat(stat.id, { detail: v })} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            </Card>
-          </Section>
         </section>
       )}
 

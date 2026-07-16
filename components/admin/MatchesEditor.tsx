@@ -57,10 +57,9 @@ type MatchRef = { match: Match; index: number };
 type YearFilter = "all" | string;
 
 const pageSeed = matchesSeed.page as MatchesPageCopy;
-const filterIds: Filter[] = ["all", "mlbb", "efootball", "wins", "losses"];
 const statIds = ["wins", "losses", "winrate"] as const;
 const resultIds: MatchResult[] = ["win", "loss"];
-const tournamentLabelIds = ["placement", "prize", "season"] as const;
+const tournamentLabelIds = ["placement", "prize"] as const;
 
 function pageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
   return {
@@ -769,23 +768,12 @@ export default function MatchesEditor() {
               <div className="border-t border-edge p-2">
             <Card>
             <div className="grid gap-3">
-              <BilingualField label="Hero kicker" value={page.kicker} onChange={(v) => patchPage({ kicker: v })} />
               <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
               <BilingualField label="Hero intro" value={page.intro} onChange={(v) => patchPage({ intro: v })} />
-              <BilingualField label="Record label" value={page.recordLabel} onChange={(v) => patchPage({ recordLabel: v })} />
-              <BilingualField label="Record intro" value={page.recordIntro} onChange={(v) => patchPage({ recordIntro: v })} />
-              <BilingualField label="History kicker" value={page.historyKicker} onChange={(v) => patchPage({ historyKicker: v })} />
-              <BilingualField label="History title" value={page.historyTitle} onChange={(v) => patchPage({ historyTitle: v })} />
               <BilingualField label="No results message" value={page.noResults} onChange={(v) => patchPage({ noResults: v })} />
               <BilingualField label="Unknown opponent fallback" value={page.unknownOpponent} onChange={(v) => patchPage({ unknownOpponent: v })} />
               <BilingualField label="Unknown tournament fallback" value={page.unknownTournament} onChange={(v) => patchPage({ unknownTournament: v })} />
               <BilingualField label="VOD soon label" value={page.vodSoon} onChange={(v) => patchPage({ vodSoon: v })} />
-              <BilingualField label="Watch VOD label" value={page.watchVod} onChange={(v) => patchPage({ watchVod: v })} />
-              <BilingualField label="Sort control label" value={page.sortLabel} onChange={(v) => patchPage({ sortLabel: v })} />
-              <BilingualField label="Sort newest first" value={page.sortNewest} onChange={(v) => patchPage({ sortNewest: v })} />
-              <BilingualField label="Sort oldest first" value={page.sortOldest} onChange={(v) => patchPage({ sortOldest: v })} />
-              <BilingualField label="Sort highest prize" value={page.sortPrizeHigh} onChange={(v) => patchPage({ sortPrizeHigh: v })} />
-              <BilingualField label="Sort lowest prize" value={page.sortPrizeLow} onChange={(v) => patchPage({ sortPrizeLow: v })} />
               <BilingualField label="Year filter label" value={page.yearLabel} onChange={(v) => patchPage({ yearLabel: v })} />
               <BilingualField label="All years label" value={page.allYears} onChange={(v) => patchPage({ allYears: v })} />
               <SelectField
@@ -800,27 +788,14 @@ export default function MatchesEditor() {
             </details>
           </Section>
 
-          <Section title="ฟิลเตอร์ สถิติ ผลแข่ง (labels)" hint="ป้ายกำกับสาธารณะ — ตั้งครั้งเดียว แทบไม่แก้">
+          <Section title="สถิติ ผลแข่ง และทัวร์นาเมนต์ (labels)" hint="แสดงจริงบนหน้า /matches — ตั้งครั้งเดียว แทบไม่แก้">
             <details className="border border-edge bg-void/30">
               <summary className="cursor-pointer px-3 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ash hover:text-soul">
-                กดเพื่อแก้ไข label ฟิลเตอร์/สถิติ/ผล (พับไว้)
+                กดเพื่อแก้ไข label ที่แสดงบนหน้าเว็บ (พับไว้)
               </summary>
               <div className="border-t border-edge p-2">
             <Card>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="border border-edge bg-void/40 p-4">
-                <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Filters</p>
-                <div className="grid gap-3">
-                  {filterIds.map((id) => (
-                    <BilingualField
-                      key={id}
-                      label={id}
-                      value={page.filters[id]}
-                      onChange={(v) => patchPage({ filters: { ...page.filters, [id]: v } })}
-                    />
-                  ))}
-                </div>
-              </div>
               <div className="border border-edge bg-void/40 p-4">
                 <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-amethyst">Stats</p>
                 <div className="grid gap-3">
