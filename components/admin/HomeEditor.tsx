@@ -47,7 +47,7 @@ interface Contact {
 /** site.json — we edit `upcomingMatch` and `contact`; everything else is preserved. */
 interface SiteFile {
   upcomingMatch: UpcomingMatch;
-  /** Most-recent finished fixture, captured when advancing to the next match. */
+  /** Most-recent finished fixture, retained for the admin workflow only. */
   lastResult?: UpcomingMatch;
   contact?: Contact;
   aboutUs?: AboutUsContent;
@@ -320,8 +320,9 @@ export default function HomeEditor() {
   };
 
   // Record the just-finished result to /matches, then clear the headline card
-  // back to a blank "next" fixture (kept as the faded "last result"). Works even
-  // with NO next match queued — this is how the LAST match of the day gets onto
+  // back to a blank "next" fixture. Keep the result for the admin workflow,
+  // but do not render it in the public schedule popup. This works even with NO
+  // next match queued — this is how the LAST match of the day gets onto
   // /matches without needing a schedule row to advance into.
   const finishToMatches = async () => {
     if (m.status !== "finished") return;
@@ -359,8 +360,6 @@ export default function HomeEditor() {
     const iso = nextEntry.time
       ? `${nextEntry.date}T${nextEntry.time}:00+07:00`
       : nextEntry.date || "";
-    // Keep the just-finished fixture as the faded "last result" shown at the top
-    // of the schedule popup, until the next one finishes.
     const lastResult = m.status === "finished" ? { ...m, status: "finished" as const } : data.lastResult;
     setData({
       ...data,
@@ -756,7 +755,7 @@ export default function HomeEditor() {
               <Button
                 variant="danger"
                 onClick={() => {
-                  if (window.confirm("ล้าง “ผลล่าสุด” (การ์ดสีจางๆ ใน popup) ออกจากเว็บ?")) {
+                  if (window.confirm("ล้างข้อมูลผลล่าสุดที่ระบบเก็บไว้?")) {
                     setData({ ...data, lastResult: undefined });
                   }
                 }}
@@ -767,7 +766,7 @@ export default function HomeEditor() {
           </div>
           {data.lastResult && (
             <p className="font-mono text-[11px] leading-relaxed text-win">
-              ผลล่าสุดที่โชว์จางๆ ใน popup: <span className="keep-latin text-soul">NIIGHTMARE {data.lastResult.score || ""} {data.lastResult.opponent || ""}</span> ({STATUS_TH.finished})
+              ผลล่าสุดที่ระบบเก็บไว้: <span className="keep-latin text-soul">NIIGHTMARE {data.lastResult.score || ""} {data.lastResult.opponent || ""}</span> ({STATUS_TH.finished}) — ไม่แสดงใน View Schedule
             </p>
           )}
 
