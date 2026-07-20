@@ -4,7 +4,7 @@ import { getSiteContent } from "@/lib/getContent";
 import type { Sponsor } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "OBS Sponsor Overlay | NIIGHTMARE Esports",
+  title: "OBS Sponsor Overlay",
   robots: { index: false, follow: false },
 };
 

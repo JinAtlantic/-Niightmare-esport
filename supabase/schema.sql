@@ -318,6 +318,8 @@ alter table public.shop_orders add column if not exists anonymized_at timestampt
 create index if not exists shop_orders_status_created_idx on public.shop_orders (status, created_at desc);
 create unique index if not exists shop_orders_ref_code_unique_idx on public.shop_orders (ref_code) where ref_code is not null;
 alter table public.shop_orders enable row level security;
+revoke all privileges on table public.shop_orders from public, anon, authenticated;
+grant select, insert, update, delete on table public.shop_orders to service_role;
 drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
 create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();
 
@@ -350,6 +352,8 @@ create table if not exists public.push_subscriptions (
   created_at  timestamptz default now()
 );
 alter table public.push_subscriptions enable row level security;
+revoke all privileges on table public.push_subscriptions from public, anon, authenticated;
+grant select, insert, update, delete on table public.push_subscriptions to service_role;
 
 -- Buyer push subscriptions (no login): a device opts in to alerts for the order
 -- UUIDs it holds locally. Service-role only; the unguessable order id is the
@@ -367,6 +371,8 @@ create table if not exists public.shop_push_subscriptions (
   updated_at  timestamptz default now()
 );
 alter table public.shop_push_subscriptions enable row level security;
+revoke all privileges on table public.shop_push_subscriptions from public, anon, authenticated;
+grant select, insert, update, delete on table public.shop_push_subscriptions to service_role;
 
 -- Atomic content replacement RPC. Admin list editors replace full sections; the
 -- transaction prevents a failed insert from leaving a deleted/half-saved table.

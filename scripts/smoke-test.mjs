@@ -12,10 +12,11 @@ const publicChecks = [
   ["/admin", "ADMIN"],
 ];
 
-async function request(path) {
+async function request(path, init = {}) {
   return fetch(`${baseUrl}${path}`, {
+    ...init,
     redirect: "follow",
-    headers: { "user-agent": "niightmare-ci-smoke/1.0" },
+    headers: { "user-agent": "niightmare-ci-smoke/1.0", ...init.headers },
   });
 }
 
@@ -55,6 +56,32 @@ async function expectStatus(path, expected) {
   console.log(`PASS ${path} ${expected}`);
 }
 
+async function expectSecurityHeaders() {
+  const response = await request("/");
+  const required = [
+    "content-security-policy",
+    "strict-transport-security",
+    "x-content-type-options",
+    "x-frame-options",
+    "referrer-policy",
+    "permissions-policy",
+  ];
+  const missing = required.filter((name) => !response.headers.get(name));
+  if (missing.length) throw new Error(`/: missing security headers: ${missing.join(", ")}`);
+  console.log("PASS / security headers");
+}
+
+async function expectJsonStatus(path, init, expected) {
+  const response = await request(path, init);
+  if (response.status !== expected) {
+    throw new Error(`${path}: expected ${expected}, got ${response.status}`);
+  }
+  if (!response.headers.get("content-type")?.includes("application/json")) {
+    throw new Error(`${path}: expected a JSON response`);
+  }
+  console.log(`PASS ${path} JSON ${expected}`);
+}
+
 await waitForServer();
 for (const [path, marker] of publicChecks) await expectPage(path, marker);
 
@@ -64,7 +91,34 @@ if (content.status !== 200 || !content.headers.get("content-type")?.includes("ap
 }
 console.log("PASS /api/content JSON 200");
 
+await expectStatus("/site.webmanifest", 200);
+await expectStatus("/admin.webmanifest", 200);
+await expectStatus("/opengraph-image.png", 200);
+await expectStatus("/twitter-image.png", 200);
+await expectStatus("/__niightmare_smoke_missing__", 404);
+await expectSecurityHeaders();
+
+await expectStatus("/api/admin/data?file=site", 401);
 await expectStatus("/api/admin/orders", 401);
 await expectStatus("/api/cron/order-retention", 401);
+await expectJsonStatus(
+  "/api/admin/upload",
+  { method: "POST" },
+  401
+);
+await expectJsonStatus(
+  "/api/admin/push/test",
+  { method: "POST" },
+  401
+);
+await expectJsonStatus(
+  "/api/shop/order",
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({}),
+  },
+  400
+);
 
 console.log("Smoke checks passed");

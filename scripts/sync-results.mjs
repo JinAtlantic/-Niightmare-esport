@@ -99,7 +99,10 @@ async function fetchLiquipedia() {
       date: dateFromTs(cells[0].attr["data-sort-value"]),
       tournament: text(cells[3].html),
       score: normScore(text(cells[5].html)),
-      opponent: text(cells[6].html) || cells[6].attr["data-sort-value"] || "",
+      // Liquipedia renders the short code as cell text and keeps the full team
+      // name in data-sort-value. Prefer the full name for public match cards.
+      opponent: cells[6].attr["data-sort-value"] || text(cells[6].html) || "",
+      opponentAbbr: text(cells[6].html) || undefined,
       vods,
     };
   }).filter((r) => r && r.date && r.opponent);
@@ -117,9 +120,13 @@ async function fetchLiveMatches(token) {
 function alreadyOnSite(row, siteMatches) {
   return siteMatches.some((m) => {
     if (String(m.date) !== row.date) return false;
-    const oppMatch = normName(m.opponent) === normName(row.opponent);
-    const scoreMatch = normScore(m.score) === row.score;
-    return oppMatch || scoreMatch; // same date + (same opp OR same score) = same match
+    const siteOpponent = normName(m.opponent);
+    const sourceOpponent = normName(row.opponent);
+    return (
+      siteOpponent === sourceOpponent ||
+      siteOpponent.startsWith(`${sourceOpponent} `) ||
+      sourceOpponent.startsWith(`${siteOpponent} `)
+    );
   });
 }
 
@@ -130,6 +137,7 @@ function toMatch(row) {
     game: "mlbb",
     tournament: { en: row.tournament, lo: row.tournament },
     opponent: row.opponent,
+    opponentAbbr: row.opponentAbbr ?? null,
     score: normScore(row.score),
     result: resultFromScore(row.score),
     vod: row.vods[0]?.url ?? null,
