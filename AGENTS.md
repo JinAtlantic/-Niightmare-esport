@@ -61,7 +61,10 @@ after the production build. The suite covers both 390px mobile and 1440px deskto
 all public routes (hydration/runtime/overflow), responsive navigation + language
 switching, every admin editor in read-only mode, and the full Shop transaction.
 It also runs automated axe checks against WCAG 2 A/AA and WCAG 2.1 A/AA on all
-public routes, the admin login, and every read-only admin editor at both viewports.
+public routes, the admin login, every read-only admin editor, and key open-dialog
+states at both viewports. Keyboard coverage verifies modal focus trapping/return,
+Escape dismissal, the async Shop payment popup, and the Matches tournament menu's
+arrow-key navigation.
 Failure traces, videos, and screenshots are uploaded as the `playwright-report`
 artifact.
 

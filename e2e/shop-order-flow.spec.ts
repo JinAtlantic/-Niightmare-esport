@@ -100,14 +100,17 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   const payResponse = await payPromise;
   await expectE2EResponse(payResponse);
   await expect(page.getByText("Payment submitted!", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: /My Orders \(1\)/ })).toHaveAttribute(
+  const myOrdersTab = page.getByRole("button", { name: /My Orders \(1\)/ });
+  await expect(myOrdersTab).toHaveAttribute(
     "aria-pressed",
     "true",
     { timeout: 5_000 }
   );
+  await expect(myOrdersTab).toBeFocused();
 
   const admin = await page.context().newPage();
   await admin.goto("/admin");
+  await admin.waitForLoadState("networkidle");
   await admin.getByRole("textbox", { name: "Password", exact: true }).fill(ADMIN_PASSWORD);
   await admin.getByRole("button", { name: "Sign in" }).click();
   await expect(admin.getByRole("heading", { name: "Admin Dashboard" })).toBeVisible();

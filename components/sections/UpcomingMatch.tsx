@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { CloseIcon, PlayIcon } from "@/components/ui/Icons";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { teamLogoFor } from "@/lib/teamLogos";
 import OpponentFlag from "@/components/cards/OpponentFlag";
@@ -238,25 +239,15 @@ function ScheduleModal({
   // viewport (a transformed ancestor of this section would otherwise capture
   // the `fixed` positioning and the popup would sit down-page, needing a scroll).
   const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
-  }, [onClose]);
+  useModalFocus({ active: mounted, containerRef: dialogRef, initialFocusRef: closeRef, onClose });
 
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
+    <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={pick(schedule.title)}>
       <button type="button" className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-label="Close schedule" onClick={onClose} />
       <div className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-edge-bright bg-gradient-to-b from-crypt to-void shadow-[0_40px_120px_-24px_rgba(0,0,0,0.9)]">
         {/* a hairline of amethyst across the top — the site's signature seam */}
@@ -282,6 +273,7 @@ function ScheduleModal({
             </h3>
           </div>
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Close schedule"

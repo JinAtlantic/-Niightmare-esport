@@ -229,7 +229,12 @@ export default function RecentResults() {
           </div>
         </Reveal>
 
-        <div className="mt-10 grid max-h-[258px] grid-cols-1 gap-3 overflow-y-auto overscroll-contain pr-1 sm:max-h-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:pr-0 lg:grid-cols-4">
+        <div
+          role="region"
+          aria-label={pick(COPY.title)}
+          tabIndex={0}
+          className="mt-10 grid max-h-[258px] grid-cols-1 gap-3 overflow-y-auto overscroll-contain pr-1 outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void sm:max-h-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:pr-0 lg:grid-cols-4"
+        >
           {shown.map((match, i) => (
             <Reveal key={match.id} delay={i * 80} className="h-full">
               <ResultCard match={match} />

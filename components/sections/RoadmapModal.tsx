@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import { resolveRoadmap, type RoadmapContent, type RoadmapHalfId, type RoadmapStage } from "@/lib/roadmap";
 import type { Tier } from "@/lib/tiers";
 import type { Lang } from "@/lib/types";
@@ -172,6 +173,7 @@ function StageCard({
 
 export default function RoadmapModal({ onClose }: { onClose: () => void }) {
   const reduce = useReducedMotion();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const { site } = useContent();
   const { lang, setLang, pick } = useLanguage();
@@ -179,24 +181,12 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
   const [activeHalf, setActiveHalf] = useState<RoadmapHalfId>("h1");
   const half = roadmap.halves.find((h) => h.id === activeHalf) ?? roadmap.halves[0];
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
+  useModalFocus({ containerRef: dialogRef, initialFocusRef: closeRef, onClose });
 
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-label={pick(roadmap.buttonLabel)}>
+    <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-label={pick(roadmap.buttonLabel)}>
       <motion.div
         className="absolute inset-0 bg-black/84 backdrop-blur-sm"
         onClick={onClose}

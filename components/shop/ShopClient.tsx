@@ -8,6 +8,7 @@ import { safeHref, safeImageSrc } from "@/lib/safety";
 import ShopPushToggle from "@/components/shop/ShopPushToggle";
 import JerseyShowcase from "@/components/shop/JerseyShowcase";
 import PageHeader from "@/components/layout/PageHeader";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import type { Lang } from "@/lib/types";
 import {
   resolveShop,
@@ -149,11 +150,26 @@ export default function ShopClient() {
   const [payingOrder, setPayingOrder] = useState<ShopOrderRecord | null>(null);
   const [slip, setSlip] = useState("");
   const [slipName, setSlipName] = useState("");
+  const payDialogRef = useRef<HTMLDivElement>(null);
+  const payCloseRef = useRef<HTMLButtonElement>(null);
+  const paySuccessRef = useRef<HTMLDivElement>(null);
+  const payReturnFocusRef = useRef<HTMLElement | null>(null);
+  const myOrdersTabRef = useRef<HTMLButtonElement>(null);
 
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => setMounted(true), []);
+  useModalFocus({
+    active: mounted && payOpen && Boolean(payingOrder),
+    containerRef: payDialogRef,
+    initialFocusRef: payCloseRef,
+    returnFocusRef: payReturnFocusRef,
+    onClose: closePay,
+  });
+  useEffect(() => {
+    if (payOpen && paySuccess) paySuccessRef.current?.focus();
+  }, [payOpen, paySuccess]);
 
   // Deep link from the in-site order notifier (/shop?view=orders) opens straight
   // to My Orders so a status toast lands the buyer on their order.
@@ -265,16 +281,6 @@ export default function ShopClient() {
     if (tab === "myorders") syncStatuses();
   }, [tab, storageKey, syncStatuses]);
 
-  // Lock background scroll while the payment popup is open so it can't scroll away.
-  useEffect(() => {
-    if (!payOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [payOpen]);
-
   const orderItems: ShopOrderItem[] = Object.entries(quantities)
     .filter(([, q]) => q > 0)
     .map(([sizeId, quantity]) => ({ sizeId, quantity }));
@@ -339,6 +345,9 @@ export default function ShopClient() {
       return;
     }
     setOrderError("");
+    if (document.activeElement instanceof HTMLElement && document.activeElement !== document.body) {
+      payReturnFocusRef.current = document.activeElement;
+    }
     setReserving(true);
     try {
       const res = await fetch("/api/shop/order", {
@@ -366,6 +375,9 @@ export default function ShopClient() {
   }
 
   function openPayFor(order: ShopOrderRecord) {
+    if (document.activeElement instanceof HTMLElement && document.activeElement !== document.body) {
+      payReturnFocusRef.current = document.activeElement;
+    }
     setPayingOrder(order);
     setSlip("");
     setSlipName("");
@@ -441,6 +453,7 @@ export default function ShopClient() {
         setPaySuccess(false);
         setPayingOrder(null);
         setTab("myorders");
+        window.requestAnimationFrame(() => myOrdersTabRef.current?.focus());
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 1900);
     } catch {
@@ -501,6 +514,7 @@ export default function ShopClient() {
           const active = tab === t.id;
           return (
             <button
+              ref={t.id === "myorders" ? myOrdersTabRef : undefined}
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
@@ -830,12 +844,12 @@ export default function ShopClient() {
         payOpen &&
         payingOrder &&
         createPortal(
-          <div className="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
+          <div ref={payDialogRef} tabIndex={-1} className="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-label={pick(COPY.payTitle)}>
             <button type="button" className="fixed inset-0 bg-black/82 backdrop-blur-sm" aria-label={pick(COPY.cancel)} onClick={closePay} />
             <div className="pointer-events-none relative flex min-h-full items-center justify-center p-4">
               <div className="pointer-events-auto relative z-10 w-full max-w-md rounded-md border border-edge-bright bg-crypt p-5 shadow-elev-3 md:p-6">
               {paySuccess ? (
-                <div className="flex flex-col items-center gap-4 py-8 text-center">
+                <div ref={paySuccessRef} tabIndex={-1} role="status" aria-live="polite" className="flex flex-col items-center gap-4 py-8 text-center outline-none">
                   <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-win bg-win/15 text-win shadow-[0_0_30px_rgba(52,211,153,0.5)]">
                     <CheckGlyph />
                   </span>
@@ -847,6 +861,7 @@ export default function ShopClient() {
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <h3 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-soul">{pick(COPY.payTitle)}</h3>
                     <button
+                      ref={payCloseRef}
                       type="button"
                       onClick={closePay}
                       aria-label={pick(COPY.cancel)}
@@ -895,7 +910,7 @@ export default function ShopClient() {
                       <button
                         type="button"
                         onClick={() => copyRef(payingOrder.refCode || "")}
-                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-glow/60 bg-glow/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.12em] text-glow transition-colors hover:bg-glow/25"
+                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-glow/60 bg-glow/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul transition-colors hover:bg-glow/25"
                       >
                         {copied ? pick(COPY.copied) : pick(COPY.copyRef)}
                       </button>
@@ -930,7 +945,7 @@ export default function ShopClient() {
                         </span>
                       )}
                     </label>
-                    {!slip && <p className="mt-2 font-mono text-[10px] leading-relaxed text-ash-dim">{pick(COPY.slipRequired)}</p>}
+                    {!slip && <p className="mt-2 font-mono text-[10px] leading-relaxed text-ash">{pick(COPY.slipRequired)}</p>}
                   </div>
 
                   {payError && <p className="mt-3 text-center font-mono text-[11px] text-loss">{payError}</p>}

@@ -98,6 +98,7 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
   });
 
   await page.goto("/admin", { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle");
   await page.getByRole("textbox", { name: "Password", exact: true }).fill(ADMIN_PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Admin Dashboard" })).toBeVisible();

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Reveal from "@/components/ui/Reveal";
 import { PlayIcon, CloseIcon } from "@/components/ui/Icons";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import type { Bilingual } from "@/lib/types";
 
 interface VideoItem {
@@ -82,26 +83,20 @@ function VideoThumb({
  * watch without leaving the site.
  */
 export default function VideoSection() {
-  const { t } = useLanguage();
+  const { t, pick } = useLanguage();
   const { site } = useContent();
   const videos = ((site as { videos?: VideoItem[] }).videos ?? []).filter(
     (v) => v && v.youtubeId
   );
   const [active, setActive] = useState<VideoItem | null>(null);
-
-  useEffect(() => {
-    if (!active) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActive(null);
-    };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [active]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useModalFocus({
+    active: Boolean(active),
+    containerRef: dialogRef,
+    initialFocusRef: closeRef,
+    onClose: () => setActive(null),
+  });
 
   if (videos.length === 0) return null;
 
@@ -138,10 +133,12 @@ export default function VideoSection() {
         typeof document !== "undefined" &&
         createPortal(
           <div
+            ref={dialogRef}
+            tabIndex={-1}
             className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6"
             role="dialog"
             aria-modal="true"
-            aria-label={active.title ? undefined : "Video player"}
+            aria-label={active.title ? pick(active.title) : "Video player"}
           >
             <div
               className="absolute inset-0 bg-black/85 backdrop-blur-sm"
@@ -152,13 +149,14 @@ export default function VideoSection() {
               <div className="clip-esports relative aspect-video overflow-hidden border border-amethyst/45 bg-black shadow-[0_0_60px_rgba(168,85,247,0.35)]">
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${active.youtubeId}?autoplay=1&rel=0`}
-                  title={active.title ? undefined : "NIIGHTMARE highlight"}
+                  title={active.title ? pick(active.title) : "NIIGHTMARE highlight"}
                   className="absolute inset-0 h-full w-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               </div>
               <button
+                ref={closeRef}
                 type="button"
                 onClick={() => setActive(null)}
                 aria-label={t("common.close")}

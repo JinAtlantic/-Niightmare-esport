@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import { safeImageSrc } from "@/lib/safety";
 import type { Bilingual } from "@/lib/types";
 
@@ -45,20 +46,15 @@ export default function JerseyShowcase({
   const [view, setView] = useState<View>(src.front ? "front" : src.back ? "back" : "front");
   const [zoom, setZoom] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setMounted(true), []);
-
-  // Lock background scroll + close on Escape while the lightbox is open.
-  useEffect(() => {
-    if (!zoom) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setZoom(false);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [zoom]);
+  useModalFocus({
+    active: mounted && zoom && Boolean(src[view]),
+    containerRef: dialogRef,
+    initialFocusRef: closeRef,
+    onClose: () => setZoom(false),
+  });
 
   const activeSrc = src[view];
   const label = (v: View) => pick(v === "front" ? COPY.front : COPY.back);
@@ -145,12 +141,15 @@ export default function JerseyShowcase({
         activeSrc &&
         createPortal(
           <div
+            ref={dialogRef}
+            tabIndex={-1}
             className="fixed inset-0 z-[110] flex flex-col bg-black/92 backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
             aria-label={`${pick(productName)} — ${label(view)}`}
           >
             <button
+              ref={closeRef}
               type="button"
               onClick={() => setZoom(false)}
               aria-label={pick(COPY.close)}

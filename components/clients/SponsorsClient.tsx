@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import AuroraHalos from "@/components/ui/AuroraHalos";
 import SectionLabel from "@/components/ui/SectionLabel";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import { useContent } from "@/components/context/ContentContext";
 import {
   ArrowRightIcon,
@@ -179,20 +180,9 @@ function SponsorModal({
 }) {
   const pick = useSponsorPick();
   const linked = isExternalLink(sponsor?.url);
-
-  useEffect(() => {
-    if (!sponsor) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [sponsor, onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useModalFocus({ active: Boolean(sponsor), containerRef: dialogRef, initialFocusRef: closeRef, onClose });
 
   if (!sponsor || typeof document === "undefined") return null;
 
@@ -201,6 +191,8 @@ function SponsorModal({
 
   return createPortal(
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       role="dialog"
       aria-modal="true"
       aria-label={sponsor.name}
@@ -212,6 +204,7 @@ function SponsorModal({
       <div className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto border border-edge-bright bg-[linear-gradient(150deg,rgba(22,16,31,0.98),rgba(11,7,16,0.99))] shadow-[0_0_54px_rgba(168,85,247,0.24)]">
         <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-[2px]" />
         <button
+          ref={closeRef}
           type="button"
           onClick={onClose}
           className="absolute right-3 top-3 z-10 border border-edge bg-void/80 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ash transition-colors hover:border-amethyst hover:text-soul"

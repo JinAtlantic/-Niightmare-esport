@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
@@ -843,6 +843,7 @@ function TournamentSelect({
   const [box, setBox] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
   const place = () => {
     const r = triggerRef.current?.getBoundingClientRect();
@@ -856,20 +857,34 @@ function TournamentSelect({
 
   useEffect(() => {
     if (!open) return;
+    const openedAt = window.performance.now();
     const close = () => setOpen(false);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const focusFrame = window.requestAnimationFrame(() => {
+      const selected = menuRef.current?.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]');
+      const first = menuRef.current?.querySelector<HTMLElement>('[role="menuitemradio"]');
+      (selected ?? first)?.focus({ preventScroll: true });
+    });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus({ preventScroll: true });
+      }
+    };
     // Close when the PAGE scrolls (the fixed panel would detach from the
     // trigger), but IGNORE scrolling inside the menu list itself — that's the
     // user browsing the options, and closing there made it feel un-scrollable.
     const onScroll = (e: Event) => {
       const t = e.target;
       if (menuRef.current && t instanceof Node && menuRef.current.contains(t)) return;
+      if (menuRef.current?.contains(document.activeElement)) return;
+      if (window.performance.now() - openedAt < 400) return;
       setOpen(false);
     };
     window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", close);
     document.addEventListener("keydown", onKey);
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", close);
       document.removeEventListener("keydown", onKey);
@@ -882,15 +897,52 @@ function TournamentSelect({
     return allLabel;
   }, [value, groups, pick, allLabel]);
 
-  const choose = (key: string) => { onChange(key); setOpen(false); };
+  const choose = (key: string) => {
+    onChange(key);
+    setOpen(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
+  };
+
+  const onMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+      window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
+      return;
+    }
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const items = Array.from(
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []
+    );
+    if (!items.length) return;
+    event.preventDefault();
+    const current = Math.max(0, items.indexOf(document.activeElement as HTMLElement));
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? items.length - 1
+          : event.key === "ArrowUp"
+            ? (current - 1 + items.length) % items.length
+            : (current + 1) % items.length;
+    items[next].focus({ preventScroll: true });
+  };
 
   return (
     <>
       <button
         ref={triggerRef}
         type="button"
-        aria-haspopup="listbox"
+        aria-haspopup="menu"
+        aria-controls={open ? menuId : undefined}
         aria-expanded={open}
+        onKeyDown={(event) => {
+          if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+            event.preventDefault();
+            place();
+            setOpen(true);
+          }
+        }}
         onClick={() => { if (open) { setOpen(false); } else { place(); setOpen(true); } }}
         className="flex h-12 w-full min-w-0 items-center justify-between gap-2 border border-edge-bright bg-gradient-to-r from-crypt2 to-void px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] text-soul shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] outline-none transition-all hover:border-amethyst/60 focus:border-amethyst focus:shadow-[0_0_18px_rgba(168,85,247,0.24)]"
       >
@@ -902,27 +954,36 @@ function TournamentSelect({
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
             <div
+              id={menuId}
               ref={menuRef}
-              role="listbox"
+              role="menu"
+              aria-label="Tournament"
+              onKeyDown={onMenuKeyDown}
               style={{ position: "fixed", left: box.left, top: box.top, width: box.width, maxHeight: box.maxHeight }}
               className="z-50 overflow-y-auto border border-edge-bright bg-crypt shadow-[0_18px_44px_rgba(0,0,0,0.62)]"
             >
               <button
                 type="button"
+                role="menuitemradio"
+                aria-checked={value === "all"}
+                tabIndex={value === "all" ? 0 : -1}
                 onClick={() => choose("all")}
                 className={`block w-full whitespace-normal break-words px-3 py-2 text-left font-mono text-[11px] font-bold uppercase leading-snug tracking-[0.08em] transition-colors hover:bg-edge/60 ${value === "all" ? "bg-amethyst/15 text-soul" : "text-ash"}`}
               >
                 {allLabel}
               </button>
               {groups.map((g) => (
-                <div key={g.tier ?? "other"}>
-                  <div className="border-t border-edge bg-void/60 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ash-dim">
+                <div key={g.tier ?? "other"} role="group" aria-label={g.tier ? `${g.tier}-Tier` : otherLabel}>
+                  <div role="presentation" className="border-t border-edge bg-void/60 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ash">
                     {g.tier ? `${g.tier}-Tier` : otherLabel}
                   </div>
                   {g.options.map((o) => (
                     <button
                       key={o.key}
                       type="button"
+                      role="menuitemradio"
+                      aria-checked={value === o.key}
+                      tabIndex={value === o.key ? 0 : -1}
                       onClick={() => choose(o.key)}
                       className={`block w-full whitespace-normal break-words px-3 py-2 text-left font-mono text-[11px] font-bold uppercase leading-snug tracking-[0.06em] transition-colors hover:bg-edge/60 ${value === o.key ? "bg-amethyst/15 text-soul" : "text-ash"}`}
                     >

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
@@ -9,6 +9,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import { countryFlag } from "@/lib/personProfile";
 import type { StaffMember } from "@/lib/types";
 
@@ -28,6 +29,7 @@ export default function StaffModal({
   const { pick, t } = useLanguage();
   const { site } = useContent();
   const reduce = useReducedMotion();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   const title = member.name || member.ign || "";
@@ -43,24 +45,14 @@ export default function StaffModal({
     .slice(0, 2)
     .toUpperCase();
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
+  useModalFocus({ containerRef: dialogRef, initialFocusRef: closeRef, onClose });
 
   if (typeof document === "undefined") return null;
 
   return createPortal(
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
@@ -14,6 +14,7 @@ import {
 import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
+import { useModalFocus } from "@/components/ui/useModalFocus";
 import { formatDate } from "@/lib/format";
 import { calculateAge, countryFlagImageUrl, formatBirthDate } from "@/lib/personProfile";
 import { safeHref } from "@/lib/safety";
@@ -58,7 +59,7 @@ function StatTile({
       >
         {icon}
       </span>
-      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-ash-dim">{label}</p>
+      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-spectre">{label}</p>
       <div className="mt-1.5">{children}</div>
     </div>
   );
@@ -79,6 +80,7 @@ export default function PlayerModal({
 }) {
   const { pick, t, lang } = useLanguage();
   const reduce = useReducedMotion();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   const monogram = player.ign.replace(/\s+/g, "").slice(0, 2).toUpperCase();
@@ -94,25 +96,14 @@ export default function PlayerModal({
   // several "<joined> – <left|Present>" spans. Empty when none are set.
   const tenures = (player.tenures ?? []).filter((tn) => tn.joined);
 
-  // ESC to close + lock body scroll + focus the close button.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
+  useModalFocus({ containerRef: dialogRef, initialFocusRef: closeRef, onClose });
 
   if (typeof document === "undefined") return null;
 
   return createPortal(
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
