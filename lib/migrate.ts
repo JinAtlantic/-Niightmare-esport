@@ -30,9 +30,13 @@ import { cleanMatchVods } from "./matchVods";
 export const s = (v?: string | null) => (v && String(v).trim() ? String(v).trim() : null);
 export const en = (b?: Bilingual) => s(b?.en);
 export const lo = (b?: Bilingual) => s(b?.lo);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const dbId = (value: unknown) =>
+  typeof value === "string" && UUID_RE.test(value.trim()) ? value.trim() : null;
 
 export function playerRows(players: Player[], game: string) {
   return players.map((p, i) => ({
+    id: dbId(p.id),
     game,
     ign: s(p.ign),
     name: s(p.name),
@@ -66,6 +70,7 @@ export function playerRows(players: Player[], game: string) {
 
 export function memberRows(staff: StaffMember[]) {
   return staff.map((m, i) => ({
+    id: dbId(m.id),
     name: s(m.name),
     nickname: s(m.ign),
     // Persist the resolved role so official_role is never empty: use the chosen
@@ -94,6 +99,7 @@ export function memberRows(staff: StaffMember[]) {
 
 export function matchRows(matches: Match[]) {
   return matches.map((m, i) => ({
+    id: dbId(m.id),
     match_date: s(m.date),
     game: s(m.game),
     tournament_en: en(m.tournament),
@@ -114,6 +120,7 @@ export function matchRows(matches: Match[]) {
 
 export function tournamentRows(tournaments: Tournament[]) {
   return tournaments.map((t, i) => ({
+    id: dbId(t.id),
     name_en: en(t.name),
     name_lo: lo(t.name),
     game: s(t.game),
@@ -127,6 +134,7 @@ export function tournamentRows(tournaments: Tournament[]) {
 
 export function newsRows(articles: NewsArticle[]) {
   return articles.map((a, i) => ({
+    id: dbId(a.id),
     news_date: s(a.date),
     tag_en: en(a.tag),
     tag_lo: lo(a.tag),
@@ -141,6 +149,7 @@ export function newsRows(articles: NewsArticle[]) {
 
 export function tierRows(tiers: SponsorTier[]) {
   return tiers.map((t, i) => ({
+    id: dbId(t.id),
     name_en: en(t.name),
     name_lo: lo(t.name),
     color: s(t.color),
@@ -151,6 +160,7 @@ export function tierRows(tiers: SponsorTier[]) {
 
 export function sponsorRows(sponsors: Sponsor[]) {
   return sponsors.map((sp, i) => ({
+    id: dbId(sp.id),
     name: s(sp.name),
     url: s(sp.url),
     logo: s(sp.logo),
