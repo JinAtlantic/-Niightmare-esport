@@ -10,6 +10,15 @@ import {
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import { sendPushToAll } from "@/lib/push";
 import {
+  SHOP_E2E_HEADERS,
+  createShopE2EOrder,
+  declareShopE2EPayment,
+  deleteShopE2EOrder,
+  isShopE2ERequest,
+  resetShopE2EOrders,
+  shopE2ERecord,
+} from "@/lib/shopE2EStore";
+import {
   resolveShop,
   computeOrder,
   summariseLines,
@@ -72,6 +81,18 @@ async function uploadSlip(slip: unknown): Promise<string | undefined> {
     const normalized = await normalizeOrderEvidenceImage(input, SLIP_MAX_BYTES);
     if (!normalized) return undefined;
     return await uploadOrderEvidence(`shop-slips/${randomUUID()}.jpg`, normalized, "image/jpeg");
+  } catch {
+    return undefined;
+  }
+}
+
+function testEvidence(slip: unknown): string | undefined {
+  if (typeof slip !== "string") return undefined;
+  const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(slip);
+  if (!match) return undefined;
+  try {
+    const bytes = Buffer.from(match[1], "base64");
+    return bytes.length > 0 && bytes.length <= SLIP_MAX_BYTES ? slip : undefined;
   } catch {
     return undefined;
   }
@@ -217,9 +238,41 @@ async function declarePayment(
   return NextResponse.json({ ok: true, id: paidRecord.id, order: paidRecord });
 }
 
+function declareTestPayment(body: Record<string, unknown>, orderId: string, refCode: string) {
+  if (!UUID_RE.test(orderId)) {
+    return NextResponse.json({ error: "Bad order id" }, { status: 400, headers: SHOP_E2E_HEADERS });
+  }
+  if (!refCode) {
+    return NextResponse.json(
+      { error: "Missing order reference" },
+      { status: 400, headers: SHOP_E2E_HEADERS }
+    );
+  }
+  const slip = testEvidence(body.slip);
+  if (!slip) {
+    return NextResponse.json(
+      { error: "Payment slip is required" },
+      { status: 400, headers: SHOP_E2E_HEADERS }
+    );
+  }
+  const updated = declareShopE2EPayment(orderId, refCode, slip);
+  if (!updated) {
+    return NextResponse.json(
+      { error: "Order is expired, already paid, or not found" },
+      { status: 409, headers: SHOP_E2E_HEADERS }
+    );
+  }
+  const order = shopE2ERecord(updated);
+  return NextResponse.json(
+    { ok: true, id: order.id, order },
+    { headers: SHOP_E2E_HEADERS }
+  );
+}
+
 export async function POST(request: Request) {
+  const e2e = isShopE2ERequest(request);
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (rateLimited(ip)) {
+  if (!e2e && rateLimited(ip)) {
     return NextResponse.json({ error: "Too many orders, please try again later." }, { status: 429 });
   }
 
@@ -231,17 +284,24 @@ export async function POST(request: Request) {
   }
 
   const intent = body.intent;
+  if (e2e && intent === "reset-e2e") {
+    resetShopE2EOrders();
+    return NextResponse.json({ ok: true }, { headers: SHOP_E2E_HEADERS });
+  }
   if (intent !== "reserve" && intent !== "pay") {
     return NextResponse.json({ error: "Invalid order intent" }, { status: 400 });
-  }
-  const db = getSupabaseAdmin();
-  if (!db) {
-    return NextResponse.json({ error: "Order storage is not configured" }, { status: 503 });
   }
 
   const orderId = str(body.orderId, 64);
   const suppliedRef = cleanRefCode(body.ref);
-  if (intent === "pay") return declarePayment(body, db, orderId, suppliedRef);
+  if (intent === "pay") {
+    if (e2e) return declareTestPayment(body, orderId, suppliedRef);
+    const db = getSupabaseAdmin();
+    if (!db) {
+      return NextResponse.json({ error: "Order storage is not configured" }, { status: 503 });
+    }
+    return declarePayment(body, db, orderId, suppliedRef);
+  }
   // Generate the payment reference server-side with cryptographic randomness;
   // the client displays the returned value and sends it back on PAY.
   const refCode = `NM-${randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`;
@@ -270,7 +330,7 @@ export async function POST(request: Request) {
   if (Object.keys(errors).length) {
     return NextResponse.json({ error: "Invalid order", fields: errors }, { status: 400 });
   }
-  const { shop } = await shopContext();
+  const { shop } = e2e ? { shop: resolveShop(null) } : await shopContext();
   if (!shop.enabled) return NextResponse.json({ error: "Shop is closed" }, { status: 403 });
   const { lines, totalQty, total } = computeOrder(shop, input.items);
   if (!lines.length) {
@@ -299,6 +359,17 @@ export async function POST(request: Request) {
     slip_url: null,
     status: "awaiting_payment",
   };
+  if (e2e) {
+    const record = shopE2ERecord(createShopE2EOrder(row));
+    return NextResponse.json(
+      { ok: true, id: record.id, order: record },
+      { headers: SHOP_E2E_HEADERS }
+    );
+  }
+  const db = getSupabaseAdmin();
+  if (!db) {
+    return NextResponse.json({ error: "Order storage is not configured" }, { status: 503 });
+  }
   const { data, error } = await db
     .from("shop_orders")
     .insert(row)
@@ -321,6 +392,13 @@ export async function DELETE(request: Request) {
   }
   const id = String(body.id || "").trim();
   if (!UUID_RE.test(id)) return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  if (isShopE2ERequest(request)) {
+    const deleted = deleteShopE2EOrder(id, true);
+    return NextResponse.json(
+      { ok: true, deleted: deleted ? 1 : 0 },
+      { headers: SHOP_E2E_HEADERS }
+    );
+  }
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ ok: true, deleted: 0 });
   const { data, error } = await db

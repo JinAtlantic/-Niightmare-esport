@@ -49,6 +49,17 @@ that ships with the playwright-go bundle, launched against installed Edge:
 `import { chromium } from 'file:///C:/Users/iTAPE/AppData/Local/ms-playwright-go/1.57.0/package/index.mjs'`
 then `chromium.launch({ channel: 'msedge', headless: true })`.
 
+### Isolated Shop browser flow
+After `npm run build`, run `npm run e2e` to exercise the complete buyer/admin order
+lifecycle in Chromium: reserve → payment slip → admin verification → packing →
+shipping image → shipped status sync in My Orders. The Playwright server runs on
+`localhost:3100` with a process-local in-memory order store. Test mode requires both
+`SHOP_E2E_MODE=true` **and** a loopback URL/Host/Forwarded-Host; the launcher also
+blanks all Supabase, Storage, push, and email credentials. It therefore must never
+write test orders or images to Production. CI installs Chromium and runs this flow
+after the production build; failure traces, videos, and screenshots are uploaded as
+the `playwright-report` artifact.
+
 ## Deploy (Vercel)
 **Primary: git push.** The repo now has a git remote and the production project is wired
 to auto-deploy on push to `main`:

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { signedStorageUrl } from "@/lib/supabaseStorage";
+import {
+  SHOP_E2E_HEADERS,
+  getShopE2EOrder,
+  isShopE2ERequest,
+} from "@/lib/shopE2EStore";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +25,19 @@ export async function GET(request: Request) {
     .slice(0, 50);
 
   if (!ids.length) return NextResponse.json({ synced: false, orders: [] });
+
+  if (isShopE2ERequest(request)) {
+    const orders = ids.flatMap((id) => {
+      const row = getShopE2EOrder(id);
+      return row
+        ? [{ id: row.id, status: row.status, shippingImageUrl: row.shipping_image_url }]
+        : [];
+    });
+    return NextResponse.json(
+      { synced: true, orders },
+      { headers: SHOP_E2E_HEADERS }
+    );
+  }
 
   const db = getSupabaseAdmin();
   // No DB → report not-synced so the client leaves its local copies untouched

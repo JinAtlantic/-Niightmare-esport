@@ -10,6 +10,13 @@ import {
   uploadOrderEvidence,
 } from "@/lib/supabaseStorage";
 import { sendPushForOrder } from "@/lib/push";
+import {
+  SHOP_E2E_HEADERS,
+  deleteShopE2EOrder,
+  isShopE2ERequest,
+  listShopE2EOrders,
+  patchShopE2EOrder,
+} from "@/lib/shopE2EStore";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +55,18 @@ async function uploadImage(data: unknown): Promise<string | undefined> {
   }
 }
 
+function testImage(data: unknown): string | undefined {
+  if (typeof data !== "string") return undefined;
+  const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(data);
+  if (!match) return undefined;
+  try {
+    const bytes = Buffer.from(match[1], "base64");
+    return bytes.length > 0 && bytes.length <= IMAGE_MAX_BYTES ? data : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function exposeEvidence(row: Record<string, unknown>) {
   const [slipUrl, shippingUrl] = await Promise.all([
     signedStorageUrl(row.slip_url as string | null, 60 * 60),
@@ -56,8 +75,14 @@ async function exposeEvidence(row: Record<string, unknown>) {
   return { ...row, slip_url: slipUrl, shipping_image_url: shippingUrl };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!(await authed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (isShopE2ERequest(request)) {
+    return NextResponse.json(
+      { orders: listShopE2EOrders() },
+      { headers: SHOP_E2E_HEADERS }
+    );
+  }
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ orders: [] });
   const { data, error } = await db
@@ -91,6 +116,34 @@ export async function PATCH(request: Request) {
   }
   if (!body.status && !body.shippingImage && !body.clearShippingImage) {
     return NextResponse.json({ error: "No changes" }, { status: 400 });
+  }
+
+  if (isShopE2ERequest(request)) {
+    const shippingImage = body.shippingImage ? testImage(body.shippingImage) : undefined;
+    if (body.shippingImage && !shippingImage) {
+      return NextResponse.json(
+        { error: "อัปโหลดรูปไม่สำเร็จ" },
+        { status: 400, headers: SHOP_E2E_HEADERS }
+      );
+    }
+    const updated = patchShopE2EOrder(body.id, {
+      status: body.status,
+      shippingImage,
+      clearShippingImage: body.clearShippingImage,
+    });
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Order not found" },
+        { status: 404, headers: SHOP_E2E_HEADERS }
+      );
+    }
+    return NextResponse.json(
+      {
+        ok: true,
+        shippingImageUrl: shippingImage ?? (body.clearShippingImage ? null : undefined),
+      },
+      { headers: SHOP_E2E_HEADERS }
+    );
   }
 
   const db = getSupabaseAdmin();
@@ -153,6 +206,15 @@ export async function DELETE(request: Request) {
   }
   if (!body.id || !UUID_RE.test(body.id)) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+  if (isShopE2ERequest(request)) {
+    const deleted = deleteShopE2EOrder(body.id);
+    return deleted
+      ? NextResponse.json({ ok: true }, { headers: SHOP_E2E_HEADERS })
+      : NextResponse.json(
+          { error: "Order not found" },
+          { status: 404, headers: SHOP_E2E_HEADERS }
+        );
   }
   const db = getSupabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });

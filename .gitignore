@@ -28,6 +28,8 @@ next-env.d.ts
 
 # local screenshots / design references (not part of the app)
 /preview
+/playwright-report/
+/test-results/
 
 # NOTE: the /data folder is content and MUST be committed.
 # It is intentionally NOT ignored here.

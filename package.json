@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --no-cache",
     "typecheck": "tsc --noEmit --pretty false",
-    "smoke": "node scripts/smoke-test.mjs"
+    "smoke": "node scripts/smoke-test.mjs",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
@@ -27,6 +28,7 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@types/node": "20.14.10",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
