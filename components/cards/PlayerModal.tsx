@@ -30,7 +30,7 @@ function fallbackCountryCode(player: Player): string {
 
 function SectionHead({ label }: { label: string }) {
   return (
-    <p className="mb-3 border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-spectre/85">
+    <p className="mb-3 border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-spectre">
       {label}
     </p>
   );
@@ -192,7 +192,7 @@ export default function PlayerModal({
 
             {/* ROLE chip + real name */}
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="inline-flex items-center border border-amethyst/50 bg-amethyst/10 px-2.5 py-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-glow shadow-[0_0_16px_rgba(168,85,247,0.22)]">
+              <span className="inline-flex items-center border border-amethyst/50 bg-amethyst/10 px-2.5 py-1 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul shadow-[0_0_16px_rgba(168,85,247,0.22)]">
                 {pick(player.role)}
               </span>
               {player.name && (
@@ -266,7 +266,7 @@ export default function PlayerModal({
                     rel="noopener noreferrer"
                     aria-label={`${player.ign} — Liquipedia`}
                     title="Liquipedia"
-                    className="hover-glow inline-flex h-11 items-center gap-2 border border-edge bg-crypt px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ash transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
+                    className="hover-glow inline-flex h-11 items-center gap-2 border border-edge bg-crypt px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-spectre transition-colors hover:border-amethyst hover:text-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void"
                   >
                     <Database size={16} strokeWidth={1.75} />
                     Liquipedia

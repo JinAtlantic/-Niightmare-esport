@@ -10,6 +10,8 @@ import SponsorsEditor from "@/components/admin/SponsorsEditor";
 import ShopEditor from "@/components/admin/ShopEditor";
 import OrdersEditor from "@/components/admin/OrdersEditor";
 import PushNotifications from "@/components/admin/PushNotifications";
+import { LaunchReadinessChecker } from "@/components/admin/LaunchReadiness";
+import type { ReadinessTarget } from "@/lib/launchReadiness";
 
 type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "orders";
 
@@ -30,6 +32,13 @@ export default function AdminApp() {
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     window.location.reload();
+  }
+
+  function openReadinessTarget(target: ReadinessTarget) {
+    setTab(target);
+    window.requestAnimationFrame(() => {
+      document.getElementById("admin-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   return (
@@ -66,6 +75,8 @@ export default function AdminApp() {
         <PushNotifications />
       </div>
 
+      <LaunchReadinessChecker onNavigate={openReadinessTarget} />
+
       <nav className="border-b border-edge">
         <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 md:px-6">
           {TABS.map((tabDef) => {
@@ -88,7 +99,7 @@ export default function AdminApp() {
         </div>
       </nav>
 
-      <main className={`mx-auto px-4 py-8 md:px-6 ${tab === "orders" ? "max-w-[1500px]" : "max-w-5xl"}`}>
+      <main id="admin-editor" className={`mx-auto scroll-mt-4 px-4 py-8 md:px-6 ${tab === "orders" ? "max-w-[1500px]" : "max-w-5xl"}`}>
         {tab === "home" && <HomeEditor />}
         {tab === "matches" && <MatchesEditor />}
         {tab === "achievements" && <AchievementsEditor />}

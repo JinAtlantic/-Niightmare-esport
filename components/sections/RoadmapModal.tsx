@@ -238,7 +238,7 @@ export default function RoadmapModal({ onClose }: { onClose: () => void }) {
                   type="button"
                   onClick={() => setActiveHalf(item.id)}
                   className={`min-h-[38px] px-2 font-display text-xs font-extrabold uppercase tracking-[0.06em] transition-all duration-300 hover:text-soul md:min-h-[46px] md:px-3 md:text-sm ${
-                    activeHalf === item.id ? "bg-amethyst/18 text-soul shadow-glow-soft" : "text-ash"
+                    activeHalf === item.id ? "bg-amethyst/18 text-soul shadow-glow-soft" : "text-spectre"
                   }`}
                 >
                   {pick(item.tab)}
