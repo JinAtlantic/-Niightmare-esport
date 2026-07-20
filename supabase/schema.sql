@@ -320,6 +320,22 @@ create unique index if not exists shop_orders_ref_code_unique_idx on public.shop
 alter table public.shop_orders enable row level security;
 drop trigger if exists set_shop_orders_updated_at on public.shop_orders;
 create trigger set_shop_orders_updated_at before update on public.shop_orders for each row execute function public.set_updated_at();
+
+-- Latest durable result for service-role maintenance jobs such as the daily
+-- order-retention cleanup. No public policies: this is operational metadata.
+create table if not exists public.system_job_status (
+  job_name text primary key,
+  last_started_at timestamptz not null,
+  last_finished_at timestamptz,
+  last_status text not null
+    check (last_status in ('running', 'succeeded', 'partial', 'failed')),
+  last_result jsonb not null default '{}'::jsonb,
+  last_error text,
+  updated_at timestamptz not null default now()
+);
+alter table public.system_job_status enable row level security;
+revoke all on table public.system_job_status from public, anon, authenticated;
+grant select, insert, update, delete on table public.system_job_status to service_role;
 drop policy if exists "members are publicly readable" on public.members;
 
 -- Web Push subscriptions for admin order alerts. One row per browser/device that

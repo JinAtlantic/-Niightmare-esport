@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 // Security headers applied to every route. Tuned for a static-ish marketing
-// site that loads Google Fonts and talks to Vercel Blob.
+// site with self-hosted fonts, Supabase Storage and privacy-safe analytics.
 const supabaseOrigin = (() => {
   try {
     return process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -35,6 +35,7 @@ const csp = [
   [
     "connect-src 'self'",
     "https://www.google-analytics.com",
+    "https://www.google.com",
     "https://www.googletagmanager.com",
     "https://analytics.google.com",
     "https://region1.google-analytics.com",
@@ -79,7 +80,7 @@ const nextConfig = {
   images: {
     // Serve modern formats with automatic resizing when next/image is used.
     formats: ["image/avif", "image/webp"],
-    // Allow remote player/team art served from Vercel Blob.
+    // Allow legacy Vercel Blob art plus the current Supabase-hosted media.
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
       { protocol: "https", hostname: "flagcdn.com" },

@@ -26,14 +26,18 @@ export default function HomePage() {
       <link
         rel="preload"
         as="image"
-        href="/home-reaper.webp"
+        href="/home-reaper-mobile-480.webp"
+        imageSrcSet="/home-reaper-mobile-480.webp 480w, /home-reaper.webp 720w"
+        imageSizes="100vw"
         media="(max-width: 1023px)"
         fetchPriority="high"
       />
       <link
         rel="preload"
         as="image"
-        href="/home-reaper-desktop.webp"
+        href="/home-reaper-desktop-1280.webp"
+        imageSrcSet="/home-reaper-desktop-1280.webp 1280w, /home-reaper-desktop.webp 1920w"
+        imageSizes="100vw"
         media="(min-width: 1024px)"
         fetchPriority="high"
       />

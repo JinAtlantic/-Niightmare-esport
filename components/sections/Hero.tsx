@@ -16,11 +16,19 @@ export default function Hero() {
     <section className="hero-section hero-section--reaper flex min-h-[calc(100svh-1.5rem)] flex-col justify-end px-5 pb-10 pt-28 text-left md:min-h-[calc(100svh-2rem)] md:px-14 md:pb-14">
       <div className="hero-atmos" aria-hidden>
         <picture>
-          <source media="(min-width: 1024px)" srcSet="/home-reaper-desktop.webp" />
+          <source
+            media="(min-width: 1024px)"
+            srcSet="/home-reaper-desktop-1280.webp 1280w, /home-reaper-desktop.webp 1920w"
+            sizes="100vw"
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="hero-bg hero-bg--reaper"
-            src="/home-reaper.webp"
+            src="/home-reaper-mobile-480.webp"
+            srcSet="/home-reaper-mobile-480.webp 480w, /home-reaper.webp 720w"
+            sizes="100vw"
+            width={720}
+            height={1279}
             alt=""
             fetchPriority="high"
           />

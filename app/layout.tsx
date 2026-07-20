@@ -83,8 +83,8 @@ export const metadata: Metadata = {
   // slot that Google + older browsers request; the ?v= busts any stale cached
   // icon so the real logo replaces an old placeholder.
   icons: {
-    icon: [{ url: "/icon.png?v=2", type: "image/png" }],
-    shortcut: "/favicon.ico?v=2",
+    icon: [{ url: "/favicon.ico?v=3", type: "image/x-icon" }],
+    shortcut: "/favicon.ico?v=3",
     apple: "/apple-icon.png?v=2",
   },
   title: {
