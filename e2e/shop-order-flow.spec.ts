@@ -111,7 +111,7 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   await admin.getByRole("textbox", { name: "Password", exact: true }).fill(ADMIN_PASSWORD);
   await admin.getByRole("button", { name: "Sign in" }).click();
   await expect(admin.getByRole("heading", { name: "Admin Dashboard" })).toBeVisible();
-  await expect(admin.getByText(refCode, { exact: true }).last()).toBeVisible();
+  await expect(admin.getByText(refCode, { exact: true }).filter({ visible: true }).first()).toBeVisible();
 
   const verifyPromise = admin.waitForResponse((response) =>
     isAdminPatch(response, "verified")
@@ -120,18 +120,20 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   await expectE2EResponse(await verifyPromise);
 
   await chooseOrderTab(admin, /^จ่ายแล้ว\s*1$/);
-  const shippingDetails = admin.locator("details:visible").filter({
-    hasText: "รูปใบรับของ / เลขพัสดุ",
+  const shippingRegion = admin.locator("aside:visible, details:visible").filter({
+    hasText: /รูปส่งสินค้า|รูปใบรับของ \/ เลขพัสดุ/,
   });
-  await shippingDetails.locator("summary").click();
+  if ((await shippingRegion.evaluate((element) => element.tagName)) === "DETAILS") {
+    await shippingRegion.locator("summary").click();
+  }
   const shippingPromise = admin.waitForResponse((response) => isAdminPatch(response, undefined, true));
-  await shippingDetails.locator('input[type="file"]').setInputFiles({
+  await shippingRegion.locator('input[type="file"]').setInputFiles({
     name: "shipping-receipt.png",
     mimeType: "image/png",
     buffer: PIXEL_PNG,
   });
   await expectE2EResponse(await shippingPromise);
-  await expect(shippingDetails.getByAltText("shipping")).toBeVisible();
+  await expect(shippingRegion.getByAltText("shipping")).toBeVisible();
 
   const packingPromise = admin.waitForResponse((response) =>
     isAdminPatch(response, "packing")
@@ -146,7 +148,7 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   await admin.getByRole("button", { name: /ทำเครื่องหมายส่งแล้ว/ }).click();
   await expectE2EResponse(await shippedPromise);
   await chooseOrderTab(admin, /^ส่งแล้ว\s*1$/);
-  await expect(admin.getByText(refCode, { exact: true }).last()).toBeVisible();
+  await expect(admin.getByText(refCode, { exact: true }).filter({ visible: true }).first()).toBeVisible();
 
   await page.reload();
   const syncPromise = page.waitForResponse((response) =>
