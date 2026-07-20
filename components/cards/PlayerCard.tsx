@@ -92,6 +92,7 @@ export default function PlayerCard({ player }: { player: Player }) {
           {flagUrl && (
             <span
               className="pointer-events-none absolute right-2.5 top-2.5 z-10 block h-5 w-7 overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.55)]"
+              role="img"
               aria-label={`${flagCode.toUpperCase()} flag`}
             >
               <Image

@@ -135,6 +135,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setOpen(false)}
+              disabled={!open}
               aria-label="Close menu"
               className="grid h-11 w-11 place-items-center border border-edge text-soul transition-colors hover:border-amethyst"
             >
@@ -146,6 +147,7 @@ export default function Navbar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  tabIndex={open ? undefined : -1}
                   className={`block border-l-2 px-4 py-3 font-mono text-sm font-medium uppercase tracking-[0.16em] transition-colors ${
                     isActive(item.href)
                       ? "border-amethyst bg-amethyst/10 text-soul"

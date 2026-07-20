@@ -104,7 +104,7 @@ function SponsorRow({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={sponsor.logo} alt="" className="h-full w-full object-contain" />
             ) : (
-              <span className="font-mono text-[10px] font-bold text-ash-dim">
+              <span className="font-mono text-[10px] font-bold text-ash">
                 {(sponsor.name || "?").slice(0, 2).toUpperCase()}
               </span>
             )}
@@ -113,7 +113,7 @@ function SponsorRow({
             <span className="block truncate font-display text-sm font-bold uppercase tracking-wide text-soul">
               {sponsor.name || "ยังไม่ตั้งชื่อ"}
             </span>
-            <span className="mt-0.5 block font-mono text-[10px] text-ash-dim">
+            <span className="mt-0.5 block font-mono text-[10px] text-ash">
               {sponsor.logo ? "โลโก้ ✓" : "ยังไม่มีโลโก้"} · {channels} ช่องทาง
               {hasDesc ? " · มีคำอธิบาย" : ""}
             </span>
@@ -242,7 +242,7 @@ export default function SponsorsEditor() {
             />
           ))}
           {sponsors.length === 0 && (
-            <p className="border border-dashed border-edge bg-void/30 px-4 py-6 text-center font-mono text-xs text-ash-dim">
+            <p className="border border-dashed border-edge bg-void/30 px-4 py-6 text-center font-mono text-xs text-ash">
               ยังไม่มี partner — กด “+ เพิ่ม partner”
             </p>
           )}

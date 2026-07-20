@@ -49,7 +49,7 @@ that ships with the playwright-go bundle, launched against installed Edge:
 `import { chromium } from 'file:///C:/Users/iTAPE/AppData/Local/ms-playwright-go/1.57.0/package/index.mjs'`
 then `chromium.launch({ channel: 'msedge', headless: true })`.
 
-### Isolated Shop browser flow
+### Isolated browser QA
 After `npm run build`, run `npm run e2e` to exercise the complete buyer/admin order
 lifecycle in Chromium: reserve → payment slip → admin verification → packing →
 shipping image → shipped status sync in My Orders. The Playwright server runs on
@@ -60,6 +60,8 @@ write test orders or images to Production. CI installs Chromium and runs this fl
 after the production build. The suite covers both 390px mobile and 1440px desktop,
 all public routes (hydration/runtime/overflow), responsive navigation + language
 switching, every admin editor in read-only mode, and the full Shop transaction.
+It also runs automated axe checks against WCAG 2 A/AA and WCAG 2.1 A/AA on all
+public routes, the admin login, and every read-only admin editor at both viewports.
 Failure traces, videos, and screenshots are uploaded as the `playwright-report`
 artifact.
 

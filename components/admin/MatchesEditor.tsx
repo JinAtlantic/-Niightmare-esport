@@ -928,7 +928,7 @@ export default function MatchesEditor() {
                       className="min-w-0 flex-1 text-left"
                     >
                       <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                        <span className="border border-amethyst/50 bg-amethyst/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-amethyst">
+                        <span className="border border-amethyst/50 bg-amethyst/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-glow">
                           {tournament.game === "mlbb" ? "MLBB" : "eFootball"}
                         </span>
                         <span className="border border-edge bg-void/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ash">

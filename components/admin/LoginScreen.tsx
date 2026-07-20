@@ -87,7 +87,7 @@ export default function LoginScreen() {
             className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-sm text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst"
             placeholder="123456"
           />
-          <span className="mt-1 block font-mono text-[10px] leading-relaxed text-ash-dim">
+          <span className="mt-1 block font-mono text-[10px] leading-relaxed text-ash">
             Required when ADMIN_TOTP_SECRET is enabled.
           </span>
         </div>
