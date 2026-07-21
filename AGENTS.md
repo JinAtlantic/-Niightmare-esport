@@ -189,8 +189,8 @@ publishes the new results + per-game VOD links. Driven by the **`/sync-results`*
 (`.claude/commands/`), which is confirm-first. The owner runs it on demand (stays manual — no
 scheduled/auto routine, by choice); opponent names/tournaments come from Liquipedia as-is.
 
-**Editable JSON blocks on the "site" section** (About Us, Niightmare Roadmap) live in
-single `jsonb` columns on `site_settings`: `about_us` and `roadmap`. Pattern for any
+**Editable JSON blocks on the "site" section** (for example About Us and Match Schedule) live in
+single `jsonb` columns on `site_settings`. Pattern for any
 new editable-content block: (1) `alter table site_settings add column if not exists
 <col> jsonb;` in `schema.sql` **and run it in Supabase before the admin can save it**;
 (2) persist it in BOTH `lib/supabaseWrite.ts` and `lib/migrate.ts` (the `site_settings`
@@ -309,14 +309,6 @@ and "Team Snapshot" blocks were removed.
   coloured by `tournamentTier(name)` in `lib/tiers.ts` (bronze C / cyan B / silver A /
   gold S; non-main events fall back to brand violet). `tournamentTier` is the single
   source of truth for tier classification — extend its regex to tier a new event.
-- **Niightmare Roadmap** = a button above the W/L/win-rate scoreboard opening
-  `RoadmapModal`. It shows H1/H2 tabs, a bilingual language toggle, and a
-  current-status tracker. Content is admin-editable via `site.roadmap`
-  (HomeEditor → "Niightmare Roadmap") with defaults/types in `lib/roadmap.ts`.
-  The active card is controlled by `activeStageId` (default `h1-wild-card`).
-  Current flow: MCCM Season 1 rank 1 goes to MSC x EWC Wild Card, then Wild
-  Card rank 1 enters Group Stage; MCCM Season 2 rank 1 goes direct to M-Series,
-  rank 2 goes to Wild Card for the final M-Series slot.
 
 ## Shop / jersey ordering (IMPLEMENTED — 2026-06)
 `/shop` is a live on-site jersey ordering flow. **No 3D viewer** — an early
@@ -330,7 +322,7 @@ vanilla Three.js in a `useEffect`.
 
 Product model (2026-07-21): `/shop` supports multiple admin-managed **Collections**. Each
 collection has its own bilingual name/copy, enabled flag, shareable `?collection=<slug>` URL,
-front/back images, currency/base price, locked back name/number, and S–4XL size rows. Each size
+a single product image, currency/base price, locked back name/number, and S–4XL size rows. Each size
 has an explicit `availability` of `in_stock` (พร้อมส่ง), `preorder` (พรีออเดอร์), or `sold_out`
 (หมด); only sold-out sizes are disabled. `/admin → Shop` can add/delete/reorder/show-hide
 collections and edit every per-collection field. The legacy single-product fields remain mirrored
@@ -346,16 +338,14 @@ phone/WhatsApp, courier dropdown with a free-text "Other", province/city/branch)
 **My Orders** (the buyer's saved orders from `localStorage`, with an empty state).
 Bilingual EN/Lao throughout.
 
-**Front/back jersey gallery (2026-07-06):** the Order tab leads with
-`components/shop/JerseyShowcase.tsx` — a premium viewer showing the shirt with a
-Front/Back toggle + two thumbnails and a tap-to-zoom fullscreen lightbox (portaled to
-`document.body`; padding-bottom box, NOT CSS aspect-ratio, for mobile Safari; plain
-`<img>` since the photos live on Supabase Storage). Before photos are uploaded it renders
-an on-brand placeholder (shirt glyph + #number + "coming soon"). The two images are
-`shop.frontImage` / `shop.backImage` on the `site.shop` jsonb blob (no migration —
-`resolveShop` in `lib/shop.ts` passes them through), uploaded in **/admin → Shop → "รูปเสื้อ
-(หน้า/หลัง)"** via `ImageField folder="shop"`. Owner will fill the real photos later
-(recommend JPEG, or a transparent PNG cut-out for the most premium look on the violet bg).
+**Single product image (2026-07-22):** each collection uses one `productImage` upload,
+which may already contain both the front and back of the jersey. The Order tab leads with
+`components/shop/JerseyShowcase.tsx`, a single-image viewer with a tap-to-zoom fullscreen
+lightbox (portaled to `document.body`; padding-bottom box, NOT CSS aspect-ratio, for mobile
+Safari; plain `<img>` because photos live on Supabase Storage). Before upload it renders an
+on-brand placeholder. `/admin → Shop` exposes one **"รูปสินค้า (รวมด้านหน้าและด้านหลัง)"**
+`ImageField` per collection. `resolveShop()` still reads legacy `frontImage` / `backImage`
+values as a fallback and normalises them to `productImage`, so existing uploads do not vanish.
 
 **Buying does NOT require sign-in** — the site has **no user login at all** (manual slip
 verification is the real safeguard). "My Orders" is tracked locally in `localStorage` on the
@@ -453,7 +443,7 @@ leftover fit model used only by the unused viewer), `app/shop/page.tsx`,
 `components/admin/OrdersEditor.tsx` (+ tab wired in `AdminApp.tsx`). All shop *config*
 (price, sizes, stock, bank/QR, couriers, contact link, rights note) lives in the
 `site_settings.shop` jsonb blob and is edited in **/admin → Shop** — same editable-JSON
-pattern as `site.aboutUs`/`site.roadmap`.
+pattern as `site.aboutUs`/`site.matchSchedule`.
 
 Owner setup still pending (placeholders shipped): upload the real bank **QR** + account
 + the "Ask for more info" contact link in /admin → Shop. The order route degrades
@@ -709,24 +699,6 @@ Changes:
   by the Supabase sponsors branch.
 - Removed unused page-copy fields from `data/sponsors.json`: old partner/tier labels,
   tier intro, CTA body, and old primary/secondary CTA definitions.
-
-### Roadmap status control
-
-Files:
-- `components/admin/RoadmapEditor.tsx`
-- `components/sections/RoadmapModal.tsx`
-- `lib/roadmap.ts`
-
-Changes:
-- `/admin -> Home -> Niightmare Roadmap` now gives every stage a clear Thai status select:
-  completed, competing now, or up next.
-- Removed the manual `Active stage ID` field from the admin UI.
-- Selecting a stage as active updates `activeStageId` automatically and demotes any other
-  active stage to future. Changing the current active stage to past/future stores an empty
-  `activeStageId`, and `resolveRoadmap()` now respects that instead of forcing the default.
-- Public labels are bilingual and fixed by state: `COMPLETED`, `COMPETING NOW`, `UP NEXT`
-  plus Lao equivalents. The future icon is now a calendar/clock rather than a lock.
-- Existing `site_settings.roadmap` JSONB persistence is reused; no migration is required.
 
 ### Desktop Orders workspace
 

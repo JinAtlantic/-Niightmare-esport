@@ -121,8 +121,6 @@ export default function ShopEditor() {
         fixedJerseyNumber: first.fixedJerseyNumber,
         sizes: first.sizes,
         productImage: first.productImage,
-        frontImage: first.frontImage,
-        backImage: first.backImage,
       } : {}),
     });
   };
@@ -153,8 +151,6 @@ export default function ShopEditor() {
       description: { en: "", lo: "" },
       sizes: template.sizes.map((size) => ({ ...size })),
       productImage: undefined,
-      frontImage: undefined,
-      backImage: undefined,
     }]);
   };
   const removeCollection = (index: number) => {
@@ -234,10 +230,16 @@ export default function ShopEditor() {
                 </div>
                 <BilingualTextArea label="ข้อความสงวนลิขสิทธิ์ชื่อ/เบอร์" value={collection.rightsNote} rows={2} onChange={(rightsNote) => patchCollection(collectionIndex, { rightsNote })} />
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <ImageField label="รูปด้านหน้าเสื้อ" value={collection.frontImage} folder="shop" onChange={(frontImage) => patchCollection(collectionIndex, { frontImage: frontImage || undefined })} />
-                  <ImageField label="รูปด้านหลังเสื้อ" value={collection.backImage} folder="shop" onChange={(backImage) => patchCollection(collectionIndex, { backImage: backImage || undefined })} />
-                </div>
+                <ImageField
+                  label="รูปสินค้า (รวมด้านหน้าและด้านหลัง)"
+                  value={collection.productImage}
+                  folder="shop"
+                  onChange={(productImage) => patchCollection(collectionIndex, {
+                    productImage: productImage || undefined,
+                    frontImage: undefined,
+                    backImage: undefined,
+                  })}
+                />
 
                 <div>
                   <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-soul">ไซส์ · สถานะ · ค่าเพิ่ม</p>

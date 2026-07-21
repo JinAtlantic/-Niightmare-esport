@@ -15,7 +15,6 @@ import type {
   Bilingual,
 } from "./types";
 import type { AboutUsContent } from "./about";
-import type { RoadmapContent } from "./roadmap";
 import type { MatchScheduleContent } from "./matchSchedule";
 import type { ShopContent } from "./shop";
 import type { GameDefinition } from "./games";
@@ -185,7 +184,6 @@ export interface SiteShape {
   /** Most-recent finished fixture (shown faded once the headline advances). */
   lastResult?: UpcomingMatch;
   aboutUs?: AboutUsContent;
-  roadmap?: RoadmapContent;
   matchSchedule?: MatchScheduleContent;
   shop?: ShopContent;
   games?: GameDefinition[];
@@ -296,7 +294,6 @@ export async function migrateAll(): Promise<MigrateResult> {
       formspree_endpoint: s(site.formspreeEndpoint),
       media_kit_url: s(site.mediaKitUrl),
       about_us: site.aboutUs ?? null,
-      roadmap: site.roadmap ?? null,
       match_schedule: site.matchSchedule ?? null,
       last_result: site.lastResult ?? null,
       shop: site.shop ?? null,

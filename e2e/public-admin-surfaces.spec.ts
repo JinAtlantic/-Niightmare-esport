@@ -236,6 +236,7 @@ test("shop products have shareable detail pages and keep per-size availability",
   const sizeButtons = page.getByRole("button", { name: /^(S|M|L|XL|XXL|3XL|4XL) (Ready to ship|Pre-order|Sold out)$/ });
   await expect(sizeButtons.first()).toBeVisible();
   expect(await sizeButtons.count()).toBeGreaterThan(0);
+  await expect(page.getByRole("button", { name: /^(Front|Back)$/ })).toHaveCount(0);
 
   await page.getByRole("link", { name: "All products" }).first().click();
   await expect(page).toHaveURL(/\/shop$/);
@@ -277,6 +278,7 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     await expect(page.locator("main")).not.toContainText("Could not load");
 
     if (editor.tab === "Home") {
+      await expect(page.locator("main")).not.toContainText(/Niightmare Roadmap/i);
       await page.getByRole("button", { name: /นัดต่อไป \(หน้า Home\)/ }).click();
       const nextMatchTime = page.locator('input[placeholder^="HH:MM"]').first();
       await expect(nextMatchTime).toBeVisible();
@@ -317,11 +319,15 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     }
 
     if (editor.tab === "Shop") {
+      await expect(page.getByText("รูปสินค้า (รวมด้านหน้าและด้านหลัง)", { exact: true })).toHaveCount(1);
+      await expect(page.locator("main")).not.toContainText("รูปด้านหน้าเสื้อ");
+      await expect(page.locator("main")).not.toContainText("รูปด้านหลังเสื้อ");
       await expect(page.getByLabel("สถานะ")).toHaveCount(7);
       await expect(page.getByLabel("สถานะ").first()).toHaveValue("preorder");
       await page.getByRole("button", { name: /เพิ่มสินค้า/i }).click();
       await expect(page.locator("main")).toContainText("ทั้งหมด 2 สินค้า");
       await expect(page.locator("main")).toContainText("New Product");
+      await expect(page.getByText("รูปสินค้า (รวมด้านหน้าและด้านหลัง)", { exact: true })).toHaveCount(2);
     }
 
     await expectNoDocumentOverflow(page);

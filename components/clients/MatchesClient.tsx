@@ -2,7 +2,6 @@
 
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
 import PageHeader from "@/components/layout/PageHeader";
 import AuroraHalos from "@/components/ui/AuroraHalos";
@@ -10,11 +9,9 @@ import OpponentLogo from "@/components/cards/OpponentLogo";
 import OpponentFlag from "@/components/cards/OpponentFlag";
 import Reveal from "@/components/ui/Reveal";
 import CountUp from "@/components/ui/CountUp";
-import RoadmapModal from "@/components/sections/RoadmapModal";
 import { PlayIcon, SearchIcon, CloseIcon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/format";
 import { tournamentTier, type Tier } from "@/lib/tiers";
-import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
 import { matchVods } from "@/lib/matchVods";
 import { cleanBo } from "@/lib/bestOf";
 import { safeHref } from "@/lib/safety";
@@ -1007,9 +1004,7 @@ export default function MatchesClient() {
     matches: Match[];
     tournaments: Tournament[];
   };
-  const [roadmapOpen, setRoadmapOpen] = useState(false);
   const page = mergePageCopy(data.page);
-  const roadmap = resolveRoadmap((content.site as { roadmap?: Partial<RoadmapContent> }).roadmap);
   const discoveredGames = [...new Set([
     ...data.matches.map((match) => match.game),
     ...(data.tournaments ?? []).map((tournament) => tournament.game),
@@ -1176,16 +1171,6 @@ export default function MatchesClient() {
         <AuroraHalos />
         <Reveal>
           <div className="glass glass-sheen max-w-full overflow-hidden p-3 shadow-elev-2 sm:p-4 md:p-6">
-            <button
-              type="button"
-              onClick={() => setRoadmapOpen(true)}
-              className="group mb-4 flex w-full min-w-0 items-center justify-center overflow-hidden border border-amethyst/40 bg-gradient-to-r from-amethyst/[0.13] via-crypt/50 to-void px-3 py-3 text-center transition-all duration-300 hover:border-amethyst/75 hover:from-amethyst/22 hover:shadow-[0_0_28px_rgba(168,85,247,0.22)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst focus-visible:ring-offset-2 focus-visible:ring-offset-void md:mb-5 md:px-5 md:py-4"
-            >
-              <span className="block min-w-0 break-words font-display text-base font-extrabold uppercase tracking-tight text-soul md:text-xl">
-                {pick(roadmap.buttonLabel)}
-              </span>
-            </button>
-
             <div>
               <StatsStrip {...stats} page={page} />
             </div>
@@ -1286,10 +1271,6 @@ export default function MatchesClient() {
             </div>
           </div>
         </Reveal>
-
-        <AnimatePresence>
-          {roadmapOpen && <RoadmapModal key="roadmap-modal" onClose={() => setRoadmapOpen(false)} />}
-        </AnimatePresence>
 
         <div
           key={`${selectedGame}-${activeYear}-${selectedTournament}`}

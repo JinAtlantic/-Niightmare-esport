@@ -2,8 +2,8 @@ import type { Bilingual, Lang } from "@/lib/types";
 
 /**
  * Shop / 3D Jersey configuration. Admin-editable via site.shop and stored in
- * site_settings.shop (single jsonb blob — same pattern as site.aboutUs /
- * site.roadmap). One jersey, one edition: every shirt carries the official
+ * site_settings.shop (single jsonb blob — same pattern as site.aboutUs). One
+ * jersey, one edition: every shirt carries the official
  * NIIGHTMARE ESPORTS name + number 7 (reserved, non-customisable). Buyers order
  * straight on the site and pay by bank transfer (QR).
  */
@@ -41,8 +41,11 @@ export interface ShopCollection {
   fixedJerseyName: string;
   fixedJerseyNumber: string;
   sizes: ShopSize[];
+  /** Canonical product photo. One upload may contain both front and back views. */
   productImage?: string;
+  /** @deprecated Legacy fields are read only so existing uploads keep working. */
   frontImage?: string;
+  /** @deprecated Legacy fields are read only so existing uploads keep working. */
   backImage?: string;
 }
 
@@ -89,11 +92,11 @@ export interface ShopContent {
   bank: ShopBank;
   /** "Ask for more info" contact link (LINE/Facebook/etc.). */
   contactUrl: string;
-  /** Optional flat product image path used as a poster/fallback. */
+  /** Product photo; one uploaded image may contain both front and back views. */
   productImage?: string;
-  /** Front-of-jersey product photo (admin-uploaded). Shown in the showcase gallery. */
+  /** @deprecated Legacy field retained for compatibility with saved content. */
   frontImage?: string;
-  /** Back-of-jersey product photo (admin-uploaded). Shown in the showcase gallery. */
+  /** @deprecated Legacy field retained for compatibility with saved content. */
   backImage?: string;
   /** Product editions shown in the public Collection selector. */
   collections: ShopCollection[];
@@ -148,8 +151,6 @@ export const DEFAULT_SHOP: ShopContent = {
   },
   contactUrl: "https://m.me/niightmareesports",
   productImage: "",
-  frontImage: "",
-  backImage: "",
   collections: [],
 };
 
@@ -264,9 +265,7 @@ function mergeCollection(fallback: ShopCollection, raw?: Partial<ShopCollection>
     fixedJerseyName: String(raw?.fixedJerseyName || fallback.fixedJerseyName),
     fixedJerseyNumber: String(raw?.fixedJerseyNumber || fallback.fixedJerseyNumber),
     sizes,
-    productImage: raw?.productImage || undefined,
-    frontImage: raw?.frontImage || undefined,
-    backImage: raw?.backImage || undefined,
+    productImage: raw?.productImage || raw?.frontImage || raw?.backImage || undefined,
   };
 }
 
@@ -296,9 +295,7 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
     fixedJerseyName: (raw?.fixedJerseyName ?? DEFAULT_SHOP.fixedJerseyName) || DEFAULT_SHOP.fixedJerseyName,
     fixedJerseyNumber: (raw?.fixedJerseyNumber ?? DEFAULT_SHOP.fixedJerseyNumber) || DEFAULT_SHOP.fixedJerseyNumber,
     sizes,
-    productImage: raw?.productImage || undefined,
-    frontImage: raw?.frontImage || undefined,
-    backImage: raw?.backImage || undefined,
+    productImage: raw?.productImage || raw?.frontImage || raw?.backImage || undefined,
   };
   const rawCollections = Array.isArray(raw?.collections) ? raw.collections : [];
   const collections = rawCollections.length
@@ -330,9 +327,7 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
       refNote: mergeBi(DEFAULT_SHOP.bank.refNote, raw?.bank?.refNote),
     },
     contactUrl: raw?.contactUrl ?? DEFAULT_SHOP.contactUrl,
-    productImage: raw?.productImage || undefined,
-    frontImage: raw?.frontImage || undefined,
-    backImage: raw?.backImage || undefined,
+    productImage: raw?.productImage || raw?.frontImage || raw?.backImage || undefined,
     collections,
   };
 }

@@ -252,8 +252,6 @@ alter table public.upcoming_match add column if not exists result text;  -- 'win
 alter table public.upcoming_match add column if not exists score text;   -- e.g. '2-1'
 -- Home "About Us" band copy (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists about_us jsonb;
--- Matches-page "Niightmare Roadmap" popup (admin-editable), stored as one JSON blob.
-alter table public.site_settings add column if not exists roadmap jsonb;
 -- Achievements page content (admin-editable), stored as one JSON blob.
 alter table public.site_settings add column if not exists achievements jsonb;
 -- Home upcoming-match schedule popup (admin-editable), stored as one JSON blob.

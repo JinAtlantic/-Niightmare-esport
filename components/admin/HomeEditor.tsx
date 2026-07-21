@@ -22,11 +22,9 @@ import {
   YoutubeIcon,
   DiscordIcon,
 } from "@/components/ui/Icons";
-import RoadmapEditor from "@/components/admin/RoadmapEditor";
 import type { Match, Tournament, UpcomingMatch } from "@/lib/types";
 import type { Bilingual } from "@/lib/types";
 import { resolveAbout, type AboutUsContent } from "@/lib/about";
-import { resolveRoadmap, type RoadmapContent } from "@/lib/roadmap";
 import {
   resolveMatchSchedule,
   type MatchScheduleContent,
@@ -52,7 +50,6 @@ interface SiteFile {
   lastResult?: UpcomingMatch;
   contact?: Contact;
   aboutUs?: AboutUsContent;
-  roadmap?: RoadmapContent;
   matchSchedule?: MatchScheduleContent;
   games?: GameDefinition[];
   [key: string]: unknown;
@@ -254,8 +251,6 @@ export default function HomeEditor() {
   const about = resolveAbout(data.aboutUs);
   const patchAbout = (p: Partial<AboutUsContent>) =>
     setData({ ...data, aboutUs: { ...about, ...p } });
-  const roadmap = resolveRoadmap(data.roadmap);
-  const patchRoadmap = (rm: RoadmapContent) => setData({ ...data, roadmap: rm });
   const matchSchedule = resolveMatchSchedule(data.matchSchedule);
   const gameOptions = enabledGames(data.games, [
     m.game,
@@ -518,13 +513,6 @@ export default function HomeEditor() {
           </div>
         </Card>
 
-      </Section>
-
-      <Section
-        title="Niightmare Roadmap (หน้า Match)"
-        hint="Popup Annual Esports Roadmap แบบกระชับ พร้อม H1/H2 tabs"
-      >
-        <RoadmapEditor value={roadmap} onChange={patchRoadmap} />
       </Section>
 
       <Section

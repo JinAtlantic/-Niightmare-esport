@@ -197,7 +197,6 @@ export async function writeSectionToSupabase(
         formspree_endpoint: s(site.formspreeEndpoint),
         media_kit_url: s(site.mediaKitUrl),
         about_us: site.aboutUs ?? null,
-        roadmap: site.roadmap ?? null,
         shop: site.shop ?? null,
       };
       if (await hasColumns(db, "site_settings", "games")) {

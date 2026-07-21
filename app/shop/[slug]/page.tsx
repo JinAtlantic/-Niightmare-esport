@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
   const description = metadataDescription(product.description.en, product.tagline.en);
-  const image = product.frontImage || product.productImage || product.backImage || "/opengraph-image.png";
+  const image = product.productImage || "/opengraph-image.png";
   const canonical = `/shop/${encodeURIComponent(product.slug)}`;
   return {
     title: product.productName.en,

@@ -110,7 +110,7 @@ export default function ShopCatalogClient() {
 function ProductCard({ product }: { product: ShopCollection }) {
   const { pick } = useLanguage();
   const state = collectionState(product);
-  const image = safeImageSrc(product.frontImage || product.productImage || product.backImage);
+  const image = safeImageSrc(product.productImage);
   const stateCopy = state === "in_stock" ? COPY.inStock : state === "preorder" ? COPY.preorder : COPY.soldOut;
   const stateClass = state === "in_stock" ? "border-win/45 bg-win/10 text-win" : state === "preorder" ? "border-glow/45 bg-glow/10 text-glow" : "border-loss/45 bg-loss/10 text-loss";
 

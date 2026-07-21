@@ -586,7 +586,7 @@ export default function ShopClient({ initialView = "cart" }: { initialView?: "ca
               <div className={`space-y-3 rounded-md border bg-void/30 p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
                 {lines.map((line) => {
                   const product = shop.collections.find((entry) => entry.id === line.collectionId);
-                  const image = safeImageSrc(product?.frontImage || product?.productImage || product?.backImage);
+                  const image = safeImageSrc(product?.productImage);
                   const key = shopCartItemKey(line.collectionId || "legacy", line.sizeId);
                   return (
                     <article key={key} className="grid grid-cols-[76px_minmax(0,1fr)] gap-3 rounded-md border border-edge bg-crypt/60 p-3 sm:grid-cols-[92px_minmax(0,1fr)_auto] sm:items-center">

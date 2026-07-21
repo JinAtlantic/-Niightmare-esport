@@ -21,27 +21,6 @@ async function expectNoAccessibilityViolations(page: Page, label: string) {
   ).toBe(0);
 }
 
-test("Roadmap dialog traps keyboard focus and restores it to the opener", async ({ page }) => {
-  await page.goto("/matches", { waitUntil: "domcontentloaded" });
-
-  const opener = page.getByRole("button", { name: /Niightmare Roadmap/i });
-  await opener.focus();
-  await page.keyboard.press("Enter");
-
-  const dialog = page.getByRole("dialog", { name: /Niightmare Roadmap/i });
-  await expect(dialog).toBeVisible();
-  await expect(dialog).not.toContainText(/COMPLETED|COMPETING NOW|UP NEXT/);
-  await expectNoAccessibilityViolations(page, "Roadmap dialog");
-  await expect.poll(() => activeElementIsInside(page, dialog)).toBe(true);
-
-  await page.keyboard.press("Tab");
-  await expect.poll(() => activeElementIsInside(page, dialog)).toBe(true);
-
-  await page.keyboard.press("Escape");
-  await expect(dialog).toBeHidden();
-  await expect(opener).toBeFocused();
-});
-
 test("Player profile dialog keeps keyboard focus inside and returns it", async ({ page }) => {
   await page.goto("/roster", { waitUntil: "domcontentloaded" });
 

@@ -204,7 +204,7 @@ function productAvailability(collection: ShopCollection): string {
 /** One admin-managed shop collection as schema.org Product + Offer data. */
 export function productSchema(collection: ShopCollection) {
   const url = `${SITE_URL}/shop/${encodeURIComponent(collection.slug)}`;
-  const images = [collection.frontImage, collection.productImage, collection.backImage]
+  const images = [collection.productImage]
     .filter((image): image is string => Boolean(image?.trim()))
     .map(abs);
   const currency = productCurrencyCode(collection.currency);

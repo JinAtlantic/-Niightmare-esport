@@ -77,7 +77,7 @@ export default function ShopProductClient({ slug }: { slug: string }) {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)] lg:items-start">
-          <JerseyShowcase front={activeProduct.frontImage} back={activeProduct.backImage} productName={activeProduct.productName} jerseyNumber={activeProduct.fixedJerseyNumber} />
+          <JerseyShowcase image={activeProduct.productImage} productName={activeProduct.productName} jerseyNumber={activeProduct.fixedJerseyNumber} />
 
           <section className="lg:sticky lg:top-24">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-glow">NIIGHTMARE SUPPLY</p>

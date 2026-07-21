@@ -251,7 +251,6 @@ def build() -> None:
             "ມີ scoreboard ສະຫຼຸບ W / L / win rate.",
             "ມີ filter ຕາມ game, year, result, sort ແລະ tournament.",
             "ຈັດກຸ່ມ tournament ແລະ tier color ເພື່ອໃຫ້ອ່ານງ່າຍ.",
-            "ມີ Niightmare Roadmap modal ອະທິບາຍເສັ້ນທາງ H1/H2 ແລະສະຖານະປັດຈຸບັນ.",
         ]),
         ("2.4 ໜ້າ Achievements, Sponsors, Contact, Legal", [
             "Achievements ສະແດງຜົນງານ ແລະການແຂ່ງຂັນສຳຄັນ.",
