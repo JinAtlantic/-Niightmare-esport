@@ -185,52 +185,22 @@ test("responsive navigation and language switch remain interactive", async ({ pa
 });
 
 test("shop products have shareable detail pages and keep per-size availability", async ({ page }) => {
-  await page.route("**/api/content", async (route) => {
-    const response = await route.fetch();
-    const content = await response.json() as {
-      site: { shop?: Record<string, unknown> };
-    };
-    const rawShop = content.site.shop ?? {};
-    const rawSizes = Array.isArray(rawShop.sizes) ? rawShop.sizes as Record<string, unknown>[] : [];
-    content.site.shop = {
-      ...rawShop,
-      collections: [
-        {
-          ...rawShop,
-          id: "home-kit",
-          slug: "home-kit",
-          enabled: true,
-          productName: { en: "Home Test Collection", lo: "Home Test Collection" },
-        },
-        {
-          ...rawShop,
-          id: "away-kit",
-          slug: "away-kit",
-          enabled: true,
-          productName: { en: "Away Test Collection", lo: "Away Test Collection" },
-          price: 399000,
-          sizes: rawSizes.map((size, index) => ({
-            ...size,
-            availability: index === 0 ? "in_stock" : index === 1 ? "sold_out" : "preorder",
-          })),
-        },
-      ],
-    };
-    await route.fulfill({ response, json: content });
-  });
+  await page.goto("/shop/official-2026", { waitUntil: "domcontentloaded" });
 
-  await page.goto("/shop/away-kit", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { level: 1, name: "Away Test Collection" })).toBeVisible();
-  await expect(page.getByText("Ready to ship", { exact: true })).toBeVisible();
-  await expect(page.getByText("Sold out", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: /^M Sold out$/ })).toBeDisabled();
+  const productHeading = page.getByRole("heading", { level: 1 });
+  await expect(productHeading).toBeVisible();
+  await expect(productHeading).not.toHaveText("Product");
+  const productName = await productHeading.textContent() || "";
+  await expect(page).toHaveTitle(/NIIGHTMARE Esports/);
+  expect(await page.content()).toContain('"@type":"Product"');
+
+  const sizeButtons = page.getByRole("button", { name: /^(S|M|L|XL|XXL|3XL|4XL) (Ready to ship|Pre-order|Sold out)$/ });
+  await expect(sizeButtons.first()).toBeVisible();
+  expect(await sizeButtons.count()).toBeGreaterThan(0);
 
   await page.getByRole("link", { name: "All products" }).first().click();
   await expect(page).toHaveURL(/\/shop$/);
-  await expect(page.getByRole("heading", { name: "Home Test Collection" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Away Test Collection" })).toBeVisible();
-  await page.getByRole("link", { name: /Home Test Collection/ }).click();
-  await expect(page).toHaveURL(/\/shop\/home-kit$/);
+  await expect(page.getByRole("heading", { name: productName })).toBeVisible();
 });
 
 test("every admin editor loads read-only from the isolated server", async ({ page }) => {

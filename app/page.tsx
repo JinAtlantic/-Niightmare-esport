@@ -10,6 +10,7 @@ import AboutUs from "@/components/sections/AboutUs";
 // import PartnerStrip from "@/components/sections/PartnerStrip";
 import JsonLd from "@/components/seo/JsonLd";
 import { upcomingEventSchema } from "@/lib/seo";
+import { getSiteContent } from "@/lib/getContent";
 
 // The homepage inherits its title/description/OG from the root layout metadata;
 // only add the self-referencing canonical so search engines collapse
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await getSiteContent();
+  const upcomingSchema = upcomingEventSchema(content);
   return (
     <>
       {/* Preload the hero (LCP) image so it isn't queued behind fonts/scripts.
@@ -41,7 +44,7 @@ export default function HomePage() {
         media="(min-width: 1024px)"
         fetchPriority="high"
       />
-      <JsonLd data={upcomingEventSchema()} />
+      {upcomingSchema ? <JsonLd data={upcomingSchema} /> : null}
       <Hero />
       <AboutUs />
       <UpcomingMatch />

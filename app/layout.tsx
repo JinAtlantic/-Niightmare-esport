@@ -163,7 +163,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <JsonLd data={[organizationSchema(), websiteSchema()]} />
+        <JsonLd data={[organizationSchema(initialContent), websiteSchema()]} />
         <LanguageProvider>
           <ContentProvider initial={initialContent}>
             <Chrome>{children}</Chrome>

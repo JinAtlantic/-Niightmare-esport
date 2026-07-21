@@ -4,7 +4,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo";
 
 const sponsorsDescription =
-  "Partner with NIIGHTMARE Esports. Explore our partners and sponsorship tiers as we dominate the Lao PDR esports scene.";
+  "Meet the official, event, and past partners supporting NIIGHTMARE Esports and the Lao PDR esports scene.";
 
 export const metadata: Metadata = {
   title: "Sponsors & Partners",

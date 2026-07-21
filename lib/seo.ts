@@ -2,12 +2,13 @@ import site from "@/data/site.json";
 import rosterData from "@/data/roster.json";
 import matchesData from "@/data/matches.json";
 import type { Match, Player, StaffMember, Tournament, UpcomingMatch } from "@/lib/types";
+import { sizePrice, type ShopCollection } from "@/lib/shop";
 
 /**
  * Structured data (JSON-LD) builders. Crawlers (Google, social cards) read these
- * to render rich results: the org's identity + socials, the team's athletes, and
- * the match calendar. Built from the bundled seed JSON so the schema is static,
- * fast, and always present at first byte (no blob round-trip on every request).
+ * to render rich results: the org's identity + socials, the team's athletes, the
+ * live match calendar, and shop products. Callers pass the same cached live
+ * content used to server-render the page; bundled JSON remains the safe fallback.
  */
 
 /**
@@ -25,24 +26,32 @@ export const SITE_URL = (
 const abs = (path: string) =>
   path.startsWith("http") ? path : `${SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 
+type SeoContent = Record<string, unknown> | null | undefined;
+
+function contentSection<T>(content: SeoContent, key: string, fallback: T): T {
+  return (content?.[key] as T | undefined) ?? fallback;
+}
+
 /** Every public social/contact link, de-duped, for schema `sameAs`. */
-function teamSameAs(): string[] {
-  const c = site.contact;
+function teamSameAs(siteContent: typeof site): string[] {
+  const c = siteContent.contact;
   return [c.facebook, c.youtube, c.tiktok, c.discord].filter(
     (u): u is string => Boolean(u && u.trim())
   );
 }
 
 /** Notable results, e.g. "M CHALLENGE CUP MEKONG SEASON 7 — CHAMPION (2026)". */
-function teamAwards(): string[] {
-  return (matchesData.tournaments as Tournament[]).map((tm) =>
+function teamAwards(matchesContent: typeof matchesData): string[] {
+  return (matchesContent.tournaments as Tournament[]).map((tm) =>
     `${tm.name.en} — ${tm.placement.en}${tm.season ? ` (${tm.season})` : ""}`
   );
 }
 
 /** Sitewide org identity — the most valuable single piece of structured data. */
-export function organizationSchema() {
-  const awards = teamAwards();
+export function organizationSchema(content?: SeoContent) {
+  const siteContent = contentSection(content, "site", site);
+  const matchesContent = contentSection(content, "matches", matchesData);
+  const awards = teamAwards(matchesContent);
   return {
     "@context": "https://schema.org",
     "@type": "SportsOrganization",
@@ -52,14 +61,14 @@ export function organizationSchema() {
     url: SITE_URL,
     logo: abs("/logo.png"),
     image: abs("/opengraph-image.png"),
-    email: site.contact.email,
+    email: siteContent.contact.email,
     description:
       "Official esports organization from Lao PDR competing in Mobile Legends: Bang Bang (MLBB) and eFootball.",
     sport: ["Esports", "Mobile Legends: Bang Bang", "eFootball"],
     foundingLocation: { "@type": "Place", name: "Lao PDR" },
     areaServed: { "@type": "Country", name: "Laos" },
     ...(awards.length ? { award: awards } : {}),
-    sameAs: teamSameAs(),
+    sameAs: teamSameAs(siteContent),
   };
 }
 
@@ -92,12 +101,13 @@ function personSchema(p: Player | StaffMember) {
 }
 
 /** The roster as a SportsTeam with its athletes + coaching staff. */
-export function sportsTeamSchema() {
+export function sportsTeamSchema(content?: SeoContent) {
+  const rosterContent = contentSection(content, "roster", rosterData);
   const players: Player[] = [
-    ...rosterData.mlbb.players,
-    ...rosterData.efootball.players,
+    ...rosterContent.mlbb.players,
+    ...rosterContent.efootball.players,
   ] as Player[];
-  const staff = rosterData.staff as StaffMember[];
+  const staff = rosterContent.staff as StaffMember[];
   return {
     "@context": "https://schema.org",
     "@type": "SportsTeam",
@@ -115,14 +125,16 @@ export function sportsTeamSchema() {
 }
 
 /** A single fixture/result as a SportsEvent. */
-function eventSchema(m: Match | UpcomingMatch, idSuffix: string) {
+function eventSchema(m: Match | UpcomingMatch, idSuffix: string, completed = false) {
   const opponent = (m.opponent || "").trim();
   return {
     "@type": "SportsEvent",
     "@id": `${SITE_URL}/matches#${idSuffix}`,
     name: `NIIGHTMARE${opponent ? ` vs ${opponent}` : ""} — ${m.tournament.en}`,
     startDate: m.date,
-    eventStatus: "https://schema.org/EventScheduled",
+    eventStatus: completed
+      ? "https://schema.org/EventCompleted"
+      : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
     location: { "@type": "VirtualLocation", url: SITE_URL },
     sport: m.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang",
@@ -135,17 +147,27 @@ function eventSchema(m: Match | UpcomingMatch, idSuffix: string) {
 }
 
 /** Upcoming headline fixture — used on the home page. */
-export function upcomingEventSchema() {
+export function upcomingEventSchema(content?: SeoContent) {
+  const siteContent = contentSection(content, "site", site);
+  const upcoming = siteContent.upcomingMatch as UpcomingMatch;
+  if (
+    upcoming.status === "practice" ||
+    !upcoming.date?.trim() ||
+    !upcoming.tournament?.en?.trim()
+  ) {
+    return null;
+  }
   return {
     "@context": "https://schema.org",
-    ...eventSchema(site.upcomingMatch as UpcomingMatch, "upcoming"),
+    ...eventSchema(upcoming, "upcoming", upcoming.status === "finished"),
   };
 }
 
 /** All fixtures (results + upcoming) as an ItemList of SportsEvents. */
-export function matchesSchema() {
-  const events = (matchesData.matches as Match[]).map((m, i) =>
-    eventSchema(m, m.id || `m${i}`)
+export function matchesSchema(content?: SeoContent) {
+  const matchesContent = contentSection(content, "matches", matchesData);
+  const events = (matchesContent.matches as Match[]).map((m, i) =>
+    eventSchema(m, m.id || `m${i}`, true)
   );
   return {
     "@context": "https://schema.org",
@@ -154,6 +176,61 @@ export function matchesSchema() {
       "@type": "ListItem",
       position: i + 1,
       item: e,
+    })),
+  };
+}
+
+function productCurrencyCode(currency: string): string {
+  const normalized = currency.trim().toUpperCase();
+  if (/LAK|KIP|ກີບ/.test(normalized)) return "LAK";
+  return /^[A-Z]{3}$/.test(normalized) ? normalized : "LAK";
+}
+
+function productAvailability(collection: ShopCollection): string {
+  if (collection.sizes.some((size) => size.availability === "in_stock")) {
+    return "https://schema.org/InStock";
+  }
+  if (collection.sizes.some((size) => size.availability === "preorder")) {
+    return "https://schema.org/PreOrder";
+  }
+  return "https://schema.org/OutOfStock";
+}
+
+/** One admin-managed shop collection as schema.org Product + Offer data. */
+export function productSchema(collection: ShopCollection) {
+  const url = `${SITE_URL}/shop/${encodeURIComponent(collection.slug)}`;
+  const images = [collection.frontImage, collection.productImage, collection.backImage]
+    .filter((image): image is string => Boolean(image?.trim()))
+    .map(abs);
+  const currency = productCurrencyCode(collection.currency);
+  const availableSizes = collection.sizes.filter((size) => size.availability !== "sold_out");
+  const availability = productAvailability(collection);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "@id": `${url}#product`,
+    name: collection.productName.en,
+    description: collection.description.en || collection.tagline.en,
+    sku: collection.id,
+    url,
+    ...(images.length ? { image: images } : {}),
+    brand: { "@type": "Brand", name: "NIIGHTMARE Esports" },
+    category: "Esports apparel",
+    offers: (availableSizes.length ? availableSizes : collection.sizes).map((size) => ({
+      "@type": "Offer",
+      name: `${collection.productName.en} — Size ${size.label}`,
+      url,
+      price: sizePrice(collection, size),
+      priceCurrency: currency,
+      availability:
+        size.availability === "sold_out"
+          ? "https://schema.org/OutOfStock"
+          : size.availability === "preorder"
+            ? "https://schema.org/PreOrder"
+            : availability,
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@id": `${SITE_URL}/#organization` },
     })),
   };
 }
