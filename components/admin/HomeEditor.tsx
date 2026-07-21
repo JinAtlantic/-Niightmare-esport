@@ -149,16 +149,45 @@ function TimeField24({
   value: string;
   onChange: (v: string) => void;
 }) {
+  // Keep incomplete keystrokes local. Committing "1" or "19" to the parent
+  // immediately makes bkkPartsToIso fall back to 00:00, which used to reset
+  // the controlled input before the user could finish typing "19:30".
+  const [draft, setDraft] = React.useState(value);
+  const focused = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!focused.current) setDraft(value);
+  }, [value]);
+
+  const isCompleteTime = (time: string) => /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time);
+
   return (
     <div>
       <Label>{label}</Label>
       <input
         type="text"
         inputMode="numeric"
-        value={value}
+        value={draft}
         maxLength={5}
         placeholder="HH:MM (เช่น 19:30)"
-        onChange={(e) => onChange(normalizeTime24(e.target.value))}
+        onFocus={() => {
+          focused.current = true;
+        }}
+        onChange={(e) => {
+          const next = normalizeTime24(e.target.value);
+          setDraft(next);
+          if (isCompleteTime(next)) onChange(next);
+        }}
+        onBlur={() => {
+          focused.current = false;
+          if (isCompleteTime(draft)) {
+            onChange(draft);
+          } else if (draft === "") {
+            onChange("");
+          } else {
+            setDraft(value);
+          }
+        }}
         className="w-full border border-edge bg-void/60 px-3 py-2 font-mono text-xs tabular-nums text-soul outline-none transition-colors placeholder:text-ash-dim focus:border-amethyst"
       />
     </div>

@@ -124,6 +124,18 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     await expect(page.locator("main")).toContainText(editor.marker);
     await expect(page.locator("main")).not.toContainText("โหลดข้อมูลไม่สำเร็จ");
     await expect(page.locator("main")).not.toContainText("Could not load");
+
+    if (editor.tab === "Home") {
+      await page.getByRole("button", { name: /นัดต่อไป \(หน้า Home\)/ }).click();
+      const nextMatchTime = page.locator('input[placeholder^="HH:MM"]').first();
+      await expect(nextMatchTime).toBeVisible();
+      await nextMatchTime.fill("");
+      await nextMatchTime.pressSequentially("1930");
+      await expect(nextMatchTime).toHaveValue("19:30");
+      await nextMatchTime.blur();
+      await expect(nextMatchTime).toHaveValue("19:30");
+    }
+
     await expectNoDocumentOverflow(page);
   }
 
