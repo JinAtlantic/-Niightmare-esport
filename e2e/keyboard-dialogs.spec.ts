@@ -73,6 +73,8 @@ test("Sponsor dialog keeps keyboard focus inside and returns it", async ({ page 
 
   const dialog = page.getByRole("dialog", { name: sponsorName });
   await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("About", { exact: true })).toHaveCount(0);
+  await expect(dialog.getByText("Connect", { exact: true })).toHaveCount(0);
   await expectNoAccessibilityViolations(page, "Sponsor dialog");
   await expect.poll(() => activeElementIsInside(page, dialog)).toBe(true);
   await page.keyboard.press("Tab");

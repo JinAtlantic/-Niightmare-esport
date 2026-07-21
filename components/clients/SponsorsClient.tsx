@@ -39,12 +39,6 @@ function useSponsorPick() {
 }
 
 const COPY = {
-  modalIntro: {
-    en: "A NIIGHTMARE sponsor or partner connected to the club's competitive journey, content, and community events.",
-    lo: "ຜູ້ສະໜັບສະໜູນ ຫຼື ພາດເນີ້ຂອງ NIIGHTMARE ທີ່ຮ່ວມເດີນທາງໃນການແຂ່ງຂັນ ຄອນເທນ ແລະ ກິດຈະກຳຊຸມຊົນ.",
-  },
-  about: { en: "About", lo: "ກ່ຽວກັບ" },
-  connect: { en: "Connect", lo: "ຊ່ອງທາງຕິດຕໍ່" },
   visit: { en: "Visit Website", lo: "ໄປທີ່ເວັບໄຊ" },
   close: { en: "Close", lo: "ປິດ" },
   facebook: { en: "Become Our Partner", lo: "ມາຮ່ວມເປັນພາດເນີ້ກັບພວກເຮົາ" },
@@ -177,9 +171,9 @@ function SponsorModal({
 
   if (!sponsor || typeof document === "undefined") return null;
 
-  const hasDescription = sponsor.description && (sponsor.description.en || sponsor.description.lo);
   const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
   const group = sponsorGroupCopy(sponsor.partnerGroup);
+  const hasContact = sponsorChannels(sponsor).length > 0 || linked;
 
   return createPortal(
     <div
@@ -224,17 +218,11 @@ function SponsorModal({
           </div>
         </div>
 
-        {/* Body: description + connect */}
-        <div className="space-y-6 p-6 md:p-7">
-          <div>
-            <SectionLabel>{pick(COPY.about)}</SectionLabel>
-            <p className="mt-3 text-[15px] leading-relaxed text-spectre">
-              {hasDescription ? pick(sponsor.description!) : pick(COPY.modalIntro)}
-            </p>
+        {hasContact && (
+          <div className="p-6 md:p-7">
+            <SponsorConnect sponsor={sponsor} linked={linked} />
           </div>
-
-          <SponsorConnect sponsor={sponsor} linked={linked} />
-        </div>
+        )}
       </div>
     </div>,
     document.body
@@ -247,9 +235,8 @@ function SponsorConnect({ sponsor, linked }: { sponsor: Sponsor; linked: boolean
   if (channels.length === 0 && !linked) return null;
 
   return (
-    <div className="border-t border-edge pt-6">
-      <SectionLabel>{pick(COPY.connect)}</SectionLabel>
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <SponsorSocialRow sponsor={sponsor} />
         {linked && (
           <a
