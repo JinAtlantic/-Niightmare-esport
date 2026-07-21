@@ -503,7 +503,7 @@ export function cleanRefCode(raw: unknown): string {
 export function computeOrder(
   content: ShopContent,
   items: ShopOrderItem[]
-): { lines: ShopOrderLine[]; totalQty: number; total: number; currency: string } {
+): { lines: ShopOrderLine[]; totalQty: number; total: number; currency: string; currencyConflict: boolean } {
   const lines: ShopOrderLine[] = [];
   for (const it of items) {
     const collection = it.collectionId
@@ -517,7 +517,20 @@ export function computeOrder(
   }
   const totalQty = lines.reduce((a, l) => a + l.quantity, 0);
   const total = lines.reduce((a, l) => a + l.lineTotal, 0);
-  return { lines, totalQty, total, currency: lines[0]?.collectionId ? (content.collections.find((c) => c.id === lines[0].collectionId)?.currency ?? content.currency) : content.currency };
+  const currencies = new Set(
+    lines.map((line) =>
+      line.collectionId
+        ? content.collections.find((collection) => collection.id === line.collectionId)?.currency ?? content.currency
+        : content.currency
+    )
+  );
+  return {
+    lines,
+    totalQty,
+    total,
+    currency: currencies.values().next().value ?? content.currency,
+    currencyConflict: currencies.size > 1,
+  };
 }
 
 export function summariseLines(lines: ShopOrderLine[]): string {

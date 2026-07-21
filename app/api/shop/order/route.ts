@@ -337,16 +337,16 @@ export async function POST(request: Request) {
   }
   const { shop } = e2e ? { shop: resolveShop(null) } : await shopContext();
   if (!shop.enabled) return NextResponse.json({ error: "Shop is closed" }, { status: 403 });
-  const { lines, totalQty, total, currency } = computeOrder(shop, input.items);
+  const { lines, totalQty, total, currency, currencyConflict } = computeOrder(shop, input.items);
   if (!lines.length) {
     return NextResponse.json(
       { error: "No available sizes selected", fields: { items: true } },
       { status: 400 }
     );
   }
-  if (new Set(lines.map((line) => line.collectionId).filter(Boolean)).size > 1) {
+  if (currencyConflict) {
     return NextResponse.json(
-      { error: "Order one collection at a time", fields: { items: true } },
+      { error: "Products using different currencies cannot be combined", fields: { items: true } },
       { status: 400 }
     );
   }

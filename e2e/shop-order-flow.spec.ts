@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
+import { computeOrder, resolveShop } from "../lib/shop";
 
 const E2E_HEADER = "x-niightmare-shop-e2e";
 const ADMIN_PASSWORD = "niightmare-shop-e2e-password";
@@ -56,6 +57,32 @@ async function expectE2EResponse(response: Response) {
 async function chooseOrderTab(page: Page, name: RegExp) {
   await page.getByRole("button", { name }).click();
 }
+
+test("multi-collection carts combine when every product uses the same currency", () => {
+  const shop = resolveShop(null);
+  const first = shop.collections[0];
+  const second = {
+    ...first,
+    id: "second-collection",
+    slug: "second-collection",
+    productName: { en: "Second Collection", lo: "Second Collection" },
+  };
+  const items = [
+    { collectionId: first.id, sizeId: first.sizes[0].id, quantity: 1 },
+    { collectionId: second.id, sizeId: second.sizes[0].id, quantity: 2 },
+  ];
+
+  const combined = computeOrder({ ...shop, collections: [first, second] }, items);
+  expect(combined.lines).toHaveLength(2);
+  expect(combined.totalQty).toBe(3);
+  expect(combined.currencyConflict).toBe(false);
+
+  const mixedCurrency = computeOrder(
+    { ...shop, collections: [first, { ...second, currency: "USD" }] },
+    items
+  );
+  expect(mixedCurrency.currencyConflict).toBe(true);
+});
 
 test("buyer payment, admin fulfilment, and buyer status sync stay inside localhost", async ({
   page,
