@@ -14,25 +14,13 @@ const uid = () => `achievement-${Date.now().toString(36)}${Math.floor(Math.rando
 
 export default function AchievementsEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<AchievementsData>("achievements");
-  const content = useContent();
-  const site = content.site as { games?: unknown };
+  const site = useContent().site as { games?: unknown };
   const [activeGame, setActiveGame] = useState("mlbb");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data) return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
 
-  const fallback = (content.matches as { tournaments?: Array<{ id: string; game: string; name: { en: string; lo: string }; placement: { en: string; lo: string }; season?: string }> }).tournaments ?? [];
-  const fallbackRecords: AchievementRecord[] = fallback.map((tournament) => ({
-    id: `legacy-${tournament.id}`,
-    game: tournament.game,
-    tournament: tournament.name,
-    placement: tournament.placement,
-    year: tournament.season ?? "",
-    image: "",
-    description: { en: "", lo: "" },
-    enabled: true,
-  }));
-  const records = data.records?.length ? data.records : fallbackRecords;
+  const records = data.records ?? [];
   const games = enabledGames(site.games, records.map((record) => record.game));
   const gameId = games.some((game) => game.id === activeGame) ? activeGame : games[0]?.id ?? "mlbb";
   const page = data.page ?? seed.page;
@@ -94,7 +82,12 @@ export default function AchievementsEditor() {
             <details key={record.id} className="border border-edge bg-crypt/55" open={!record.image}>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
                 <span className="font-display font-bold uppercase tracking-wide text-soul">{record.tournament.en || `Tournament ${index + 1}`}</span>
-                <span className="font-display text-lg font-black uppercase text-gold">{record.placement.en || "—"}</span>
+                <span className="flex shrink-0 items-center gap-3">
+                  <span className={`border px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] ${record.enabled !== false ? "border-win/45 bg-win/10 text-win" : "border-edge bg-void/60 text-ash"}`}>
+                    {record.enabled !== false ? "แสดงบนเว็บ" : "ซ่อนอยู่"}
+                  </span>
+                  <span className="font-display text-lg font-black uppercase text-gold">{record.placement.en || "—"}</span>
+                </span>
               </summary>
               <Card className="m-3 mt-0 space-y-3">
                 <div className="grid gap-4 md:grid-cols-[180px_1fr]">

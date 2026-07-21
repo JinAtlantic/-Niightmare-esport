@@ -115,6 +115,7 @@ test("public pages reconcile server content with the live API", async ({ page })
     const content = (await response.json()) as {
       __contentSource?: string;
       matches: { matches: unknown[]; tournaments: unknown[] };
+      achievements: { records?: unknown[] };
     };
     content.matches.matches = [
       {
@@ -150,6 +151,16 @@ test("public pages reconcile server content with the live API", async ({ page })
         season: "2026",
       },
     ];
+    content.achievements.records = [
+      {
+        id: "independent-achievement",
+        game: "mlbb",
+        tournament: { en: "INDEPENDENT ACHIEVEMENT", lo: "INDEPENDENT ACHIEVEMENT" },
+        placement: { en: "Champion", lo: "Champion" },
+        image: "",
+        enabled: true,
+      },
+    ];
     delete content.__contentSource;
     await route.fulfill({ response, json: content });
   });
@@ -158,7 +169,8 @@ test("public pages reconcile server content with the live API", async ({ page })
   await expect(page.getByRole("heading", { name: "LIVE RECOVERY CUP" })).toBeVisible();
 
   await page.goto("/achievements", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: "LIVE RECOVERY CUP" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "INDEPENDENT ACHIEVEMENT" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "LIVE RECOVERY CUP" })).toHaveCount(0);
 });
 
 test("achievement records stay strictly separated by game", async ({ page }) => {
@@ -171,6 +183,7 @@ test("achievement records stay strictly separated by game", async ({ page }) => 
     ];
     content.achievements.records = [
       { id: "mlbb-only", game: "mlbb", tournament: { en: "MLBB ONLY CUP", lo: "MLBB ONLY CUP" }, placement: { en: "1st", lo: "1st" }, image: "", enabled: true },
+      { id: "mlbb-hidden", game: "mlbb", tournament: { en: "HIDDEN MLBB CUP", lo: "HIDDEN MLBB CUP" }, placement: { en: "3rd", lo: "3rd" }, image: "", enabled: false },
       { id: "valorant-only", game: "valorant", tournament: { en: "VALORANT ONLY CUP", lo: "VALORANT ONLY CUP" }, placement: { en: "2nd", lo: "2nd" }, image: "", enabled: true },
     ];
     delete content.__contentSource;
@@ -179,6 +192,7 @@ test("achievement records stay strictly separated by game", async ({ page }) => 
 
   await page.goto("/achievements", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "MLBB ONLY CUP" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "HIDDEN MLBB CUP" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "VALORANT ONLY CUP" })).toHaveCount(0);
   await page.getByRole("button", { name: /VALORANT/ }).click();
   await expect(page.getByRole("heading", { name: "VALORANT ONLY CUP" })).toBeVisible();
@@ -275,8 +289,8 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     }
 
     if (editor.tab === "Matches") {
-      const mlbb = page.getByRole("button", { name: /Manage Game MLBB/i });
-      const efootball = page.getByRole("button", { name: /Manage Game eFootball/i });
+      const mlbb = page.getByRole("button", { name: /^Manage Game MLBB \d+ tournaments \d+ matches/i });
+      const efootball = page.getByRole("button", { name: /^Manage Game eFootball \d+ tournaments \d+ matches/i });
       await expect(mlbb).toBeVisible();
       await expect(efootball).toBeVisible();
 

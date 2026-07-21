@@ -7,28 +7,18 @@ import Reveal from "@/components/ui/Reveal";
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { enabledGames } from "@/lib/games";
-import type { AchievementRecord, AchievementsData, Tournament } from "@/lib/types";
+import type { AchievementRecord, AchievementsData } from "@/lib/types";
 
-function fallbackRecords(tournaments: Tournament[]): AchievementRecord[] {
-  return tournaments.map((tournament) => ({
-    id: `tournament-${tournament.id}`,
-    game: tournament.game,
-    tournament: tournament.name,
-    placement: tournament.placement,
-    year: tournament.season,
-    description: { en: "", lo: "" },
-    enabled: true,
-  }));
-}
+const EMPTY_RECORDS: AchievementRecord[] = [];
 
 export default function AchievementsClient() {
   const { pick } = useLanguage();
   const content = useContent();
   const achievements = content.achievements as unknown as AchievementsData;
-  const tournaments = ((content.matches as { tournaments?: Tournament[] }).tournaments ?? []);
-  const authoredRecords = achievements.records ?? [];
-  const records = authoredRecords.length ? authoredRecords : fallbackRecords(tournaments);
-  const discovered = [...new Set([...records.map((record) => record.game), ...tournaments.map((tournament) => tournament.game)])];
+  // Achievements are an independent admin-managed collection. Never derive
+  // them from /matches: hiding or editing a result must not change this page.
+  const records = achievements.records ?? EMPTY_RECORDS;
+  const discovered = [...new Set(records.map((record) => record.game))];
   const games = enabledGames((content.site as { games?: unknown }).games, discovered);
   const [activeGame, setActiveGame] = useState(games[0]?.id ?? "mlbb");
 
