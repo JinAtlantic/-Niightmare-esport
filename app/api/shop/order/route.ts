@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { deleteFromStorage } from "@/lib/supabaseStorage";
+import { deleteFromStorage, normalizeOrderEvidenceImage } from "@/lib/supabaseStorage";
 import { uploadEvidenceDataUrl } from "@/lib/orderEvidenceUpload";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import { sendPushToAll } from "@/lib/push";
@@ -66,13 +66,15 @@ async function shopContext(): Promise<{ shop: ShopContent; formspree: string }> 
   return { shop, formspree };
 }
 
-function testEvidence(slip: unknown): string | undefined {
+async function testEvidence(slip: unknown): Promise<string | undefined> {
   if (typeof slip !== "string") return undefined;
   const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(slip);
   if (!match) return undefined;
   try {
     const bytes = Buffer.from(match[1], "base64");
-    return bytes.length > 0 && bytes.length <= SLIP_MAX_BYTES ? slip : undefined;
+    if (!bytes.length || bytes.length > SLIP_MAX_BYTES) return undefined;
+    const normalized = await normalizeOrderEvidenceImage(bytes, SLIP_MAX_BYTES);
+    return normalized ? `data:image/jpeg;base64,${normalized.toString("base64")}` : undefined;
   } catch {
     return undefined;
   }
@@ -229,7 +231,7 @@ async function declarePayment(
   return NextResponse.json({ ok: true, id: paidRecord.id, order: paidRecord });
 }
 
-function declareTestPayment(body: Record<string, unknown>, orderId: string, refCode: string) {
+async function declareTestPayment(body: Record<string, unknown>, orderId: string, refCode: string) {
   if (!UUID_RE.test(orderId)) {
     return NextResponse.json({ error: "Bad order id" }, { status: 400, headers: SHOP_E2E_HEADERS });
   }
@@ -239,7 +241,7 @@ function declareTestPayment(body: Record<string, unknown>, orderId: string, refC
       { status: 400, headers: SHOP_E2E_HEADERS }
     );
   }
-  const slip = testEvidence(body.slip);
+  const slip = await testEvidence(body.slip);
   if (!slip) {
     return NextResponse.json(
       { error: "Payment slip is required" },

@@ -1,4 +1,5 @@
 import "server-only";
+import sharp from "sharp";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 
 /** Public website media and private customer/order evidence must never share an
@@ -56,14 +57,17 @@ export async function normalizeOrderEvidenceImage(
   maxBytes = 4 * 1024 * 1024
 ): Promise<Buffer | null> {
   try {
-    const sharp = (await import("sharp")).default;
     const output = await sharp(input, { failOn: "error", limitInputPixels: 24_000_000 })
       .rotate()
       .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
       .jpeg({ quality: 88, progressive: true, mozjpeg: true })
       .toBuffer();
     return output.length > 0 && output.length <= maxBytes ? output : null;
-  } catch {
+  } catch (error) {
+    console.error(
+      "[order-evidence] sharp normalization error",
+      error instanceof Error ? error.message : "unknown error"
+    );
     return null;
   }
 }

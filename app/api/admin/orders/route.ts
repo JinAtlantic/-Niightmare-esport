@@ -4,6 +4,7 @@ import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   deleteFromStorage,
+  normalizeOrderEvidenceImage,
   signedStorageUrl,
 } from "@/lib/supabaseStorage";
 import { uploadEvidenceDataUrl } from "@/lib/orderEvidenceUpload";
@@ -34,13 +35,15 @@ async function authed(): Promise<boolean> {
   return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
 }
 
-function testImage(data: unknown): string | undefined {
+async function testImage(data: unknown): Promise<string | undefined> {
   if (typeof data !== "string") return undefined;
   const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(data);
   if (!match) return undefined;
   try {
     const bytes = Buffer.from(match[1], "base64");
-    return bytes.length > 0 && bytes.length <= IMAGE_MAX_BYTES ? data : undefined;
+    if (!bytes.length || bytes.length > IMAGE_MAX_BYTES) return undefined;
+    const normalized = await normalizeOrderEvidenceImage(bytes, IMAGE_MAX_BYTES);
+    return normalized ? `data:image/jpeg;base64,${normalized.toString("base64")}` : undefined;
   } catch {
     return undefined;
   }
@@ -98,7 +101,7 @@ export async function PATCH(request: Request) {
   }
 
   if (isShopE2ERequest(request)) {
-    const shippingImage = body.shippingImage ? testImage(body.shippingImage) : undefined;
+    const shippingImage = body.shippingImage ? await testImage(body.shippingImage) : undefined;
     if (body.shippingImage && !shippingImage) {
       return NextResponse.json(
         { error: "อัปโหลดรูปไม่สำเร็จ" },

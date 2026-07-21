@@ -67,6 +67,9 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  // Keep Sharp as a native runtime dependency in Vercel Functions. Explicitly
+  // externalizing it avoids wrapping the native module in a dynamic bundle.
+  serverExternalPackages: ["sharp"],
   // Don't advertise the framework.
   poweredByHeader: false,
   compress: true,
