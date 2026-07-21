@@ -94,10 +94,15 @@ export default function ShopProductClient({ slug }: { slug: string }) {
                 {activeProduct.sizes.map((size) => {
                   const selected = size.id === sizeId;
                   const disabled = size.availability === "sold_out";
+                  const availabilityClass = size.availability === "in_stock"
+                    ? "border-win/40 bg-win/10 text-win"
+                    : size.availability === "preorder"
+                      ? "border-glow/40 bg-glow/10 text-glow"
+                      : "border-loss/40 bg-loss/10 text-loss";
                   return (
-                    <button key={size.id} type="button" disabled={disabled} aria-pressed={selected} onClick={() => setSizeId(size.id)} className={`relative min-h-[58px] rounded-md border px-2 py-2 font-display text-sm font-black uppercase transition-all ${selected ? "border-glow bg-amethyst/20 text-soul shadow-glow-soft" : disabled ? "cursor-not-allowed border-edge bg-void/35 text-ash-dim line-through" : "border-edge-bright bg-crypt/70 text-spectre hover:border-amethyst hover:text-soul"}`}>
-                      {size.label}
-                      <span className={`mt-1 block font-mono text-[7px] font-bold uppercase tracking-[0.08em] no-underline ${size.availability === "in_stock" ? "text-win" : size.availability === "preorder" ? "text-glow" : "text-loss"}`}>
+                    <button key={size.id} type="button" disabled={disabled} aria-pressed={selected} onClick={() => setSizeId(size.id)} className={`relative min-h-[82px] rounded-md border px-2 py-3 font-display font-black uppercase transition-all ${selected ? "border-glow bg-amethyst/20 text-soul shadow-glow-soft" : disabled ? "cursor-not-allowed border-edge bg-void/35 text-ash-dim" : "border-edge-bright bg-crypt/70 text-spectre hover:border-amethyst hover:text-soul"}`}>
+                      <span data-size-label className={`block text-lg leading-none sm:text-xl ${disabled ? "line-through" : ""}`}>{size.label}</span>
+                      <span data-size-availability className={`mt-2 flex min-h-6 w-full items-center justify-center rounded-md border px-1.5 py-1 font-mono text-[10px] font-bold uppercase leading-tight tracking-[0.04em] no-underline sm:text-[11px] ${availabilityClass}`}>
                         {pick(size.availability === "in_stock" ? COPY.inStock : size.availability === "preorder" ? COPY.preorder : COPY.soldOut)}
                       </span>
                     </button>

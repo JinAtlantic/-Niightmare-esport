@@ -126,7 +126,7 @@ function ProductCard({ product }: { product: ShopCollection }) {
               <span className="font-display text-4xl font-black text-amethyst/35">#{product.fixedJerseyNumber || "7"}</span>
             </div>
           )}
-          <span className={`absolute left-2 top-2 rounded-full border px-2 py-1 font-mono text-[8px] font-bold uppercase tracking-[0.12em] sm:left-3 sm:top-3 ${stateClass}`}>
+          <span className={`absolute left-2 top-2 rounded-md border px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase leading-none tracking-[0.08em] sm:left-3 sm:top-3 sm:text-[11px] ${stateClass}`}>
             {pick(stateCopy)}
           </span>
         </div>

@@ -240,6 +240,10 @@ test("shop products have shareable detail pages and keep per-size availability",
   const sizeButtons = page.getByRole("button", { name: /^(S|M|L|XL|XXL|3XL|4XL) (Ready to ship|Pre-order|Sold out)$/ });
   await expect(sizeButtons.first()).toBeVisible();
   expect(await sizeButtons.count()).toBeGreaterThan(0);
+  const sizeLabelFont = Number.parseFloat(await sizeButtons.first().locator("[data-size-label]").evaluate((element) => getComputedStyle(element).fontSize));
+  const availabilityFont = Number.parseFloat(await sizeButtons.first().locator("[data-size-availability]").evaluate((element) => getComputedStyle(element).fontSize));
+  expect(sizeLabelFont).toBeGreaterThanOrEqual(18);
+  expect(availabilityFont).toBeGreaterThanOrEqual(10);
   await expect(page.getByRole("button", { name: /^(Front|Back)$/ })).toHaveCount(0);
 
   await page.getByRole("link", { name: "All products" }).first().click();
