@@ -173,7 +173,9 @@ function SponsorModal({
 
   const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
   const group = sponsorGroupCopy(sponsor.partnerGroup);
+  const description = sponsor.description ? pick(sponsor.description).trim() : "";
   const hasContact = sponsorChannels(sponsor).length > 0 || linked;
+  const hasDetails = Boolean(description) || hasContact;
 
   return createPortal(
     <div
@@ -218,9 +220,18 @@ function SponsorModal({
           </div>
         </div>
 
-        {hasContact && (
-          <div className="p-6 md:p-7">
-            <SponsorConnect sponsor={sponsor} linked={linked} />
+        {hasDetails && (
+          <div className="space-y-6 p-6 md:p-7">
+            {description && (
+              <p className="whitespace-pre-line text-base leading-relaxed text-spectre md:text-lg">
+                {description}
+              </p>
+            )}
+            {hasContact && (
+              <div className={description ? "border-t border-edge pt-5" : undefined}>
+                <SponsorConnect sponsor={sponsor} linked={linked} />
+              </div>
+            )}
           </div>
         )}
       </div>
