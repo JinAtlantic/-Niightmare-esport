@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useContent } from "@/components/context/ContentContext";
 import { safeHref, safeImageSrc } from "@/lib/safety";
+import { EvidenceImageError, prepareEvidenceImage } from "@/lib/clientEvidenceImage";
 import ShopPushToggle from "@/components/shop/ShopPushToggle";
 import JerseyShowcase from "@/components/shop/JerseyShowcase";
 import PageHeader from "@/components/layout/PageHeader";
@@ -62,6 +63,11 @@ const COPY = {
   slipPick: { en: "Tap to upload your slip", lo: "ກົດເພື່ອອັບໂຫລດສະລິບ" },
   slipChange: { en: "Change slip", lo: "ປ່ຽນສະລິບ" },
   slipRequired: { en: "Please attach your payment slip first.", lo: "ກະລຸນາແນບສະລິບການໂອນກ່ອນ." },
+  slipPreparing: { en: "Preparing image...", lo: "ກຳລັງກຽມຮູບ..." },
+  slipTooLarge: { en: "This image is too large. Please choose one under 25 MB.", lo: "ຮູບນີ້ໃຫຍ່ເກີນໄປ. ກະລຸນາເລືອກຮູບຕ່ຳກວ່າ 25 MB." },
+  slipUnsupported: { en: "This image format cannot be read. Please use JPG, PNG, or WebP.", lo: "ບໍ່ສາມາດອ່ານຮູບນີ້ໄດ້. ກະລຸນາໃຊ້ JPG, PNG ຫຼື WebP." },
+  slipProcessError: { en: "Could not prepare this image. Please choose another image.", lo: "ບໍ່ສາມາດກຽມຮູບນີ້ໄດ້. ກະລຸນາເລືອກຮູບອື່ນ." },
+  slipStorageError: { en: "Image storage is temporarily unavailable. Please try again shortly.", lo: "ລະບົບເກັບຮູບບໍ່ພ້ອມຊົ່ວຄາວ. ກະລຸນາລອງໃໝ່ອີກຄັ້ງ." },
   bank: { en: "Bank", lo: "ທະນາຄານ" },
   accName: { en: "Account name", lo: "ຊື່ບັນຊີ" },
   accNo: { en: "Account number", lo: "ເລກບັນຊີ" },
@@ -150,6 +156,7 @@ export default function ShopClient() {
   const [payingOrder, setPayingOrder] = useState<ShopOrderRecord | null>(null);
   const [slip, setSlip] = useState("");
   const [slipName, setSlipName] = useState("");
+  const [processingSlip, setProcessingSlip] = useState(false);
   const payDialogRef = useRef<HTMLDivElement>(null);
   const payCloseRef = useRef<HTMLButtonElement>(null);
   const paySuccessRef = useRef<HTMLDivElement>(null);
@@ -397,12 +404,24 @@ export default function ShopClient() {
     const file = e.target.files?.[0];
     if (!file) return;
     setPayError("");
+    setSlip("");
+    setSlipName("");
+    setProcessingSlip(true);
     try {
-      const dataUrl = await downscaleImage(file);
+      const dataUrl = await prepareEvidenceImage(file);
       setSlip(dataUrl);
       setSlipName(file.name);
-    } catch {
-      setPayError(pick(COPY.payError));
+    } catch (error) {
+      if (error instanceof EvidenceImageError && error.code === "source_too_large") {
+        setPayError(pick(COPY.slipTooLarge));
+      } else if (error instanceof EvidenceImageError && error.code === "unsupported_image") {
+        setPayError(pick(COPY.slipUnsupported));
+      } else {
+        setPayError(pick(COPY.slipProcessError));
+      }
+    } finally {
+      setProcessingSlip(false);
+      e.target.value = "";
     }
   }
 
@@ -437,7 +456,7 @@ export default function ShopClient() {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "save failed");
+      if (!res.ok) throw new Error(String(json?.code || "save_failed"));
       const slipUrl: string | undefined = json.order?.slipUrl;
       const serverId: string | undefined = json.order?.id ?? payingOrder.id;
       const target = payingOrder;
@@ -456,8 +475,12 @@ export default function ShopClient() {
         window.requestAnimationFrame(() => myOrdersTabRef.current?.focus());
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 1900);
-    } catch {
-      setPayError(pick(COPY.payError));
+    } catch (error) {
+      setPayError(
+        error instanceof Error && error.message === "storage_failed"
+          ? pick(COPY.slipStorageError)
+          : pick(COPY.payError)
+      );
     } finally {
       setSubmitting(false);
     }
@@ -945,7 +968,7 @@ export default function ShopClient() {
                         </span>
                       )}
                     </label>
-                    {!slip && <p className="mt-2 font-mono text-[10px] leading-relaxed text-ash">{pick(COPY.slipRequired)}</p>}
+                    {!slip && <p className="mt-2 font-mono text-[10px] leading-relaxed text-ash">{processingSlip ? pick(COPY.slipPreparing) : pick(COPY.slipRequired)}</p>}
                   </div>
 
                   {payError && <p className="mt-3 text-center font-mono text-[11px] text-loss">{payError}</p>}
@@ -953,10 +976,10 @@ export default function ShopClient() {
                   <button
                     type="button"
                     onClick={confirmTransfer}
-                    disabled={submitting || !slip}
+                    disabled={submitting || processingSlip || !slip}
                     className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-win/60 bg-win/15 px-5 py-3 font-display text-base font-bold uppercase tracking-[0.16em] text-win transition-all hover:bg-win/25 hover:shadow-[0_0_24px_rgba(52,211,153,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {submitting ? pick(COPY.sending) : pick(COPY.transferred)}
+                    {processingSlip ? pick(COPY.slipPreparing) : submitting ? pick(COPY.sending) : pick(COPY.transferred)}
                   </button>
                 </>
               )}
@@ -971,34 +994,6 @@ export default function ShopClient() {
 }
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
-
-/** Read an image file, downscale it (longest edge ≤ 1400px) and return a JPEG
- *  data URL. Keeps the uploaded slip small (~100–300 KB) so it posts fast and
- *  loads instantly in the admin Orders tab. Falls back to the raw file on error. */
-function downscaleImage(file: File, maxEdge = 1400, quality = 0.82): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("read failed"));
-    reader.onload = () => {
-      const src = String(reader.result || "");
-      const img = new Image();
-      img.onerror = () => resolve(src); // fall back to the original data URL
-      img.onload = () => {
-        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
-        if (scale >= 1) return resolve(src);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return resolve(src);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
-      };
-      img.src = src;
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
 function Field({ label, error, children }: { label: string; error?: boolean; children: React.ReactNode }) {
   return (

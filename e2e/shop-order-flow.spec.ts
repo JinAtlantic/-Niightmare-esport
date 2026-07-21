@@ -1,11 +1,28 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
+import { randomBytes } from "node:crypto";
+import sharp from "sharp";
 
 const E2E_HEADER = "x-niightmare-shop-e2e";
 const ADMIN_PASSWORD = "niightmare-shop-e2e-password";
-const PIXEL_PNG = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEUlEQVQImWNYEfodjhiI4wAAJ/EfQQ19TOgAAAAASUVORK5CYII=",
-  "base64"
-);
+async function largeDetailedPng() {
+  const width = 1200;
+  const height = 1200;
+  return sharp(randomBytes(width * height * 3), {
+    raw: { width, height, channels: 3 },
+  })
+    .png({ compressionLevel: 0 })
+    .toBuffer();
+}
+
+function expectCompressedJpeg(response: Response, field: "slip" | "shippingImage") {
+  const body = response.request().postDataJSON();
+  const value = String(body?.[field] || "");
+  expect(
+    value.startsWith("data:image/jpeg;base64,"),
+    `field=${field} keys=${Object.keys(body || {}).join(",")} prefix=${value.slice(0, 40)}`
+  ).toBeTruthy();
+  expect(Buffer.from(value.split(",")[1] || "", "base64").length).toBeLessThanOrEqual(1_500_000);
+}
 
 function isOrderResponse(response: Response, intent: "reserve" | "pay") {
   if (!response.url().endsWith("/api/shop/order") || response.request().method() !== "POST") {
@@ -31,7 +48,8 @@ function isAdminPatch(response: Response, status?: string, shipping = false) {
 }
 
 async function expectE2EResponse(response: Response) {
-  expect(response.ok()).toBeTruthy();
+  const failure = response.ok() ? "" : `status=${response.status()} body=${await response.text()}`;
+  expect(response.ok(), failure).toBeTruthy();
   expect(response.headers()[E2E_HEADER]).toBe("1");
 }
 
@@ -88,16 +106,19 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   expect(refCode).toMatch(/^NM-[A-Z0-9]{8}$/);
 
   await expect(page.getByRole("dialog", { name: "Transfer to pay" })).toBeVisible();
+  const detailedPng = await largeDetailedPng();
+  expect(detailedPng.length).toBeGreaterThan(4 * 1024 * 1024);
   await page.locator('input[type="file"][accept="image/png,image/jpeg,image/webp"]').setInputFiles({
-    name: "payment-slip.png",
+    name: "large-payment-slip.png",
     mimeType: "image/png",
-    buffer: PIXEL_PNG,
+    buffer: detailedPng,
   });
   await expect(page.getByAltText("slip preview")).toBeVisible();
 
   const payPromise = page.waitForResponse((response) => isOrderResponse(response, "pay"));
   await page.getByRole("button", { name: "I've transferred" }).click();
   const payResponse = await payPromise;
+  expectCompressedJpeg(payResponse, "slip");
   await expectE2EResponse(payResponse);
   await expect(page.getByText("Payment submitted!", { exact: true })).toBeVisible();
   const myOrdersTab = page.getByRole("button", { name: /My Orders \(1\)/ });
@@ -131,11 +152,13 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   }
   const shippingPromise = admin.waitForResponse((response) => isAdminPatch(response, undefined, true));
   await shippingRegion.locator('input[type="file"]').setInputFiles({
-    name: "shipping-receipt.png",
+    name: "large-shipping-receipt.png",
     mimeType: "image/png",
-    buffer: PIXEL_PNG,
+    buffer: detailedPng,
   });
-  await expectE2EResponse(await shippingPromise);
+  const shippingResponse = await shippingPromise;
+  await expectE2EResponse(shippingResponse);
+  expectCompressedJpeg(shippingResponse, "shippingImage");
   await expect(shippingRegion.getByAltText("shipping")).toBeVisible();
 
   const packingPromise = admin.waitForResponse((response) =>

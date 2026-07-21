@@ -1,14 +1,12 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE_NAME, adminDisabled, verifyToken } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   deleteFromStorage,
-  normalizeOrderEvidenceImage,
   signedStorageUrl,
-  uploadOrderEvidence,
 } from "@/lib/supabaseStorage";
+import { uploadEvidenceDataUrl } from "@/lib/orderEvidenceUpload";
 import { sendPushForOrder } from "@/lib/push";
 import {
   SHOP_E2E_HEADERS,
@@ -34,25 +32,6 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 async function authed(): Promise<boolean> {
   return !adminDisabled() && verifyToken((await cookies()).get(COOKIE_NAME)?.value);
-}
-
-async function uploadImage(data: unknown): Promise<string | undefined> {
-  if (typeof data !== "string") return undefined;
-  const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(data);
-  if (!match) return undefined;
-  try {
-    const input = Buffer.from(match[1], "base64");
-    if (!input.length || input.length > IMAGE_MAX_BYTES) return undefined;
-    const normalized = await normalizeOrderEvidenceImage(input, IMAGE_MAX_BYTES);
-    if (!normalized) return undefined;
-    return await uploadOrderEvidence(
-      `shop-shipping/${randomUUID()}.jpg`,
-      normalized,
-      "image/jpeg"
-    );
-  } catch {
-    return undefined;
-  }
 }
 
 function testImage(data: unknown): string | undefined {
@@ -164,10 +143,21 @@ export async function PATCH(request: Request) {
   if (body.clearShippingImage) {
     update.shipping_image_url = null;
   } else if (body.shippingImage) {
-    newRef = await uploadImage(body.shippingImage);
-    if (!newRef) {
-      return NextResponse.json({ error: "อัปโหลดรูปไม่สำเร็จ" }, { status: 400 });
+    const shippingUpload = await uploadEvidenceDataUrl(body.shippingImage, "shop-shipping");
+    if (!shippingUpload.ok) {
+      const status = shippingUpload.reason === "storage_failed" ? 503 : 400;
+      return NextResponse.json(
+        {
+          code: shippingUpload.reason,
+          error:
+            shippingUpload.reason === "storage_failed"
+              ? "ระบบเก็บรูปไม่พร้อมใช้งานชั่วคราว กรุณาลองใหม่"
+              : "ประมวลผลรูปไม่สำเร็จ กรุณาใช้ JPG, PNG หรือ WebP ขนาดต่ำกว่า 25 MB",
+        },
+        { status }
+      );
     }
+    newRef = shippingUpload.ref;
     update.shipping_image_url = newRef;
   }
 

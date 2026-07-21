@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Card } from "@/components/admin/ui";
 import { isOrderExpired } from "@/lib/shop";
+import { EvidenceImageError, prepareEvidenceImage } from "@/lib/clientEvidenceImage";
 
 interface OrderLine {
   label: string;
@@ -82,31 +83,6 @@ function timeAgo(iso: string): string {
   const mo = Math.floor(d / 30);
   if (mo < 12) return `${mo} เดือนที่แล้ว`;
   return `${Math.floor(mo / 12)} ปีที่แล้ว`;
-}
-
-/** Read an image File and downscale it to a JPEG data URL (admin shipping photos). */
-async function fileToDownscaledDataUrl(file: File, max = 1400): Promise<string> {
-  const dataUrl = await new Promise<string>((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(String(r.result));
-    r.onerror = () => rej(new Error("read"));
-    r.readAsDataURL(file);
-  });
-  const img = await new Promise<HTMLImageElement>((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = () => rej(new Error("img"));
-    i.src = dataUrl;
-  });
-  const scale = Math.min(1, max / Math.max(img.width, img.height));
-  if (scale >= 1) return dataUrl;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(img.width * scale);
-  canvas.height = Math.round(img.height * scale);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return dataUrl;
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.85);
 }
 
 type TabId = "awaiting" | "checking" | "paid" | "packing" | "shipped";
@@ -439,7 +415,7 @@ export default function OrdersEditor() {
     setBusyId(id);
     setError("");
     try {
-      const dataUrl = await fileToDownscaledDataUrl(file);
+      const dataUrl = await prepareEvidenceImage(file);
       const res = await fetch("/api/admin/orders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -451,7 +427,13 @@ export default function OrdersEditor() {
       const nowIso = new Date().toISOString();
       setOrders((rows) => rows.map((r) => (r.id === id ? { ...r, shipping_image_url: url, updated_at: nowIso } : r)));
     } catch (e) {
-      setError(e instanceof Error && e.message ? e.message : "อัปโหลดรูปไม่สำเร็จ");
+      if (e instanceof EvidenceImageError && e.code === "source_too_large") {
+        setError("รูปใหญ่เกินไป กรุณาเลือกรูปที่มีขนาดต่ำกว่า 25 MB");
+      } else if (e instanceof EvidenceImageError && e.code === "unsupported_image") {
+        setError("อ่านรูปนี้ไม่ได้ กรุณาใช้ไฟล์ JPG, PNG หรือ WebP");
+      } else {
+        setError(e instanceof Error && e.message ? e.message : "อัปโหลดรูปไม่สำเร็จ กรุณาลองเลือกรูปอื่น");
+      }
     } finally {
       setBusyId("");
     }

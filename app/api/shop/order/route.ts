@@ -2,11 +2,8 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  deleteFromStorage,
-  normalizeOrderEvidenceImage,
-  uploadOrderEvidence,
-} from "@/lib/supabaseStorage";
+import { deleteFromStorage } from "@/lib/supabaseStorage";
+import { uploadEvidenceDataUrl } from "@/lib/orderEvidenceUpload";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import { sendPushToAll } from "@/lib/push";
 import {
@@ -67,23 +64,6 @@ async function shopContext(): Promise<{ shop: ShopContent; formspree: string }> 
     // Defaults keep the shop page functional during a brief content-read outage.
   }
   return { shop, formspree };
-}
-
-/** Validate actual image bytes, strip metadata, and upload to the private order
- * evidence bucket. The returned value is an opaque storage ref, not a URL. */
-async function uploadSlip(slip: unknown): Promise<string | undefined> {
-  if (typeof slip !== "string") return undefined;
-  const match = /^data:image\/(?:png|jpeg|webp);base64,([\s\S]+)$/.exec(slip);
-  if (!match) return undefined;
-  try {
-    const input = Buffer.from(match[1], "base64");
-    if (!input.length || input.length > SLIP_MAX_BYTES) return undefined;
-    const normalized = await normalizeOrderEvidenceImage(input, SLIP_MAX_BYTES);
-    if (!normalized) return undefined;
-    return await uploadOrderEvidence(`shop-slips/${randomUUID()}.jpg`, normalized, "image/jpeg");
-  } catch {
-    return undefined;
-  }
 }
 
 function testEvidence(slip: unknown): string | undefined {
@@ -170,10 +150,21 @@ async function declarePayment(
 
   // Validate the reservation before uploading so bogus order IDs cannot leave
   // orphan payment slips in Storage.
-  const slipRef = await uploadSlip(body.slip);
-  if (!slipRef) {
-    return NextResponse.json({ error: "Payment slip is required" }, { status: 400 });
+  const slipUpload = await uploadEvidenceDataUrl(body.slip, "shop-slips");
+  if (!slipUpload.ok) {
+    const status = slipUpload.reason === "storage_failed" ? 503 : 400;
+    return NextResponse.json(
+      {
+        code: slipUpload.reason,
+        error:
+          slipUpload.reason === "storage_failed"
+            ? "Payment image storage is temporarily unavailable"
+            : "Could not process the payment slip. Please use a JPG, PNG, or WebP image under 25 MB.",
+      },
+      { status }
+    );
   }
+  const slipRef = slipUpload.ref;
 
   const paidAt = new Date().toISOString();
   const { data: updated, error: updateError } = await db
