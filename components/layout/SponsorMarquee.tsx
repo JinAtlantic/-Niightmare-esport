@@ -4,12 +4,14 @@ import React from "react";
 import { useContent } from "@/components/context/ContentContext";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { safeImageSrc } from "@/lib/safety";
-import type { Bilingual } from "@/lib/types";
+import { resolveSponsorGroup } from "@/lib/sponsorGroups";
+import type { Bilingual, SponsorGroup } from "@/lib/types";
 
 interface MarqueeSponsor {
   id: string;
   name: string;
   logo?: string;
+  partnerGroup?: SponsorGroup;
 }
 
 const FALLBACK_LABEL: Bilingual = { en: "OUR PARTNERS", lo: "partners ຂອງເຮົາ" };
@@ -27,7 +29,9 @@ export default function SponsorMarquee() {
     page?: { partnersLabel?: Bilingual };
     sponsors?: MarqueeSponsor[];
   };
-  const sponsors = content.sponsors ?? [];
+  const sponsors = (content.sponsors ?? []).filter(
+    (sponsor) => resolveSponsorGroup(sponsor.partnerGroup) !== "past"
+  );
   if (sponsors.length === 0) return null;
 
   const label = content.page?.partnersLabel ?? FALLBACK_LABEL;
