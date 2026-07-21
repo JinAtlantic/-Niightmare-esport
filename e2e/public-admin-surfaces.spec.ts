@@ -192,12 +192,7 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
   await page.getByRole("textbox", { name: "Password", exact: true }).fill(ADMIN_PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Admin Dashboard" })).toBeVisible();
-  const readiness = page.getByRole("region", { name: "Launch Readiness" });
-  await expect(readiness).toBeVisible();
-  await expect(readiness).toHaveAttribute("data-readiness-level", /^(ready|warning|blocked)$/);
-  await expect(readiness.locator("article")).toHaveCount(6);
-  await readiness.getByRole("button", { name: /ไป(?:ดู|แก้)ที่ Shop/ }).first().click();
-  await expect(page.locator("main")).toContainText("สถานะร้าน & ราคา");
+  await expect(page.getByRole("region", { name: "Launch Readiness" })).toHaveCount(0);
 
   const editors: { tab: string; marker: string | RegExp }[] = [
     { tab: "Orders", marker: "ออเดอร์เสื้อ" },

@@ -10,8 +10,6 @@ import SponsorsEditor from "@/components/admin/SponsorsEditor";
 import ShopEditor from "@/components/admin/ShopEditor";
 import OrdersEditor from "@/components/admin/OrdersEditor";
 import PushNotifications from "@/components/admin/PushNotifications";
-import { LaunchReadinessChecker } from "@/components/admin/LaunchReadiness";
-import type { ReadinessTarget } from "@/lib/launchReadiness";
 
 type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "orders";
 
@@ -32,13 +30,6 @@ export default function AdminApp() {
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     window.location.reload();
-  }
-
-  function openReadinessTarget(target: ReadinessTarget) {
-    setTab(target);
-    window.requestAnimationFrame(() => {
-      document.getElementById("admin-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
   }
 
   return (
@@ -74,8 +65,6 @@ export default function AdminApp() {
       <div className="border-b border-edge bg-void/40">
         <PushNotifications />
       </div>
-
-      <LaunchReadinessChecker onNavigate={openReadinessTarget} />
 
       <nav className="border-b border-edge">
         <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 md:px-6">
