@@ -166,6 +166,15 @@ export default function MatchesEditor() {
 
   const setMatches = (next: Match[]) => setData({ ...data, matches: next });
   const setTournaments = (next: Tournament[]) => setData({ ...data, tournaments: next });
+  const activeGame = gameFilter === "all" ? null : gameFilter;
+  const chooseGame = (game: Match["game"]) => {
+    setGameFilter(game);
+    setRecordQuery("");
+    setYearFilter("all");
+    setOpenTournamentId(null);
+    setUnassignedOpen(false);
+    setExpandedMatchId(null);
+  };
   const openMatchesPreview = () => {
     window.open(`/matches?adminPreview=${Date.now()}`, "_blank", "noopener,noreferrer");
   };
@@ -192,12 +201,13 @@ export default function MatchesEditor() {
     });
   };
 
-  const addMatch = () =>
+  const addMatch = () => {
+    if (!activeGame) return;
     setMatches([
       {
         id: uid("m"),
         date: new Date().toISOString().slice(0, 10),
-        game: "mlbb",
+        game: activeGame,
         tournament: { ...emptyText },
         round: { ...emptyText },
         opponent: "",
@@ -208,6 +218,7 @@ export default function MatchesEditor() {
       },
       ...matches,
     ]);
+  };
 
   const addMatchForTournament = (tournament: Tournament) => {
     const nextMatch: Match = {
@@ -227,10 +238,11 @@ export default function MatchesEditor() {
   };
 
   const addTournament = () => {
+    if (!activeGame) return;
     const nextTournament: Tournament = {
       id: uid("t"),
       name: { en: "New Tournament", lo: "New Tournament" },
-      game: "mlbb",
+      game: activeGame,
       placement: { ...emptyText },
       prize: "-",
       season: String(new Date().getFullYear()),
@@ -307,14 +319,20 @@ export default function MatchesEditor() {
   });
   const unassignedMatches = matchRefs.filter((ref) => !assignedIndexes.has(ref.index));
   const query = norm(recordQuery);
-  const tournamentOptions = tournaments.map((t) => ({
+  const tournamentOptions = tournaments.filter((t) => !activeGame || t.game === activeGame).map((t) => ({
     value: t.id,
     label: `${t.game === "mlbb" ? "MLBB" : "eFootball"} / ${t.name.en || t.name.lo || "Untitled tournament"}`,
   }));
   const yearOptions = [
     ...new Set([
-      ...tournamentGroups.map(({ tournament, items }) => groupYear(tournament, items)).filter(Boolean),
-      ...unassignedMatches.map(({ match }) => extractYear(match.date)).filter(Boolean),
+      ...tournamentGroups
+        .filter(({ tournament }) => !activeGame || tournament.game === activeGame)
+        .map(({ tournament, items }) => groupYear(tournament, items))
+        .filter(Boolean),
+      ...unassignedMatches
+        .filter(({ match }) => !activeGame || match.game === activeGame)
+        .map(({ match }) => extractYear(match.date))
+        .filter(Boolean),
     ]),
   ].sort((a, b) => b.localeCompare(a));
   const filteredTournamentGroups = tournamentGroups.filter(({ tournament, items }) => {
@@ -355,6 +373,12 @@ export default function MatchesEditor() {
       ].some((value) => norm(value).includes(query));
     return matchesGame && matchesYear && matchesQuery;
   });
+  const activeTournamentCount = tournamentGroups.filter(
+    ({ tournament }) => !activeGame || tournament.game === activeGame
+  ).length;
+  const activeUnassignedCount = unassignedMatches.filter(
+    ({ match }) => !activeGame || match.game === activeGame
+  ).length;
 
   // Tournaments that exist only as matches (no metadata row) — e.g. results
   // auto-added by "advance to next match", or tournaments whose metadata was
@@ -715,11 +739,19 @@ export default function MatchesEditor() {
     );
   };
 
+  const gameSummaries = GAME_OPTS.map((game) => ({
+    ...game,
+    matchCount: matches.filter((match) => match.game === game.value).length,
+    tournamentCount: tournaments.filter((tournament) => tournament.game === game.value).length,
+  }));
+  const activeGameLabel = activeGame === "mlbb" ? "MLBB" : "eFootball";
+
   return (
     <div className="space-y-6">
       <div className="sticky top-0 z-10 -mx-4 flex flex-col items-start justify-between gap-2 border-b border-edge bg-void/95 px-4 py-2 backdrop-blur md:-mx-6 md:flex-row md:items-center md:px-6">
         <p className="font-mono text-xs text-ash">
-          {matches.length} matches / {tournaments.length} tournaments
+          {activeGame ? matches.filter((match) => match.game === activeGame).length : matches.length} matches /{" "}
+          {activeGame ? tournaments.filter((tournament) => tournament.game === activeGame).length : tournaments.length} tournaments
         </p>
         <div className="flex flex-wrap items-center justify-end gap-2">
           {error && <span className="font-mono text-[11px] text-loss">{error}</span>}
@@ -757,6 +789,48 @@ export default function MatchesEditor() {
           );
         })}
       </div>
+
+      {view === "records" && !activeGame && (
+        <section className="space-y-4">
+          <div className="border-b border-edge pb-3">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-amethyst">
+              Match Management
+            </p>
+            <h2 className="mt-1 font-display text-xl font-bold uppercase tracking-wide text-soul">
+              เลือกเกมที่ต้องการจัดการ
+            </h2>
+            <p className="mt-1 font-mono text-xs text-ash">
+              แต่ละเกมจะแสดงเฉพาะทัวร์นาเมนต์และผลการแข่งขันของเกมนั้น
+            </p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {gameSummaries.map((game) => (
+              <button
+                key={game.value}
+                type="button"
+                onClick={() => chooseGame(game.value as Match["game"])}
+                className="group relative overflow-hidden border border-edge bg-crypt2 p-5 text-left transition-all hover:border-amethyst hover:bg-amethyst/10 hover:shadow-[0_0_24px_rgba(168,85,247,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amethyst"
+              >
+                <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst to-transparent opacity-60" />
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-glow">
+                  Manage Game
+                </span>
+                <span className="mt-2 block font-display text-2xl font-bold uppercase tracking-wide text-soul transition-colors group-hover:text-glow">
+                  {game.label}
+                </span>
+                <span className="mt-4 flex flex-wrap gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ash">
+                  <span className="border border-edge bg-void/60 px-2 py-1">{game.tournamentCount} tournaments</span>
+                  <span className="border border-edge bg-void/60 px-2 py-1">{game.matchCount} matches</span>
+                </span>
+                <span className="mt-5 block border-t border-edge pt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-spectre">
+                  เปิดหน้าจัดการ →
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {view === "page" && (
         <section className="space-y-4">
@@ -843,13 +917,21 @@ export default function MatchesEditor() {
         </section>
       )}
 
-      {view === "records" && (
+      {view === "records" && activeGame && (
         <section className="space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-2 border-b border-edge pb-2">
             <div>
-              <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">Records</h2>
+              <Button
+                onClick={() => setGameFilter("all")}
+                className="mb-2 min-h-[30px] px-2 py-1 text-[10px]"
+              >
+                ← เลือกเกมอื่น
+              </Button>
+              <h2 className="font-display text-base font-bold uppercase tracking-wide text-soul">
+                {activeGameLabel} Records
+              </h2>
               <p className="mt-0.5 max-w-2xl font-mono text-[11px] text-ash">
-                เปิดทัวร์นาเมนต์ แก้ไขแมตช์ แล้วบันทึกครั้งเดียว
+                จัดการเฉพาะทัวร์นาเมนต์และผลการแข่งขันของ {activeGameLabel}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -861,22 +943,12 @@ export default function MatchesEditor() {
           </div>
 
           <Card className="bg-crypt2/80">
-            <div className="grid gap-2 lg:grid-cols-[minmax(220px,1fr)_180px_130px] lg:items-end">
+            <div className="grid gap-2 lg:grid-cols-[minmax(220px,1fr)_130px] lg:items-end">
               <TextField
                 label="Search"
                 value={recordQuery}
                 onChange={setRecordQuery}
                 placeholder="MPL, ONIC, Final..."
-              />
-              <SelectField
-                label="Game"
-                value={gameFilter}
-                onChange={(v) => setGameFilter(v as GameFilter)}
-                options={[
-                  { value: "all", label: "All Games" },
-                  { value: "mlbb", label: "MLBB" },
-                  { value: "efootball", label: "eFootball" },
-                ]}
               />
               <SelectField
                 label={page.yearLabel.en || "Year"}
@@ -890,13 +962,12 @@ export default function MatchesEditor() {
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
               <p className="font-mono text-[11px] text-ash">
-                {filteredTournamentGroups.length}/{tournamentGroups.length} tournaments / {filteredUnassignedMatches.length} unassigned
+                {filteredTournamentGroups.length}/{activeTournamentCount} tournaments / {filteredUnassignedMatches.length}/{activeUnassignedCount} unassigned
               </p>
-              {(recordQuery || gameFilter !== "all" || yearFilter !== "all") && (
+              {(recordQuery || yearFilter !== "all") && (
                 <Button
                   onClick={() => {
                     setRecordQuery("");
-                    setGameFilter("all");
                     setYearFilter("all");
                   }}
                   className="min-h-[30px] px-2 py-1 text-[10px]"

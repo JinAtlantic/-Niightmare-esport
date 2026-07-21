@@ -273,6 +273,21 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
       await expect(page.locator('input[placeholder^="https://youtube.com/live"]')).toHaveCount(0);
     }
 
+    if (editor.tab === "Matches") {
+      const mlbb = page.getByRole("button", { name: /Manage Game MLBB/i });
+      const efootball = page.getByRole("button", { name: /Manage Game eFootball/i });
+      await expect(mlbb).toBeVisible();
+      await expect(efootball).toBeVisible();
+
+      await mlbb.click();
+      await expect(page.getByRole("heading", { name: "MLBB Records" })).toBeVisible();
+      await expect(page.getByText("All Games", { exact: true })).toHaveCount(0);
+
+      await page.getByRole("button", { name: /เลือกเกมอื่น/ }).click();
+      await efootball.click();
+      await expect(page.getByRole("heading", { name: "eFootball Records" })).toBeVisible();
+    }
+
     if (editor.tab === "Sponsors") {
       await page.getByRole("button", { name: /Apollo Entertainment/ }).click();
       const groupSelect = page.getByLabel("กลุ่มที่แสดงบนหน้า Sponsors").first();
