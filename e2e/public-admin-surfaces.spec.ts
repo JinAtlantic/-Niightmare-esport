@@ -86,6 +86,58 @@ for (const route of PUBLIC_ROUTES) {
   });
 }
 
+test("public pages reconcile server content with the live API", async ({ page }) => {
+  await page.route("**/api/content", async (route) => {
+    const response = await route.fetch();
+    const content = (await response.json()) as {
+      __contentSource?: string;
+      matches: { matches: unknown[]; tournaments: unknown[] };
+    };
+    content.matches.matches = [
+      {
+        id: "recovery-1",
+        date: "2026-07-03",
+        game: "mlbb",
+        tournament: { en: "LIVE RECOVERY CUP", lo: "LIVE RECOVERY CUP" },
+        opponent: "RECOVERY ONE",
+        score: "1-0",
+        result: "win",
+        vod: null,
+        vods: [],
+      },
+      {
+        id: "recovery-2",
+        date: "2026-07-02",
+        game: "mlbb",
+        tournament: { en: "LIVE RECOVERY CUP", lo: "LIVE RECOVERY CUP" },
+        opponent: "RECOVERY TWO",
+        score: "1-0",
+        result: "win",
+        vod: null,
+        vods: [],
+      },
+    ];
+    content.matches.tournaments = [
+      {
+        id: "recovery-tournament",
+        name: { en: "LIVE RECOVERY CUP", lo: "LIVE RECOVERY CUP" },
+        game: "mlbb",
+        placement: { en: "Champion", lo: "Champion" },
+        prize: "$2",
+        season: "2026",
+      },
+    ];
+    delete content.__contentSource;
+    await route.fulfill({ response, json: content });
+  });
+
+  await page.goto("/matches", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "LIVE RECOVERY CUP" })).toBeVisible();
+
+  await page.goto("/achievements", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("$2", { exact: true })).toBeVisible();
+});
+
 test("responsive navigation and language switch remain interactive", async ({ page }, testInfo) => {
   const assertRuntime = watchRuntime(page);
   await page.goto("/", { waitUntil: "domcontentloaded" });

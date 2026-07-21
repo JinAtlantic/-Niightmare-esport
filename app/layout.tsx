@@ -142,8 +142,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Server-render the live content so the first paint shows real data (no
-  // client refetch, no seed→cloud reflow). Falls back to the seed on any error.
+  // Server-render the live content so the first paint normally shows real data.
+  // A marked fallback can perform one client recovery read after hydration.
   let initialContent: Partial<Content> | null = null;
   try {
     initialContent = (await getSiteContent()) as Partial<Content>;
