@@ -2,6 +2,10 @@ import { expect, test, type Page, type Response } from "@playwright/test";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
 import { computeOrder, resolveShop } from "../lib/shop";
+import {
+  generateOrderReference,
+  orderReferenceCapacity,
+} from "../lib/orderReference";
 
 const E2E_HEADER = "x-niightmare-shop-e2e";
 const ADMIN_PASSWORD = "niightmare-shop-e2e-password";
@@ -84,6 +88,12 @@ test("multi-collection carts combine when every product uses the same currency",
   expect(mixedCurrency.currencyConflict).toBe(true);
 });
 
+test("new order references start at four alphanumeric characters", () => {
+  expect(orderReferenceCapacity(4)).toBe(1_679_616n);
+  expect(generateOrderReference()).toMatch(/^[A-Z0-9]{4}$/);
+  expect(generateOrderReference(5)).toMatch(/^[A-Z0-9]{5}$/);
+});
+
 test("buyer payment, admin fulfilment, and buyer status sync stay inside localhost", async ({
   page,
   request,
@@ -152,7 +162,7 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   const orderId = String(reserveJson.order.id);
   const refCode = String(reserveJson.order.refCode);
   expect(orderId).toMatch(/^[0-9a-f-]{36}$/i);
-  expect(refCode).toMatch(/^NM-[A-Z0-9]{8}$/);
+  expect(refCode).toMatch(/^[A-Z0-9]{4}$/);
 
   await expect(page.getByRole("dialog", { name: "Transfer to pay" })).toBeVisible();
   const detailedPng = await largeDetailedPng();

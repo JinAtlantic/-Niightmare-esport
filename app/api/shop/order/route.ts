@@ -1,9 +1,13 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { deleteFromStorage, normalizeOrderEvidenceImage } from "@/lib/supabaseStorage";
 import { uploadEvidenceDataUrl } from "@/lib/orderEvidenceUpload";
+import {
+  generateOrderReference,
+  orderReferenceCapacity,
+  ORDER_REFERENCE_START_LENGTH,
+} from "@/lib/orderReference";
 import { contentFromSupabase } from "@/lib/contentFromSupabase";
 import { sendPushToAll } from "@/lib/push";
 import {
@@ -46,6 +50,54 @@ function rateLimited(ip: string): boolean {
   hits.push(now);
   HITS.set(ip, hits);
   return hits.length > MAX;
+}
+
+async function availableOrderReferenceLength(
+  db: SupabaseClient
+): Promise<{ length: number; error?: never } | { length?: never; error: string }> {
+  for (let length = ORDER_REFERENCE_START_LENGTH; ; length += 1) {
+    const { count, error } = await db
+      .from("shop_orders")
+      .select("ref_code", { count: "exact", head: true })
+      .like("ref_code", "_".repeat(length));
+    if (error) return { error: error.message };
+    if (BigInt(count ?? 0) < orderReferenceCapacity(length)) return { length };
+  }
+}
+
+function isOrderReferenceCollision(error: { code?: string; message?: string; details?: string }): boolean {
+  if (error.code !== "23505") return false;
+  return /ref_code|shop_orders_ref_code/i.test(`${error.message ?? ""} ${error.details ?? ""}`);
+}
+
+async function insertOrderWithUniqueReference(
+  db: SupabaseClient,
+  row: Record<string, unknown>
+): Promise<{ data: Record<string, unknown> | null; error: string | null }> {
+  let lengthResult = await availableOrderReferenceLength(db);
+  if (lengthResult.error) return { data: null, error: lengthResult.error };
+  let length = lengthResult.length;
+  let collisions = 0;
+
+  for (;;) {
+    const refCode = generateOrderReference(length);
+    const { data, error } = await db
+      .from("shop_orders")
+      .insert({ ...row, ref_code: refCode })
+      .select("*")
+      .single();
+    if (!error) return { data: data as Record<string, unknown>, error: null };
+    if (!isOrderReferenceCollision(error)) return { data: null, error: error.message };
+
+    // The unique database index is the final concurrency guard. If two buyers
+    // happen to receive the same random candidate, retry without failing either order.
+    collisions += 1;
+    if (collisions % 64 === 0) {
+      lengthResult = await availableOrderReferenceLength(db);
+      if (lengthResult.error) return { data: null, error: lengthResult.error };
+      length = lengthResult.length;
+    }
+  }
 }
 
 const str = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
@@ -306,10 +358,6 @@ export async function POST(request: Request) {
     }
     return declarePayment(body, db, orderId, suppliedRef);
   }
-  // Generate the payment reference server-side with cryptographic randomness;
-  // the client displays the returned value and sends it back on PAY.
-  const refCode = `NM-${randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`;
-
   const rawItems = Array.isArray(body.items) ? (body.items as unknown[]) : [];
   const items: ShopOrderItem[] = rawItems
     .slice(0, 20)
@@ -358,7 +406,6 @@ export async function POST(request: Request) {
     items: lines,
     unit_price: lines.length === 1 ? lines[0].unitPrice : null,
     total,
-    ref_code: refCode,
     user_email: userEmail || null,
     currency,
     customer_name: input.customerName,
@@ -381,14 +428,12 @@ export async function POST(request: Request) {
   if (!db) {
     return NextResponse.json({ error: "Order storage is not configured" }, { status: 503 });
   }
-  const { data, error } = await db
-    .from("shop_orders")
-    .insert(row)
-    .select("*")
-    .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { data, error } = await insertOrderWithUniqueReference(db, row);
+  if (error || !data) {
+    return NextResponse.json({ error: error || "Could not create order reference" }, { status: 500 });
+  }
 
-  const record = recordFromRow(data as Record<string, unknown>);
+  const record = recordFromRow(data);
   return NextResponse.json({ ok: true, id: record.id, order: record });
 }
 

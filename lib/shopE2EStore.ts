@@ -2,6 +2,11 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import {
+  generateOrderReference,
+  orderReferenceCapacity,
+  ORDER_REFERENCE_START_LENGTH,
+} from "@/lib/orderReference";
+import {
   cleanRefCode,
   SHOP_PAYMENT_WINDOW_HOURS,
   type ShopOrderLine,
@@ -64,7 +69,7 @@ export interface ShopE2EOrderRow {
 
 type NewShopE2EOrder = Omit<
   ShopE2EOrderRow,
-  "id" | "created_at" | "updated_at" | "paid_at" | "shipping_image_url"
+  "id" | "created_at" | "updated_at" | "paid_at" | "ref_code" | "shipping_image_url"
 >;
 
 declare global {
@@ -79,8 +84,19 @@ function orders(): Map<string, ShopE2EOrderRow> {
 
 export function createShopE2EOrder(input: NewShopE2EOrder): ShopE2EOrderRow {
   const now = new Date().toISOString();
+  const usedReferences = new Set([...orders().values()].map((order) => order.ref_code));
+  let referenceLength = ORDER_REFERENCE_START_LENGTH;
+  while (
+    BigInt([...usedReferences].filter((reference) => reference.length === referenceLength).length) >=
+    orderReferenceCapacity(referenceLength)
+  ) {
+    referenceLength += 1;
+  }
+  let refCode = generateOrderReference(referenceLength);
+  while (usedReferences.has(refCode)) refCode = generateOrderReference(referenceLength);
   const row: ShopE2EOrderRow = {
     ...input,
+    ref_code: refCode,
     id: randomUUID(),
     created_at: now,
     updated_at: now,

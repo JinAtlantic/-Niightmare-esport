@@ -473,7 +473,7 @@ export interface ShopOrderRecord {
   sizeSummary: string;
   totalQty: number;
   total: number;
-  /** Short human reference code (e.g. "NM-7K3QX") the buyer is asked to put in
+  /** Short human reference code (e.g. "A7K2") the buyer is asked to put in
    * the transfer note, so the team can match a payment to one order. */
   refCode?: string;
   currency: string;
@@ -496,7 +496,7 @@ export function cleanRefCode(raw: unknown): string {
   return String(raw ?? "")
     .toUpperCase()
     .replace(/[^A-Z0-9-]/g, "")
-    .slice(0, 16);
+    .slice(0, 64);
 }
 
 /** Resolve cart items against the live catalogue and compute authoritative totals. */
