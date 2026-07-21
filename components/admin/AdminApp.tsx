@@ -10,14 +10,18 @@ import SponsorsEditor from "@/components/admin/SponsorsEditor";
 import ShopEditor from "@/components/admin/ShopEditor";
 import OrdersEditor from "@/components/admin/OrdersEditor";
 import PushNotifications from "@/components/admin/PushNotifications";
+import GamesEditor from "@/components/admin/GamesEditor";
+import GalleryEditor from "@/components/admin/GalleryEditor";
 
-type Tab = "home" | "matches" | "achievements" | "roster" | "sponsors" | "shop" | "orders";
+type Tab = "home" | "games" | "matches" | "achievements" | "gallery" | "roster" | "sponsors" | "shop" | "orders";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "orders", label: "Orders" },
   { id: "home", label: "Home" },
+  { id: "games", label: "Games" },
   { id: "matches", label: "Matches" },
   { id: "achievements", label: "Achievements" },
+  { id: "gallery", label: "Gallery" },
   { id: "roster", label: "Team" },
   { id: "sponsors", label: "Sponsors" },
   { id: "shop", label: "Shop" },
@@ -90,8 +94,10 @@ export default function AdminApp() {
 
       <main id="admin-editor" className={`mx-auto scroll-mt-4 px-4 py-8 md:px-6 ${tab === "orders" ? "max-w-[1500px]" : "max-w-5xl"}`}>
         {tab === "home" && <HomeEditor />}
+        {tab === "games" && <GamesEditor />}
         {tab === "matches" && <MatchesEditor />}
         {tab === "achievements" && <AchievementsEditor />}
+        {tab === "gallery" && <GalleryEditor />}
         {tab === "roster" && <RosterEditor />}
         {tab === "sponsors" && <SponsorsEditor />}
         {tab === "shop" && <ShopEditor />}

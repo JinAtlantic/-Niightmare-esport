@@ -5,6 +5,7 @@ const PUBLIC_ROUTES = [
   "/",
   "/matches",
   "/achievements",
+  "/gallery",
   "/roster",
   "/sponsors",
   "/shop",
@@ -157,7 +158,31 @@ test("public pages reconcile server content with the live API", async ({ page })
   await expect(page.getByRole("heading", { name: "LIVE RECOVERY CUP" })).toBeVisible();
 
   await page.goto("/achievements", { waitUntil: "domcontentloaded" });
-  await expect(page.getByText("$2", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "LIVE RECOVERY CUP" })).toBeVisible();
+});
+
+test("achievement records stay strictly separated by game", async ({ page }) => {
+  await page.route("**/api/content", async (route) => {
+    const response = await route.fetch();
+    const content = await response.json();
+    content.site.games = [
+      { id: "mlbb", name: { en: "Mobile Legends: Bang Bang", lo: "MLBB" }, shortName: "MLBB", enabled: true },
+      { id: "valorant", name: { en: "Valorant", lo: "Valorant" }, shortName: "VALORANT", enabled: true },
+    ];
+    content.achievements.records = [
+      { id: "mlbb-only", game: "mlbb", tournament: { en: "MLBB ONLY CUP", lo: "MLBB ONLY CUP" }, placement: { en: "1st", lo: "1st" }, image: "", enabled: true },
+      { id: "valorant-only", game: "valorant", tournament: { en: "VALORANT ONLY CUP", lo: "VALORANT ONLY CUP" }, placement: { en: "2nd", lo: "2nd" }, image: "", enabled: true },
+    ];
+    delete content.__contentSource;
+    await route.fulfill({ response, json: content });
+  });
+
+  await page.goto("/achievements", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "MLBB ONLY CUP" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "VALORANT ONLY CUP" })).toHaveCount(0);
+  await page.getByRole("button", { name: /VALORANT/ }).click();
+  await expect(page.getByRole("heading", { name: "VALORANT ONLY CUP" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "MLBB ONLY CUP" })).toHaveCount(0);
 });
 
 test("responsive navigation and language switch remain interactive", async ({ page }, testInfo) => {
@@ -222,9 +247,11 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
   const editors: { tab: string; marker: string | RegExp }[] = [
     { tab: "Orders", marker: "ออเดอร์เสื้อ" },
     { tab: "Home", marker: "About Us (หน้า Home)" },
+    { tab: "Games", marker: "ID: mlbb" },
     { tab: "Matches", marker: "Records" },
     { tab: "Achievements", marker: "ข้อความหน้า Achievements" },
     { tab: "Team", marker: "ทีม MLBB" },
+    { tab: "Gallery", marker: "Description" },
     { tab: "Sponsors", marker: /\d+ partners/ },
     { tab: "Shop", marker: "Collections" },
   ];

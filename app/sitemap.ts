@@ -5,7 +5,7 @@ import { resolveShop, type ShopContent } from "@/lib/shop";
 import type { Player } from "@/lib/types";
 
 // Public, indexable routes. /admin is intentionally excluded.
-const ROUTES = ["", "/roster", "/matches", "/achievements", "/shop", "/sponsors"];
+const ROUTES = ["", "/roster", "/matches", "/achievements", "/gallery", "/shop", "/sponsors"];
 // Legal pages — indexable but low priority / rarely change.
 const LEGAL_ROUTES = ["/privacy", "/terms"];
 
@@ -18,16 +18,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     | {
         mlbb?: { players?: Player[] };
         efootball?: { players?: Player[] };
+        games?: Record<string, { players?: Player[] }>;
       }
     | undefined;
   const shop = resolveShop(site?.shop);
   const products = shop.collections.filter(
     (collection) => collection.enabled && collection.slug
   );
-  const players = [
-    ...(roster?.mlbb?.players ?? []),
-    ...(roster?.efootball?.players ?? []),
-  ].filter((player) => player.id);
+  const players = (roster?.games
+    ? Object.values(roster.games).flatMap((division) => division.players ?? [])
+    : [
+        ...(roster?.mlbb?.players ?? []),
+        ...(roster?.efootball?.players ?? []),
+      ]).filter((player) => player.id);
   const lastModified = new Date();
   return [
     ...ROUTES.map((path) => ({

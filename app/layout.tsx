@@ -106,7 +106,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NIIGHTMARE Esports — Lao PDR | MLBB & eFootball",
     description:
-      "From Lao PDR — we haunt the meta. Official home of NIIGHTMARE Esports (MLBB & eFootball).",
+      "Niightmare Zone — official home of NIIGHTMARE Esports from Lao PDR.",
     siteName: "NIIGHTMARE Esports",
     locale: "en_US",
     alternateLocale: ["lo_LA"],
@@ -118,7 +118,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "NIIGHTMARE Esports — Lao PDR",
-    description: "From Lao PDR — we haunt the meta. MLBB & eFootball.",
+    description: "Niightmare Zone — official home of NIIGHTMARE Esports from Lao PDR.",
   },
   robots: { index: true, follow: true },
 };

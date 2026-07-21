@@ -189,5 +189,35 @@
     "opponent": "ONIC",
     "opponentLogo": ""
   },
-  "videos": []
+  "videos": [],
+  "games": [
+    {
+      "id": "mlbb",
+      "name": { "en": "Mobile Legends: Bang Bang", "lo": "Mobile Legends: Bang Bang" },
+      "shortName": "MLBB",
+      "enabled": true
+    },
+    {
+      "id": "efootball",
+      "name": { "en": "eFootball", "lo": "eFootball" },
+      "shortName": "eFootball",
+      "enabled": true
+    }
+  ],
+  "gallery": {
+    "page": {
+      "kicker": { "en": "NIIGHTMARE ARCHIVE", "lo": "ຄັງພາບ NIIGHTMARE" },
+      "title": { "en": "GALLERY", "lo": "ຄັງຮູບພາບ" },
+      "intro": {
+        "en": "Moments from competition, the team, and the community.",
+        "lo": "ຮວບຮວມຊ່ວງເວລາຈາກການແຂ່ງຂັນ, ທີມ ແລະ ຊຸມຊົນ."
+      }
+    },
+    "categories": [
+      { "id": "team", "name": { "en": "Team", "lo": "ທີມ" } },
+      { "id": "tournaments", "name": { "en": "Tournaments", "lo": "ການແຂ່ງຂັນ" } },
+      { "id": "community", "name": { "en": "Community", "lo": "ຊຸມຊົນ" } }
+    ],
+    "items": []
+  }
 }

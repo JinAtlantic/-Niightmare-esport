@@ -33,6 +33,7 @@ import {
   type MatchScheduleEntry,
 } from "@/lib/matchSchedule";
 import { BO_SELECT_OPTIONS } from "@/lib/bestOf";
+import { enabledGames, type GameDefinition } from "@/lib/games";
 
 interface Contact {
   email?: string;
@@ -53,6 +54,7 @@ interface SiteFile {
   aboutUs?: AboutUsContent;
   roadmap?: RoadmapContent;
   matchSchedule?: MatchScheduleContent;
+  games?: GameDefinition[];
   [key: string]: unknown;
 }
 
@@ -75,10 +77,6 @@ const STATUS_OPTS = [
   { value: "live", label: "กำลังแข่ง (Live)" },
   { value: "finished", label: "จบแล้ว (Finished)" },
   { value: "practice", label: "ช่วงซ้อมทีม (Practice)" },
-];
-const GAME_OPTS = [
-  { value: "mlbb", label: "MLBB" },
-  { value: "efootball", label: "eFootball" },
 ];
 const RESULT_OPTS = [
   { value: "win", label: "ชนะ (Win)" },
@@ -259,6 +257,10 @@ export default function HomeEditor() {
   const roadmap = resolveRoadmap(data.roadmap);
   const patchRoadmap = (rm: RoadmapContent) => setData({ ...data, roadmap: rm });
   const matchSchedule = resolveMatchSchedule(data.matchSchedule);
+  const gameOptions = enabledGames(data.games, [
+    m.game,
+    ...matchSchedule.entries.map((entry) => entry.game ?? ""),
+  ]).map((game) => ({ value: game.id, label: game.shortName }));
   const patchMatchSchedule = (patch: Partial<MatchScheduleContent>) =>
     setData({ ...data, matchSchedule: resolveMatchSchedule({ ...matchSchedule, ...patch }) });
   const patchScheduleEntry = (id: string, patch: Partial<MatchScheduleEntry>) =>
@@ -665,7 +667,7 @@ export default function HomeEditor() {
             label="เกม"
             value={m.game}
             onChange={(v) => patch({ game: v as UpcomingMatch["game"] })}
-            options={GAME_OPTS}
+            options={gameOptions}
           />
           <BilingualField
             label="งาน / ทัวร์นาเมนต์"
@@ -813,7 +815,7 @@ export default function HomeEditor() {
                     label="เกม (ใช้ตอนดึงขึ้นหน้าแรก)"
                     value={entry.game ?? "mlbb"}
                     onChange={(game) => patchScheduleEntry(entry.id, { game: game as MatchScheduleEntry["game"] })}
-                    options={GAME_OPTS}
+                    options={gameOptions}
                   />
                   <TextField
                     label="ชื่อย่อคู่แข่ง (สูงสุด 4 ตัว)"

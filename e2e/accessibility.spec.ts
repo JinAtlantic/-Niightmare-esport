@@ -7,6 +7,7 @@ const PUBLIC_ROUTES = [
   "/",
   "/matches",
   "/achievements",
+  "/gallery",
   "/roster",
   "/sponsors",
   "/shop",
@@ -59,9 +60,11 @@ test("admin login and every read-only editor meet WCAG A/AA", async ({ page }) =
   const editors: { tab: string; marker: string | RegExp }[] = [
     { tab: "Orders", marker: "ออเดอร์เสื้อ" },
     { tab: "Home", marker: "About Us (หน้า Home)" },
+    { tab: "Games", marker: "ID: mlbb" },
     { tab: "Matches", marker: "Records" },
     { tab: "Achievements", marker: "ข้อความหน้า Achievements" },
     { tab: "Team", marker: "ทีม MLBB" },
+    { tab: "Gallery", marker: "Description" },
     { tab: "Sponsors", marker: /\d+ partners/ },
     { tab: "Shop", marker: "Collections" },
   ];

@@ -123,11 +123,16 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
     // page; null/absent → keep the seed (RosterClient also merges over the seed).
     const ssRow = (ss.data ?? {}) as Record<string, unknown>;
     const rosterPage = ssRow.roster_page as Record<string, unknown> | null;
+    const playerGameIds = [...new Set(all.map((row) => String(row.game ?? "").trim()).filter(Boolean))];
+    const rosterGames = Object.fromEntries(
+      playerGameIds.map((game) => [game, { players: all.filter((row) => row.game === game).map(toPlayer) }])
+    ) as Record<string, { players: Player[] }>;
     const roster = {
       ...storedRoster,
       ...(rosterPage ? { page: rosterPage } : {}),
-      mlbb: { players: all.filter((r) => r.game === "mlbb").map(toPlayer) },
-      efootball: { players: all.filter((r) => r.game === "efootball").map(toPlayer) },
+      games: rosterGames,
+      mlbb: rosterGames.mlbb ?? { players: [] },
+      efootball: rosterGames.efootball ?? { players: [] },
       staff: ((members.data ?? []) as MemberRow[]).map(rowToStaff),
     };
 
@@ -222,6 +227,8 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
       lastResult: (c.last_result as Record<string, unknown> | null) ?? undefined,
       // Shop / 3D jersey config (jsonb). Null/absent → DEFAULT_SHOP.
       shop: (c.shop as Record<string, unknown> | null) ?? undefined,
+      games: (c.games as unknown[] | null) ?? undefined,
+      gallery: (c.gallery as Record<string, unknown> | null) ?? undefined,
       upcomingMatch: u
         ? {
             status: u.status,

@@ -53,6 +53,10 @@ test("Player profile dialog keeps keyboard focus inside and returns it", async (
   await expect(dialog).toBeVisible();
   await expect(dialog.locator("[data-player-vital]")).toHaveCount(3);
   await expect(dialog.locator("[data-player-vital] svg")).toHaveCount(0);
+  // The panel fades in with opacity, which temporarily blends otherwise-safe
+  // text colours into the background. Audit the settled dialog, not a frame in
+  // the middle of its entrance animation.
+  await expect(dialog.locator(":scope > .relative.z-10")).toHaveCSS("opacity", "1");
   await expectNoAccessibilityViolations(page, "Player dialog");
   await expect.poll(() => activeElementIsInside(page, dialog)).toBe(true);
   await page.keyboard.press("Tab");

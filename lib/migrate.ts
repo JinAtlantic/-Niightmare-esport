@@ -18,6 +18,8 @@ import type { AboutUsContent } from "./about";
 import type { RoadmapContent } from "./roadmap";
 import type { MatchScheduleContent } from "./matchSchedule";
 import type { ShopContent } from "./shop";
+import type { GameDefinition } from "./games";
+import type { GalleryContent } from "./gallery";
 import { cleanMatchVods } from "./matchVods";
 import { resolveSponsorGroup } from "./sponsorGroups";
 
@@ -186,6 +188,8 @@ export interface SiteShape {
   roadmap?: RoadmapContent;
   matchSchedule?: MatchScheduleContent;
   shop?: ShopContent;
+  games?: GameDefinition[];
+  gallery?: GalleryContent;
 }
 
 export interface MigrateResult {
@@ -296,6 +300,8 @@ export async function migrateAll(): Promise<MigrateResult> {
       match_schedule: site.matchSchedule ?? null,
       last_result: site.lastResult ?? null,
       shop: site.shop ?? null,
+      games: site.games ?? null,
+      gallery: site.gallery ?? null,
       achievements: achievements ?? null,
     };
     const { error: siteErr } = await db.from("site_settings").upsert(siteSettingsRow);

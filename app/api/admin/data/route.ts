@@ -38,7 +38,7 @@ function validateSection(key: ContentKey, value: unknown): string | null {
         ? null
         : "Invalid matches payload";
     case "roster":
-      return object("page") && object("mlbb") && object("efootball") && array("staff")
+      return object("page") && (object("games") || (object("mlbb") && object("efootball"))) && array("staff")
         ? null
         : "Invalid roster payload";
     case "sponsors":
@@ -112,6 +112,8 @@ export async function PUT(request: Request) {
     revalidatePath("/", "layout");
     revalidatePath("/matches");
     revalidatePath("/achievements");
+    revalidatePath("/roster");
+    revalidatePath("/gallery");
     revalidatePath("/shop");
     return NextResponse.json({ ok: true });
   } catch (e) {

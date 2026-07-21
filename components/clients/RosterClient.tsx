@@ -11,6 +11,7 @@ import { useContent } from "@/components/context/ContentContext";
 import { groupStaffByTier, memberGame, type StaffTier } from "@/lib/staff";
 import rosterSeed from "@/data/roster.json";
 import type { Bilingual, GameId, Player, StaffMember } from "@/lib/types";
+import { enabledGames } from "@/lib/games";
 
 type RosterStatId = "active" | "mlbb" | "efootball" | "staff";
 type RosterTab = GameId | "staff";
@@ -86,14 +87,23 @@ function TierRow({ label, members }: { label: string; members: StaffMember[] }) 
 
 export default function RosterClient() {
   const { pick, t } = useLanguage();
-  const roster = useContent().roster as {
+  const content = useContent();
+  const roster = content.roster as {
     page?: Partial<RosterPageCopy>;
     mlbb: { players: Player[] };
     efootball: { players: Player[] };
+    games?: Record<string, { players: Player[] }>;
     staff: StaffMember[];
   };
   const [tab, setTab] = useState<RosterTab>("mlbb");
   const page = mergePageCopy(roster.page);
+  const rosterGames: Record<string, { players: Player[] }> = {
+    mlbb: roster.mlbb ?? { players: [] },
+    efootball: roster.efootball ?? { players: [] },
+    ...(roster.games ?? {}),
+  };
+  const gameIds = [...new Set([...Object.keys(rosterGames), ...roster.staff.map((member) => memberGame(member)).filter((id): id is string => Boolean(id))])];
+  const games = enabledGames((content.site as { games?: unknown }).games, gameIds);
 
   // Coaches sit under their game's lineup (from each member's game field, with a
   // text fallback for legacy entries); everyone else is the back-office group.
@@ -102,10 +112,15 @@ export default function RosterClient() {
   const backOffice = roster.staff.filter((m) => !memberGame(m));
 
   const tabs: { id: RosterTab; label: Bilingual; count: number }[] = [
-    { id: "mlbb", label: page.divisionLabels.mlbb, count: roster.mlbb.players.length },
-    { id: "efootball", label: page.divisionLabels.efootball, count: roster.efootball.players.length },
+    ...games.map((game) => ({
+      id: game.id,
+      label: page.divisionLabels[game.id] ?? game.name,
+      count: rosterGames[game.id]?.players.length ?? 0,
+    })),
     { id: "staff", label: page.staffLabel, count: backOffice.length },
   ];
+
+  const activeTab = tabs.some((entry) => entry.id === tab) ? tab : tabs[0]?.id ?? "staff";
 
   return (
     <>
@@ -120,7 +135,7 @@ export default function RosterClient() {
         {/* View tabs — MLBB / eFootball lineups, and the back-office team */}
         <div className="flex flex-wrap items-center justify-center gap-1 border-b border-edge">
           {tabs.map(({ id, label, count }) => {
-            const active = tab === id;
+            const active = activeTab === id;
             return (
               <button
                 key={id}
@@ -147,18 +162,18 @@ export default function RosterClient() {
         </div>
 
         {/* re-keyed per tab so cards re-enter on switch */}
-        <div key={tab}>
-          {tab !== "staff" ? (
+        <div key={activeTab}>
+          {activeTab !== "staff" ? (
             <>
               <div className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-                {roster[tab].players.map((player, i) => (
+                {(rosterGames[activeTab]?.players ?? []).map((player, i) => (
                   <Reveal key={player.id} delay={i * 70} className="h-full">
                     <PlayerCard player={player} />
                   </Reveal>
                 ))}
               </div>
               {/* coaches for this game sit right under its lineup */}
-              <TierRow label={t("roster.coaching_staff")} members={coachesFor(tab)} />
+              <TierRow label={t("roster.coaching_staff")} members={coachesFor(activeTab)} />
             </>
           ) : (
             (() => {

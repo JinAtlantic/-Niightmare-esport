@@ -10,11 +10,14 @@ function allPlayers(content: Record<string, unknown>) {
   const roster = content.roster as {
     mlbb?: { players?: Player[] };
     efootball?: { players?: Player[] };
+    games?: Record<string, { players?: Player[] }>;
   };
-  return [
-    ...(roster.mlbb?.players ?? []),
-    ...(roster.efootball?.players ?? []),
-  ];
+  return roster.games
+    ? Object.values(roster.games).flatMap((division) => division.players ?? [])
+    : [
+        ...(roster.mlbb?.players ?? []),
+        ...(roster.efootball?.players ?? []),
+      ];
 }
 
 async function getPlayer(playerId: string) {

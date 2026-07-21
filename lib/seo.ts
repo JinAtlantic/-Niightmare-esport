@@ -3,6 +3,7 @@ import rosterData from "@/data/roster.json";
 import matchesData from "@/data/matches.json";
 import type { Match, Player, StaffMember, Tournament, UpcomingMatch } from "@/lib/types";
 import { sizePrice, type ShopCollection } from "@/lib/shop";
+import { enabledGames, gameLabel } from "@/lib/games";
 
 /**
  * Structured data (JSON-LD) builders. Crawlers (Google, social cards) read these
@@ -103,10 +104,13 @@ function personSchema(p: Player | StaffMember) {
 /** The roster as a SportsTeam with its athletes + coaching staff. */
 export function sportsTeamSchema(content?: SeoContent) {
   const rosterContent = contentSection(content, "roster", rosterData);
-  const players: Player[] = [
-    ...rosterContent.mlbb.players,
-    ...rosterContent.efootball.players,
-  ] as Player[];
+  const dynamicGames = (rosterContent as { games?: Record<string, { players?: Player[] }> }).games;
+  const players: Player[] = dynamicGames
+    ? Object.values(dynamicGames).flatMap((division) => division.players ?? [])
+    : [
+        ...(rosterContent.mlbb?.players ?? []),
+        ...(rosterContent.efootball?.players ?? []),
+      ] as Player[];
   const staff = rosterContent.staff as StaffMember[];
   return {
     "@context": "https://schema.org",
@@ -127,6 +131,7 @@ export function sportsTeamSchema(content?: SeoContent) {
 /** A single fixture/result as a SportsEvent. */
 function eventSchema(m: Match | UpcomingMatch, idSuffix: string, completed = false) {
   const opponent = (m.opponent || "").trim();
+  const games = enabledGames(undefined, [m.game]);
   return {
     "@type": "SportsEvent",
     "@id": `${SITE_URL}/matches#${idSuffix}`,
@@ -137,7 +142,7 @@ function eventSchema(m: Match | UpcomingMatch, idSuffix: string, completed = fal
       : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
     location: { "@type": "VirtualLocation", url: SITE_URL },
-    sport: m.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang",
+    sport: gameLabel(games, m.game),
     organizer: { "@type": "Organization", name: m.tournament.en },
     competitor: [
       { "@type": "SportsTeam", name: "NIIGHTMARE ESPORTS" },

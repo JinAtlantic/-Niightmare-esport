@@ -14,6 +14,7 @@ import { useContent } from "@/components/context/ContentContext";
 import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
 import { cleanBo } from "@/lib/bestOf";
 import { safeImageSrc } from "@/lib/safety";
+import { enabledGames } from "@/lib/games";
 import type { Lang, MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
 type Countdown = { d: number; h: number; m: number; s: number; done: boolean };
@@ -360,7 +361,9 @@ export default function UpcomingMatch() {
   const round = match.round && (match.round.en || match.round.lo) ? match.round : null;
   const roundLabel = round ? pick(round) : null;
   const bo = cleanBo(match.bo);
-  const gameName = match.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang";
+  const gameDefinition = enabledGames((site as { games?: unknown }).games, [match.game])
+    .find((game) => game.id === match.game);
+  const gameName = gameDefinition ? pick(gameDefinition.name) : match.game.toUpperCase();
   // Countdown renders client-side only to avoid time-zone hydration mismatch.
   const [cd, setCd] = useState<Countdown | null>(null);
   useEffect(() => {

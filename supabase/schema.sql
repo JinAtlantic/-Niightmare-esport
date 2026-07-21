@@ -267,6 +267,9 @@ alter table public.site_settings add column if not exists shop jsonb;
 -- labels. The player/staff LISTS live in their own tables; this is only the
 -- surrounding page text so /admin → Roster → "หน้า Roster (Page)" saves live.
 alter table public.site_settings add column if not exists roster_page jsonb;
+-- Shared game registry + admin-managed public Gallery.
+alter table public.site_settings add column if not exists games jsonb;
+alter table public.site_settings add column if not exists gallery jsonb;
 
 -- ── STORAGE BUCKETS ──────────────────────────────────────────────────────────
 -- Public website media stays CDN-readable. Customer slips and shipping evidence

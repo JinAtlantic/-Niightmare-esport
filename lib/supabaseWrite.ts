@@ -85,12 +85,15 @@ export async function writeSectionToSupabase(
         page?: unknown;
         mlbb?: { players?: Player[] };
         efootball?: { players?: Player[] };
+        games?: Record<string, { players?: Player[] }>;
         staff?: StaffMember[];
       };
-      const players = [
-        ...playerRows(r.mlbb?.players ?? [], "mlbb"),
-        ...playerRows(r.efootball?.players ?? [], "efootball"),
-      ];
+      const gameEntries = r.games && Object.keys(r.games).length
+        ? Object.entries(r.games)
+        : [["mlbb", r.mlbb], ["efootball", r.efootball]] as const;
+      const players = gameEntries.flatMap(([game, section]) =>
+        playerRows(section?.players ?? [], game)
+      );
       const members = memberRows(r.staff ?? []);
       const playerProfileColumns = ["birth_date", "country_code", "country_en", "country_lo"];
       const memberProfileColumns = ["country_code", "country_en", "country_lo"];
@@ -197,6 +200,12 @@ export async function writeSectionToSupabase(
         roadmap: site.roadmap ?? null,
         shop: site.shop ?? null,
       };
+      if (await hasColumns(db, "site_settings", "games")) {
+        siteSettingsRow.games = site.games ?? null;
+      }
+      if (await hasColumns(db, "site_settings", "gallery")) {
+        siteSettingsRow.gallery = site.gallery ?? null;
+      }
       if (hasMatchSchedulePayload(site.matchSchedule)) {
         siteSettingsRow.match_schedule = site.matchSchedule ?? null;
       }

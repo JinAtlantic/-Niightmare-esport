@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
+import { useContent } from "@/components/context/ContentContext";
 import {
   Button,
   Card,
@@ -16,6 +17,7 @@ import matchesSeed from "@/data/matches.json";
 import { cleanMatchVods } from "@/lib/matchVods";
 import { BO_SELECT_OPTIONS } from "@/lib/bestOf";
 import type { Bilingual, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
+import { enabledGames, gameLabel } from "@/lib/games";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 type GameFilter = "all" | Match["game"];
@@ -65,18 +67,13 @@ function pageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
   return {
     ...pageSeed,
     ...page,
-    defaultGame: page?.defaultGame === "efootball" ? "efootball" : "mlbb",
+    defaultGame: page?.defaultGame || "mlbb",
     filters: { ...pageSeed.filters, ...(page?.filters ?? {}) },
     stats: { ...pageSeed.stats, ...(page?.stats ?? {}) },
     results: { ...pageSeed.results, ...(page?.results ?? {}) },
     tournamentLabels: { ...pageSeed.tournamentLabels, ...(page?.tournamentLabels ?? {}) },
   };
 }
-
-const GAME_OPTS = [
-  { value: "mlbb", label: "MLBB" },
-  { value: "efootball", label: "eFootball" },
-];
 
 const RESULT_OPTS = [
   { value: "win", label: "Win" },
@@ -148,6 +145,7 @@ function groupYear(tournament: Tournament, items: MatchRef[]) {
 
 export default function MatchesEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<MatchesFile>("matches");
+  const site = useContent().site as { games?: unknown };
   const [view, setView] = useState<"records" | "page">("records");
   const [openTournamentId, setOpenTournamentId] = useState<string | null>(null);
   const [unassignedOpen, setUnassignedOpen] = useState(false);
@@ -160,6 +158,8 @@ export default function MatchesEditor() {
   if (!data) return <p className="font-mono text-sm text-loss">Could not load matches data.</p>;
 
   const { matches, tournaments } = data;
+  const games = enabledGames(site.games, [...matches.map((match) => match.game), ...tournaments.map((tournament) => tournament.game)]);
+  const gameOptions = games.map((game) => ({ value: game.id, label: game.shortName }));
   const page = pageCopy(data.page);
   const setPage = (next: MatchesPageCopy) => setData({ ...data, page: next });
   const patchPage = (patch: Partial<MatchesPageCopy>) => setPage({ ...page, ...patch });
@@ -457,7 +457,7 @@ export default function MatchesEditor() {
             label="Game"
             value={m.game}
             onChange={(v) => patchMatch(i, { game: v as Match["game"] })}
-            options={GAME_OPTS}
+            options={gameOptions}
           />
           {showTournament && (
             <div className="md:col-span-2">
@@ -739,12 +739,12 @@ export default function MatchesEditor() {
     );
   };
 
-  const gameSummaries = GAME_OPTS.map((game) => ({
+  const gameSummaries = gameOptions.map((game) => ({
     ...game,
     matchCount: matches.filter((match) => match.game === game.value).length,
     tournamentCount: tournaments.filter((tournament) => tournament.game === game.value).length,
   }));
-  const activeGameLabel = activeGame === "mlbb" ? "MLBB" : "eFootball";
+  const activeGameLabel = activeGame ? gameLabel(games, activeGame) : "All Games";
 
   return (
     <div className="space-y-6">
@@ -854,7 +854,7 @@ export default function MatchesEditor() {
                 label="Default game on /matches"
                 value={page.defaultGame}
                 onChange={(v) => patchPage({ defaultGame: v as Match["game"] })}
-                options={GAME_OPTS}
+                options={gameOptions}
               />
             </div>
             </Card>
@@ -1089,7 +1089,7 @@ export default function MatchesEditor() {
                               label="Game"
                               value={tournament.game}
                               onChange={(v) => patchTournamentAndLinkedMatches(tournamentIndex, { game: v as Tournament["game"] })}
-                              options={GAME_OPTS}
+                              options={gameOptions}
                             />
                             <TextField
                               label="Season"

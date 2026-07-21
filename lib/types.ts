@@ -109,7 +109,8 @@ export interface StaffMember {
   socials: Socials;
 }
 
-export type GameId = "mlbb" | "efootball";
+/** Stable admin-managed game slug (legacy values: mlbb, efootball). */
+export type GameId = string;
 export type MatchResult = "win" | "loss" | "draw";
 
 /** State of the headline fixture shown on the home page. */
@@ -285,6 +286,18 @@ export interface AchievementStaff {
   since: string;
 }
 
+/** One square tournament card on the per-game Achievements page. */
+export interface AchievementRecord {
+  id: string;
+  game: GameId;
+  tournament: Bilingual;
+  placement: Bilingual;
+  year?: string;
+  image?: string;
+  description?: Bilingual;
+  enabled?: boolean;
+}
+
 export interface AchievementsData {
   page: { kicker: Bilingual; title: Bilingual; intro: Bilingual };
   stats: AchievementStat[];
@@ -293,4 +306,5 @@ export interface AchievementsData {
   campaign: CampaignEntry[];
   formerPlayers: FormerPlayer[];
   staff: AchievementStaff[];
+  records?: AchievementRecord[];
 }

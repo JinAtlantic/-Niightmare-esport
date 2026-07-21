@@ -21,11 +21,10 @@ import { safeHref } from "@/lib/safety";
 import { useContent } from "@/components/context/ContentContext";
 import matchesSeed from "@/data/matches.json";
 import type { Bilingual, GameId, Match, MatchResult, MatchVod, Tournament } from "@/lib/types";
+import { enabledGames } from "@/lib/games";
 
 type Filter = "all" | "mlbb" | "efootball" | "wins" | "losses";
 type SortOrder = "newest" | "oldest" | "prize-high" | "prize-low";
-
-const GAME_FILTERS: GameId[] = ["mlbb", "efootball"];
 
 interface MatchesPageCopy {
   kicker: Bilingual;
@@ -60,7 +59,7 @@ function mergePageCopy(page?: Partial<MatchesPageCopy>): MatchesPageCopy {
   return {
     ...pageSeed,
     ...page,
-    defaultGame: page?.defaultGame === "efootball" ? "efootball" : "mlbb",
+    defaultGame: page?.defaultGame || "mlbb",
     filters: { ...pageSeed.filters, ...(page?.filters ?? {}) },
     stats: { ...pageSeed.stats, ...(page?.stats ?? {}) },
     results: { ...pageSeed.results, ...(page?.results ?? {}) },
@@ -1011,7 +1010,17 @@ export default function MatchesClient() {
   const [roadmapOpen, setRoadmapOpen] = useState(false);
   const page = mergePageCopy(data.page);
   const roadmap = resolveRoadmap((content.site as { roadmap?: Partial<RoadmapContent> }).roadmap);
-  const [selectedGame, setSelectedGame] = useState<GameId>(page.defaultGame);
+  const discoveredGames = [...new Set([
+    ...data.matches.map((match) => match.game),
+    ...(data.tournaments ?? []).map((tournament) => tournament.game),
+  ])];
+  const games = enabledGames((content.site as { games?: unknown }).games, discoveredGames);
+  const initialGame = games.some((game) => game.id === page.defaultGame) ? page.defaultGame : games[0]?.id ?? "mlbb";
+  const [selectedGame, setSelectedGame] = useState<GameId>(initialGame);
+
+  useEffect(() => {
+    if (!games.some((game) => game.id === selectedGame)) setSelectedGame(games[0]?.id ?? "mlbb");
+  }, [games, selectedGame]);
 
   const tournamentYearByKey = useMemo(() => {
     return new Map(
@@ -1208,16 +1217,16 @@ export default function MatchesClient() {
             {/* Game division — a deliberate primary choice, separate from the
                 secondary year/tournament filters below. */}
             <div className="mt-6">
-              <div className="relative grid grid-cols-2 gap-1.5 border border-edge-bright bg-void/75 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.24)] before:pointer-events-none before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amethyst/70 before:to-transparent">
-                {GAME_FILTERS.map((id) => {
-                  const active = selectedGame === id;
+              <div className="relative grid grid-cols-2 gap-1.5 border border-edge-bright bg-void/75 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.24)] before:pointer-events-none before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amethyst/70 before:to-transparent md:grid-cols-3 lg:grid-cols-4">
+                {games.map((game) => {
+                  const active = selectedGame === game.id;
                   return (
                     <button
-                      key={id}
+                      key={game.id}
                       type="button"
                       aria-pressed={active}
                       onClick={() => {
-                        setSelectedGame(id);
+                        setSelectedGame(game.id);
                         setSelectedYear("");
                         setSelectedTournament("all");
                       }}
@@ -1229,7 +1238,7 @@ export default function MatchesClient() {
                     >
                       <span className={`absolute right-3 top-3 h-2 w-2 rounded-full border ${active ? "border-glow bg-glow shadow-[0_0_12px_#A855F7]" : "border-edge-bright bg-void"}`} />
                       <span className={`keep-latin block font-display text-lg font-black uppercase tracking-[0.12em] ${active ? "text-soul" : "text-spectre group-hover:text-soul"}`}>
-                        {id === "mlbb" ? "MLBB" : "EFOOTBALL"}
+                        {game.shortName}
                       </span>
                     </button>
                   );

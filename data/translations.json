@@ -5,6 +5,7 @@
     "roster": { "en": "TEAM", "lo": "ທີມ" },
     "matches": { "en": "MATCHES", "lo": "ການແຂ່ງຂັນ" },
     "achievements": { "en": "ACHIEVEMENTS", "lo": "ຜົນງານ" },
+    "gallery": { "en": "GALLERY", "lo": "ຄັງຮູບພາບ" },
     "sponsors": { "en": "SPONSORS", "lo": "ສະປອນເຊີ" },
     "shop": { "en": "SHOP", "lo": "ຮ້ານຄ້າ" },
     "contact": { "en": "CONTACT", "lo": "ຕິດຕໍ່" },
@@ -16,12 +17,12 @@
       "lo": "ສປປ ລາວ · MLBB / eFOOTBALL"
     },
     "tagline": {
-      "en": "WE HAUNT THE",
-      "lo": "ພວກເຮົາຕາມຫຼອກຫຼອນ"
+      "en": "NIIGHTMARE",
+      "lo": "NIIGHTMARE"
     },
     "tagline_accent": {
-      "en": "META",
-      "lo": "ເມຕ້າ"
+      "en": "ZONE",
+      "lo": "ZONE"
     },
     "subtitle": {
       "en": "Competing in Mobile Legends: Bang Bang & eFootball",
@@ -182,7 +183,7 @@
     }
   },
   "footer": {
-    "tagline": { "en": "WE HAUNT THE META", "lo": "ພວກເຮົາຕາມຫຼອກຫຼອນເມຕ້າ" },
+    "tagline": { "en": "Niightmare Zone", "lo": "Niightmare Zone" },
     "quick_links": { "en": "QUICK LINKS", "lo": "ລິ້ງດ່ວນ" },
     "follow_us": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" },
     "copyright": {

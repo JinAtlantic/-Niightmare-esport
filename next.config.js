@@ -89,6 +89,7 @@ const nextConfig = {
     // Allow legacy Vercel Blob art plus the current Supabase-hosted media.
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "flagcdn.com" },
     ],
   },

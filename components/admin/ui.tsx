@@ -235,8 +235,8 @@ export function ImageField({
 }: {
   label: string;
   value?: string;
-  /** Upload target subfolder under /public/blob (e.g. "teams", "players", "staff", "sponsors", "shop"). */
-  folder: "teams" | "players" | "staff" | "sponsors" | "shop";
+  /** Upload target subfolder in the public Supabase uploads bucket. */
+  folder: "teams" | "players" | "staff" | "sponsors" | "shop" | "gallery" | "achievements";
   onChange: (path: string) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);

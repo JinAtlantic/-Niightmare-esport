@@ -42,6 +42,7 @@ test("dynamic product metadata and sitemap are crawlable", async ({ page, reques
   expect(sitemap.ok()).toBeTruthy();
   const sitemapText = await sitemap.text();
   expect(sitemapText).toContain("/shop/official-2026");
+  expect(sitemapText).toContain("/gallery");
   expect(sitemapText).toMatch(/\/roster\/[^<]+/);
 
   const response = await page.goto("/shop/official-2026", {

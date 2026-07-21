@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
+import { useContent } from "@/components/context/ContentContext";
 import PhotoCropEditor from "@/components/admin/PhotoCropEditor";
 import {
   Button,
@@ -17,6 +18,7 @@ import rosterSeed from "@/data/roster.json";
 import type { Bilingual, Player, StaffMember, GameId } from "@/lib/types";
 import { STAFF_ROLES, memberGame, staffRoleKey } from "@/lib/staff";
 import { countryFlag } from "@/lib/personProfile";
+import { enabledGames } from "@/lib/games";
 
 const TIER_LABEL: Record<1 | 2 | 3, string> = {
   1: "แถว 1 · บริหาร",
@@ -79,8 +81,9 @@ interface RosterPageCopy {
 
 interface RosterFile {
   page?: RosterPageCopy;
-  mlbb: { players: Player[] };
-  efootball: { players: Player[] };
+  mlbb?: { players: Player[] };
+  efootball?: { players: Player[] };
+  games?: Record<string, { players: Player[] }>;
   staff: StaffMember[];
 }
 
@@ -110,7 +113,7 @@ function move<T>(arr: T[], i: number, dir: -1 | 1): T[] {
 
 function emptyPlayer(game: GameId): Player {
   return {
-    id: uid(game === "mlbb" ? "mlbb" : "efb"),
+    id: uid(game),
     ign: "",
     role: { en: "", lo: "" },
     socials: {},
@@ -468,21 +471,32 @@ function StaffList({
 
 export default function RosterEditor() {
   const { data, setData, loading, saving, error, savedAt, save } = useData<RosterFile>("roster");
+  const site = useContent().site as { games?: unknown };
   const [view, setView] = useState<"page" | "players" | "staff">("players");
 
   if (loading) return <p className="font-mono text-sm text-ash">กำลังโหลด…</p>;
   if (!data) return <p className="font-mono text-sm text-loss">โหลดข้อมูลไม่สำเร็จ</p>;
 
   const page = pageCopy(data.page);
+  const dataGames: Record<string, { players: Player[] }> = {
+    mlbb: data.mlbb ?? { players: [] },
+    efootball: data.efootball ?? { players: [] },
+    ...(data.games ?? {}),
+  };
+  const gameDefinitions = enabledGames(site.games, [
+    ...Object.keys(dataGames),
+    ...data.staff.map((member) => memberGame(member)).filter((id): id is string => Boolean(id)),
+  ]);
   const setPage = (next: RosterPageCopy) => setData({ ...data, page: next });
   const patchPage = (patch: Partial<RosterPageCopy>) => setPage({ ...page, ...patch });
 
   const setPlayers = (game: GameId, next: Player[]) =>
-    setData({ ...data, [game]: { players: next } } as RosterFile);
+    setData({ ...data, games: { ...dataGames, [game]: { players: next } } });
   const patchPlayer = (game: GameId, i: number, patch: Partial<Player>) =>
-    setPlayers(game, data[game].players.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+    setPlayers(game, (dataGames[game]?.players ?? []).map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
   const setSocial = (game: GameId, i: number, key: keyof Player["socials"], val: string) => {
-    const p = data[game].players[i];
+    const p = dataGames[game]?.players[i];
+    if (!p) return;
     const socials = { ...p.socials };
     const v = val.trim();
     if (!v || v === "#") delete socials[key];
@@ -525,10 +539,10 @@ export default function RosterEditor() {
     });
 
   const sectionProps = (game: GameId) => ({
-    players: data[game].players,
-    onAdd: () => setPlayers(game, [...data[game].players, emptyPlayer(game)]),
-    onMove: (i: number, dir: -1 | 1) => setPlayers(game, move(data[game].players, i, dir)),
-    onDelete: (i: number) => setPlayers(game, data[game].players.filter((_, idx) => idx !== i)),
+    players: dataGames[game]?.players ?? [],
+    onAdd: () => setPlayers(game, [...(dataGames[game]?.players ?? []), emptyPlayer(game)]),
+    onMove: (i: number, dir: -1 | 1) => setPlayers(game, move(dataGames[game]?.players ?? [], i, dir)),
+    onDelete: (i: number) => setPlayers(game, (dataGames[game]?.players ?? []).filter((_, idx) => idx !== i)),
     onPatch: (i: number, patch: Partial<Player>) => patchPlayer(game, i, patch),
     onSocial: (i: number, key: keyof Player["socials"], val: string) => setSocial(game, i, key, val),
   });
@@ -537,7 +551,7 @@ export default function RosterEditor() {
     <div className="space-y-10">
       <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 border-b border-edge bg-void/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <p className="font-mono text-xs text-ash">
-          MLBB {data.mlbb.players.length} · eFootball {data.efootball.players.length} · ทีมงาน {data.staff.length}
+          {gameDefinitions.map((game) => `${game.shortName} ${dataGames[game.id]?.players.length ?? 0}`).join(" · ")} · ทีมงาน {data.staff.length}
         </p>
         <div className="flex items-center gap-3">
           {error && <span className="font-mono text-[11px] text-loss">{error}</span>}
@@ -554,7 +568,7 @@ export default function RosterEditor() {
       <div className="flex flex-wrap gap-2">
         {([
           { id: "page", label: "หน้า Team (Page)", count: 8 },
-          { id: "players", label: "นักกีฬา + โค้ช (Players)", count: data.mlbb.players.length + data.efootball.players.length + (data.staff.length - backOffice.length) },
+          { id: "players", label: "นักกีฬา + โค้ช (Players)", count: gameDefinitions.reduce((sum, game) => sum + (dataGames[game.id]?.players.length ?? 0), 0) + (data.staff.length - backOffice.length) },
           { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: backOffice.length },
         ] as const).map(({ id, label, count }) => {
           const active = view === id;
@@ -592,16 +606,14 @@ export default function RosterEditor() {
           <Section title="Navigation labels" hint="Labels ของ tab เกมและ tier ทีมงานบนหน้า Team">
             <Card>
             <div className="grid gap-3 md:grid-cols-2">
-              <BilingualField
-                label="MLBB tab"
-                value={page.divisionLabels.mlbb}
-                onChange={(v) => patchPage({ divisionLabels: { ...page.divisionLabels, mlbb: v } })}
-              />
-              <BilingualField
-                label="eFootball tab"
-                value={page.divisionLabels.efootball}
-                onChange={(v) => patchPage({ divisionLabels: { ...page.divisionLabels, efootball: v } })}
-              />
+              {gameDefinitions.map((game) => (
+                <BilingualField
+                  key={game.id}
+                  label={`${game.shortName} tab`}
+                  value={page.divisionLabels[game.id] ?? game.name}
+                  onChange={(v) => patchPage({ divisionLabels: { ...page.divisionLabels, [game.id]: v } })}
+                />
+              ))}
               <BilingualField
                 label="Investor / Founder tier"
                 value={page.tierLabels.executive}
@@ -626,30 +638,22 @@ export default function RosterEditor() {
 
       {view === "players" && (
         <>
-          <PlayerList title="ทีม MLBB" {...sectionProps("mlbb")} />
-          <StaffList
-            title="โค้ช MLBB"
-            members={coachesOf("mlbb")}
-            variant="coach"
-            addLabel="+ เพิ่มโค้ช MLBB"
-            onAdd={() => addStaff({ game: "mlbb", officialRole: "head_coach" })}
-            onMove={(id, dir) => moveStaffInGroup(coachesOf("mlbb"), id, dir)}
-            onDelete={deleteStaffId}
-            onPatch={patchStaffId}
-            onSocial={setStaffSocialId}
-          />
-          <PlayerList title="ทีม eFootball" {...sectionProps("efootball")} />
-          <StaffList
-            title="โค้ช eFootball"
-            members={coachesOf("efootball")}
-            variant="coach"
-            addLabel="+ เพิ่มโค้ช eFootball"
-            onAdd={() => addStaff({ game: "efootball", officialRole: "head_coach" })}
-            onMove={(id, dir) => moveStaffInGroup(coachesOf("efootball"), id, dir)}
-            onDelete={deleteStaffId}
-            onPatch={patchStaffId}
-            onSocial={setStaffSocialId}
-          />
+          {gameDefinitions.map((game) => (
+            <React.Fragment key={game.id}>
+              <PlayerList title={`ทีม ${game.shortName}`} {...sectionProps(game.id)} />
+              <StaffList
+                title={`โค้ช ${game.shortName}`}
+                members={coachesOf(game.id)}
+                variant="coach"
+                addLabel={`+ เพิ่มโค้ช ${game.shortName}`}
+                onAdd={() => addStaff({ game: game.id, officialRole: "head_coach" })}
+                onMove={(id, dir) => moveStaffInGroup(coachesOf(game.id), id, dir)}
+                onDelete={deleteStaffId}
+                onPatch={patchStaffId}
+                onSocial={setStaffSocialId}
+              />
+            </React.Fragment>
+          ))}
         </>
       )}
 

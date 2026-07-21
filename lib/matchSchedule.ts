@@ -1,5 +1,6 @@
 import type { Bilingual, GameId } from "@/lib/types";
 import { cleanBo } from "@/lib/bestOf";
+import { gameSlug } from "@/lib/games";
 
 export interface MatchScheduleEntry {
   id: string;
@@ -63,7 +64,7 @@ function cleanEntry(entry: Partial<MatchScheduleEntry>, index: number): MatchSch
       lo: entry.round?.lo ?? "",
     },
     bo: cleanBo(entry.bo),
-    game: entry.game === "efootball" ? "efootball" : entry.game === "mlbb" ? "mlbb" : undefined,
+    game: entry.game ? gameSlug(entry.game) || undefined : undefined,
     tournament,
     opponentAbbr: entry.opponentAbbr?.trim() || undefined,
     opponentLogo: entry.opponentLogo?.trim() || undefined,
