@@ -603,7 +603,7 @@ export default function RosterEditor() {
                 onChange={(v) => patchPage({ divisionLabels: { ...page.divisionLabels, efootball: v } })}
               />
               <BilingualField
-                label="Executive tier"
+                label="Investor / Founder tier"
                 value={page.tierLabels.executive}
                 onChange={(v) => patchPage({ tierLabels: { ...page.tierLabels, executive: v } })}
               />
