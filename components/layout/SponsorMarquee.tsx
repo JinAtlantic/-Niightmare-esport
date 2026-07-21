@@ -62,7 +62,7 @@ export default function SponsorMarquee() {
                     <img
                       src={logo}
                       alt={`${s.name} logo`}
-                      className="max-h-11 w-auto max-w-[140px] object-contain opacity-70 grayscale transition-[filter,opacity] duration-300 hover:opacity-100 hover:grayscale-0"
+                      className="max-h-11 w-auto max-w-[140px] object-contain opacity-90 transition-opacity duration-300 hover:opacity-100"
                     />
                   ) : (
                     <span className="keep-latin whitespace-nowrap font-display text-base font-bold uppercase tracking-[0.08em] text-spectre transition-colors duration-300 hover:text-soul md:text-lg">

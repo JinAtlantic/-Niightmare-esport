@@ -64,7 +64,7 @@ function SponsorLogo({ sponsor, className = "" }: { sponsor: Sponsor; className?
         <img
           src={safeImageSrc(sponsor.logo)}
           alt={`${sponsor.name} logo`}
-          className="max-h-full max-w-full object-contain"
+          className="h-full w-full object-contain"
         />
       ) : (
         <span className="keep-latin font-display text-3xl font-black tracking-wide text-glow/90">
@@ -124,8 +124,8 @@ function SponsorCard({
     >
       <span aria-hidden className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 bg-amethyst/10 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
-      <div className="relative grid h-20 place-items-center rounded-sm bg-void/40 px-3 transition-colors group-hover:bg-void/60 md:h-24">
-        <SponsorLogo sponsor={sponsor} className="h-full w-full" />
+      <div className="relative grid aspect-square w-full place-items-center rounded-sm bg-void/40 p-3 transition-colors group-hover:bg-void/60 md:p-4">
+        <SponsorLogo sponsor={sponsor} className="aspect-square h-full w-full" />
       </div>
       <h3 className="keep-latin mt-3 line-clamp-1 font-display text-sm font-bold uppercase tracking-[0.06em] text-soul md:text-[15px]">
         {sponsor.name}
@@ -200,8 +200,8 @@ function SponsorModal({
 
         {/* Header: logo + name */}
         <div className="flex flex-col items-center gap-4 border-b border-edge bg-void/45 px-6 pb-6 pt-8 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
-          <div className="grid h-28 w-40 shrink-0 place-items-center border border-edge-bright/60 bg-void/60 p-4">
-            <SponsorLogo sponsor={sponsor} className="h-full w-full" />
+          <div className="grid aspect-square w-28 shrink-0 place-items-center border border-edge-bright/60 bg-void/60 p-4 sm:w-32">
+            <SponsorLogo sponsor={sponsor} className="aspect-square h-full w-full" />
           </div>
           <div className="min-w-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
