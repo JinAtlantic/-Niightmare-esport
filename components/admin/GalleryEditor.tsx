@@ -48,7 +48,6 @@ export default function GalleryEditor() {
 
       <Section title="ข้อความหน้า Gallery" hint="หัวข้อและคำอธิบายด้านบนหน้า">
         <Card className="grid gap-3">
-          <BilingualField label="Kicker" value={gallery.page.kicker} onChange={(kicker) => setGallery({ ...gallery, page: { ...gallery.page, kicker } })} />
           <BilingualField label="หัวข้อ" value={gallery.page.title} onChange={(title) => setGallery({ ...gallery, page: { ...gallery.page, title } })} />
           <BilingualField label="คำอธิบาย" value={gallery.page.intro} onChange={(intro) => setGallery({ ...gallery, page: { ...gallery.page, intro } })} />
         </Card>

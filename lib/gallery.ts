@@ -16,7 +16,6 @@ export interface GalleryItem {
 
 export interface GalleryContent {
   page: {
-    kicker: Bilingual;
     title: Bilingual;
     intro: Bilingual;
   };
@@ -26,7 +25,6 @@ export interface GalleryContent {
 
 export const DEFAULT_GALLERY: GalleryContent = {
   page: {
-    kicker: { en: "NIIGHTMARE ARCHIVE", lo: "ຄັງພາບ NIIGHTMARE" },
     title: { en: "GALLERY", lo: "ຄັງຮູບພາບ" },
     intro: {
       en: "Moments from competition, the team, and the community.",
@@ -83,7 +81,6 @@ export function resolveGallery(value: unknown): GalleryContent {
     : [];
   return {
     page: {
-      kicker: bi(rawPage.kicker, DEFAULT_GALLERY.page.kicker),
       title: bi(rawPage.title, DEFAULT_GALLERY.page.title),
       intro: bi(rawPage.intro, DEFAULT_GALLERY.page.intro),
     },

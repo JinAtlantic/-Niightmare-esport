@@ -40,7 +40,6 @@ export default function GalleryClient() {
   return (
     <>
       <PageHeader
-        kicker={pick(gallery.page.kicker)}
         title={pick(gallery.page.title)}
         subtitle={pick(gallery.page.intro)}
         subtitleClassName="text-base font-medium text-spectre md:text-lg"

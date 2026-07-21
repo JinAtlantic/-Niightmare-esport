@@ -100,6 +100,10 @@ for (const route of PUBLIC_ROUTES) {
       await expect(page.locator("main")).not.toContainText("WORKING TOGETHER");
     }
 
+    if (route === "/gallery") {
+      await expect(page.locator("main")).not.toContainText(/NIIGHTMARE ARCHIVE/i);
+    }
+
     if (route === "/roster") {
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Team");
     }
