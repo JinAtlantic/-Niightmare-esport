@@ -38,7 +38,7 @@ export default function Footer() {
                 NIIGHTMARE
               </h2>
               <span className="font-mono text-[11px] font-medium uppercase tracking-[0.42em] text-glow">
-                Esport
+                Esports
               </span>
             </div>
 

@@ -58,6 +58,7 @@ for (const route of PUBLIC_ROUTES) {
     await expect(page.locator("main")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: "NIIGHTMARE home" })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/NIIGHTMARE ESPORT(?!S)/i);
     await expect(page.locator("nextjs-portal")).toHaveCount(0);
 
     if (route === "/") {
@@ -74,6 +75,21 @@ for (const route of PUBLIC_ROUTES) {
       await expect(groups.nth(0)).toContainText("OFFICIAL SPONSORS");
       await expect(groups.nth(1)).toContainText("EVENT SPONSORS");
       await expect(groups.nth(2)).toContainText("PAST PARTNERS");
+      for (const group of await groups.all()) {
+        const heading = group.getByRole("heading", { level: 2 });
+        const centerOffset = await heading.evaluate((element) => {
+          const section = element.closest("[data-sponsor-group]");
+          if (!section) return Number.POSITIVE_INFINITY;
+          const sectionRect = section.getBoundingClientRect();
+          const headingRect = element.getBoundingClientRect();
+          return Math.abs(
+            headingRect.left + headingRect.width / 2 -
+              (sectionRect.left + sectionRect.width / 2)
+          );
+        });
+        expect(centerOffset).toBeLessThanOrEqual(2);
+        await expect(group.locator(":scope > div:first-of-type > span")).toHaveCount(0);
+      }
       await expect(page.locator("main")).not.toContainText("WORKING TOGETHER");
     }
 

@@ -54,7 +54,7 @@ export default function Hero() {
             <span className="home-hero-main">
               N<span className="home-hero-double-i">II</span>GHTMARE
             </span>
-            <span className="home-hero-sub">ESPORT</span>
+            <span className="home-hero-sub">ESPORTS</span>
           </h1>
 
           <p

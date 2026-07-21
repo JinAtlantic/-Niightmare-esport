@@ -47,8 +47,8 @@ function sections(email: string): LegalSectionData[] {
       blocks: [
         {
           p: {
-            en: "The NIIGHTMARE name, the “NIIGHTMARE ESPORT” wordmark, our reaper emblem and logo, and all original text, graphics, and design on this website are the property of NIIGHTMARE Esports and are protected by intellectual-property and trademark law. You may not copy, reproduce, modify, distribute, or use them commercially without our prior written permission.",
-            lo: "ຊື່ NIIGHTMARE, ໂລໂກ້ຕົວອັກສອນ “NIIGHTMARE ESPORT”, ສັນຍາລັກ ແລະ ໂລໂກ້ຮູບຍົມມະທູດຂອງພວກເຮົາ ພ້ອມທັງຂໍ້ຄວາມ, ຮູບພາບ ແລະ ການອອກແບບຕົ້ນສະບັບທັງໝົດໃນເວັບໄຊ້ນີ້ ເປັນຊັບສິນຂອງ NIIGHTMARE Esports ແລະ ໄດ້ຮັບການປົກປ້ອງຕາມກົດໝາຍຊັບສິນທາງປັນຍາ ແລະ ເຄື່ອງໝາຍການຄ້າ. ທ່ານບໍ່ສາມາດສຳເນົາ, ເຮັດຊ້ຳ, ດັດແປງ, ເຜີຍແຜ່ ຫຼື ນຳໄປໃຊ້ໃນທາງການຄ້າ ໂດຍບໍ່ໄດ້ຮັບອະນຸຍາດເປັນລາຍລັກອັກສອນຈາກພວກເຮົາກ່ອນ.",
+            en: "The NIIGHTMARE name, the “NIIGHTMARE ESPORTS” wordmark, our reaper emblem and logo, and all original text, graphics, and design on this website are the property of NIIGHTMARE Esports and are protected by intellectual-property and trademark law. You may not copy, reproduce, modify, distribute, or use them commercially without our prior written permission.",
+            lo: "ຊື່ NIIGHTMARE, ໂລໂກ້ຕົວອັກສອນ “NIIGHTMARE ESPORTS”, ສັນຍາລັກ ແລະ ໂລໂກ້ຮູບຍົມມະທູດຂອງພວກເຮົາ ພ້ອມທັງຂໍ້ຄວາມ, ຮູບພາບ ແລະ ການອອກແບບຕົ້ນສະບັບທັງໝົດໃນເວັບໄຊ້ນີ້ ເປັນຊັບສິນຂອງ NIIGHTMARE Esports ແລະ ໄດ້ຮັບການປົກປ້ອງຕາມກົດໝາຍຊັບສິນທາງປັນຍາ ແລະ ເຄື່ອງໝາຍການຄ້າ. ທ່ານບໍ່ສາມາດສຳເນົາ, ເຮັດຊ້ຳ, ດັດແປງ, ເຜີຍແຜ່ ຫຼື ນຳໄປໃຊ້ໃນທາງການຄ້າ ໂດຍບໍ່ໄດ້ຮັບອະນຸຍາດເປັນລາຍລັກອັກສອນຈາກພວກເຮົາກ່ອນ.",
           },
         },
       ],

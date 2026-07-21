@@ -285,12 +285,7 @@ function SponsorGroupSection({
       className="relative overflow-hidden border border-edge bg-[linear-gradient(150deg,rgba(28,20,40,0.5),rgba(11,7,16,0.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] md:p-6"
     >
       <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-px" />
-      <div className="flex items-center justify-between gap-4">
-        <SectionLabel>{pick(copy.label)}</SectionLabel>
-        <span className="shrink-0 border border-edge bg-void/60 px-2.5 py-1 font-mono text-[10px] font-bold text-amethyst">
-          {String(sponsors.length).padStart(2, "0")}
-        </span>
-      </div>
+      <SectionLabel centered>{pick(copy.label)}</SectionLabel>
 
       {sponsors.length > 0 ? (
         <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
