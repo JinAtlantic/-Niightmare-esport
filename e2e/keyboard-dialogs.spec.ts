@@ -30,6 +30,7 @@ test("Roadmap dialog traps keyboard focus and restores it to the opener", async 
 
   const dialog = page.getByRole("dialog", { name: /Niightmare Roadmap/i });
   await expect(dialog).toBeVisible();
+  await expect(dialog).not.toContainText(/COMPLETED|COMPETING NOW|UP NEXT/);
   await expectNoAccessibilityViolations(page, "Roadmap dialog");
   await expect.poll(() => activeElementIsInside(page, dialog)).toBe(true);
 

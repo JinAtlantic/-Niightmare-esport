@@ -23,26 +23,17 @@ const statusClass = {
     card: "border-edge bg-void/45 opacity-85",
     node: "border-ash-dim bg-void text-ash",
     icon: Check,
-    label: "text-ash",
   },
   active: {
     card: "border-amethyst/75 bg-gradient-to-br from-amethyst/[0.18] via-crypt to-void shadow-[0_0_34px_rgba(168,85,247,0.35)]",
     node: "border-amethyst bg-amethyst/15 text-glow shadow-[0_0_22px_rgba(168,85,247,0.75)]",
     icon: Radar,
-    label: "text-glow",
   },
   future: {
     card: "border-edge bg-crypt/55",
     node: "border-edge-bright bg-void text-ash-dim",
     icon: CalendarClock,
-    label: "text-ash-dim",
   },
-} as const;
-
-const STATUS_LABEL = {
-  past: { en: "COMPLETED", lo: "ແຂ່ງແລ້ວ" },
-  active: { en: "COMPETING NOW", lo: "ກຳລັງແຂ່ງ" },
-  future: { en: "UP NEXT", lo: "ງານຕໍ່ໄປ" },
 } as const;
 
 const TIER_BORDER: Record<Tier, string> = {
@@ -144,14 +135,7 @@ function StageCard({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${style.label}`}>
-              {status === "active"
-                ? pick(STATUS_LABEL.active)
-                : status === "past"
-                  ? pick(STATUS_LABEL.past)
-                  : pick(STATUS_LABEL.future)}
-            </span>
+          <div className="flex flex-wrap items-center">
             <span className={`keep-latin font-mono text-[8px] font-bold uppercase tracking-[0.1em] md:text-[9px] ${tierText}`}>
               {tagLabel}
             </span>
