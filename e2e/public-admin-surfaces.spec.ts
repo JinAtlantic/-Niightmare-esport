@@ -59,6 +59,15 @@ for (const route of PUBLIC_ROUTES) {
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: "NIIGHTMARE home" })).toBeVisible();
     await expect(page.locator("nextjs-portal")).toHaveCount(0);
+
+    if (route === "/") {
+      const sections = await page.locator("main section").allTextContents();
+      const aboutIndex = sections.findIndex((text) => text.includes("WHO WE ARE"));
+      const upcomingIndex = sections.findIndex((text) => text.includes("UPCOMING MATCH"));
+      const resultsIndex = sections.findIndex((text) => text.includes("RECENT RESULTS"));
+      expect([aboutIndex, upcomingIndex, resultsIndex]).toEqual([1, 2, 3]);
+    }
+
     await expectNoDocumentOverflow(page);
     assertRuntime();
   });

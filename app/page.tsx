@@ -43,9 +43,9 @@ export default function HomePage() {
       />
       <JsonLd data={upcomingEventSchema()} />
       <Hero />
+      <AboutUs />
       <UpcomingMatch />
       <RecentResults />
-      <AboutUs />
     </>
   );
 }

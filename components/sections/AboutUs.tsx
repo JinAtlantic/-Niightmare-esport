@@ -15,7 +15,7 @@ import { safeHref } from "@/lib/safety";
  * "WHO WE ARE" section heading (scythe-tick flanked, matching RecentResults),
  * then a reaper-voiced statement with one outlined violet accent word echoing
  * the hero. All copy is admin-editable via site.aboutUs (HomeEditor) and falls
- * back to DEFAULT_ABOUT. Sits below RecentResults.
+ * back to DEFAULT_ABOUT. Leads the homepage content below the hero.
  */
 export default function AboutUs() {
   const { pick } = useLanguage();
