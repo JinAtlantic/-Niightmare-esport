@@ -20,7 +20,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Home" },
   { id: "matches", label: "Matches" },
   { id: "achievements", label: "Achievements" },
-  { id: "roster", label: "Roster" },
+  { id: "roster", label: "Team" },
   { id: "sponsors", label: "Sponsors" },
   { id: "shop", label: "Shop" },
 ];

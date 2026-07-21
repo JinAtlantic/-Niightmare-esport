@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     template: "%s | NIIGHTMARE Esports",
   },
   description:
-    "Official website of NIIGHTMARE Esports from Lao PDR. Competing in Mobile Legends: Bang Bang (MLBB) and eFootball. Roster, matches, sponsors and more.",
+    "Official website of NIIGHTMARE Esports from Lao PDR. Competing in Mobile Legends: Bang Bang (MLBB) and eFootball. Team, matches, sponsors and more.",
   keywords: [
     "Niightmare Esports",
     "Niightmare Esports Lao PDR",

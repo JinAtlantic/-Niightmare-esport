@@ -2,7 +2,7 @@
   "nav": {
     "news": { "en": "NEWS", "lo": "ຂ່າວ" },
     "home": { "en": "HOME", "lo": "ໜ້າຫຼັກ" },
-    "roster": { "en": "ROSTER", "lo": "ນັກກີລາ" },
+    "roster": { "en": "TEAM", "lo": "ທີມ" },
     "matches": { "en": "MATCHES", "lo": "ການແຂ່ງຂັນ" },
     "achievements": { "en": "ACHIEVEMENTS", "lo": "ຜົນງານ" },
     "sponsors": { "en": "SPONSORS", "lo": "ສະປອນເຊີ" },
@@ -27,7 +27,7 @@
       "en": "Competing in Mobile Legends: Bang Bang & eFootball",
       "lo": "ແຂ່ງຂັນໃນ Mobile Legends: Bang Bang ແລະ eFootball"
     },
-    "btn_roster": { "en": "VIEW ROSTER", "lo": "ເບິ່ງນັກກີລາ" },
+    "btn_roster": { "en": "VIEW TEAM", "lo": "ເບິ່ງທີມ" },
     "btn_follow": { "en": "FOLLOW US", "lo": "ຕິດຕາມພວກເຮົາ" },
     "until_kickoff": { "en": "Until kickoff", "lo": "ກ່ອນເລີ່ມ" }
   },
@@ -37,7 +37,7 @@
     "view_all_news": { "en": "ALL NEWS", "lo": "ຂ່າວທັງໝົດ" },
     "highlights": { "en": "HIGHLIGHTS", "lo": "ໄຮໄລທ໌" },
     "highlights_kicker": { "en": "WATCH & REPLAY", "lo": "ເບິ່ງ & ດູຍ້ອນຫຼັງ" },
-    "our_roster": { "en": "OUR ROSTER", "lo": "ທີມງານຂອງເຮົາ" },
+    "our_roster": { "en": "OUR TEAM", "lo": "ທີມຂອງພວກເຮົາ" },
     "match_results": { "en": "MATCH RESULTS", "lo": "ຜົນການແຂ່ງ" },
     "our_partners": { "en": "OUR PARTNERS", "lo": "ຄູ່ຮ່ວມງານ" },
     "contact_us": { "en": "CONTACT US", "lo": "ຕິດຕໍ່ຫາເຮົາ" },

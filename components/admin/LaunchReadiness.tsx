@@ -106,7 +106,7 @@ export function LaunchReadinessChecker({ onNavigate }: LaunchReadinessCheckerPro
                   onClick={() => onNavigate(item.target)}
                   className="mt-auto self-start pt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-glow underline decoration-amethyst/60 underline-offset-4 hover:text-soul focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
                 >
-                  {item.level === "ready" ? "ไปดูที่" : "ไปแก้ที่"} {item.target === "shop" ? "Shop" : item.target === "sponsors" ? "Sponsors" : "Roster"}
+                  {item.level === "ready" ? "ไปดูที่" : "ไปแก้ที่"} {item.target === "shop" ? "Shop" : item.target === "sponsors" ? "Sponsors" : "Team"}
                 </button>
               </article>
             );

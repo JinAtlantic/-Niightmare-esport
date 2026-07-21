@@ -56,7 +56,7 @@ export default async function PlayerProfilePage({
         data={[
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Roster", path: "/roster" },
+            { name: "Team", path: "/roster" },
             { name: player.ign, path: `/roster/${player.id}` },
           ]),
         ]}

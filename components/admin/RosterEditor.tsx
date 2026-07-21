@@ -553,7 +553,7 @@ export default function RosterEditor() {
       {/* sub-tabs — edit players or staff separately for a shorter, focused form */}
       <div className="flex flex-wrap gap-2">
         {([
-          { id: "page", label: "หน้า Roster (Page)", count: 8 },
+          { id: "page", label: "หน้า Team (Page)", count: 8 },
           { id: "players", label: "นักกีฬา + โค้ช (Players)", count: data.mlbb.players.length + data.efootball.players.length + (data.staff.length - backOffice.length) },
           { id: "staff", label: "ทีมหลังบ้าน (Staff)", count: backOffice.length },
         ] as const).map(({ id, label, count }) => {
@@ -579,7 +579,7 @@ export default function RosterEditor() {
 
       {view === "page" && (
         <section className="space-y-4">
-          <Section title="Roster page copy" hint="ข้อความบนหน้า /roster — แก้ได้โดยไม่ต้อง deploy">
+          <Section title="Team page copy" hint="ข้อความบนหน้า Team (/roster) — แก้ได้โดยไม่ต้อง deploy">
             <Card>
             <div className="grid gap-3">
               <BilingualField label="Hero title" value={page.title} onChange={(v) => patchPage({ title: v })} />
@@ -589,7 +589,7 @@ export default function RosterEditor() {
             </Card>
           </Section>
 
-          <Section title="Navigation labels" hint="Labels ของ tab เกมและ tier ทีมงานบนหน้า roster">
+          <Section title="Navigation labels" hint="Labels ของ tab เกมและ tier ทีมงานบนหน้า Team">
             <Card>
             <div className="grid gap-3 md:grid-cols-2">
               <BilingualField

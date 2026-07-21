@@ -77,6 +77,10 @@ for (const route of PUBLIC_ROUTES) {
       await expect(page.locator("main")).not.toContainText("WORKING TOGETHER");
     }
 
+    if (route === "/roster") {
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Team");
+    }
+
     await expectNoDocumentOverflow(page);
     assertRuntime();
   });
@@ -132,7 +136,7 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     { tab: "Home", marker: "About Us (หน้า Home)" },
     { tab: "Matches", marker: "Records" },
     { tab: "Achievements", marker: "ข้อความหน้า Achievements" },
-    { tab: "Roster", marker: "ทีม MLBB" },
+    { tab: "Team", marker: "ทีม MLBB" },
     { tab: "Sponsors", marker: /\d+ partners/ },
     { tab: "Shop", marker: "สถานะร้าน & ราคา" },
   ];

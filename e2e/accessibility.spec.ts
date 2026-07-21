@@ -58,7 +58,7 @@ test("admin login and every read-only editor meet WCAG A/AA", async ({ page }) =
     { tab: "Home", marker: "About Us (หน้า Home)" },
     { tab: "Matches", marker: "Records" },
     { tab: "Achievements", marker: "ข้อความหน้า Achievements" },
-    { tab: "Roster", marker: "ทีม MLBB" },
+    { tab: "Team", marker: "ทีม MLBB" },
     { tab: "Sponsors", marker: /\d+ partners/ },
     { tab: "Shop", marker: "สถานะร้าน & ราคา" },
   ];

@@ -199,7 +199,7 @@ undefined`); (4) define `DEFAULT_*` + a `resolve*()` merge in a `lib/*.ts`, edit
 a sub-editor in `HomeEditor`. The component reads `useContent().site.<key>` and falls
 back to the default — so the block renders before anything is ever saved.
 
-**Roster PAGE copy is admin-editable (2026-07-06):** the /admin → Roster **"หน้า Roster
+**Team PAGE copy is admin-editable (2026-07-06):** the /admin → Team **"หน้า Team
 (Page)"** tab (hero title/intro, tab + tier labels, stat labels) used to be **seed-only**
 — the roster save wrote only the `players`/`members` tables and reads rebuilt `page` from
 `data/roster.json`, so Page-tab edits never surfaced (the Players/Staff tabs always
@@ -209,6 +209,10 @@ guarded by `hasColumns`) and merged over the seed page in `lib/contentFromSupaba
 Migration (already run live): `alter table public.site_settings add column if not exists
 roster_page jsonb;`. NB: this is the roster-key equivalent of the sponsors page-copy
 gotcha below — but roster page copy now DOES go live.
+The user-facing page name is **Team** (navigation, hero, metadata, breadcrumbs, and Admin tab),
+but the stable route remains `/roster` and internal code/data keys remain `roster` for backward
+compatibility. Do not rename the route, Supabase column, or content key unless a URL migration
+is explicitly requested.
 
 ## Recently redesigned
 **Sponsors revamp (2026-07-04):** `components/clients/SponsorsClient.tsx` is now **logo-first** —

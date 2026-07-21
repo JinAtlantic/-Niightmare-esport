@@ -1,19 +1,19 @@
 {
   "page": {
     "kicker": {
-      "en": "Competitive Roster",
+      "en": "Competitive Team",
       "lo": "ລາຍຊື່ນັກກິລາແຂ່ງຂັນ"
     },
     "title": {
-      "en": "Our Roster",
-      "lo": "ນັກກິລາຂອງເຮົາ"
+      "en": "Team",
+      "lo": "ທີມ"
     },
     "intro": {
       "en": "Meet the players and staff carrying the NIIGHTMARE banner across MLBB and eFootball.",
       "lo": "ຮູ້ຈັກນັກກິລາ ແລະ ທີມງານທີ່ພາຊື່ NIIGHTMARE ລົງແຂ່ງຂັນໃນ MLBB ແລະ eFootball."
     },
     "overviewLabel": {
-      "en": "Roster Intelligence",
+      "en": "Team Intelligence",
       "lo": "ຂໍ້ມູນລວມຂອງທີມ"
     },
     "overviewIntro": {

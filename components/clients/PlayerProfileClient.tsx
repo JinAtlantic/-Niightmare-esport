@@ -8,7 +8,7 @@ import { calculateAge, countryFlag, formatBirthDate } from "@/lib/personProfile"
 import type { Player } from "@/lib/types";
 
 const COPY = {
-  back: { en: "Back to roster", lo: "ກັບໄປຫາ roster" },
+  back: { en: "Back to team", lo: "ກັບໄປຫາທີມ" },
   about: { en: "Player Profile", lo: "ໂປຣໄຟລ໌ນັກກິລາ" },
 };
 
