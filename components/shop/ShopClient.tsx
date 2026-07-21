@@ -636,17 +636,23 @@ export default function ShopClient({ initialCollection }: { initialCollection?: 
               {collection.sizes.map((s) => {
                 const price = sizePrice(collection, s);
                 const qty = quantities[s.id] ?? 0;
+                const available = s.availability !== "sold_out";
                 return (
-                  <div key={s.id} className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 transition-colors ${qty > 0 ? "bg-amethyst/10 ring-1 ring-inset ring-amethyst/25" : ""}`}>
-                    <div className="min-w-0">
-                      <span className="font-display text-base font-bold uppercase tracking-wide text-soul">{s.label}</span>
-                      <span className="ml-2 font-mono text-[11px] text-ash">
-                        {formatPrice(price, collection.currency)}
-                        {s.surcharge > 0 ? ` (+${s.surcharge.toLocaleString("en-US")})` : ""}
+                  <div key={s.id} className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-md px-3 py-3 transition-colors ${qty > 0 ? "bg-amethyst/10 ring-1 ring-inset ring-amethyst/25" : ""}`}>
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span className="font-display text-lg font-black uppercase leading-none tracking-wide text-soul">{s.label}</span>
+                      <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] ${
+                        s.availability === "in_stock"
+                          ? "border-win/40 bg-win/10 text-win"
+                          : s.availability === "preorder"
+                            ? "border-glow/40 bg-glow/10 text-glow"
+                            : "border-loss/40 bg-loss/10 text-loss"
+                      }`}>
+                        {pick(s.availability === "in_stock" ? COPY.inStock : s.availability === "preorder" ? COPY.preorder : COPY.soldOut)}
                       </span>
                     </div>
-                    {s.availability !== "sold_out" ? (
-                      <div className="inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
+                    {available && (
+                      <div className="row-span-2 row-start-1 inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
                         <Stepper label="−" onClick={() => adjustQty(s.id, -1)} dim={qty === 0} />
                         <input
                           type="text"
@@ -659,14 +665,15 @@ export default function ShopClient({ initialCollection }: { initialCollection?: 
                         />
                         <Stepper label="+" onClick={() => adjustQty(s.id, 1)} />
                       </div>
-                    ) : (
-                      <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-loss">{pick(COPY.soldOut)}</span>
                     )}
-                    <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.1em] ${
-                      s.availability === "in_stock" ? "border-win/40 bg-win/10 text-win" : s.availability === "preorder" ? "border-glow/40 bg-glow/10 text-glow" : "hidden"
-                    }`}>
-                      {pick(s.availability === "in_stock" ? COPY.inStock : COPY.preorder)}
-                    </span>
+                    <div className="col-start-1 row-start-2 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                      <span className="whitespace-nowrap font-display text-[15px] font-extrabold tabular-nums tracking-wide text-soul [text-shadow:0_0_14px_rgba(236,231,242,0.18)] sm:text-base">
+                        {formatPrice(price, collection.currency)}
+                      </span>
+                      {s.surcharge > 0 && (
+                        <span className="whitespace-nowrap font-mono text-[10px] font-semibold text-glow">+{s.surcharge.toLocaleString("en-US")}</span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
