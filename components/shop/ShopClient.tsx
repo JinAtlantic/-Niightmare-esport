@@ -536,8 +536,8 @@ export default function ShopClient({ initialCollection }: { initialCollection?: 
     <>
       <PageHeader
         title={pick({
-          en: "Niightmare Jersey\nThe Last Dance\nCollection",
-          lo: "ເສື້ອທີມ niightmare\nThe Last Dance\nCollection",
+          en: "Niightmare Jersey",
+          lo: "ເສື້ອທີມ NIIGHTMARE",
         })}
         titleClassName="text-2xl sm:text-3xl md:text-4xl"
         subtitle={pick(collection.tagline)}
