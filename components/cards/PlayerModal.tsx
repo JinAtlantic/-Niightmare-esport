@@ -7,9 +7,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   X,
   Database,
-  MapPin,
-  CalendarDays,
-  Clock,
 } from "lucide-react";
 import { useLanguage } from "@/components/context/LanguageContext";
 import SocialLinks from "@/components/ui/SocialLinks";
@@ -36,29 +33,20 @@ function SectionHead({ label }: { label: string }) {
   );
 }
 
-/** A single vital (country / birth date / age) as a premium bordered tile with a
- *  corner icon and a violet hover edge. */
+/** A single vital (country / birth date / age) as a premium bordered tile. */
 function StatTile({
-  icon,
   label,
   children,
 }: {
-  icon: React.ReactNode;
   label: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="group/tile relative overflow-hidden border border-edge bg-void/45 px-3 py-2.5 transition-colors duration-300 hover:border-amethyst/40">
+    <div data-player-vital className="group/tile relative overflow-hidden border border-edge bg-void/45 px-3 py-2.5 transition-colors duration-300 hover:border-amethyst/40">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/50 to-transparent opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100"
       />
-      <span
-        aria-hidden
-        className="absolute right-2 top-2 text-amethyst/45 transition-colors duration-300 group-hover/tile:text-amethyst/85"
-      >
-        {icon}
-      </span>
       <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-spectre">{label}</p>
       <div className="mt-1.5">{children}</div>
     </div>
@@ -204,7 +192,7 @@ export default function PlayerModal({
             {(flagUrl || countryName || birthDate || age !== null) && (
               <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
                 {(flagUrl || countryName) && (
-                  <StatTile icon={<MapPin size={13} strokeWidth={2} />} label={t("roster.country_label")}>
+                  <StatTile label={t("roster.country_label")}>
                     <span className="flex items-center gap-2 font-mono text-sm font-semibold uppercase text-soul">
                       {flagUrl && (
                         <span className="block h-3.5 w-5 shrink-0 overflow-hidden border border-edge/70">
@@ -224,12 +212,12 @@ export default function PlayerModal({
                   </StatTile>
                 )}
                 {birthDate && (
-                  <StatTile icon={<CalendarDays size={13} strokeWidth={2} />} label={t("roster.birth_date")}>
+                  <StatTile label={t("roster.birth_date")}>
                     <span className="keep-latin font-mono text-sm font-semibold text-soul">{birthDate}</span>
                   </StatTile>
                 )}
                 {age !== null && (
-                  <StatTile icon={<Clock size={13} strokeWidth={2} />} label={t("roster.age_label")}>
+                  <StatTile label={t("roster.age_label")}>
                     <span className="keep-latin font-mono text-sm font-semibold text-soul">
                       {age} {t("roster.years_old")}
                     </span>

@@ -51,6 +51,8 @@ test("Player profile dialog keeps keyboard focus inside and returns it", async (
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
+  await expect(dialog.locator("[data-player-vital]")).toHaveCount(3);
+  await expect(dialog.locator("[data-player-vital] svg")).toHaveCount(0);
   await expectNoAccessibilityViolations(page, "Player dialog");
   await expect.poll(() => activeElementIsInside(page, dialog)).toBe(true);
   await page.keyboard.press("Tab");
