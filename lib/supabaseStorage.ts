@@ -1,5 +1,4 @@
 import "server-only";
-import sharp from "sharp";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 
 /** Public website media and private customer/order evidence must never share an
@@ -57,6 +56,11 @@ export async function normalizeOrderEvidenceImage(
   maxBytes = 4 * 1024 * 1024
 ): Promise<Buffer | null> {
   try {
+    // Keep the native module lazy so unrelated storage routes (status reads,
+    // deletes, signed URLs) remain available even if a deployment is missing
+    // a platform binary. The trace config explicitly ships Sharp's native
+    // runtime files with the two routes that normalize uploads.
+    const { default: sharp } = await import("sharp");
     const output = await sharp(input, { failOn: "error", limitInputPixels: 24_000_000 })
       .rotate()
       .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
