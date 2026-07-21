@@ -11,14 +11,13 @@ import SocialLinks from "@/components/ui/SocialLinks";
 import CopyEmailButton from "@/components/ui/CopyEmailButton";
 import { useModalFocus } from "@/components/ui/useModalFocus";
 import { countryFlag } from "@/lib/personProfile";
-import { memberGame } from "@/lib/staff";
 import type { StaffMember } from "@/lib/types";
 
 /**
  * Staff / management detail dialog. Same premium shell as PlayerModal (framer
  * bloom, pinned portrait + scrolling content on desktop, whole-panel scroll on
- * mobile, fixed close). Back-office profiles omit the responsibility section;
- * coach profiles keep it between Official Role and Contact.
+ * mobile, fixed close). Staff responsibilities remain admin-editable but are
+ * intentionally omitted from every public staff profile.
  */
 export default function StaffModal({
   member,
@@ -35,8 +34,6 @@ export default function StaffModal({
 
   const title = member.name || member.ign || "";
   const nickname = member.ign && member.name && member.ign !== member.name ? member.ign : null;
-  const bio = member.bio ? pick(member.bio) : t("roster.responsibility_fallback");
-  const showResponsibility = memberGame(member) !== null;
   const email = member.email || site.contact.email;
   const flag = countryFlag(member.countryCode);
   const countryName = member.country ? pick(member.country) : member.countryCode?.toUpperCase();
@@ -142,15 +139,6 @@ export default function StaffModal({
                   {flag && <span className="text-base leading-none">{flag}</span>}
                   {countryName && <span className="truncate">{countryName}</span>}
                 </p>
-              </div>
-            )}
-
-            {showResponsibility && (
-              <div className="mt-6">
-                <p className="mb-2 border-l-2 border-amethyst pl-2 font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-spectre/85">
-                  {t("roster.responsibility")}
-                </p>
-                <p className="text-sm leading-relaxed text-ash">{bio}</p>
               </div>
             )}
 
