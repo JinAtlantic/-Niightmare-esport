@@ -8,6 +8,9 @@ const PUBLIC_ROUTES = [
   "/roster",
   "/sponsors",
   "/shop",
+  "/shop/official-2026",
+  "/shop?view=cart",
+  "/shop?view=orders",
   "/privacy",
   "/terms",
 ] as const;
@@ -181,7 +184,7 @@ test("responsive navigation and language switch remain interactive", async ({ pa
   assertRuntime();
 });
 
-test("shop collections are selectable, shareable, and keep per-size availability", async ({ page }) => {
+test("shop products have shareable detail pages and keep per-size availability", async ({ page }) => {
   await page.route("**/api/content", async (route) => {
     const response = await route.fetch();
     const content = await response.json() as {
@@ -216,17 +219,18 @@ test("shop collections are selectable, shareable, and keep per-size availability
     await route.fulfill({ response, json: content });
   });
 
-  await page.goto("/shop?collection=away-kit", { waitUntil: "domcontentloaded" });
-  const selector = page.getByLabel("Collection");
-  await expect(selector).toHaveValue("away-kit");
-  await expect(page.getByRole("heading", { name: "Away Test Collection" })).toBeVisible();
+  await page.goto("/shop/away-kit", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { level: 1, name: "Away Test Collection" })).toBeVisible();
   await expect(page.getByText("Ready to ship", { exact: true })).toBeVisible();
   await expect(page.getByText("Sold out", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("M quantity")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^M Sold out$/ })).toBeDisabled();
 
-  await selector.selectOption("home-kit");
-  await expect(page).toHaveURL(/collection=home-kit/);
+  await page.getByRole("link", { name: "All products" }).first().click();
+  await expect(page).toHaveURL(/\/shop$/);
   await expect(page.getByRole("heading", { name: "Home Test Collection" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Away Test Collection" })).toBeVisible();
+  await page.getByRole("link", { name: /Home Test Collection/ }).click();
+  await expect(page).toHaveURL(/\/shop\/home-kit$/);
 });
 
 test("every admin editor loads read-only from the isolated server", async ({ page }) => {
@@ -304,9 +308,9 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     if (editor.tab === "Shop") {
       await expect(page.getByLabel("สถานะ")).toHaveCount(7);
       await expect(page.getByLabel("สถานะ").first()).toHaveValue("preorder");
-      await page.getByRole("button", { name: /เพิ่ม Collection/i }).click();
-      await expect(page.locator("main")).toContainText("ทั้งหมด 2 Collection");
-      await expect(page.locator("main")).toContainText("New Collection");
+      await page.getByRole("button", { name: /เพิ่มสินค้า/i }).click();
+      await expect(page.locator("main")).toContainText("ทั้งหมด 2 สินค้า");
+      await expect(page.locator("main")).toContainText("New Product");
     }
 
     await expectNoDocumentOverflow(page);

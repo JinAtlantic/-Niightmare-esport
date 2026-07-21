@@ -90,8 +90,11 @@ test("Payment dialog traps focus, closes with Escape, and returns to Order & pay
   request,
 }) => {
   await request.post("/api/shop/order", { data: { intent: "reset-e2e" } });
-  await page.goto("/shop", { waitUntil: "domcontentloaded" });
-  await page.getByLabel("S quantity").fill("1");
+  await page.goto("/shop/official-2026", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: /^S Pre-order$/ }).click();
+  await page.getByLabel("Quantity").fill("1");
+  await page.getByRole("button", { name: "Add to cart" }).click();
+  await page.getByRole("link", { name: /^Cart: 1$/ }).click();
   await page.getByLabel("Full name").fill("Keyboard Buyer");
   await page.getByLabel("Phone / WhatsApp").fill("02055550999");
   await page.getByLabel("Courier").selectOption({ index: 1 });

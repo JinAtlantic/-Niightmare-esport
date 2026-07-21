@@ -101,8 +101,13 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   expect(invalidCollection.status()).toBe(400);
 
   await page.goto("/shop");
-  await expect(page.getByText("Pre-order", { exact: true }).first()).toBeVisible();
-  await page.getByLabel("S quantity").fill("1");
+  await page.getByTestId("product-card-link").first().click();
+  await expect(page).toHaveURL(/\/shop\/official-2026$/);
+  await page.getByRole("button", { name: /^S Pre-order$/ }).click();
+  await page.getByLabel("Quantity").fill("1");
+  await page.getByRole("button", { name: "Add to cart" }).click();
+  await page.getByRole("link", { name: /^Cart: 1$/ }).click();
+  await expect(page).toHaveURL(/view=cart/);
   await page.getByLabel("Full name").fill("Shop E2E Buyer");
   await page.getByLabel("Phone / WhatsApp").fill("02055550123");
   await page.getByLabel("Courier").selectOption({ index: 1 });

@@ -148,7 +148,7 @@ export default function ShopEditor() {
       id: `collection-${suffix}`,
       slug: `collection-${suffix}`,
       enabled: false,
-      productName: { en: "New Collection", lo: "ຄໍເລັກຊັນໃໝ່" },
+      productName: { en: "New Product", lo: "ສິນຄ້າໃໝ່" },
       tagline: { en: "New NIIGHTMARE collection", lo: "ຄໍເລັກຊັນ NIIGHTMARE ໃໝ່" },
       description: { en: "", lo: "" },
       sizes: template.sizes.map((size) => ({ ...size })),
@@ -159,7 +159,7 @@ export default function ShopEditor() {
   };
   const removeCollection = (index: number) => {
     if (shop.collections.length === 1) return;
-    if (!window.confirm("ลบ Collection นี้หรือไม่? ออเดอร์เก่าจะไม่ถูกลบ")) return;
+    if (!window.confirm("ลบสินค้านี้หรือไม่? ออเดอร์เก่าจะไม่ถูกลบ")) return;
     patchCollections(shop.collections.filter((_, i) => i !== index));
   };
   const moveCollection = (index: number, direction: -1 | 1) => {
@@ -195,18 +195,18 @@ export default function ShopEditor() {
         </Card>
       </Section>
 
-      <Section title="Collections" hint="เพิ่มรุ่นเสื้อ แยกราคา รูป และสถานะของแต่ละไซส์ได้อิสระ" collapsible={false}>
+      <Section title="สินค้า / Collections" hint="สินค้าแต่ละชิ้นมีหน้ารายละเอียดของตัวเอง แยกราคา รูป และสถานะของแต่ละไซส์ได้อิสระ" collapsible={false}>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3 rounded-md border border-edge bg-crypt/50 p-3">
-            <p className="font-mono text-xs text-ash">ทั้งหมด {shop.collections.length} Collection · หน้าเว็บจะแสดงเฉพาะรายการที่เปิดขาย</p>
-            <Button variant="primary" onClick={addCollection}>+ เพิ่ม Collection</Button>
+            <p className="font-mono text-xs text-ash">ทั้งหมด {shop.collections.length} สินค้า · หน้าเว็บจะแสดงเฉพาะรายการที่เปิดขาย</p>
+            <Button variant="primary" onClick={addCollection}>+ เพิ่มสินค้า</Button>
           </div>
           {shop.collections.map((collection, collectionIndex) => (
             <details key={collection.id} className="group overflow-hidden rounded-md border border-edge-bright bg-crypt/45" open={shop.collections.length === 1 || undefined}>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-crypt2/70 p-4 [&::-webkit-details-marker]:hidden">
                 <div className="min-w-0">
-                  <p className="truncate font-display text-base font-bold uppercase tracking-wide text-soul">{collection.productName.en || `Collection ${collectionIndex + 1}`}</p>
-                  <p className={`mt-1 font-mono text-[10px] uppercase tracking-[0.14em] ${collection.enabled ? "text-win" : "text-ash"}`}>{collection.enabled ? "เปิดขาย" : "ซ่อนจากหน้าเว็บ"} · /shop?collection={collection.slug}</p>
+                  <p className="truncate font-display text-base font-bold uppercase tracking-wide text-soul">{collection.productName.en || `Product ${collectionIndex + 1}`}</p>
+                  <p className={`mt-1 font-mono text-[10px] uppercase tracking-[0.14em] ${collection.enabled ? "text-win" : "text-ash"}`}>{collection.enabled ? "เปิดขาย" : "ซ่อนจากหน้าเว็บ"} · /shop/{collection.slug}</p>
                 </div>
                 <span className="font-mono text-xs text-glow transition-transform group-open:rotate-90">▶</span>
               </summary>
@@ -219,7 +219,7 @@ export default function ShopEditor() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
-                  <BilingualField label="ชื่อ Collection / สินค้า" value={collection.productName} onChange={(productName) => patchCollection(collectionIndex, { productName })} />
+                  <BilingualField label="ชื่อสินค้า" value={collection.productName} onChange={(productName) => patchCollection(collectionIndex, { productName })} />
                   <BilingualField label="แท็กไลน์" value={collection.tagline} onChange={(tagline) => patchCollection(collectionIndex, { tagline })} />
                 </div>
                 <BilingualTextArea label="รายละเอียดสินค้า" value={collection.description} onChange={(description) => patchCollection(collectionIndex, { description })} />

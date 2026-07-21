@@ -10,6 +10,9 @@ const PUBLIC_ROUTES = [
   "/roster",
   "/sponsors",
   "/shop",
+  "/shop/official-2026",
+  "/shop?view=cart",
+  "/shop?view=orders",
   "/privacy",
   "/terms",
 ] as const;

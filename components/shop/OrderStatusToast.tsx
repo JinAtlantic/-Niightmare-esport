@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/components/context/LanguageContext";
 import type { Bilingual } from "@/lib/types";
 import type { ShopOrderRecord } from "@/lib/shop";
@@ -199,7 +200,7 @@ export default function OrderStatusToast() {
             role="status"
             className={`pointer-events-auto flex w-full max-w-md items-start gap-2 rounded-md border border-edge-bright border-l-[3px] bg-crypt/95 p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.85)] backdrop-blur animate-fadeInUp sm:w-[22rem] ${meta.accent}`}
           >
-            <a href="/shop?view=orders" className="group min-w-0 flex-1">
+            <Link href="/shop?view=orders" className="group min-w-0 flex-1">
               <p className="font-display text-sm font-bold uppercase tracking-wide text-soul">{pick(meta.title)}</p>
               <p className="mt-0.5 font-mono text-[11px] leading-snug text-spectre">
                 {pick(meta.body)}
@@ -208,7 +209,7 @@ export default function OrderStatusToast() {
               <span className="mt-1.5 inline-block font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-glow transition-colors group-hover:text-soul">
                 {pick({ en: "View order →", lo: "ເບິ່ງອໍເດີ →" })}
               </span>
-            </a>
+            </Link>
             <button
               type="button"
               onClick={() => dismiss(toastKey(t))}
