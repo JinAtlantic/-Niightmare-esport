@@ -11,8 +11,17 @@ import {
   BilingualField,
   ImageField,
   Label,
+  SelectField,
 } from "@/components/admin/ui";
-import { resolveShop, qrFrameStyle, type ShopContent, type ShopSize } from "@/lib/shop";
+import {
+  resolveShop,
+  qrFrameStyle,
+  shopSlug,
+  type ShopCollection,
+  type ShopContent,
+  type ShopSize,
+  type ShopSizeAvailability,
+} from "@/lib/shop";
 import { safeImageSrc } from "@/lib/safety";
 import type { Bilingual } from "@/lib/types";
 
@@ -97,8 +106,69 @@ export default function ShopEditor() {
   const shop = resolveShop(data.shop);
   const patch = (p: Partial<ShopContent>) => setData({ ...data, shop: { ...shop, ...p } });
   const patchBank = (p: Partial<ShopContent["bank"]>) => patch({ bank: { ...shop.bank, ...p } });
-  const patchSize = (index: number, p: Partial<ShopSize>) =>
-    patch({ sizes: shop.sizes.map((s, i) => (i === index ? { ...s, ...p } : s)) });
+  const patchCollections = (collections: ShopCollection[]) => {
+    const first = collections[0];
+    patch({
+      collections,
+      ...(first ? {
+        productName: first.productName,
+        tagline: first.tagline,
+        description: first.description,
+        rightsNote: first.rightsNote,
+        currency: first.currency,
+        price: first.price,
+        fixedJerseyName: first.fixedJerseyName,
+        fixedJerseyNumber: first.fixedJerseyNumber,
+        sizes: first.sizes,
+        productImage: first.productImage,
+        frontImage: first.frontImage,
+        backImage: first.backImage,
+      } : {}),
+    });
+  };
+  const patchCollection = (index: number, p: Partial<ShopCollection>) =>
+    patchCollections(shop.collections.map((collection, i) => i === index ? { ...collection, ...p } : collection));
+  const uniqueSlug = (raw: string, currentIndex: number) => {
+    const base = shopSlug(raw, shop.collections[currentIndex].id);
+    const used = new Set(shop.collections.filter((_, index) => index !== currentIndex).map((collection) => collection.slug));
+    if (!used.has(base)) return base;
+    let suffix = 2;
+    while (used.has(`${base}-${suffix}`)) suffix += 1;
+    return `${base}-${suffix}`;
+  };
+  const patchSize = (collectionIndex: number, sizeIndex: number, p: Partial<ShopSize>) => {
+    const collection = shop.collections[collectionIndex];
+    patchCollection(collectionIndex, { sizes: collection.sizes.map((size, i) => i === sizeIndex ? { ...size, ...p } : size) });
+  };
+  const addCollection = () => {
+    const template = shop.collections[0];
+    const suffix = Date.now().toString(36);
+    patchCollections([...shop.collections, {
+      ...template,
+      id: `collection-${suffix}`,
+      slug: `collection-${suffix}`,
+      enabled: false,
+      productName: { en: "New Collection", lo: "ຄໍເລັກຊັນໃໝ່" },
+      tagline: { en: "New NIIGHTMARE collection", lo: "ຄໍເລັກຊັນ NIIGHTMARE ໃໝ່" },
+      description: { en: "", lo: "" },
+      sizes: template.sizes.map((size) => ({ ...size })),
+      productImage: undefined,
+      frontImage: undefined,
+      backImage: undefined,
+    }]);
+  };
+  const removeCollection = (index: number) => {
+    if (shop.collections.length === 1) return;
+    if (!window.confirm("ลบ Collection นี้หรือไม่? ออเดอร์เก่าจะไม่ถูกลบ")) return;
+    patchCollections(shop.collections.filter((_, i) => i !== index));
+  };
+  const moveCollection = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= shop.collections.length) return;
+    const next = [...shop.collections];
+    [next[index], next[target]] = [next[target], next[index]];
+    patchCollections(next);
+  };
 
   return (
     <div className="space-y-8">
@@ -115,56 +185,87 @@ export default function ShopEditor() {
         </div>
       </div>
 
-      <Section title="สถานะร้าน & ราคา" hint="เปิด/ปิดการขาย, สกุลเงิน, ราคาฐาน และชื่อ/เบอร์ที่ล็อกไว้" collapsible={false}>
+      <Section title="สถานะร้าน" hint="สวิตช์หลักสำหรับเปิดหรือปิดหน้า Shop ทั้งหมด" collapsible={false}>
         <Card className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <Button variant={shop.enabled ? "primary" : "ghost"} onClick={() => patch({ enabled: !shop.enabled })}>
               {shop.enabled ? "เปิดขายอยู่" : "ปิดร้านอยู่"}
             </Button>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            <TextField label="สกุลเงิน (เช่น ກີບ)" value={shop.currency} onChange={(currency) => patch({ currency })} />
-            <NumberField label="ราคาฐาน (S–XXL)" value={shop.price} onChange={(price) => patch({ price })} />
-            <div />
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <TextField label="ชื่อหลังเสื้อ (ล็อก)" value={shop.fixedJerseyName} onChange={(fixedJerseyName) => patch({ fixedJerseyName })} />
-            <TextField label="เบอร์เสื้อ (ล็อก)" value={shop.fixedJerseyNumber} onChange={(fixedJerseyNumber) => patch({ fixedJerseyNumber })} />
-          </div>
-          <BilingualTextArea label="ข้อความสงวนลิขสิทธิ์ชื่อ/เบอร์" value={shop.rightsNote} rows={2} onChange={(rightsNote) => patch({ rightsNote })} />
         </Card>
       </Section>
 
-      <Section title="ข้อความสินค้า" hint="ชื่อสินค้าและแท็กไลน์ที่แสดงบนหน้า /shop">
-        <Card className="space-y-4">
-          <BilingualField label="ชื่อสินค้า" value={shop.productName} onChange={(productName) => patch({ productName })} />
-          <BilingualField label="แท็กไลน์" value={shop.tagline} onChange={(tagline) => patch({ tagline })} />
-        </Card>
-      </Section>
-
-      <Section title="รูปเสื้อ (หน้า / หลัง)" hint="อัปโหลดรูปเสื้อด้านหน้าและด้านหลัง — โชว์เป็นแกลเลอรีพรีเมียมบนหน้า /shop (แตะซูมได้)">
-        <Card>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <ImageField
-                label="รูปด้านหน้าเสื้อ"
-                value={shop.frontImage}
-                folder="shop"
-                onChange={(frontImage) => patch({ frontImage: frontImage || undefined })}
-              />
-              <p className="font-mono text-[10px] text-ash">แนะนำรูปแนวตั้ง พื้นหลังโล่ง/เข้ม จะดูพรีเมียมสุด</p>
-            </div>
-            <div className="space-y-2">
-              <ImageField
-                label="รูปด้านหลังเสื้อ"
-                value={shop.backImage}
-                folder="shop"
-                onChange={(backImage) => patch({ backImage: backImage || undefined })}
-              />
-              <p className="font-mono text-[10px] text-ash">ใส่รูปหลัง (โชว์ชื่อ + เบอร์ 7) — เว้นว่างได้ ถ้ายังไม่มี</p>
-            </div>
+      <Section title="Collections" hint="เพิ่มรุ่นเสื้อ แยกราคา รูป และสถานะของแต่ละไซส์ได้อิสระ" collapsible={false}>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 rounded-md border border-edge bg-crypt/50 p-3">
+            <p className="font-mono text-xs text-ash">ทั้งหมด {shop.collections.length} Collection · หน้าเว็บจะแสดงเฉพาะรายการที่เปิดขาย</p>
+            <Button variant="primary" onClick={addCollection}>+ เพิ่ม Collection</Button>
           </div>
-        </Card>
+          {shop.collections.map((collection, collectionIndex) => (
+            <details key={collection.id} className="group overflow-hidden rounded-md border border-edge-bright bg-crypt/45" open={shop.collections.length === 1 || undefined}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-crypt2/70 p-4 [&::-webkit-details-marker]:hidden">
+                <div className="min-w-0">
+                  <p className="truncate font-display text-base font-bold uppercase tracking-wide text-soul">{collection.productName.en || `Collection ${collectionIndex + 1}`}</p>
+                  <p className={`mt-1 font-mono text-[10px] uppercase tracking-[0.14em] ${collection.enabled ? "text-win" : "text-ash"}`}>{collection.enabled ? "เปิดขาย" : "ซ่อนจากหน้าเว็บ"} · /shop?collection={collection.slug}</p>
+                </div>
+                <span className="font-mono text-xs text-glow transition-transform group-open:rotate-90">▶</span>
+              </summary>
+              <div className="space-y-5 border-t border-edge p-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button variant={collection.enabled ? "primary" : "ghost"} onClick={() => patchCollection(collectionIndex, { enabled: !collection.enabled })}>{collection.enabled ? "เปิดขายอยู่" : "ซ่อนอยู่"}</Button>
+                  <Button onClick={() => moveCollection(collectionIndex, -1)} disabled={collectionIndex === 0}>↑ เลื่อนขึ้น</Button>
+                  <Button onClick={() => moveCollection(collectionIndex, 1)} disabled={collectionIndex === shop.collections.length - 1}>↓ เลื่อนลง</Button>
+                  <Button variant="danger" onClick={() => removeCollection(collectionIndex)} disabled={shop.collections.length === 1}>ลบ</Button>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <BilingualField label="ชื่อ Collection / สินค้า" value={collection.productName} onChange={(productName) => patchCollection(collectionIndex, { productName })} />
+                  <BilingualField label="แท็กไลน์" value={collection.tagline} onChange={(tagline) => patchCollection(collectionIndex, { tagline })} />
+                </div>
+                <BilingualTextArea label="รายละเอียดสินค้า" value={collection.description} onChange={(description) => patchCollection(collectionIndex, { description })} />
+                <div className="grid gap-3 md:grid-cols-3">
+                  <TextField label="Slug สำหรับลิงก์" value={collection.slug} onChange={(slug) => patchCollection(collectionIndex, { slug: uniqueSlug(slug, collectionIndex) })} />
+                  <TextField label="สกุลเงิน (เช่น ກີບ)" value={collection.currency} onChange={(currency) => patchCollection(collectionIndex, { currency })} />
+                  <NumberField label="ราคาฐาน" value={collection.price} onChange={(price) => patchCollection(collectionIndex, { price })} />
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <TextField label="ชื่อหลังเสื้อ (ล็อก)" value={collection.fixedJerseyName} onChange={(fixedJerseyName) => patchCollection(collectionIndex, { fixedJerseyName })} />
+                  <TextField label="เบอร์เสื้อ (ล็อก)" value={collection.fixedJerseyNumber} onChange={(fixedJerseyNumber) => patchCollection(collectionIndex, { fixedJerseyNumber })} />
+                </div>
+                <BilingualTextArea label="ข้อความสงวนลิขสิทธิ์ชื่อ/เบอร์" value={collection.rightsNote} rows={2} onChange={(rightsNote) => patchCollection(collectionIndex, { rightsNote })} />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <ImageField label="รูปด้านหน้าเสื้อ" value={collection.frontImage} folder="shop" onChange={(frontImage) => patchCollection(collectionIndex, { frontImage: frontImage || undefined })} />
+                  <ImageField label="รูปด้านหลังเสื้อ" value={collection.backImage} folder="shop" onChange={(backImage) => patchCollection(collectionIndex, { backImage: backImage || undefined })} />
+                </div>
+
+                <div>
+                  <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-soul">ไซส์ · สถานะ · ค่าเพิ่ม</p>
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {collection.sizes.map((size, sizeIndex) => (
+                      <Card key={size.id} className="space-y-3">
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          <TextField label="ป้ายไซส์" value={size.label} onChange={(label) => patchSize(collectionIndex, sizeIndex, { label })} />
+                          <SelectField
+                            label="สถานะ"
+                            value={size.availability}
+                            onChange={(availability) => patchSize(collectionIndex, sizeIndex, { availability: availability as ShopSizeAvailability, inStock: availability !== "sold_out" })}
+                            options={[
+                              { value: "in_stock", label: "พร้อมส่ง" },
+                              { value: "preorder", label: "พรีออเดอร์" },
+                              { value: "sold_out", label: "หมด" },
+                            ]}
+                          />
+                          <NumberField label="ค่าเพิ่ม" value={size.surcharge} onChange={(surcharge) => patchSize(collectionIndex, sizeIndex, { surcharge })} />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
       </Section>
 
       <Section title="ธนาคาร & QR โอนเงิน" hint="ข้อมูลที่โชว์ใน popup โอนเงิน" collapsible={false}>
@@ -230,24 +331,6 @@ export default function ShopEditor() {
         </Card>
       </Section>
 
-      <Section title="ไซส์ สต็อก และค่าเพิ่ม" hint="เปิด/ปิดสต็อกและตั้งราคาเพิ่มของแต่ละไซส์" collapsible={false}>
-        <div className="space-y-3">
-          {shop.sizes.map((s, i) => (
-            <Card key={s.id} className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-display text-base font-bold uppercase tracking-wide text-soul">ไซส์ {s.label}</span>
-                <Button variant={s.inStock ? "primary" : "danger"} onClick={() => patchSize(i, { inStock: !s.inStock })}>
-                  {s.inStock ? "มีสต็อก" : "หมด"}
-                </Button>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <TextField label="ป้ายไซส์" value={s.label} onChange={(label) => patchSize(i, { label })} />
-                <NumberField label="ค่าเพิ่ม (สกุลเงิน)" value={s.surcharge} onChange={(surcharge) => patchSize(i, { surcharge })} />
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Section>
     </div>
   );
 }

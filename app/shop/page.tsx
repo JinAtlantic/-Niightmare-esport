@@ -14,7 +14,8 @@ export const metadata: Metadata = {
   twitter: { title: "Shop — NIIGHTMARE Esports Jersey", description: shopDescription, images: ["/twitter-image.png"] },
 };
 
-export default function ShopPage() {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ collection?: string }> }) {
+  const params = await searchParams;
   return (
     <>
       <JsonLd
@@ -25,7 +26,7 @@ export default function ShopPage() {
           ]),
         ]}
       />
-      <ShopClient />
+      <ShopClient initialCollection={params.collection} />
     </>
   );
 }

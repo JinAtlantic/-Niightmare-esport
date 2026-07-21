@@ -60,7 +60,7 @@ test("admin login and every read-only editor meet WCAG A/AA", async ({ page }) =
     { tab: "Achievements", marker: "ข้อความหน้า Achievements" },
     { tab: "Team", marker: "ทีม MLBB" },
     { tab: "Sponsors", marker: /\d+ partners/ },
-    { tab: "Shop", marker: "สถานะร้าน & ราคา" },
+    { tab: "Shop", marker: "Collections" },
   ];
 
   for (const editor of editors) {

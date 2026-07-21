@@ -88,8 +88,19 @@ function asLine(value: unknown): ShopOrderLine | null {
   const lineTotal = Math.max(0, Math.floor(Number(row.lineTotal) || unitPrice * quantity));
   const sizeId = str(row.sizeId, 20);
   const label = str(row.label, 40);
+  const collectionId = str(row.collectionId, 80) || undefined;
+  const collectionSlug = str(row.collectionSlug, 80) || undefined;
+  const rawCollectionName = row.collectionName && typeof row.collectionName === "object"
+    ? row.collectionName as Record<string, unknown>
+    : null;
+  const parsedCollectionName = rawCollectionName
+    ? { en: str(rawCollectionName.en, 120), lo: str(rawCollectionName.lo, 120) }
+    : null;
+  const collectionName = parsedCollectionName && (parsedCollectionName.en || parsedCollectionName.lo)
+    ? parsedCollectionName
+    : undefined;
   return sizeId && label && quantity > 0
-    ? { sizeId, label, quantity, unitPrice, lineTotal }
+    ? { collectionId, collectionSlug, collectionName, sizeId, label, quantity, unitPrice, lineTotal }
     : null;
 }
 
@@ -305,6 +316,7 @@ export async function POST(request: Request) {
     .map((item) => {
       const value = (item ?? {}) as Record<string, unknown>;
       return {
+        collectionId: str(value.collectionId, 80),
         sizeId: str(value.sizeId, 12).toLowerCase(),
         quantity: Math.max(0, Math.min(999, Math.floor(Number(value.quantity) || 0))),
       };
@@ -325,10 +337,16 @@ export async function POST(request: Request) {
   }
   const { shop } = e2e ? { shop: resolveShop(null) } : await shopContext();
   if (!shop.enabled) return NextResponse.json({ error: "Shop is closed" }, { status: 403 });
-  const { lines, totalQty, total } = computeOrder(shop, input.items);
+  const { lines, totalQty, total, currency } = computeOrder(shop, input.items);
   if (!lines.length) {
     return NextResponse.json(
       { error: "No available sizes selected", fields: { items: true } },
+      { status: 400 }
+    );
+  }
+  if (new Set(lines.map((line) => line.collectionId).filter(Boolean)).size > 1) {
+    return NextResponse.json(
+      { error: "Order one collection at a time", fields: { items: true } },
       { status: 400 }
     );
   }
@@ -342,7 +360,7 @@ export async function POST(request: Request) {
     total,
     ref_code: refCode,
     user_email: userEmail || null,
-    currency: shop.currency,
+    currency,
     customer_name: input.customerName,
     phone: input.phone,
     courier: input.courier,

@@ -6,10 +6,23 @@ import { isOrderExpired } from "@/lib/shop";
 import { EvidenceImageError, prepareEvidenceImage } from "@/lib/clientEvidenceImage";
 
 interface OrderLine {
+  collectionName?: { en?: string; lo?: string };
   label: string;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+}
+
+function collectionLabel(order: OrderRow): string {
+  const names = Array.from(new Set((order.items ?? []).map((line) => line.collectionName?.en).filter(Boolean)));
+  return names.join(", ");
+}
+
+function itemLabel(order: OrderRow): string {
+  if (Array.isArray(order.items) && order.items.length) {
+    return order.items.map((line) => `${line.label} × ${line.quantity}`).join(", ");
+  }
+  return order.size || "—";
 }
 
 interface OrderRow {
@@ -253,7 +266,8 @@ function OrderDetailPanel({
           <h3 className="border-l-2 border-amethyst pl-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-soul">สินค้า</h3>
           <div className="mt-3 flex items-center justify-between gap-3 border border-edge-bright bg-void/50 px-4 py-3">
             <div>
-              <p className="keep-latin font-display text-lg font-bold text-soul">{order.size || "—"}</p>
+              {collectionLabel(order) && <p className="keep-latin font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-glow">{collectionLabel(order)}</p>}
+              <p className="keep-latin font-display text-lg font-bold text-soul">{itemLabel(order)}</p>
               <p className="mt-0.5 font-mono text-xs text-spectre">รวม {order.quantity} ตัว</p>
             </div>
             <p className="font-display text-lg font-bold tabular-nums text-glow">{fmt(order.total, order.currency)}</p>
@@ -869,7 +883,8 @@ export default function OrdersEditor() {
                             </button>
                           </td>
                           <td className="px-4 py-3.5 align-middle">
-                            <p className="keep-latin truncate font-display text-base font-bold text-soul">{order.size || "—"}</p>
+                            {collectionLabel(order) && <p className="keep-latin truncate font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-glow">{collectionLabel(order)}</p>}
+                            <p className="keep-latin truncate font-display text-base font-bold text-soul">{itemLabel(order)}</p>
                             <p className="mt-0.5 font-mono text-xs text-spectre">{order.quantity} ตัว · {courier}</p>
                           </td>
                           <td className="px-4 py-3.5 text-right align-middle">
@@ -1007,7 +1022,7 @@ export default function OrdersEditor() {
                   the value column and nothing falls out of line */}
               <dl className="grid grid-cols-[4.75rem_1fr] items-baseline gap-x-3 gap-y-2 border-t border-edge pt-3 font-mono text-[13px]">
                 <dt className="text-[11px] uppercase tracking-[0.12em] text-ash">ไซส์</dt>
-                <dd className="keep-latin font-bold text-soul">{o.size}</dd>
+                <dd className="keep-latin font-bold text-soul">{collectionLabel(o) ? `${collectionLabel(o)} · ` : ""}{itemLabel(o)}</dd>
                 <dt className="text-[11px] uppercase tracking-[0.12em] text-ash">รวม</dt>
                 <dd className="text-spectre">
                   <span className="font-display text-base font-bold text-soul">{o.quantity}</span> ตัว
@@ -1121,7 +1136,7 @@ export default function OrdersEditor() {
                   <div className="mt-2.5 border-t border-edge/60 pt-2.5 font-mono text-[11px] text-spectre">
                     {o.items.map((l, idx) => (
                       <span key={idx} className="mr-3 inline-block">
-                        {l.label} × {l.quantity} = {fmt(l.lineTotal, o.currency)}
+                        {l.collectionName?.en ? `${l.collectionName.en} · ` : ""}{l.label} × {l.quantity} = {fmt(l.lineTotal, o.currency)}
                       </span>
                     ))}
                   </div>

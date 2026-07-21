@@ -13,6 +13,7 @@ import { useModalFocus } from "@/components/ui/useModalFocus";
 import type { Lang } from "@/lib/types";
 import {
   resolveShop,
+  resolveShopCollection,
   sizePrice,
   formatPrice,
   computeOrder,
@@ -38,6 +39,9 @@ const COPY = {
   orderTitle: { en: "Order your jersey", lo: "ສັ່ງຊື້ເສື້ອ" },
   pickQuantities: { en: "Choose quantity per size — order several sizes at once.", lo: "ເລືອກຈຳນວນຕໍ່ໄຊ້ — ສັ່ງຫຼາຍໄຊ້ໃນຄັ້ງດຽວໄດ້." },
   soldOut: { en: "Sold out", lo: "ໝົດ" },
+  collection: { en: "Collection", lo: "ຄໍເລັກຊັນ" },
+  inStock: { en: "Ready to ship", lo: "ພ້ອມສົ່ງ" },
+  preorder: { en: "Pre-order", lo: "ສັ່ງຈອງ" },
   fullName: { en: "Full name", lo: "ຊື່ ແລະ ນາມສະກຸນ" },
   phone: { en: "Phone / WhatsApp", lo: "ເບີໂທ / WhatsApp" },
   courier: { en: "Courier", lo: "ບໍລິສັດຂົນສົ່ງ" },
@@ -118,10 +122,13 @@ function formatRemaining(ms: number, lang: Lang): string {
   return `${m}m`;
 }
 
-export default function ShopClient() {
+export default function ShopClient({ initialCollection }: { initialCollection?: string }) {
   const { pick, lang } = useLanguage();
   const { site } = useContent();
   const shop: ShopContent = resolveShop((site as { shop?: Partial<ShopContent> }).shop);
+  const [selectedCollection, setSelectedCollection] = useState(initialCollection || "");
+  const collection = resolveShopCollection(shop, selectedCollection);
+  const publicCollections = shop.collections.filter((item) => item.enabled);
 
   // No sign-in: buying never requires an account. "My Orders" is tracked locally
   // (localStorage) under one base key on this device.
@@ -290,8 +297,23 @@ export default function ShopClient() {
 
   const orderItems: ShopOrderItem[] = Object.entries(quantities)
     .filter(([, q]) => q > 0)
-    .map(([sizeId, quantity]) => ({ sizeId, quantity }));
-  const { lines, totalQty, total } = computeOrder(shop, orderItems);
+    .map(([sizeId, quantity]) => ({ collectionId: collection?.id, sizeId, quantity }));
+  const { lines, totalQty, total, currency: orderCurrency } = computeOrder(shop, orderItems);
+
+  function chooseCollection(slug: string) {
+    setSelectedCollection(slug);
+    setQuantities({});
+    setErrors({});
+    setOrderError("");
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("collection", slug);
+      url.searchParams.delete("view");
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    } catch {
+      /* URL History API unavailable */
+    }
+  }
 
   function persist(list: ShopOrderRecord[]) {
     try {
@@ -494,7 +516,7 @@ export default function ShopClient() {
   const contactHref = safeHref(shop.contactUrl);
   const qrSrc = safeImageSrc(shop.bank.qrImage);
 
-  if (!shop.enabled) {
+  if (!shop.enabled || !collection) {
     return (
       <section className="grid min-h-[70vh] place-items-center px-4 pt-24">
         <div className="max-w-md text-center">
@@ -518,7 +540,7 @@ export default function ShopClient() {
           lo: "ເສື້ອທີມ niightmare\nThe Last Dance\nCollection",
         })}
         titleClassName="text-2xl sm:text-3xl md:text-4xl"
-        subtitle={pick(shop.tagline)}
+        subtitle={pick(collection.tagline)}
       />
       <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-12 md:px-6 md:pt-14">
       {/* ambient two-tone wash — soft radial gradients (amethyst + magenta) that
@@ -531,6 +553,23 @@ export default function ShopClient() {
         aria-hidden
         className="pointer-events-none absolute -left-24 top-40 -z-10 h-72 w-72 rounded-full bg-glow/10 blur-[90px]"
       />
+      {publicCollections.length > 1 && (
+        <label className="mb-6 block rounded-md border border-edge-bright bg-crypt/70 p-4 shadow-elev-1">
+          <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">
+            {pick(COPY.collection)}
+          </span>
+          <select
+            value={collection.slug}
+            onChange={(event) => chooseCollection(event.target.value)}
+            className="min-h-[48px] w-full rounded-md border border-amethyst/50 bg-void/80 px-3.5 font-display text-sm font-bold uppercase tracking-[0.08em] text-soul outline-none focus:border-glow"
+          >
+            {publicCollections.map((item) => (
+              <option key={item.id} value={item.slug}>{pick(item.productName)}</option>
+            ))}
+          </select>
+        </label>
+      )}
+
       {/* tabs — switch between Order and My Orders */}
       <div className="mb-8 flex items-center justify-center gap-1 border-b border-edge">
         {TABS.map((t) => {
@@ -562,12 +601,17 @@ export default function ShopClient() {
         {/* ── ORDER ──────────────────────────────────────────────────── */}
         {tab === "order" && (
           <section id="order-form" className="space-y-5">
+            <div className="border-l-2 border-amethyst bg-gradient-to-r from-amethyst/10 to-transparent px-4 py-3">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-glow">{pick(COPY.collection)}</p>
+              <h2 className="mt-1 font-display text-xl font-black uppercase tracking-wide text-soul">{pick(collection.productName)}</h2>
+            </div>
             {/* front/back jersey gallery — premium viewer with tap-to-zoom */}
             <JerseyShowcase
-              front={shop.frontImage}
-              back={shop.backImage}
-              productName={shop.productName}
-              jerseyNumber={shop.fixedJerseyNumber}
+              key={collection.id}
+              front={collection.frontImage}
+              back={collection.backImage}
+              productName={collection.productName}
+              jerseyNumber={collection.fixedJerseyNumber}
             />
 
             <div className="relative overflow-hidden rounded-md border border-amethyst/60 bg-gradient-to-br from-amethyst/[0.18] via-crypt/50 to-crypt/20 p-4 shadow-[0_0_30px_-6px_rgba(168,85,247,0.5)] ring-1 ring-inset ring-amethyst/10">
@@ -577,9 +621,9 @@ export default function ShopClient() {
               <p className="relative mb-1.5 inline-flex items-center gap-2 rounded-full border border-glow/40 bg-amethyst/20 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-glow shadow-[0_0_16px_-2px_rgba(199,125,255,0.6)]">
                 <LockGlyph /> {pick(COPY.reserved)}
               </p>
-              <p className="relative text-[13px] leading-relaxed text-spectre/90">{pick(shop.rightsNote)}</p>
+              <p className="relative text-[13px] leading-relaxed text-spectre/90">{pick(collection.rightsNote)}</p>
               <p className="relative mt-2 font-display text-sm font-bold uppercase tracking-wide text-soul [text-shadow:0_0_20px_rgba(168,85,247,0.55)]">
-                {shop.fixedJerseyName} · #{shop.fixedJerseyNumber}
+                {collection.fixedJerseyName} · #{collection.fixedJerseyNumber}
               </p>
             </div>
 
@@ -589,19 +633,19 @@ export default function ShopClient() {
             </div>
 
             <div className={`grid gap-2 rounded-md border bg-void/30 p-2 ${errors.items ? "border-loss/70" : "border-edge"}`}>
-              {shop.sizes.map((s) => {
-                const price = sizePrice(shop, s);
+              {collection.sizes.map((s) => {
+                const price = sizePrice(collection, s);
                 const qty = quantities[s.id] ?? 0;
                 return (
                   <div key={s.id} className={`flex items-center justify-between gap-3 rounded-md px-3 py-2.5 transition-colors ${qty > 0 ? "bg-amethyst/10 ring-1 ring-inset ring-amethyst/25" : ""}`}>
                     <div className="min-w-0">
                       <span className="font-display text-base font-bold uppercase tracking-wide text-soul">{s.label}</span>
                       <span className="ml-2 font-mono text-[11px] text-ash">
-                        {formatPrice(price, shop.currency)}
+                        {formatPrice(price, collection.currency)}
                         {s.surcharge > 0 ? ` (+${s.surcharge.toLocaleString("en-US")})` : ""}
                       </span>
                     </div>
-                    {s.inStock ? (
+                    {s.availability !== "sold_out" ? (
                       <div className="inline-flex shrink-0 items-center rounded-md border border-edge bg-void/50">
                         <Stepper label="−" onClick={() => adjustQty(s.id, -1)} dim={qty === 0} />
                         <input
@@ -618,6 +662,11 @@ export default function ShopClient() {
                     ) : (
                       <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-loss">{pick(COPY.soldOut)}</span>
                     )}
+                    <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.1em] ${
+                      s.availability === "in_stock" ? "border-win/40 bg-win/10 text-win" : s.availability === "preorder" ? "border-glow/40 bg-glow/10 text-glow" : "hidden"
+                    }`}>
+                      {pick(s.availability === "in_stock" ? COPY.inStock : COPY.preorder)}
+                    </span>
                   </div>
                 );
               })}
@@ -670,7 +719,7 @@ export default function ShopClient() {
                   )}
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="stat-num whitespace-nowrap font-display text-2xl font-bold sm:text-3xl">{formatPrice(total, shop.currency)}</p>
+                  <p className="stat-num whitespace-nowrap font-display text-2xl font-bold sm:text-3xl">{formatPrice(total, orderCurrency || collection.currency)}</p>
                   <p className="font-mono text-[11px] text-ash">
                     {totalQty} {pick(COPY.pieces)}
                   </p>
@@ -752,7 +801,7 @@ export default function ShopClient() {
                     <div key={(o.id ?? o.refCode ?? "") + i} className="rounded-md border border-edge bg-void/50 p-4 shadow-elev-1">
                       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                         <span className="font-display text-sm font-bold uppercase tracking-wide text-soul">
-                          {pick(shop.productName)} · {o.sizeSummary}
+                          {(o.items?.[0]?.collectionName ? pick(o.items[0].collectionName) : pick(shop.productName))} · {o.items?.map((line) => `${line.label}×${line.quantity}`).join(", ") || o.sizeSummary}
                         </span>
                         <span className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] ${badgeCls}`}>{badge}</span>
                       </div>
@@ -837,7 +886,7 @@ export default function ShopClient() {
                           <div className="mt-2.5 border-t border-edge/60 pt-2.5 font-mono text-[11px] text-spectre">
                             {o.items.map((l, idx) => (
                               <span key={idx} className="mr-3 inline-block keep-latin">
-                                {l.label} × {l.quantity}
+                                {l.collectionName ? `${pick(l.collectionName)} · ` : ""}{l.label} × {l.quantity}
                               </span>
                             ))}
                           </div>
@@ -941,7 +990,7 @@ export default function ShopClient() {
                   </div>
 
                   <div className="mt-3 grid gap-2 rounded-md border border-edge bg-void/50 p-4 font-mono text-xs">
-                    <Row label={pick(COPY.items)} value={(payingOrder.items ?? []).map((l) => `${l.label}×${l.quantity}`).join(", ")} />
+                    <Row label={pick(COPY.items)} value={(payingOrder.items ?? []).map((l) => `${l.collectionName ? `${pick(l.collectionName)} · ` : ""}${l.label}×${l.quantity}`).join(", ")} />
                     <Row label={pick(COPY.bank)} value={shop.bank.bankName} />
                     <Row label={pick(COPY.accName)} value={shop.bank.accountName} />
                     <Row label={pick(COPY.accNo)} value={shop.bank.accountNumber} />

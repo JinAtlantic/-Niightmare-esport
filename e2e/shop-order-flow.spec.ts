@@ -86,7 +86,22 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   expect(productionHostProbe.headers()[E2E_HEADER]).toBeUndefined();
   expect(productionHostProbe.status()).toBe(503);
 
+  const invalidCollection = await request.post("/api/shop/order", {
+    data: {
+      intent: "reserve",
+      items: [{ collectionId: "missing-collection", sizeId: "s", quantity: 1 }],
+      customerName: "Invalid collection probe",
+      phone: "02055550001",
+      courier: "Test courier",
+      province: "Vientiane",
+      city: "Chanthabouly",
+      branch: "Test",
+    },
+  });
+  expect(invalidCollection.status()).toBe(400);
+
   await page.goto("/shop");
+  await expect(page.getByText("Pre-order", { exact: true }).first()).toBeVisible();
   await page.getByLabel("S quantity").fill("1");
   await page.getByLabel("Full name").fill("Shop E2E Buyer");
   await page.getByLabel("Phone / WhatsApp").fill("02055550123");
@@ -100,6 +115,8 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   const reserveResponse = await reservePromise;
   await expectE2EResponse(reserveResponse);
   const reserveJson = await reserveResponse.json();
+  expect(reserveResponse.request().postDataJSON()?.items?.[0]?.collectionId).toBe("official-2026");
+  expect(reserveJson.order.items?.[0]?.collectionName?.en).toBe("NIIGHTMARE 2026 Official Jersey");
   const orderId = String(reserveJson.order.id);
   const refCode = String(reserveJson.order.refCode);
   expect(orderId).toMatch(/^[0-9a-f-]{36}$/i);

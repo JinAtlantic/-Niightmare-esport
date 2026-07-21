@@ -307,7 +307,8 @@ create table if not exists public.shop_orders (
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
 );
--- Per-size breakdown for multi-size orders: [{ sizeId, label, quantity, unitPrice, lineTotal }, …]
+-- Per-size breakdown for multi-size orders. New rows also carry collectionId,
+-- collectionSlug and bilingual collectionName; legacy rows without them remain valid.
 alter table public.shop_orders add column if not exists items jsonb;
 update public.shop_orders
 set items = jsonb_build_array(jsonb_build_object(

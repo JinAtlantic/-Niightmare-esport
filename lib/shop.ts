@@ -9,6 +9,7 @@ import type { Bilingual, Lang } from "@/lib/types";
  */
 
 export type ShopGender = "male" | "female";
+export type ShopSizeAvailability = "in_stock" | "preorder" | "sold_out";
 
 /** One garment size row. Measurements are centimetres; surcharge is in the shop currency. */
 export interface ShopSize {
@@ -22,7 +23,27 @@ export interface ShopSize {
   maxHeight: number;
   /** Extra charge added to the base price for this size (0 for S–XXL). */
   surcharge: number;
+  /** Explicit fulfilment state. `inStock` remains for old saved content. */
+  availability: ShopSizeAvailability;
   inStock: boolean;
+}
+
+export interface ShopCollection {
+  id: string;
+  slug: string;
+  enabled: boolean;
+  productName: Bilingual;
+  tagline: Bilingual;
+  description: Bilingual;
+  rightsNote: Bilingual;
+  currency: string;
+  price: number;
+  fixedJerseyName: string;
+  fixedJerseyNumber: string;
+  sizes: ShopSize[];
+  productImage?: string;
+  frontImage?: string;
+  backImage?: string;
 }
 
 /** Bank-transfer details shown in the payment popup. Admin-editable. */
@@ -74,6 +95,8 @@ export interface ShopContent {
   frontImage?: string;
   /** Back-of-jersey product photo (admin-uploaded). Shown in the showcase gallery. */
   backImage?: string;
+  /** Product editions shown in the public Collection selector. */
+  collections: ShopCollection[];
 }
 
 export const DEFAULT_SHOP: ShopContent = {
@@ -97,13 +120,13 @@ export const DEFAULT_SHOP: ShopContent = {
   fixedJerseyName: "NIIGHTMARE ESPORTS",
   fixedJerseyNumber: "7",
   sizes: [
-    { id: "s", label: "S", chest: 96, length: 68, shoulder: 42, sleeve: 20, minHeight: 155, maxHeight: 165, surcharge: 0, inStock: true },
-    { id: "m", label: "M", chest: 102, length: 70, shoulder: 44, sleeve: 21, minHeight: 163, maxHeight: 172, surcharge: 0, inStock: true },
-    { id: "l", label: "L", chest: 108, length: 72, shoulder: 46, sleeve: 22, minHeight: 170, maxHeight: 178, surcharge: 0, inStock: true },
-    { id: "xl", label: "XL", chest: 114, length: 74, shoulder: 48, sleeve: 23, minHeight: 176, maxHeight: 185, surcharge: 0, inStock: true },
-    { id: "xxl", label: "XXL", chest: 120, length: 76, shoulder: 50, sleeve: 24, minHeight: 183, maxHeight: 192, surcharge: 0, inStock: true },
-    { id: "3xl", label: "3XL", chest: 126, length: 78, shoulder: 52, sleeve: 25, minHeight: 188, maxHeight: 196, surcharge: 10000, inStock: true },
-    { id: "4xl", label: "4XL", chest: 132, length: 80, shoulder: 54, sleeve: 26, minHeight: 192, maxHeight: 200, surcharge: 20000, inStock: true },
+    { id: "s", label: "S", chest: 96, length: 68, shoulder: 42, sleeve: 20, minHeight: 155, maxHeight: 165, surcharge: 0, availability: "preorder", inStock: true },
+    { id: "m", label: "M", chest: 102, length: 70, shoulder: 44, sleeve: 21, minHeight: 163, maxHeight: 172, surcharge: 0, availability: "preorder", inStock: true },
+    { id: "l", label: "L", chest: 108, length: 72, shoulder: 46, sleeve: 22, minHeight: 170, maxHeight: 178, surcharge: 0, availability: "preorder", inStock: true },
+    { id: "xl", label: "XL", chest: 114, length: 74, shoulder: 48, sleeve: 23, minHeight: 176, maxHeight: 185, surcharge: 0, availability: "preorder", inStock: true },
+    { id: "xxl", label: "XXL", chest: 120, length: 76, shoulder: 50, sleeve: 24, minHeight: 183, maxHeight: 192, surcharge: 0, availability: "preorder", inStock: true },
+    { id: "3xl", label: "3XL", chest: 126, length: 78, shoulder: 52, sleeve: 25, minHeight: 188, maxHeight: 196, surcharge: 10000, availability: "preorder", inStock: true },
+    { id: "4xl", label: "4XL", chest: 132, length: 80, shoulder: 54, sleeve: 26, minHeight: 192, maxHeight: 200, surcharge: 20000, availability: "preorder", inStock: true },
   ],
   couriers: ["Anousith Express", "Mixay Express", "HAL Logistics", "Houb Logistics", "BCEL Express", "Other"],
   bank: {
@@ -127,6 +150,7 @@ export const DEFAULT_SHOP: ShopContent = {
   productImage: "",
   frontImage: "",
   backImage: "",
+  collections: [],
 };
 
 /** Wearer height bounds the slider is clamped to (cm). */
@@ -191,7 +215,16 @@ const num = (raw: unknown, fallback: number): number => {
   return Number.isFinite(n) ? (n as number) : fallback;
 };
 
-function mergeSize(fallback: ShopSize, raw?: Partial<ShopSize> | null): ShopSize {
+function sizeAvailability(raw: Partial<ShopSize> | null | undefined, fallback: ShopSize, legacyPreorder: boolean): ShopSizeAvailability {
+  if (raw?.availability === "in_stock" || raw?.availability === "preorder" || raw?.availability === "sold_out") {
+    return raw.availability;
+  }
+  if (typeof raw?.inStock === "boolean") return raw.inStock ? (legacyPreorder ? "preorder" : "in_stock") : "sold_out";
+  return fallback.availability;
+}
+
+function mergeSize(fallback: ShopSize, raw?: Partial<ShopSize> | null, legacyPreorder = true): ShopSize {
+  const availability = sizeAvailability(raw, fallback, legacyPreorder);
   return {
     id: raw?.id ?? fallback.id,
     label: (raw?.label ?? fallback.label) || fallback.label,
@@ -202,7 +235,38 @@ function mergeSize(fallback: ShopSize, raw?: Partial<ShopSize> | null): ShopSize
     minHeight: num(raw?.minHeight, fallback.minHeight),
     maxHeight: num(raw?.maxHeight, fallback.maxHeight),
     surcharge: num(raw?.surcharge, fallback.surcharge),
-    inStock: typeof raw?.inStock === "boolean" ? raw.inStock : fallback.inStock,
+    availability,
+    inStock: availability !== "sold_out",
+  };
+}
+
+export function shopSlug(raw: string, fallback = "collection"): string {
+  const slug = raw.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48);
+  return slug || fallback;
+}
+
+function mergeCollection(fallback: ShopCollection, raw?: Partial<ShopCollection> | null): ShopCollection {
+  const rawSizes = Array.isArray(raw?.sizes) ? raw.sizes : null;
+  const sizes = rawSizes?.length
+    ? rawSizes.map((size, index) => mergeSize(fallback.sizes[index] ?? fallback.sizes[0], size, false))
+    : fallback.sizes.map((size) => ({ ...size }));
+  const id = String(raw?.id || fallback.id).trim() || fallback.id;
+  return {
+    id,
+    slug: shopSlug(String(raw?.slug || raw?.productName?.en || fallback.slug), fallback.slug),
+    enabled: typeof raw?.enabled === "boolean" ? raw.enabled : fallback.enabled,
+    productName: mergeBi(fallback.productName, raw?.productName),
+    tagline: mergeBi(fallback.tagline, raw?.tagline),
+    description: mergeBi(fallback.description, raw?.description),
+    rightsNote: mergeBi(fallback.rightsNote, raw?.rightsNote),
+    currency: String(raw?.currency || fallback.currency),
+    price: num(raw?.price, fallback.price),
+    fixedJerseyName: String(raw?.fixedJerseyName || fallback.fixedJerseyName),
+    fixedJerseyNumber: String(raw?.fixedJerseyNumber || fallback.fixedJerseyNumber),
+    sizes,
+    productImage: raw?.productImage || undefined,
+    frontImage: raw?.frontImage || undefined,
+    backImage: raw?.backImage || undefined,
   };
 }
 
@@ -211,13 +275,35 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
   const rawSizes = Array.isArray(raw?.sizes) ? raw!.sizes : null;
   const sizes =
     rawSizes && rawSizes.length
-      ? rawSizes.map((sz, i) => mergeSize(DEFAULT_SHOP.sizes[i] ?? DEFAULT_SHOP.sizes[0], sz))
+      ? rawSizes.map((sz, i) => mergeSize(DEFAULT_SHOP.sizes[i] ?? DEFAULT_SHOP.sizes[0], sz, raw?.preorder ?? DEFAULT_SHOP.preorder))
       : DEFAULT_SHOP.sizes;
 
   const couriers =
     Array.isArray(raw?.couriers) && raw!.couriers.filter((c) => c && c.trim()).length
       ? raw!.couriers.filter((c) => c && c.trim())
       : DEFAULT_SHOP.couriers;
+
+  const legacyCollection: ShopCollection = {
+    id: "official-2026",
+    slug: "official-2026",
+    enabled: true,
+    productName: mergeBi(DEFAULT_SHOP.productName, raw?.productName),
+    tagline: mergeBi(DEFAULT_SHOP.tagline, raw?.tagline),
+    description: mergeBi(DEFAULT_SHOP.description, raw?.description),
+    rightsNote: mergeBi(DEFAULT_SHOP.rightsNote, raw?.rightsNote),
+    currency: (raw?.currency ?? DEFAULT_SHOP.currency) || DEFAULT_SHOP.currency,
+    price: num(raw?.price, DEFAULT_SHOP.price),
+    fixedJerseyName: (raw?.fixedJerseyName ?? DEFAULT_SHOP.fixedJerseyName) || DEFAULT_SHOP.fixedJerseyName,
+    fixedJerseyNumber: (raw?.fixedJerseyNumber ?? DEFAULT_SHOP.fixedJerseyNumber) || DEFAULT_SHOP.fixedJerseyNumber,
+    sizes,
+    productImage: raw?.productImage || undefined,
+    frontImage: raw?.frontImage || undefined,
+    backImage: raw?.backImage || undefined,
+  };
+  const rawCollections = Array.isArray(raw?.collections) ? raw.collections : [];
+  const collections = rawCollections.length
+    ? rawCollections.map((collection, index) => mergeCollection(index === 0 ? legacyCollection : { ...legacyCollection, id: `collection-${index + 1}`, slug: `collection-${index + 1}` }, collection))
+    : [legacyCollection];
 
   return {
     enabled: typeof raw?.enabled === "boolean" ? raw.enabled : DEFAULT_SHOP.enabled,
@@ -247,12 +333,18 @@ export function resolveShop(raw?: Partial<ShopContent> | null): ShopContent {
     productImage: raw?.productImage || undefined,
     frontImage: raw?.frontImage || undefined,
     backImage: raw?.backImage || undefined,
+    collections,
   };
+}
+
+export function resolveShopCollection(content: ShopContent, idOrSlug?: string | null): ShopCollection | undefined {
+  const enabled = content.collections.filter((collection) => collection.enabled);
+  return enabled.find((collection) => collection.id === idOrSlug || collection.slug === idOrSlug) ?? enabled[0];
 }
 
 /* ── Pricing ──────────────────────────────────────────────────────────────── */
 
-export function sizePrice(content: ShopContent, size: ShopSize | undefined): number {
+export function sizePrice(content: Pick<ShopContent, "price"> | Pick<ShopCollection, "price">, size: ShopSize | undefined): number {
   return content.price + (size?.surcharge ?? 0);
 }
 
@@ -349,11 +441,15 @@ export function recommendSize(sizes: ShopSize[], heightCm: number, gender: ShopG
  * size, so a buyer can order several sizes in one go. */
 
 export interface ShopOrderItem {
+  collectionId?: string;
   sizeId: string;
   quantity: number;
 }
 
 export interface ShopOrderLine {
+  collectionId?: string;
+  collectionSlug?: string;
+  collectionName?: Bilingual;
   sizeId: string;
   label: string;
   quantity: number;
@@ -407,22 +503,34 @@ export function cleanRefCode(raw: unknown): string {
 export function computeOrder(
   content: ShopContent,
   items: ShopOrderItem[]
-): { lines: ShopOrderLine[]; totalQty: number; total: number } {
+): { lines: ShopOrderLine[]; totalQty: number; total: number; currency: string } {
   const lines: ShopOrderLine[] = [];
   for (const it of items) {
-    const size = content.sizes.find((s) => s.id === it.sizeId);
+    const collection = it.collectionId
+      ? content.collections.find((candidate) => candidate.enabled && (candidate.id === it.collectionId || candidate.slug === it.collectionId))
+      : resolveShopCollection(content);
+    const size = collection?.sizes.find((s) => s.id === it.sizeId);
     const qty = Math.floor(Number(it.quantity) || 0);
-    if (!size || !size.inStock || qty < 1) continue;
-    const unitPrice = sizePrice(content, size);
-    lines.push({ sizeId: size.id, label: size.label, quantity: qty, unitPrice, lineTotal: unitPrice * qty });
+    if (!collection || !size || size.availability === "sold_out" || qty < 1) continue;
+    const unitPrice = sizePrice(collection, size);
+    lines.push({ collectionId: collection.id, collectionSlug: collection.slug, collectionName: collection.productName, sizeId: size.id, label: size.label, quantity: qty, unitPrice, lineTotal: unitPrice * qty });
   }
   const totalQty = lines.reduce((a, l) => a + l.quantity, 0);
   const total = lines.reduce((a, l) => a + l.lineTotal, 0);
-  return { lines, totalQty, total };
+  return { lines, totalQty, total, currency: lines[0]?.collectionId ? (content.collections.find((c) => c.id === lines[0].collectionId)?.currency ?? content.currency) : content.currency };
 }
 
 export function summariseLines(lines: ShopOrderLine[]): string {
-  return lines.map((l) => `${l.label}×${l.quantity}`).join(", ");
+  const groups = new Map<string, { name: string; items: string[] }>();
+  for (const line of lines) {
+    const key = line.collectionId || line.collectionName?.en || "legacy";
+    const group = groups.get(key) ?? { name: line.collectionName?.en || "", items: [] };
+    group.items.push(`${line.label}×${line.quantity}`);
+    groups.set(key, group);
+  }
+  return Array.from(groups.values())
+    .map((group) => `${group.name ? `${group.name} / ` : ""}${group.items.join(", ")}`)
+    .join("; ");
 }
 
 export type ShopOrderField = "items" | "customerName" | "phone" | "courier" | "province" | "city" | "branch";
@@ -446,10 +554,11 @@ export function buildOrderMessage(content: ShopContent, order: ShopOrderRecord, 
     lang === "lo"
       ? { head: "ສັ່ງຊື້ເສື້ອ NIIGHTMARE", product: "ສິນຄ້າ", items: "ລາຍການ", qty: "ຈຳນວນລວມ", name: "ຊື່ຜູ້ສັ່ງ", phone: "ເບີໂທ/WhatsApp", ship: "ຂົນສົ່ງ", total: "ລາຄາລວມ" }
       : { head: "NIIGHTMARE jersey order", product: "Product", items: "Items", qty: "Total qty", name: "Customer", phone: "Phone/WhatsApp", ship: "Delivery", total: "Total" };
-  const itemLines = order.items.map((l) => `  - ${l.label} × ${l.quantity} = ${formatPrice(l.lineTotal, order.currency)}`).join("\n");
+  const itemLines = order.items.map((l) => `  - ${l.collectionName?.[lang] || l.collectionName?.en ? `${l.collectionName?.[lang] || l.collectionName?.en} · ` : ""}${l.label} × ${l.quantity} = ${formatPrice(l.lineTotal, order.currency)}`).join("\n");
+  const productName = order.items[0]?.collectionName?.[lang] || order.items[0]?.collectionName?.en || content.productName[lang] || content.productName.en;
   return [
     L.head,
-    `${L.product}: ${content.productName[lang] ?? content.productName.en}`,
+    `${L.product}: ${productName}`,
     `${L.items}:`,
     itemLines,
     `${L.qty}: ${order.totalQty}`,

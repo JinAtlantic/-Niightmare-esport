@@ -181,6 +181,54 @@ test("responsive navigation and language switch remain interactive", async ({ pa
   assertRuntime();
 });
 
+test("shop collections are selectable, shareable, and keep per-size availability", async ({ page }) => {
+  await page.route("**/api/content", async (route) => {
+    const response = await route.fetch();
+    const content = await response.json() as {
+      site: { shop?: Record<string, unknown> };
+    };
+    const rawShop = content.site.shop ?? {};
+    const rawSizes = Array.isArray(rawShop.sizes) ? rawShop.sizes as Record<string, unknown>[] : [];
+    content.site.shop = {
+      ...rawShop,
+      collections: [
+        {
+          ...rawShop,
+          id: "home-kit",
+          slug: "home-kit",
+          enabled: true,
+          productName: { en: "Home Test Collection", lo: "Home Test Collection" },
+        },
+        {
+          ...rawShop,
+          id: "away-kit",
+          slug: "away-kit",
+          enabled: true,
+          productName: { en: "Away Test Collection", lo: "Away Test Collection" },
+          price: 399000,
+          sizes: rawSizes.map((size, index) => ({
+            ...size,
+            availability: index === 0 ? "in_stock" : index === 1 ? "sold_out" : "preorder",
+          })),
+        },
+      ],
+    };
+    await route.fulfill({ response, json: content });
+  });
+
+  await page.goto("/shop?collection=away-kit", { waitUntil: "domcontentloaded" });
+  const selector = page.getByLabel("Collection");
+  await expect(selector).toHaveValue("away-kit");
+  await expect(page.getByRole("heading", { name: "Away Test Collection" })).toBeVisible();
+  await expect(page.getByText("Ready to ship", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sold out", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("M quantity")).toHaveCount(0);
+
+  await selector.selectOption("home-kit");
+  await expect(page).toHaveURL(/collection=home-kit/);
+  await expect(page.getByRole("heading", { name: "Home Test Collection" })).toBeVisible();
+});
+
 test("every admin editor loads read-only from the isolated server", async ({ page }) => {
   const assertRuntime = watchRuntime(page);
   const unexpectedWrites: string[] = [];
@@ -204,7 +252,7 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
     { tab: "Achievements", marker: "ข้อความหน้า Achievements" },
     { tab: "Team", marker: "ทีม MLBB" },
     { tab: "Sponsors", marker: /\d+ partners/ },
-    { tab: "Shop", marker: "สถานะร้าน & ราคา" },
+    { tab: "Shop", marker: "Collections" },
   ];
 
   for (const editor of editors) {
@@ -236,6 +284,14 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
       ]);
       await groupSelect.selectOption("event");
       await expect(groupSelect).toHaveValue("event");
+    }
+
+    if (editor.tab === "Shop") {
+      await expect(page.getByLabel("สถานะ")).toHaveCount(7);
+      await expect(page.getByLabel("สถานะ").first()).toHaveValue("preorder");
+      await page.getByRole("button", { name: /เพิ่ม Collection/i }).click();
+      await expect(page.locator("main")).toContainText("ทั้งหมด 2 Collection");
+      await expect(page.locator("main")).toContainText("New Collection");
     }
 
     await expectNoDocumentOverflow(page);

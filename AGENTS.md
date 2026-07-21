@@ -328,9 +328,18 @@ pins React 18, so fiber's reconciler reads removed internals (`ReactCurrentBatch
 and crashes only at client runtime (tsc/lint/build all pass). Any future 3D must be
 vanilla Three.js in a `useEffect`.
 
-Product model (one jersey, one edition): currency LAK, base **329,000 ກີບ**, sizes
-S–4XL where **3XL +10,000 / 4XL +20,000** (per-size `surcharge`). Back name/number are
-**locked** to "NIIGHTMARE ESPORTS #7" (reserved, shown with a rights note). The page is
+Product model (2026-07-21): `/shop` supports multiple admin-managed **Collections**. Each
+collection has its own bilingual name/copy, enabled flag, shareable `?collection=<slug>` URL,
+front/back images, currency/base price, locked back name/number, and S–4XL size rows. Each size
+has an explicit `availability` of `in_stock` (พร้อมส่ง), `preorder` (พรีออเดอร์), or `sold_out`
+(หมด); only sold-out sizes are disabled. `/admin → Shop` can add/delete/reorder/show-hide
+collections and edit every per-collection field. The legacy single-product fields remain mirrored
+to the first collection so existing live `site_settings.shop` JSON works without a migration;
+`resolveShop()` creates the first collection automatically until the admin saves the new shape.
+Current base defaults remain **329,000 ກີບ**, S–4XL, with **3XL +10,000 / 4XL +20,000**
+(per-size `surcharge`). Back name/number are **locked** to "NIIGHTMARE ESPORTS #7" (reserved,
+shown with a rights note). New order line JSON stores collection id/slug/name with the size, so
+My Orders and Admin Orders identify the purchased collection while old rows still render. The page is
 two tabs styled like the Achievements page: **Order** (reserved note + size→quantity
 rows, supporting several sizes per order and a typeable qty up to 999; customer name,
 phone/WhatsApp, courier dropdown with a free-text "Other", province/city/branch) and
