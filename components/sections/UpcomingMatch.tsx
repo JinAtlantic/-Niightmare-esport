@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useLanguage } from "@/components/context/LanguageContext";
-import { CloseIcon, PlayIcon } from "@/components/ui/Icons";
+import { CloseIcon } from "@/components/ui/Icons";
 import { useModalFocus } from "@/components/ui/useModalFocus";
 import { opponentMonogram } from "@/components/cards/OpponentLogo";
 import { teamLogoFor } from "@/lib/teamLogos";
@@ -13,7 +13,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { useContent } from "@/components/context/ContentContext";
 import { resolveMatchSchedule, type MatchScheduleContent, type MatchScheduleEntry } from "@/lib/matchSchedule";
 import { cleanBo } from "@/lib/bestOf";
-import { safeHref, safeImageSrc } from "@/lib/safety";
+import { safeImageSrc } from "@/lib/safety";
 import type { Lang, MatchStatus, UpcomingMatch as UpcomingMatchData } from "@/lib/types";
 
 type Countdown = { d: number; h: number; m: number; s: number; done: boolean };
@@ -356,18 +356,11 @@ export default function UpcomingMatch() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const status: MatchStatus = match.status ?? "next";
   const s = STATUS[status] ?? STATUS.next;
-  const streamHref = safeHref(match.streamUrl);
-
   const hasOpponent = Boolean(match.opponent && match.opponent.trim());
   const round = match.round && (match.round.en || match.round.lo) ? match.round : null;
   const roundLabel = round ? pick(round) : null;
   const bo = cleanBo(match.bo);
   const gameName = match.game === "efootball" ? "eFootball" : "Mobile Legends: Bang Bang";
-  // A fixture counts as "will be broadcast" from the admin toggle (hasLive) OR
-  // simply having a stream link — so the badge shows even before a link is set,
-  // and becomes clickable once one is.
-  const hasLiveIntent = Boolean(match.hasLive) || Boolean(streamHref);
-
   // Countdown renders client-side only to avoid time-zone hydration mismatch.
   const [cd, setCd] = useState<Countdown | null>(null);
   useEffect(() => {
@@ -510,39 +503,6 @@ export default function UpcomingMatch() {
               </span>
             </span>
 
-            {/* broadcast badge — says whether this fixture will be streamed.
-                Only for pre-live states; when it's actually live the WATCH LIVE
-                button below carries the call to action instead. */}
-            {status !== "live" && status !== "finished" &&
-              (hasLiveIntent ? (
-                streamHref ? (
-                  <a
-                    href={streamHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss transition-colors hover:border-loss hover:bg-loss/20"
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
-                    </span>
-                    {pick({ en: "Live stream", lo: "ມີຖ່າຍທອດສົດ" })}
-                  </a>
-                ) : (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-loss/50 bg-loss/10 px-3.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-loss">
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-loss opacity-70 motion-safe:animate-ping" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
-                    </span>
-                    {pick({ en: "Live stream", lo: "ມີຖ່າຍທອດສົດ" })}
-                  </span>
-                )
-              ) : (
-                <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-void/40 px-3.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ash-dim">
-                  <span className="h-2 w-2 rounded-full bg-ash-dim/70" aria-hidden />
-                  {pick({ en: "No live stream", lo: "ບໍ່ມີຖ່າຍທອດສົດ" })}
-                </span>
-              ))}
           </div>
 
           {/* mobile-only: tournament headline sits above the clash so the event
@@ -622,17 +582,6 @@ export default function UpcomingMatch() {
                 {currentLiveScore && (
                   <LiveScoreBoard score={currentLiveScore} label={liveScoreLabel} />
                 )}
-                {streamHref && (
-                  <a
-                    href={streamHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex w-full max-w-sm items-center justify-center gap-2.5 rounded-md border border-loss/60 bg-gradient-to-b from-loss/25 to-loss/10 px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.2em] text-soul shadow-[0_0_30px_rgba(251,113,133,0.5)] transition-all duration-300 hover:from-loss/35 hover:to-loss/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-loss focus-visible:ring-offset-2 focus-visible:ring-offset-void"
-                  >
-                    <PlayIcon size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                    {t("sections.watch_live")}
-                  </a>
-                )}
               </div>
             )}
 
@@ -674,7 +623,7 @@ export default function UpcomingMatch() {
             </div>
           </dl>
 
-          {/* ── footer band (desktop): countdown (upcoming) or live + watch CTA ── */}
+          {/* ── footer band (desktop): countdown or live match status ── */}
           {(showCountdown || status === "live") && (
             <div className="hidden flex-col items-center gap-5 border-t border-edge bg-white/[0.015] px-4 py-7 md:flex md:gap-6 md:px-6 md:py-9">
               {showCountdown && cd && (
@@ -700,17 +649,6 @@ export default function UpcomingMatch() {
                     <LiveScoreBoard score={currentLiveScore} label={liveScoreLabel} />
                   )}
 
-                  {streamHref && (
-                    <a
-                      href={streamHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex w-full max-w-sm items-center justify-center gap-2.5 rounded-md border border-loss/60 bg-gradient-to-b from-loss/25 to-loss/10 px-7 py-3.5 font-display text-sm font-bold uppercase tracking-[0.2em] text-soul shadow-[0_0_30px_rgba(251,113,133,0.5)] transition-all duration-300 hover:from-loss/35 hover:to-loss/15 hover:shadow-[0_0_48px_rgba(251,113,133,0.78)] focus:outline-none focus-visible:ring-2 focus-visible:ring-loss focus-visible:ring-offset-2 focus-visible:ring-offset-void sm:w-auto md:text-base"
-                    >
-                      <PlayIcon size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                      {t("sections.watch_live")}
-                    </a>
-                  )}
                 </>
               )}
             </div>

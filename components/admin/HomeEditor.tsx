@@ -414,10 +414,6 @@ export default function HomeEditor() {
       }),
     });
   };
-  // "Has live" is a persisted intent (m.hasLive); an existing stream link also
-  // counts so older fixtures keep showing the badge without re-toggling.
-  const hasLive = Boolean(m.hasLive) || Boolean(m.streamUrl && m.streamUrl.trim());
-
   return (
     <div className="space-y-8">
       {/* save bar */}
@@ -709,42 +705,7 @@ export default function HomeEditor() {
           </div>
         </Card>
 
-        {/* 7) ถ่ายทอดสด (used often) */}
-        <Card className="mt-4 space-y-2">
-          <Label>🔴 ถ่ายทอดสด (Live)</Label>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={hasLive ? "primary" : "ghost"}
-              onClick={() => patch({ hasLive: true })}
-              className="min-h-[36px]"
-            >
-              มีถ่ายทอดสด
-            </Button>
-            <Button
-              variant={!hasLive ? "primary" : "ghost"}
-              onClick={() => patch({ hasLive: false, streamUrl: undefined })}
-              className="min-h-[36px]"
-            >
-              ไม่มี
-            </Button>
-          </div>
-          {hasLive && (
-            <div className="mt-2">
-              <TextField
-                label="ลิงก์ไลฟ์สด (YouTube/Facebook) — เว้นว่างได้"
-                value={m.streamUrl ?? ""}
-                onChange={(v) => patch({ streamUrl: v || undefined })}
-                placeholder="https://youtube.com/live/…"
-              />
-              <p className="mt-1 font-mono text-[11px] leading-relaxed text-ash">
-                เลือก “มีถ่ายทอดสด” แล้วการ์ดจะโชว์ป้าย “🔴 LIVE STREAM” ทันที (แม้ยังไม่ใส่ลิงก์).
-                พอใส่ลิงก์ ป้ายจะกดไปดูช่องได้ และปุ่ม WATCH LIVE จะเด่นขึ้นเมื่อตั้งสถานะ = กำลังแข่ง
-              </p>
-            </div>
-          )}
-        </Card>
-
-        {/* 8) ตารางคิวแมตช์ถัดไป (popup) */}
+        {/* 7) ตารางคิวแมตช์ถัดไป (popup) */}
         <Card className="mt-4 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>

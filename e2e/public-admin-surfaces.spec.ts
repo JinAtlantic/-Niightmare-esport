@@ -67,6 +67,9 @@ for (const route of PUBLIC_ROUTES) {
       const upcomingIndex = sections.findIndex((text) => text.includes("UPCOMING MATCH"));
       const resultsIndex = sections.findIndex((text) => text.includes("RECENT RESULTS"));
       expect([aboutIndex, upcomingIndex, resultsIndex]).toEqual([1, 2, 3]);
+      await expect(page.getByText("Live stream", { exact: true })).toHaveCount(0);
+      await expect(page.getByText("No live stream", { exact: true })).toHaveCount(0);
+      await expect(page.getByText("WATCH LIVE", { exact: true })).toHaveCount(0);
     }
 
     if (route === "/sponsors") {
@@ -219,6 +222,7 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
       await expect(nextMatchTime).toHaveValue("19:30");
       await nextMatchTime.blur();
       await expect(nextMatchTime).toHaveValue("19:30");
+      await expect(page.locator('input[placeholder^="https://youtube.com/live"]')).toHaveCount(0);
     }
 
     if (editor.tab === "Sponsors") {

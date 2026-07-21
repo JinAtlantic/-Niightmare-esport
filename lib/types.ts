@@ -141,11 +141,9 @@ export interface UpcomingMatch {
   /** Optional 3-letter opponent short code, shown in the crest when no logo is
    *  set. Empty falls back to initials derived from the opponent name. */
   opponentAbbr?: string;
-  /** Optional live-stream URL (YouTube/Facebook). When set + status "live",
-   *  the home hero shows a WATCH LIVE button. */
+  /** Legacy live-stream URL retained for backward-compatible content reads. */
   streamUrl?: string;
-  /** Whether this fixture will be broadcast live. Drives the "Live broadcast"
-   *  badge on the card even before a stream link is added. */
+  /** Legacy broadcast flag retained for backward-compatible content reads. */
   hasLive?: boolean;
   /** When status is "finished": the result of the match (win/loss/draw). */
   result?: MatchResult;

@@ -279,7 +279,10 @@ refresh, and reloads once when the admin flips the status away from "live" (matc
 No new columns — reuses the existing `score` field. The **/admin editor** (`HomeEditor.tsx`
 "นัดต่อไป") was reorganized to be **status-driven**: a big status picker up top, then only the
 relevant box shows (rose LIVE-SCORE box when live; RESULT box when finished), followed by
-grouped cards (คู่แข่ง / งาน–รอบ / วัน–เวลา / ถ่ายทอดสด) + the schedule-queue popup. The finished
+grouped cards (คู่แข่ง / งาน–รอบ / วัน–เวลา) + the schedule-queue popup. The Upcoming Match
+live-stream controls, broadcast badges, and WATCH LIVE links were removed; live match status,
+the live score, and the site-wide live matchup alert remain. Legacy `streamUrl`/`hasLive` fields
+stay in the data layer for backward compatibility but are no longer shown or edited. The finished
 box has **two actions**: `finishToMatches()` ("✅ บันทึกผลลงหน้า Match" — appends the result to
 /matches then clears the card; **works even with no queued next row**, fixing the dead-end where
 the last match of the day couldn't be recorded) and `promoteNext()` (append + advance to the

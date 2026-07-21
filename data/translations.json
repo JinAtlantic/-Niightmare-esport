@@ -51,7 +51,6 @@
     "result_loss": { "en": "LOSS", "lo": "ແພ້" },
     "result_draw": { "en": "DRAW", "lo": "ເສີມກັນ" },
     "upcoming_practice_label": { "en": "TEAM PRACTICE", "lo": "ການຊ້ອມຂອງທີມ" },
-    "watch_live": { "en": "WATCH LIVE", "lo": "ເບິ່ງຖ່າຍທອດສົດ" },
     "tournament_history": { "en": "TOURNAMENT HISTORY", "lo": "ປະຫວັດການແຂ່ງຂັນ" }
   },
   "common": {
