@@ -197,6 +197,9 @@ export interface SponsorSocials {
   phone?: string;
 }
 
+/** Public section where a sponsor appears on the Sponsors page. */
+export type SponsorGroup = "official" | "event" | "past";
+
 export interface Sponsor {
   id: string;
   name: string;
@@ -204,6 +207,8 @@ export interface Sponsor {
   url: string;
   /** Optional sponsor logo URL uploaded from admin. */
   logo?: string;
+  /** Admin-controlled public grouping. Legacy rows default to `official`. */
+  partnerGroup?: SponsorGroup;
   /** Short industry / category label, e.g. "Telecom" (bilingual). */
   category?: Bilingual;
   /** What the sponsor does — shown in the popup (bilingual). */

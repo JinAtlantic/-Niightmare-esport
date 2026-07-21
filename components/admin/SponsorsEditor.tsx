@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { useData } from "@/components/admin/useData";
-import { BilingualField, Button, ImageField, Label, Section, TextArea, TextField } from "@/components/admin/ui";
+import { BilingualField, Button, ImageField, Label, Section, SelectField, TextArea, TextField } from "@/components/admin/ui";
+import { SPONSOR_GROUPS, resolveSponsorGroup, sponsorGroupCopy } from "@/lib/sponsorGroups";
 import type { Bilingual, Sponsor, SponsorSocials } from "@/lib/types";
 
 const SOCIAL_FIELDS: { key: keyof SponsorSocials; label: string; placeholder: string }[] = [
@@ -88,6 +89,7 @@ function SponsorRow({
   const [open, setOpen] = useState(false);
   const channels = channelCount(sponsor);
   const hasDesc = Boolean(sponsor.description && (sponsor.description.en || sponsor.description.lo));
+  const group = sponsorGroupCopy(sponsor.partnerGroup);
 
   return (
     <div className="border border-edge bg-crypt/40">
@@ -116,6 +118,7 @@ function SponsorRow({
             <span className="mt-0.5 block font-mono text-[10px] text-ash">
               {sponsor.logo ? "โลโก้ ✓" : "ยังไม่มีโลโก้"} · {channels} ช่องทาง
               {hasDesc ? " · มีคำอธิบาย" : ""}
+              {` · ${group.adminLabel}`}
             </span>
           </span>
           <span
@@ -138,6 +141,17 @@ function SponsorRow({
             label="ชื่อ partner"
             value={sponsor.name}
             onChange={(name) => onPatch({ name })}
+          />
+          <SelectField
+            label="กลุ่มที่แสดงบนหน้า Sponsors"
+            value={resolveSponsorGroup(sponsor.partnerGroup)}
+            options={SPONSOR_GROUPS.map((item) => ({
+              value: item.id,
+              label: item.adminLabel,
+            }))}
+            onChange={(partnerGroup) =>
+              onPatch({ partnerGroup: resolveSponsorGroup(partnerGroup) })
+            }
           />
           <ImageField
             label="โลโก้"
@@ -204,7 +218,7 @@ export default function SponsorsEditor() {
   const addSponsor = () =>
     setSponsors([
       ...sponsors,
-      { id: uid("s"), name: "New Partner", url: "", logo: "" },
+      { id: uid("s"), name: "New Partner", url: "", logo: "", partnerGroup: "official" },
     ]);
 
   return (
@@ -224,7 +238,7 @@ export default function SponsorsEditor() {
 
       <Section
         title="Partners"
-        hint="คลิกที่ชื่อเพื่อเปิดแก้ไข — โลโก้ / คำอธิบาย / ช่องทางติดต่อ"
+        hint="คลิกที่ชื่อเพื่อเปิดแก้ไข — เลือกกลุ่ม / โลโก้ / คำอธิบาย / ช่องทางติดต่อ"
         defaultOpen
         collapsible={false}
         action={<Button onClick={addSponsor}>+ เพิ่ม partner</Button>}

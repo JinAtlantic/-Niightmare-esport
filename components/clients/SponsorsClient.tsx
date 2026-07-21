@@ -20,18 +20,11 @@ import {
 } from "@/components/ui/Icons";
 import sponsorsSeed from "@/data/sponsors.json";
 import { safeHref, safeImageSrc } from "@/lib/safety";
-import type { Bilingual, Sponsor } from "@/lib/types";
-
-interface SponsorValueProp {
-  id: string;
-  title: Bilingual;
-  body: Bilingual;
-}
+import { SPONSOR_GROUPS, resolveSponsorGroup, sponsorGroupCopy } from "@/lib/sponsorGroups";
+import type { Bilingual, Sponsor, SponsorGroup } from "@/lib/types";
 
 interface SponsorsPageCopy {
   heroTitle: Bilingual;
-  valueLabel: Bilingual;
-  valueProps: SponsorValueProp[];
 }
 
 const FALLBACK_PAGE = sponsorsSeed.page as SponsorsPageCopy;
@@ -46,11 +39,9 @@ function useSponsorPick() {
 }
 
 const COPY = {
-  wallLabel: { en: "OFFICIAL PARTNERS", lo: "ພາດເນີ້ທາງການ" },
-  official: { en: "Official NIIGHTMARE Partner", lo: "ພາດເນີ້ທາງການຂອງ NIIGHTMARE" },
   modalIntro: {
-    en: "An official partner helping power the club's competitive journey, content, and fan moments across the season.",
-    lo: "ພາດເນີ້ທາງການທີ່ຊ່ວຍຜັກດັນເສັ້ນທາງແຂ່ງຂັນ ຄອນເທນ ແລະຊ່ວງເວລາຂອງແຟນຄັບຕະຫຼອດຊີຊັນ.",
+    en: "A NIIGHTMARE sponsor or partner connected to the club's competitive journey, content, and community events.",
+    lo: "ຜູ້ສະໜັບສະໜູນ ຫຼື ພາດເນີ້ຂອງ NIIGHTMARE ທີ່ຮ່ວມເດີນທາງໃນການແຂ່ງຂັນ ຄອນເທນ ແລະ ກິດຈະກຳຊຸມຊົນ.",
   },
   about: { en: "About", lo: "ກ່ຽວກັບ" },
   connect: { en: "Connect", lo: "ຊ່ອງທາງຕິດຕໍ່" },
@@ -188,6 +179,7 @@ function SponsorModal({
 
   const hasDescription = sponsor.description && (sponsor.description.en || sponsor.description.lo);
   const category = sponsor.category && (sponsor.category.en || sponsor.category.lo);
+  const group = sponsorGroupCopy(sponsor.partnerGroup);
 
   return createPortal(
     <div
@@ -219,7 +211,7 @@ function SponsorModal({
           </div>
           <div className="min-w-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amethyst">
-              {pick(COPY.official)}
+              {pick(group.eyebrow)}
             </p>
             <h2 className="keep-latin mt-2 break-words font-display text-3xl font-black uppercase leading-none tracking-wide text-soul md:text-4xl">
               {sponsor.name}
@@ -275,24 +267,45 @@ function SponsorConnect({ sponsor, linked }: { sponsor: Sponsor; linked: boolean
   );
 }
 
-function ValuePropCard({ item, index }: { item: SponsorValueProp; index: number }) {
+function SponsorGroupSection({
+  group,
+  sponsors,
+  onOpen,
+}: {
+  group: SponsorGroup;
+  sponsors: Sponsor[];
+  onOpen: (sponsor: Sponsor) => void;
+}) {
   const pick = useSponsorPick();
+  const copy = sponsorGroupCopy(group);
+
   return (
-    <div className="group relative overflow-hidden border border-edge bg-[linear-gradient(150deg,rgba(28,20,40,0.78),rgba(11,7,16,0.98))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amethyst/60 md:p-5">
-      <span aria-hidden className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amethyst/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <div className="relative flex items-center gap-2">
-        <span aria-hidden className="h-2 w-6 skew-x-[-18deg] bg-amethyst/70 transition-colors group-hover:bg-glow" />
-        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-amethyst">
-          {String(index + 1).padStart(2, "0")}
+    <section
+      data-sponsor-group={group}
+      className="relative overflow-hidden border border-edge bg-[linear-gradient(150deg,rgba(28,20,40,0.5),rgba(11,7,16,0.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] md:p-6"
+    >
+      <span aria-hidden className="scythe-line absolute inset-x-0 top-0 h-px" />
+      <div className="flex items-center justify-between gap-4">
+        <SectionLabel>{pick(copy.label)}</SectionLabel>
+        <span className="shrink-0 border border-edge bg-void/60 px-2.5 py-1 font-mono text-[10px] font-bold text-amethyst">
+          {String(sponsors.length).padStart(2, "0")}
         </span>
       </div>
-      <h3 className="relative mt-3 font-display text-base font-black uppercase leading-tight tracking-[0.06em] text-soul transition-colors group-hover:text-glow md:text-lg">
-        {pick(item.title)}
-      </h3>
-      <p className="relative mt-2 text-[13px] font-medium leading-relaxed text-ash">
-        {pick(item.body)}
-      </p>
-    </div>
+
+      {sponsors.length > 0 ? (
+        <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+          {sponsors.map((sponsor) => (
+            <SponsorCard key={sponsor.id} sponsor={sponsor} onOpen={onOpen} />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-5 grid min-h-24 place-items-center border border-dashed border-edge bg-void/30 px-4 py-6 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ash">
+            {pick(copy.empty)}
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -305,7 +318,6 @@ export default function SponsorsClient() {
   };
   const [activeSponsor, setActiveSponsor] = useState<Sponsor | null>(null);
   const page = { ...FALLBACK_PAGE, ...(data.page ?? {}) };
-  const valueProps = page.valueProps?.length ? page.valueProps : FALLBACK_PAGE.valueProps;
   const facebookHref =
     safeHref(content.site?.contact?.facebook) || safeHref("https://facebook.com/niightmareesports");
 
@@ -315,23 +327,17 @@ export default function SponsorsClient() {
 
       <section className="relative isolate mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <AuroraHalos />
-        {/* Partner wall — logo first */}
-        <SectionLabel centered>{pick(COPY.wallLabel)}</SectionLabel>
-
-        <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
-          {data.sponsors.map((sponsor) => (
-            <SponsorCard key={sponsor.id} sponsor={sponsor} onOpen={setActiveSponsor} />
+        <div className="space-y-5 md:space-y-6">
+          {SPONSOR_GROUPS.map(({ id }) => (
+            <SponsorGroupSection
+              key={id}
+              group={id}
+              sponsors={data.sponsors.filter(
+                (sponsor) => resolveSponsorGroup(sponsor.partnerGroup) === id
+              )}
+              onOpen={setActiveSponsor}
+            />
           ))}
-        </div>
-
-        {/* Benefits — compact */}
-        <div className="mt-12 md:mt-16">
-          <SectionLabel centered>{pick(page.valueLabel)}</SectionLabel>
-          <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
-            {valueProps.slice(0, 4).map((item, index) => (
-              <ValuePropCard key={item.id} item={item} index={index} />
-            ))}
-          </div>
         </div>
 
         {/* CTA — compact */}

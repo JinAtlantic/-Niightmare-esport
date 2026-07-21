@@ -68,6 +68,15 @@ for (const route of PUBLIC_ROUTES) {
       expect([aboutIndex, upcomingIndex, resultsIndex]).toEqual([1, 2, 3]);
     }
 
+    if (route === "/sponsors") {
+      const groups = page.locator("[data-sponsor-group]");
+      await expect(groups).toHaveCount(3);
+      await expect(groups.nth(0)).toContainText("OFFICIAL SPONSORS");
+      await expect(groups.nth(1)).toContainText("EVENT SPONSORS");
+      await expect(groups.nth(2)).toContainText("PAST PARTNERS");
+      await expect(page.locator("main")).not.toContainText("WORKING TOGETHER");
+    }
+
     await expectNoDocumentOverflow(page);
     assertRuntime();
   });
@@ -143,6 +152,19 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
       await expect(nextMatchTime).toHaveValue("19:30");
       await nextMatchTime.blur();
       await expect(nextMatchTime).toHaveValue("19:30");
+    }
+
+    if (editor.tab === "Sponsors") {
+      await page.getByRole("button", { name: /Apollo Entertainment/ }).click();
+      const groupSelect = page.getByLabel("กลุ่มที่แสดงบนหน้า Sponsors").first();
+      await expect(groupSelect).toHaveValue("official");
+      await expect(groupSelect.locator("option")).toHaveText([
+        "สปอนเซอร์ทางการ",
+        "สปอนเซอร์เฉพาะงาน",
+        "สปอนเซอร์ที่เคยร่วมงาน",
+      ]);
+      await groupSelect.selectOption("event");
+      await expect(groupSelect).toHaveValue("event");
     }
 
     await expectNoDocumentOverflow(page);

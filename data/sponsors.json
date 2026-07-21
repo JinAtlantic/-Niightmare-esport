@@ -3,57 +3,7 @@
     "heroTitle": {
       "en": "SPONSORS",
       "lo": "ຜູ້ສະໜັບສະໜູນ"
-    },
-    "valueLabel": {
-      "en": "WORKING TOGETHER",
-      "lo": "ຮ່ວມງານກັບພວກເຮົາ"
-    },
-    "valueProps": [
-      {
-        "id": "gen-z-reach",
-        "title": {
-          "en": "Meet Our Community",
-          "lo": "ເຂົ້າເຖິງແຟນຂອງພວກເຮົາ"
-        },
-        "body": {
-          "en": "Share your brand with esports fans across Laos through content that feels genuine and fits the community.",
-          "lo": "ແນະນຳແບຣນຂອງທ່ານໃຫ້ແຟນອີສະປອດທົ່ວລາວໄດ້ຮູ້ຈັກ ຜ່ານຄອນເທນທີ່ເປັນທຳມະຊາດ ແລະ ເຂົ້າກັບຊຸມຊົນ."
-        }
-      },
-      {
-        "id": "premium-visibility",
-        "title": {
-          "en": "Be Seen With The Team",
-          "lo": "ໃຫ້ແຟນເຫັນແບຣນຂອງທ່ານ"
-        },
-        "body": {
-          "en": "Show up where our fans already follow us—from team jerseys and match days to our website and social channels.",
-          "lo": "ແບຣນຂອງທ່ານຈະຢູ່ໃນຈຸດທີ່ແຟນຕິດຕາມພວກເຮົາ ຕັ້ງແຕ່ເສື້ອແຂ່ງ ວັນແຂ່ງຂັນ ໄປຈົນເຖິງເວັບໄຊ ແລະ ໂຊຊຽວ."
-        }
-      },
-      {
-        "id": "conversion-campaigns",
-        "title": {
-          "en": "Create Together",
-          "lo": "ສ້າງສິ່ງດີໆນຳກັນ"
-        },
-        "body": {
-          "en": "Let’s make content, offers, and activities that are useful for your brand and enjoyable for our fans.",
-          "lo": "ພວກເຮົາສາມາດຮ່ວມກັນເຮັດຄອນເທນ ໂປຣໂມຊັນ ແລະ ກິດຈະກຳທີ່ເປັນປະໂຫຍດກັບແບຣນ ແລະ ມ່ວນສຳລັບແຟນ."
-        }
-      },
-      {
-        "id": "global-stage",
-        "title": {
-          "en": "Grow With Our Journey",
-          "lo": "ເຕີບໂຕໄປນຳກັນ"
-        },
-        "body": {
-          "en": "As NIIGHTMARE reaches bigger stages, your brand comes with us and becomes part of the story.",
-          "lo": "ເມື່ອ NIIGHTMARE ໄປເຖິງເວທີທີ່ໃຫຍ່ຂຶ້ນ ແບຣນຂອງທ່ານກໍຈະຮ່ວມເດີນທາງ ແລະ ເປັນສ່ວນໜຶ່ງຂອງເລື່ອງລາວນີ້."
-        }
-      }
-    ]
+    }
   },
   "sponsors": [
     {
@@ -61,6 +11,7 @@
       "name": "Apollo Entertainment",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Entertainment", "lo": "ບັນເທີງ" },
       "description": {
         "en": "An entertainment and events partner supporting NIIGHTMARE's shows and community moments.",
@@ -73,6 +24,7 @@
       "name": "M Frolic",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Entertainment", "lo": "ບັນເທີງ" },
       "description": {
         "en": "A Lao entertainment brand teaming up with NIIGHTMARE on content and events.",
@@ -85,6 +37,7 @@
       "name": "Vibes Cafe VTE",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Café", "lo": "ຄາເຟ່" },
       "description": {
         "en": "A laid-back Vientiane café with pool vibes, live music and great coffee — a chill spot for the community.",
@@ -97,6 +50,7 @@
       "name": "SV Garage",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Automotive", "lo": "ບໍລິການລົດ" },
       "description": {
         "en": "An automotive service partner keeping the team rolling.",
@@ -109,6 +63,7 @@
       "name": "Senglao Café",
       "url": "https://senglaocafe.com/",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Café", "lo": "ຄາເຟ່" },
       "description": {
         "en": "A beloved Vientiane café known for fusion food, retro American décor and a warm, lively atmosphere.",
@@ -125,6 +80,7 @@
       "name": "WHR",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "description": {
         "en": "An official NIIGHTMARE partner.",
         "lo": "ພາດເນີ້ທາງການຂອງ NIIGHTMARE."
@@ -136,6 +92,7 @@
       "name": "DML",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "description": {
         "en": "An official NIIGHTMARE partner.",
         "lo": "ພາດເນີ້ທາງການຂອງ NIIGHTMARE."
@@ -147,6 +104,7 @@
       "name": "Good Start",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "description": {
         "en": "An official NIIGHTMARE partner.",
         "lo": "ພາດເນີ້ທາງການຂອງ NIIGHTMARE."
@@ -158,6 +116,7 @@
       "name": "IPEDD",
       "url": "#",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Apparel", "lo": "ເສື້ອຜ້າ" },
       "description": {
         "en": "A Lao clothing brand crafting 100% cotton, made-in-Laos apparel.",
@@ -170,6 +129,7 @@
       "name": "Lao Esports Federation",
       "url": "https://laoesports.com/",
       "logo": "",
+      "partnerGroup": "official",
       "category": { "en": "Esports Federation", "lo": "ສະຫະພັນອີສະປອດ" },
       "description": {
         "en": "The official governing body for esports in Laos — developing talent and growing the national scene.",

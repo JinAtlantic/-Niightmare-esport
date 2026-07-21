@@ -224,28 +224,35 @@ in the viewport (a transformed ancestor otherwise anchored the `fixed` layer to 
 `GlobeIcon`/`PhoneIcon` in `components/ui/Icons.tsx`. Columns to run before saving sponsors in
 admin (else the save 500s): `alter table public.sponsors add column if not exists category jsonb;`
 `… description jsonb;` `… socials jsonb;` (already run on the live DB).
+- **Three public groups (2026-07-21):** the old single "OFFICIAL PARTNERS" wall is now three
+  stacked sections in this order: **Official Sponsors → Event Sponsors → Past Partners**. Every
+  sponsor has `partnerGroup` (`official|event|past`), persisted in the non-null
+  `sponsors.partner_group` column and selected in **/admin → Sponsors**. Missing/legacy values
+  resolve to `official`; all 10 existing live rows were backfilled to `official`. Shared labels,
+  ordering, and fallback logic live in `lib/sponsorGroups.ts`. The old **WORKING TOGETHER**
+  benefits section and its seed copy were removed completely.
 - **Admin editor is an accordion** now (`components/admin/SponsorsEditor.tsx`): each partner is a
   collapsed row (logo thumb + name + status) you click to edit — far easier for a long list.
 - **Sponsorship Tiers were removed** (unused, never rendered): the editor UI + the page copy's
   tier fields are gone, and the `sponsor_tiers` table was **wiped to 0 rows**. `SponsorTier` /
   `tierRows` / the `sponsor_tiers` read+write still exist in the lib layer (harmless) and the
   editor passes `tiers` through untouched so a save doesn't recreate them.
-- **CTA band** is just a short **"Become Our Partner" / "ມາຮ່ວມເປັນພາກສ່ວນກັບພວກເຮົາ"** invite
-  (hardcoded `COPY.ctaInvite`) + buttons; the descriptive `ctaBody` paragraph was dropped.
+- **CTA band** is just a short **"Become Our Partner" / "ມາຮ່ວມເປັນພາດເນີ້ກັບພວກເຮົາ"**
+  Facebook button (hardcoded `COPY.facebook`); the descriptive paragraph was dropped.
 - **Footer partner marquee** (`components/layout/SponsorMarquee.tsx`, mounted in `Footer.tsx`)
   **replaced the Quick Links column**: a full-width band of partner logos auto-scrolling
   left→right (CSS `.marquee-track`/`@keyframes sponsor-marquee` in `globals.css`, seamless via a
   duplicated aria-hidden second copy, edge fade mask, pause-on-hover, frozen under
   reduced-motion). Footer top grid dropped to 2 cols. Logos show once uploaded; until then each
-  partner renders as a **name wordmark**. Shared `partnersLabel` (footer + home `PartnerStrip` +
-  sponsors page) Lao is **"partners ຂອງເຮົາ"**.
+  partner renders as a **name wordmark**. Shared `partnersLabel` (footer + home `PartnerStrip`)
+  Lao is **"partners ຂອງເຮົາ"**.
 
-**GOTCHA — sponsors `page` copy is SEED-ONLY:** the sponsors-file `page` block (hero/labels/
-valueProps/CTA) is NOT persisted to Supabase — `supabaseWrite`'s `sponsors` branch only writes
+**GOTCHA — sponsors `page` copy is SEED-ONLY:** the sponsors-file `page` block (currently only
+the hero title) is NOT persisted to Supabase — `supabaseWrite`'s `sponsors` branch only writes
 the `sponsors` + `sponsor_tiers` tables, and `contentFromSupabase` builds `page` from
 `data/sponsors.json`. So editing page copy in /admin does nothing live; to change it you must
-edit the seed + deploy. Per-sponsor rows (name/logo/category/description/socials) DO persist via
-Supabase and show instantly. Publish sponsor rows to live from a script by PUTting
+edit the seed + deploy. Per-sponsor rows (name/logo/partnerGroup/category/description/socials)
+DO persist via Supabase and show instantly. Publish sponsor rows to live from a script by PUTting
 `/api/admin/data?file=sponsors` with a minted admin token (send the full sponsors list +
 current tiers so nothing is wiped) — same pattern as `scripts/sync-results.mjs`.
 

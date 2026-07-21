@@ -9,6 +9,7 @@ import sponsorsSeed from "@/data/sponsors.json";
 import siteSeed from "@/data/site.json";
 import achievementsSeed from "@/data/achievements.json";
 import type { Player, Socials } from "./types";
+import { resolveSponsorGroup } from "./sponsorGroups";
 
 /**
  * Assemble the full site content object from Supabase, in the exact shape the
@@ -176,6 +177,7 @@ export async function contentFromSupabase(): Promise<Record<string, unknown> | n
         name: (r.name as string) ?? "",
         url: (r.url as string) ?? "#",
         logo: val(r.logo),
+        partnerGroup: resolveSponsorGroup(r.partner_group),
         category: jsonBi(r.category),
         description: jsonBi(r.description),
         socials: (r.socials && typeof r.socials === "object" ? r.socials : undefined) as

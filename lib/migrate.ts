@@ -19,6 +19,7 @@ import type { RoadmapContent } from "./roadmap";
 import type { MatchScheduleContent } from "./matchSchedule";
 import type { ShopContent } from "./shop";
 import { cleanMatchVods } from "./matchVods";
+import { resolveSponsorGroup } from "./sponsorGroups";
 
 /**
  * One-time (re-runnable) migration of the current Vercel-Blob content into the
@@ -164,6 +165,7 @@ export function sponsorRows(sponsors: Sponsor[]) {
     name: s(sp.name),
     url: s(sp.url),
     logo: s(sp.logo),
+    partner_group: resolveSponsorGroup(sp.partnerGroup),
     category: sp.category ?? null,
     description: sp.description ?? null,
     socials: sp.socials ?? null,
