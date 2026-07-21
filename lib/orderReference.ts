@@ -1,6 +1,6 @@
 import { randomInt } from "node:crypto";
 
-export const ORDER_REFERENCE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+export const ORDER_REFERENCE_ALPHABET = "0123456789";
 export const ORDER_REFERENCE_START_LENGTH = 4;
 
 export function orderReferenceCapacity(length: number): bigint {

@@ -319,7 +319,7 @@ set items = jsonb_build_array(jsonb_build_object(
   'lineTotal', coalesce(total, 0)
 ))
 where items is null;
--- Short unique order reference code (e.g. "A7K2") the buyer is asked to put in the
+-- Short unique order reference code (e.g. "4827") the buyer is asked to put in the
 -- transfer note, so the team can match a payment to one order (manual, no gateway).
 alter table public.shop_orders add column if not exists ref_code text;
 -- Private storage reference for the customer-uploaded payment slip.

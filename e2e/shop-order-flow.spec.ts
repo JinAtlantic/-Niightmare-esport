@@ -88,10 +88,10 @@ test("multi-collection carts combine when every product uses the same currency",
   expect(mixedCurrency.currencyConflict).toBe(true);
 });
 
-test("new order references start at four alphanumeric characters", () => {
-  expect(orderReferenceCapacity(4)).toBe(1_679_616n);
-  expect(generateOrderReference()).toMatch(/^[A-Z0-9]{4}$/);
-  expect(generateOrderReference(5)).toMatch(/^[A-Z0-9]{5}$/);
+test("new order references start at four numeric digits", () => {
+  expect(orderReferenceCapacity(4)).toBe(BigInt(10_000));
+  expect(generateOrderReference()).toMatch(/^\d{4}$/);
+  expect(generateOrderReference(5)).toMatch(/^\d{5}$/);
 });
 
 test("buyer payment, admin fulfilment, and buyer status sync stay inside localhost", async ({
@@ -162,7 +162,7 @@ test("buyer payment, admin fulfilment, and buyer status sync stay inside localho
   const orderId = String(reserveJson.order.id);
   const refCode = String(reserveJson.order.refCode);
   expect(orderId).toMatch(/^[0-9a-f-]{36}$/i);
-  expect(refCode).toMatch(/^[A-Z0-9]{4}$/);
+  expect(refCode).toMatch(/^\d{4}$/);
 
   await expect(page.getByRole("dialog", { name: "Transfer to pay" })).toBeVisible();
   const detailedPng = await largeDetailedPng();

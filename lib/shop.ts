@@ -473,7 +473,7 @@ export interface ShopOrderRecord {
   sizeSummary: string;
   totalQty: number;
   total: number;
-  /** Short human reference code (e.g. "A7K2") the buyer is asked to put in
+  /** Short human reference code (e.g. "4827") the buyer is asked to put in
    * the transfer note, so the team can match a payment to one order. */
   refCode?: string;
   currency: string;

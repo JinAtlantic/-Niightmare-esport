@@ -56,10 +56,14 @@ async function availableOrderReferenceLength(
   db: SupabaseClient
 ): Promise<{ length: number; error?: never } | { length?: never; error: string }> {
   for (let length = ORDER_REFERENCE_START_LENGTH; ; length += 1) {
+    const minimumReference = "0".repeat(length);
+    const maximumReference = "9".repeat(length);
     const { count, error } = await db
       .from("shop_orders")
       .select("ref_code", { count: "exact", head: true })
-      .like("ref_code", "_".repeat(length));
+      .like("ref_code", "_".repeat(length))
+      .gte("ref_code", minimumReference)
+      .lte("ref_code", maximumReference);
     if (error) return { error: error.message };
     if (BigInt(count ?? 0) < orderReferenceCapacity(length)) return { length };
   }
