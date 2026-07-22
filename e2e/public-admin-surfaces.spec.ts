@@ -65,6 +65,13 @@ for (const route of PUBLIC_ROUTES) {
     await expect(page.locator("body")).not.toContainText(/NIIGHTMARE ESPORT(?!S)/i);
     await expect(page.locator("nextjs-portal")).toHaveCount(0);
 
+    if (route !== "/") {
+      const pageHeader = page.locator(".page-header");
+      if (await pageHeader.count()) {
+        await expect(pageHeader.locator("h1 + p")).toHaveCount(0);
+      }
+    }
+
     if (route === "/") {
       const sections = await page.locator("main section").allTextContents();
       const aboutIndex = sections.findIndex((text) => text.includes("WHO WE ARE"));

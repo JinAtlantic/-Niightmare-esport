@@ -4,10 +4,11 @@ import React from "react";
 
 interface PageHeaderProps {
   title: string;
+  /** Kept for content compatibility; inner-page descriptions are intentionally hidden. */
   subtitle?: string;
   /** Optional mono eyebrow shown above the title, with a glowing node. */
   kicker?: string;
-  /** Overrides the subtitle's size/color (layout classes are kept). */
+  /** Legacy companion to subtitle; retained so existing editable copy is not deleted. */
   subtitleClassName?: string;
   /** Overrides the title's size classes (default text-4xl md:text-5xl) — e.g. a
    *  smaller size for a stacked multi-line hero. */
@@ -19,7 +20,7 @@ interface PageHeaderProps {
  * disciplined light source rising from below, film grain, an optional mono
  * kicker, the display title with a violet glow, and the scythe-blade divider.
  */
-export default function PageHeader({ title, subtitle, kicker, subtitleClassName, titleClassName }: PageHeaderProps) {
+export default function PageHeader({ title, kicker, titleClassName }: PageHeaderProps) {
   return (
     <section className="page-header relative overflow-hidden border-b border-edge">
       <div className="hero-grain" aria-hidden />
@@ -46,17 +47,6 @@ export default function PageHeader({ title, subtitle, kicker, subtitleClassName,
               ))
             : title}
         </h1>
-
-        {subtitle && (
-          <p
-            className={`fx-rise mx-auto mt-5 max-w-2xl leading-relaxed ${
-              subtitleClassName ?? "text-[15px] text-ash md:text-base"
-            }`}
-            style={{ animationDelay: "0.16s" }}
-          >
-            {subtitle}
-          </p>
-        )}
 
         <div
           className="fx-rise mx-auto mt-7 h-[2px] w-[120px] -skew-x-[24deg] bg-gradient-to-r from-transparent via-amethyst to-glow shadow-[0_0_16px_rgba(168,85,247,0.6)]"
