@@ -32,7 +32,11 @@ export function gameSlug(value: string): string {
 }
 
 export function resolveGames(value: unknown, discoveredIds: string[] = []): GameDefinition[] {
-  const raw = Array.isArray(value) ? value : [];
+  // Once the admin has saved an explicit list, it is the source of truth.
+  // Do not silently restore defaults or IDs discovered in old content: removing
+  // a game should hide it without requiring destructive deletion of its history.
+  const hasConfiguredGames = Array.isArray(value);
+  const raw = hasConfiguredGames ? value : DEFAULT_GAMES;
   const resolved = raw
     .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === "object")
     .map((entry, index): GameDefinition | null => {
@@ -54,16 +58,18 @@ export function resolveGames(value: unknown, discoveredIds: string[] = []): Game
     .filter((entry): entry is GameDefinition => entry !== null);
 
   const byId = new Map<string, GameDefinition>();
-  for (const game of [...DEFAULT_GAMES, ...resolved]) byId.set(game.id, game);
-  for (const rawId of discoveredIds) {
-    const id = gameSlug(rawId);
-    if (!id || byId.has(id)) continue;
-    byId.set(id, {
-      id,
-      name: { en: rawId, lo: rawId },
-      shortName: rawId.toUpperCase(),
-      enabled: true,
-    });
+  for (const game of resolved) byId.set(game.id, game);
+  if (!hasConfiguredGames) {
+    for (const rawId of discoveredIds) {
+      const id = gameSlug(rawId);
+      if (!id || byId.has(id)) continue;
+      byId.set(id, {
+        id,
+        name: { en: rawId, lo: rawId },
+        shortName: rawId.toUpperCase(),
+        enabled: true,
+      });
+    }
   }
   return [...byId.values()];
 }

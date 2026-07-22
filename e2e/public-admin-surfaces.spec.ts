@@ -189,6 +189,7 @@ test("achievement records stay strictly separated by game", async ({ page }) => 
       { id: "mlbb-only", game: "mlbb", tournament: { en: "MLBB ONLY CUP", lo: "MLBB ONLY CUP" }, placement: { en: "1st", lo: "1st" }, image: "", enabled: true },
       { id: "mlbb-hidden", game: "mlbb", tournament: { en: "HIDDEN MLBB CUP", lo: "HIDDEN MLBB CUP" }, placement: { en: "3rd", lo: "3rd" }, image: "", enabled: false },
       { id: "valorant-only", game: "valorant", tournament: { en: "VALORANT ONLY CUP", lo: "VALORANT ONLY CUP" }, placement: { en: "2nd", lo: "2nd" }, image: "", enabled: true },
+      { id: "removed-game", game: "efootball", tournament: { en: "REMOVED GAME CUP", lo: "REMOVED GAME CUP" }, placement: { en: "1st", lo: "1st" }, image: "", enabled: true },
     ];
     delete content.__contentSource;
     await route.fulfill({ response, json: content });
@@ -198,6 +199,8 @@ test("achievement records stay strictly separated by game", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "MLBB ONLY CUP" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "HIDDEN MLBB CUP" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "VALORANT ONLY CUP" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /eFootball/i })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "REMOVED GAME CUP" })).toHaveCount(0);
   await page.getByRole("button", { name: /VALORANT/ }).click();
   await expect(page.getByRole("heading", { name: "VALORANT ONLY CUP" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "MLBB ONLY CUP" })).toHaveCount(0);
@@ -296,6 +299,16 @@ test("every admin editor loads read-only from the isolated server", async ({ pag
       await nextMatchTime.blur();
       await expect(nextMatchTime).toHaveValue("19:30");
       await expect(page.locator('input[placeholder^="https://youtube.com/live"]')).toHaveCount(0);
+    }
+
+    if (editor.tab === "Games") {
+      const deleteButtons = page.locator("button.game-delete-button");
+      await expect(deleteButtons).toHaveCount(2);
+      page.once("dialog", (dialog) => dialog.accept());
+      await deleteButtons.filter({ hasText: "eFootball" }).click();
+      await expect(page.getByText("ID: efootball", { exact: true })).toHaveCount(0);
+      await expect(deleteButtons).toHaveCount(1);
+      await expect(deleteButtons.first()).toBeDisabled();
     }
 
     if (editor.tab === "Matches") {

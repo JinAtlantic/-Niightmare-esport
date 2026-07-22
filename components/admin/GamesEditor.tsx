@@ -24,6 +24,15 @@ export default function GamesEditor() {
     setGames([...games, { id, name: { en: newName.trim(), lo: newName.trim() }, shortName: newName.trim().slice(0, 24), enabled: true }]);
     setNewName("");
   };
+  const removeGame = (index: number) => {
+    const game = games[index];
+    if (!game || games.length <= 1) return;
+    const confirmed = window.confirm(
+      `ลบเกม ${game.shortName} ออกจากระบบ?\n\nข้อมูลนักกีฬา แมตช์ และผลงานเดิมจะยังไม่ถูกลบ และจะกลับมาได้หากเพิ่มเกม ID เดิมอีกครั้ง`
+    );
+    if (!confirmed) return;
+    setGames(games.filter((_, row) => row !== index));
+  };
 
   return (
     <div className="space-y-6">
@@ -51,10 +60,20 @@ export default function GamesEditor() {
                   <p className="font-display text-lg font-bold uppercase tracking-wide text-soul">{game.shortName}</p>
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ash">ID: {game.id}</p>
                 </div>
-                <label className="flex items-center gap-2 font-mono text-xs text-spectre">
-                  <input type="checkbox" checked={game.enabled} onChange={(event) => patchGame(index, { enabled: event.target.checked })} className="accent-amethyst" />
-                  แสดงเกมนี้
-                </label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-2 font-mono text-xs text-spectre">
+                    <input type="checkbox" checked={game.enabled} onChange={(event) => patchGame(index, { enabled: event.target.checked })} className="accent-amethyst" />
+                    แสดงเกมนี้
+                  </label>
+                  <Button
+                    variant="danger"
+                    onClick={() => removeGame(index)}
+                    disabled={games.length <= 1}
+                    className="game-delete-button min-h-[36px] px-3 py-1.5"
+                  >
+                    ลบเกม <span className="keep-latin">{game.shortName}</span>
+                  </Button>
+                </div>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <BilingualField label="ชื่อเต็ม" value={game.name} onChange={(name) => patchGame(index, { name })} />
@@ -63,6 +82,9 @@ export default function GamesEditor() {
             </Card>
           ))}
         </div>
+        <p className="mt-3 font-mono text-[11px] leading-relaxed text-ash">
+          การลบจะซ่อนเกมออกจาก Team, Matches และ Achievements หลังจากกด “บันทึกเกม” โดยไม่ลบข้อมูลเก่าถาวร
+        </p>
       </Section>
     </div>
   );
